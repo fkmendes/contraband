@@ -6,7 +6,7 @@ import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-import contraband.multNormOneTraitAnalytical;
+import contraband.MVNUtils;
 
 public class OUmultNormOneTraitAnalyticalTestDriver2 {
 
@@ -35,7 +35,6 @@ public class OUmultNormOneTraitAnalyticalTestDriver2 {
 		RealMatrix invVcvMat = invTMat.scalarMultiply(1/var); // (var*tMat)^-1 = tMat^-1 / var
 		double varToNdetTMat = Math.pow(var, n) * tMatLUD.getDeterminant(); // det(var*tMat) = var^n * det(tMat)
 				
-		multNormOneTraitAnalytical lkCalculator = new multNormOneTraitAnalytical();
-		System.out.println(lkCalculator.computeLk(n, var, mean, data, invVcvMat, varToNdetTMat));
+		System.out.println(MVNUtils.computeMVNLk(n, var, mean, data, invVcvMat, varToNdetTMat));
 	}
 }
