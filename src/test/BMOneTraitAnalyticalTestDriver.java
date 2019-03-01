@@ -5,10 +5,9 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-
 import contraband.MVNUtils;
 
-public class OUmultNormOneTraitAnalyticalTestDriver2 {
+public class BMOneTraitAnalyticalTestDriver {
 
 	public static void main(String[] args) {
 		
@@ -29,12 +28,13 @@ public class OUmultNormOneTraitAnalyticalTestDriver2 {
 			{ 1.0, 1.0, 3.0, 0.0 },
 			{ 0.0, 0.0, 0.0, 3.0 }
 			};
+			
 		RealMatrix tMat = new Array2DRowRealMatrix(tMatInput);
 		LUDecomposition tMatLUD = new LUDecomposition(tMat);
 		RealMatrix invTMat = tMatLUD.getSolver().getInverse(); // if only variance chances and not tree, we don't have to invert
 		RealMatrix invVcvMat = invTMat.scalarMultiply(1/var); // (var*tMat)^-1 = tMat^-1 / var
 		double varToNdetTMat = Math.pow(var, n) * tMatLUD.getDeterminant(); // det(var*tMat) = var^n * det(tMat)
 				
-		System.out.println(MVNUtils.computeMVNLk(n, var, mean, data, invVcvMat, varToNdetTMat));
+		System.out.println(MVNUtils.computeMVNLk(n, var, mean, data, invVcvMat, varToNdetTMat)); // 2.4983819506063697E-4
 	}
 }
