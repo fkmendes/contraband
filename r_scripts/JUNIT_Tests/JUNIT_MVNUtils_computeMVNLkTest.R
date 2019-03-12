@@ -2,8 +2,18 @@
 # JUnit OUUtils tests expected values
 # ---------- #
 
-devtools::load_all("/Users/entimos/Desktop/mvMORPH") # Modified mvMORPH package with printing of the final covariance matrix and weight matrix
-source(file = "/Users/entimos/Desktop/Pau_scripts_&_functions/OUEBproject/OUfunctions.R")
+library(mvMORPH)
+
+## The following three commands are aimed to modify mvMORPH package in order for it to print
+## the final covariance matrix (multiplied by sigma^2) and weight matrix of the OU model to compare our implementation with mvMORPH's.
+envirMORPH <- environment(mvMORPH::mvOU)
+source(file = "/Users/entimos/GitHub/contraband/r_scripts/mvOU.r")
+environment(mvOU) <- envirMORPH
+
+# The following command loads prior functions to calculate the covariance matrix,
+# the weight matrix and the likelihood of the Hansen model to compare their results with mvMORPH's results
+source(file = "/Users/entimos/GitHub/contraband/r_scripts/OUfunctions.R")
+
 EPSILON <- 1e-04 # Tolerance value for comparing mvMORPH with PAU's functions
 
 # 1, 2, 3 refers to Test 1, Test 2 and Test 3 respectively
@@ -221,4 +231,4 @@ all.equal(as.numeric(log(likFM)), as.numeric(fitFM$LogLik), tolerance = EPSILON)
 all.equal(as.numeric(log(likRI)), as.numeric(fitRI$LogLik), tolerance = EPSILON)
 all.equal(as.numeric(log(likRM)), as.numeric(fitRM$LogLik), tolerance = EPSILON)
 
-
+# ----- END: MVNUtils.computeMVNLk validation ----- #

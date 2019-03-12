@@ -231,3 +231,6 @@ all.equal(ouWRM[1,2], wMatRM12, tolerance = EPSILON)
 all.equal(ouWRM[3,3], wMatRM33, tolerance = EPSILON)  
 all.equal(ouWRM[2,3], wMatRM23, tolerance = EPSILON)
 all.equal(ouWRM[2,1], wMatRM21, tolerance = EPSILON)
+
+# ----- END: OUUtils.computeWMatOneTrait validation ----- #
+

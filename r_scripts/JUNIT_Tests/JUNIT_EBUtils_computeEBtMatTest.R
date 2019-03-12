@@ -3,10 +3,22 @@
 # ---------- #
 
 library(mvMORPH)
-devtools::load_all("/Users/entimos/Desktop/mvMORPH") # Modified mvMORPH package with printing of the final covariance matrix and weight matrix
-source("/Users/entimos/Desktop/Pau_scripts_&_functions/OUEBproject/EBfunctions.R")
+
+## The following three commands are aimed to modify mvMORPH package in order for it to print
+## the final covariance matrix of the EB model to compare our implementation with mvMORPH's.
+## We just have to compare the values of the last covariance matrix that it's shown in the display
+envirMORPH <- environment(mvMORPH::mvEB)
+source(file = "/Users/entimos/GitHub/contraband/r_scripts/mvEB.r")
+environment(mvEB) <- envirMORPH
+
+# The following command loads prior functions to calculate the covariance matrix,
+# the weight matrix and the likelihood of the Hansen model to compare their results with mvMORPH's results
+source(file = "/Users/entimos/GitHub/contraband/r_scripts/EBfunctions.R")
 
 EPSILON <- 1e-4
+
+# Remarks: In this script we compare both covariance matrix results and likelihood values between
+# the ones provided by functions onEBfunctions.R script and the ones in mvMORPH package
 
 # ----- START: EBUtils.computeEBtMat validation ----- #
 # JUnit: EBVcvMatTest
@@ -84,5 +96,5 @@ all.equal(as.numeric(covEB25), as.numeric(covEB[3,2]), EPSILON) # sp2 t1 vs sp1 
 
 all.equal(as.numeric(log(lik2)), as.numeric(fit$LogLik), tolerance = EPSILON)
 
-# ----- END: GeneralUtils.computeEBtMat validation ----- #
+# ----- END: EBUtils.computeEBtMat validation ----- #
 
