@@ -71,24 +71,35 @@ public class MVNUtils {
 	/*
 	 * Main lk computation function
 	 */
+	
+	// author: Joseph Felsenstein
+	// title: Maximum likelihood estimation of evolutionary trees from continuous characters
+			// Equation 5
 	public static double computeMVNLk(int n, double var, RealVector mean, RealVector data, RealMatrix invVcvMat, double varToNdetTMat) {		
 		
 		/*
 		 * This whole thing is the normalizing constant the guarantees
 		 * an integral of one (a proper density function)
 		 */
-		double likelihood = 1 / ( Math.pow( (2 * Math.PI), n/2 ) *
-				Math.pow( varToNdetTMat, 0.5 ) );
+		
+		double likelihood = 1.0 / ( Math.pow( (2.0 * Math.PI), n/2.0 ) * Math.pow( varToNdetTMat, 0.5 ) );
 		
 		/*
 		 * Now we multiply by the data stuff
 		 */
+		
 		likelihood *= Math.exp( 
 				invVcvMat
 				.preMultiply(data.subtract(mean)).mapMultiply(-0.5)
 				.dotProduct(data.subtract(mean))
 				);
+		System.out.println("Printing coming from MVNUtils lik " + likelihood);
 
 		return likelihood;
+	}
+	
+	public static double normalDensity(double x, double mu, double sigma2) {
+		
+		return (1.0/Math.sqrt(2.0 * Math.PI * sigma2)) * Math.exp( - Math.pow(x - mu, 2)/(2.0 * sigma2));
 	}
 }
