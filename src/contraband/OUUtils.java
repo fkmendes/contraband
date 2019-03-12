@@ -190,15 +190,13 @@ public class OUUtils {
 //		Node sp = allLeaf.get(i); //Selecting the current leaf specified by i
 
 			double spHeight = sp.getHeight();
-	
-			if(k == 0) {
+			
+			if(mergeRoot && k == 0) {
 				
-				RealMatrix cellValue = OUUtils.getExpAlphaMat(m, EigenAlphaObject.getD(), EigenAlphaObject.getV(), nodeRoot.getHeight() - spHeight);  //Math.exp(-alpha * (nodeRoot.getHeight() - currentSpHeight));	
+				RealMatrix cellValue = OUUtils.getExpAlphaMat(m, EigenAlphaObject.getD(), EigenAlphaObject.getV(), nodeRoot.getHeight() - spHeight); 
 				wMat = wMat.add(cellValue);
-				GeneralUtils.displayRealMatrix(wMat);
-				
-				if(!mergeRoot) { return wMat; }
 			}
+
 			
 			while(!sp.isRoot()) {
 				
@@ -210,7 +208,7 @@ public class OUUtils {
 					RealMatrix cellValue = OUUtils.getExpAlphaMat(m, EigenAlphaObject.getD(), EigenAlphaObject.getV(), sp.getHeight() - spHeight)
 							.subtract( OUUtils.getExpAlphaMat(m, EigenAlphaObject.getD(), EigenAlphaObject.getV(), sp.getParent().getHeight() - spHeight) );   // Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight));
 					wMat = wMat.add(cellValue);
-					GeneralUtils.displayRealMatrix(cellValue);
+//					GeneralUtils.displayRealMatrix(cellValue);
 				}
 				sp = sp.getParent();
 			}
@@ -240,13 +238,14 @@ public class OUUtils {
 			
 			for(Node sp:allLeaf) {
 				
-				blockWeightMat = multiTraitWeightMatSpVsRegime(m, sp, 0, nodeRoot, regimes, EigenAlphaObject, false);
-				GeneralUtils.setBlocksInMatrix(blockWeightMat.getData(), m, sp.getNr(), 0, Result);	
+				double spHeight = sp.getHeight();
+				RealMatrix cellValue = OUUtils.getExpAlphaMat(m, EigenAlphaObject.getD(), EigenAlphaObject.getV(), nodeRoot.getHeight() - spHeight); 
+				GeneralUtils.setBlocksInMatrix(cellValue.getData(), m, sp.getNr(), 0, Result);	
 				
-				for(int k = 1; k < r + 1; k++) {
+				for(int k = 0; k < r; k++) {
 		
 					blockWeightMat = multiTraitWeightMatSpVsRegime(m, sp, k, nodeRoot, regimes, EigenAlphaObject, false);
-					GeneralUtils.setBlocksInMatrix(blockWeightMat.getData(), m, sp.getNr(), k, Result);	
+					GeneralUtils.setBlocksInMatrix(blockWeightMat.getData(), m, sp.getNr(), k + 1, Result);	
 				}
 			}
 		}

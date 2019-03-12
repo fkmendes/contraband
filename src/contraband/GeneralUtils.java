@@ -114,17 +114,19 @@ public class GeneralUtils {
 		
 		int i = 0, j = 0;
 		int[] rowElements = forLoopRange(rowIndex * m, m); System.out.println(" Numero de filas filas " + rowElements.length);
-		int[] colElements = forLoopRange(colIndex * m, m); System.out.println(" Numero de columnas de clomunas " + colElements.length);
+		int[] colElements = forLoopRange(colIndex * m, m); System.out.println(" Numero de columnas " + colElements.length);
 		
 		for(int row:rowElements) {
 			
 			for(int col:colElements) {
 				
-				Result[row][col] = 	blockMat[i][j];
+				System.out.println(col);
+				Result[row][col] = 	blockMat[i][j]; System.out.println("row = " + row + "," + "col = " + col);
 				
 				j++;
 			}
-			
+	
+			j = 0;
 			i++;
 		}
 	}

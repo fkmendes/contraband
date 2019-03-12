@@ -118,17 +118,19 @@ public class OUmultiTraitGeneralTest {
 		List<Node> allLeaf = nodeRoot.getAllLeafNodes();
 		Double[] regimes = new Double[nodeRoot.getNr() + 1]; //It stores the regimes of nodes in the order taken by beast
 		myTree.getMetaData(nodeRoot, regimes, "Regime");	// Populating regimes vector
-		Node sp1 = allLeaf.get(0);
+		Node sp = allLeaf.get(0);
+		System.out.println("species index: " + sp.getNr());
 		
 //		int intRootRegime = regimes[nodeRoot.getNr()].intValue(); //We will set the regime of the root to be always 0
 		
-		RealMatrix W00 = OUUtils.multiTraitWeightMatSpVsRegime(m, sp1, 0, nodeRoot, regimes, eigenAlpha, true);
+		RealMatrix W01 = OUUtils.multiTraitWeightMatSpVsRegime(m, sp, 1, nodeRoot, regimes, eigenAlpha, true);
 		System.out.println("tadaaa");
-		GeneralUtils.displayRealMatrix(W00);
+		GeneralUtils.displayRealMatrix(W01);
 		
 		// Test a forLoopRange
 		int[] Lista = GeneralUtils.forLoopRange(20, 10); //Lista de 20 hasta 29
 		System.out.println("Lista de prueba = " + Lista[2]);
+		
 		// Works fine
 		
 		// Compute the full weight matrix
