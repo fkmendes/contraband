@@ -9,7 +9,7 @@ import beast.util.TreeParser;
 import contraband.OUUtils;
 import contraband.GeneralUtils;
 
-public class OUOneTraitcomputeWMatOneTraitTest {
+public class OUOneTraitComputeWMatOneTraitTest {
 
 	final static double EPSILON = 1e-4;
 	

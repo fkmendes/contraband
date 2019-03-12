@@ -16,14 +16,36 @@ import beast.util.TreeParser;
 public class OUUtils {
 	
 	/*
-	 * Note: sigma^2 does not go in because it is handled by MVNUtils
-	 */
-	
-	// authors: Lam Si Tung Ho and Cécile Ané́
-	// title: Asymptotic theory with hierarchical autocorrelation:cOrnstein-Uhlenbeck tree models 
-		// Equation 1 (covariance matrix, random root formula)
-		// Equation 2 (covariance matrix, fixed root formula)
-//	
+	 * The math inside this formula comes from 
+	 * "Asymptotic theory with hierarchical autocorrelation: Ornstein-Uhlenbeck tree models"
+	 * by Lam Si Tun Ho and Cécile Ané (2013)
+	 * 
+	 * Equation 1 (covariance matrix, random root formula)
+	 * 
+	 * \frac{\sigma^2}{2\alpha}\mathb{V}\text{ with }V_{ij} = e^{-\alpha d_{ij}}
+	 * 
+	 * where d_ij is the length of the path between both species
+	 * and sigma^2/(2*alpha) is referred to as gamma and is the variance
+	 * of the stationary distribution of the process. So the stationary
+	 * distribution depends on sigma^2 and alpha (it follows those values
+	 * during MCMC). This equation assumes there is a single mean mu (is this
+	 * mu supposed to be root optimum?) over the whole tree.
+	 * I do not understand how/why this assumption is made since
+	 * we are modelling OU in the first place, and in OU you have multiple
+	 * optima.
+	 * 
+	 * Equation 2 (covariance matrix, fixed root formula)
+	 * 
+	 * \frac{\sigma^2}{2\alpha}\mathb{V}\text{ with }V_{ij} = e^{-\alpha d_{ij}}(1-e^{-2\alpha t_{ij}})
+	 * 
+	 * where t_{ij} is the covariance between species i and j from the species tree
+	 * 
+	 * NOTE 1: sigma^2 does not go in because it is handled by MVNUtils
+	 * 
+	 * NOTE 2: The OU T matrix depends on the "normal" T matrix that comes straight from the tree.
+	 * But when we have OU, now this T matrix from the tree has to be modified, which is what
+	 * the code below does.
+	 */ 
 	public static void computeOUTMatOneTrait(int n, double alpha, double[][] tMat, double[][] ouTMat, boolean rootIsFixed) {
 		
 		double cellValue;
