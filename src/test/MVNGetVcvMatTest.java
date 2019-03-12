@@ -28,7 +28,7 @@ public class MVNGetVcvMatTest {
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
 		
-		MVNUtils.populateVcvMatrix(myTree, nodeToRootPaths, tMat, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMat, leftLeaves, rightLeaves);
 		
 		//System.out.println("cov(sp20, sp17) = " + tMat[7][5]); 		// cov(sp20, sp17) = 10.8195673283
 		//System.out.println("cov(sp39, sp40) = " + tMat[24][26]); 	// cov(sp24, sp26) = 19.9373471939
@@ -44,7 +44,7 @@ public class MVNGetVcvMatTest {
 		List<Node> leftLeaves2 = new ArrayList<>();
 		List<Node> rightLeaves2 = new ArrayList<>();
 		
-		MVNUtils.populateVcvMatrix(myTreeNonUltra, nodeToRootPaths2, tMat2, leftLeaves2, rightLeaves2);
+		MVNUtils.populateTMatrix(myTreeNonUltra, nodeToRootPaths2, tMat2, leftLeaves2, rightLeaves2);
 		
 		//System.out.println("cov(sp20, sp17) = " + tMat2[7][5]); 	// cov(sp20, sp17) = 10.8195673283
 		//System.out.println("cov(sp39, sp40) = " + tMat2[24][26]); 	// cov(sp24, sp26) = 10.3952852439

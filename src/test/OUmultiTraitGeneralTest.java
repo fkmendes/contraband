@@ -30,7 +30,7 @@ public class OUmultiTraitGeneralTest {
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
 
-		MVNUtils.populateVcvMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
 		
 		double[][] Alpha = {{1, 0.2},
 							{0.2, 1}

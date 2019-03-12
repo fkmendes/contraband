@@ -45,7 +45,7 @@ public class EBcomputeEBtMatTest {
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
 
-		MVNUtils.populateVcvMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
 		
 		// GChunk and covariance calculation
 		double[][] gMat = new double[n][n];
@@ -77,7 +77,7 @@ public class EBcomputeEBtMatTest {
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
 
-		MVNUtils.populateVcvMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
 		
 		// GChunk and covariance calculation
 		double[][] gMat = new double[n][n];

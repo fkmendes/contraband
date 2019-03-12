@@ -19,7 +19,7 @@ import contraband.MVNUtils;
 import beast.evolution.tree.Node;
 import contraband.OUUtils;
 
-public class OUOneTraitcomputeMVNLk {
+public class OUOneTraitComputeMVNLk {
 	
 	final static double EPSILON = 1e-4;
 	
@@ -68,7 +68,7 @@ public class OUOneTraitcomputeMVNLk {
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
 	
-		MVNUtils.populateVcvMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
 	
 			// OU covariance matrices
 		double[][] ouCovFI, ouCovFM, ouCovRI, ouCovRM;
@@ -184,7 +184,7 @@ public class OUOneTraitcomputeMVNLk {
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
 	
-		MVNUtils.populateVcvMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
 	
 			// OU covariance matrices
 		double[][] ouCovFI, ouCovFM, ouCovRI, ouCovRM;
@@ -287,7 +287,7 @@ public class OUOneTraitcomputeMVNLk {
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
 	
-		MVNUtils.populateVcvMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
 	
 			// OU covariance matrices
 		double[][] ouCovFI, ouCovFM, ouCovRI, ouCovRM;
