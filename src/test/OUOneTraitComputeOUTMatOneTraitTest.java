@@ -19,15 +19,16 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 	
 	final static double EPSILON = 1e-4;
 	
-//	For the covariance matrices we can assume two different hipothesis:
-//		    'F' suffix refers to assuming a fixed parameter Root
-//		    'R' suffix refers to assuming a random variable Root (stationary distribution)
-//	For the weight matrices we can assume two different hipothesis:
-//		    'I' suffix refers to isolating the root optimum value in the weight Matrix
-//		    'M' suffix refers to merging the root parameter with the optimum parameter associated with the eldest selective regime
-	
-// 	Every test has four different outputs according to the combination of the previous situations: FI, FM, RI, RM	
-//	 1, 2, 3 refers to Test 1, Test 2 and Test 3 respectively
+	/* 
+	 * F: root theta (=root mean=root ancestral trait value=root regime) is a separate parameter,
+	 * we "F"ix the root value (condition OU on this value)
+	 * R: root theta is not a parameter, it is a "R"andom value with a stationary distribution 
+	 * that we integrate over
+	 * 
+	 * I: we set the root theta (=root mean=root ancestral trait value=root regime) to be its own "I"ndependent
+	 * parameter, and estimate the
+	 * M: we set the root theta to be the same ("M"erge) as the regime of one of its children, making it not be a parameter
+	 */
 	
 	private static double[][] ouTMat1FI, ouTMat1FM, ouTMat1RI, ouTMat1RM;
 	private static double[][] ouTMat2FI, ouTMat2FM, ouTMat2RI, ouTMat2RM;
@@ -36,11 +37,12 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 	/*
 	 * Test 1 contains 4 asserts. It checks the OU covariance matrix values in 4 different scenarios.
 	 * 
-	 * (1) Fixed root trait value, root optimum separate from the "primary optimum" (the primary optimum is
+	 * (1) Fixed root trait value, root optimum (what is often referred to the root mean, or root state)
+	 * is separate (I) from the "primary optimum" (the primary optimum is
 	 * the "ancestral" optimum that existed before the root, and kept being the optimum down one or both of 
-	 * the branches coming from the root)
+	 * the branches coming from the root).
 	 * 
-	 * (2) Fixed root trait value, root optimum is set to be the same as whatever the primary optimum is.
+	 * (2) Fixed root trait value, root optimum is set to be the same (M) as whatever the primary optimum is.
 	 * The primary optimum is passed by the user as the optimum of the root (some regimem is picked and that
 	 * is both the primary optimum and the root optimum).
 	 * 	  
@@ -204,7 +206,6 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 
 	@Test	// Test 1
 	public void againstRvarOUTest1 () {
-		
 		Assert.assertEquals(1.563088e-29, 	ouTMat1FI[0][1], EPSILON);
 		Assert.assertEquals(2.000003e-02, 	ouTMat1FI[2][2], EPSILON);
 		Assert.assertEquals(1.221620e-56, 	ouTMat1FI[1][2], EPSILON);
@@ -228,7 +229,6 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 	
 	@Test	// Test 2
 	public void againstRvarOUTest2 () {
-		
 		Assert.assertEquals(0.2711105, 		ouTMat2FI[0][1], EPSILON);
 		Assert.assertEquals(2.67973939, 	ouTMat2FI[2][2], EPSILON);
 		Assert.assertEquals(0.02357370, 	ouTMat2FI[1][2], EPSILON);
@@ -252,7 +252,6 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 	
 	@Test 	// Test 3
 	public void againstRvarOUTest3 () {
-		
 		Assert.assertEquals(4.640928e-07, 	ouTMat3FI[0][1], EPSILON);
 		Assert.assertEquals(7.428888e-01, 	ouTMat3FI[2][2], EPSILON);
 		Assert.assertEquals(3.668135e-10, 	ouTMat3FI[1][2], EPSILON);

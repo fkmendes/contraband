@@ -60,7 +60,7 @@ public class BMOneTraitAnalyticalTest {
 		RealMatrix invVcvMat = invTMat.scalarMultiply(1/var); // (var*tMat)^-1 = tMat^-1 / var
 		double varToNdetTMat = Math.pow(var, n) * tMatLUD.getDeterminant(); // det(var*tMat) = var^n * det(tMat)
 		
-		resLk = MVNUtils.computeMVNLk(n, var, mean, data, invVcvMat, varToNdetTMat);
+		resLk = MVNUtils.getMVNLk(n, var, mean, data, invVcvMat, varToNdetTMat);
 	}
 	
 	@Test 

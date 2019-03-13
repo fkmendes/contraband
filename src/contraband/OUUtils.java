@@ -20,7 +20,7 @@ public class OUUtils {
 	 * "Asymptotic theory with hierarchical autocorrelation: Ornstein-Uhlenbeck tree models"
 	 * by Lam Si Tun Ho and Cécile Ané (2013)
 	 * 
-	 * Equation 1 (covariance matrix, random root formula)
+	 * Equation 1 (OU T matrix, random root formula)
 	 * 
 	 * \frac{\sigma^2}{2\alpha}\mathb{V}\text{ with }V_{ij} = e^{-\alpha d_{ij}}
 	 * 
@@ -28,23 +28,30 @@ public class OUUtils {
 	 * and sigma^2/(2*alpha) is referred to as gamma and is the variance
 	 * of the stationary distribution of the process. So the stationary
 	 * distribution depends on sigma^2 and alpha (it follows those values
-	 * during MCMC). This equation assumes there is a single mean mu (is this
-	 * mu supposed to be root optimum?) over the whole tree.
+	 * during MCMC). This equation assumes there is a single mean mu (root optimum) over the whole tree.
 	 * I do not understand how/why this assumption is made since
 	 * we are modelling OU in the first place, and in OU you have multiple
 	 * optima.
 	 * 
-	 * Equation 2 (covariance matrix, fixed root formula)
+	 * This is for ultrametric trees, where there isn't information about the root
+	 * ancestral state (the root optimum=root mean=root regime). So we integrate over a stationary distribution.
+	 * 
+	 * Equation 2 (OU T matrix, fixed root formula)
 	 * 
 	 * \frac{\sigma^2}{2\alpha}\mathb{V}\text{ with }V_{ij} = e^{-\alpha d_{ij}}(1-e^{-2\alpha t_{ij}})
 	 * 
-	 * where t_{ij} is the covariance between species i and j from the species tree
+	 * where t_{ij} is the covariance between species i and j from the species tree.
 	 * 
-	 * NOTE 1: sigma^2 does not go in because it is handled by MVNUtils
+	 * This is for non-ultrametric trees, where fossils are available -- and the root mean (root optimum=root regime)
+	 * can be estimated. In this case, we estimate the root optimum AND then condition the process on it (fix the root value)
+	 * But if the tree is ultrametric and OU is stationary, this option should converge on the random root case).
+	 * 
+	 * NOTE 1: sigma^2 does not go in because it is handled by MVNUtils.
 	 * 
 	 * NOTE 2: The OU T matrix depends on the "normal" T matrix that comes straight from the tree.
 	 * But when we have OU, now this T matrix from the tree has to be modified, which is what
-	 * the code below does.
+	 * the code below does. It is not the vcv matrix yet because we haven't multiplied it
+	 * by sigma^2.
 	 */ 
 	public static void computeOUTMatOneTrait(int n, double alpha, double[][] tMat, double[][] ouTMat, boolean rootIsFixed) {
 		
@@ -64,24 +71,54 @@ public class OUUtils {
 		}	
 	}
 	
-	// authors: Marguerite A. Butler* and Aaron A. King
-	// title: Phylogenetic Comparative Analysis: A Modeling Approach for Adaptive Evolution (Appendix 1)
-		// Equation A7 (weight matrix, isolated root formula)
-	
-	// authors: Julien Clavel, Gilles Escarguel and Gildas Merceron
-	// title: mvMORPH: an R package for fitting multivariate evolutionary models to morphometric data
-		// Page 5 (weight matrix, merged root idea)
-	
-	public static void computeWMatOneTrait(TreeParser Tree, int n, int r, double alpha, double[][] WMat, boolean mergeRoot) {
+	/*
+	 * The math inside this formula comes from 
+	 * 
+	 * "Phylogenetic Comparative Analysis: A Modeling Approach for Adaptive Evolution" (Appendix 1)
+	 * by Marguerite Butler and Aaron King (2004)
+	 * 
+	 * Equation A7 (weight matrix, root has its own optimum, i.e., mergeRoot=false)
+	 * 
+	 * W_{ij} = e^{-\alpha T}\sum_{\gamma =1}^{\kappa (i)}\beta_{ik}^{\gamma}(e^{\alpha t_{i}^{\gamma}}-e^{\alpha t_{i}^{\gamma -1}})
+	 * 
+	 * where T is the length of the time the regime applies
+	 * \beta_{ik} is the indicator value of the k-th regime (out of r), i-th species (out of N) (there is one \beta_{ik} per branch)
+	 * \gamma is a discrete variable that represents branches on a path (\gamma - 1 is the parent of \gamma), with \gammas going from
+	 * 1 to the total number of branches on a path, \kappa{i}.
+	 * 
+	 * This is the more general description of the weight matrix, in which we actually estimate the root value (root optimum=root mean=root regime),
+	 * and thus have it as a separate parameter. We should use this when we have fossils (tree is non-ultrametric).
+	 * 
+	 * It does not make sense to use this option (mergeRoot=false) if we set rootIsFixed=false when computing the OUTmatrix.
+	 * 
+	 * and
+	 * 
+	 * "mvMORPH: an R package for fitting multivariate evolutionary models to morphometric data"
+	 * by Julien Clavel, Gilles Escarguel and Gildas Merceron (2015)
+	 * 
+	 * Equation 6 (they call it the covariance matrix, this is the multivariate equivalent of the weight matrix in Butler and King)
+	 * 
+	 * \text{Cov}(Y_i,Y_j)=\int_{0}^{C_{ij}}e^{-\mathbf{A}(C_{ii}-\nu)}\mathbf{R}e^{-\mathbf{A}^{T}(C_{jj}-\nu)}\text{d}\nu
+	 * 
+	 * We use this less general version when we don't have the root value (root optimum=root mean) as a separate parameter, and
+	 * instead set it to be equal to one of the thetas (one of the optima). Which theta (mean) to use for the root is 
+	 * provided by the user.
+	 * 
+	 */
+	public static void computeWMatOneTrait(TreeParser Tree, List<Node> allLeafNodes, int n, int r, double alpha, double[][] WMat, boolean mergeRoot) {
 		
 		Node nodeRoot = Tree.getRoot();
-		List<Node> allLeaf = nodeRoot.getAllLeafNodes();
+		// List<Node> allLeaf = nodeRoot.getAllLeafNodes();
 		
 		Double[] regimes = new Double[nodeRoot.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
 		int rootIndexOffset;
 		int intRootRegime;	// Eldest regime index
 
-		Tree.getMetaData(nodeRoot, regimes, "Regime");
+		/* 
+		 * The regimes array is the computational equivalent of 
+		 * Beta_{i}^{\gamma} in equation A6 of Butler & King's Appendix 1
+		*/
+		Tree.getMetaData(nodeRoot, regimes, "Regime"); // writes on regimes array
 		
 		if (mergeRoot) { 		// column dimension of WMat must be r
 			
@@ -94,7 +131,7 @@ public class OUUtils {
 			intRootRegime = 0;	
 		}
 		
-		for (Node sp: allLeaf) {
+		for (Node sp: allLeafNodes) {
 				
 			int spNr = sp.getNr();	// Will specify the row index 
 				
@@ -112,7 +149,6 @@ public class OUUtils {
 				sp = sp.getParent();
 			}
 		}		
-		//GeneralUtils.displayRealMatrix(WMat);
 	}
 	
 	
