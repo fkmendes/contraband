@@ -38,12 +38,6 @@ public class BMOneTraitAnalyticalTest {
 			
 		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
 		GeneralUtils.display2DArray(tMatInput);
-//		double[][] tMatInput = new double[][] {
-//		{ 3.0, 2.0, 1.0, 0.0 },
-//		{ 2.0, 3.0, 1.0, 0.0 },
-//		{ 1.0, 1.0, 3.0, 0.0 },
-//		{ 0.0, 0.0, 0.0, 3.0 }
-//		};
 
 		// var, mean
 		double var = 1.4822794118;

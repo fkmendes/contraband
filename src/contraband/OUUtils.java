@@ -8,10 +8,47 @@ import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import java.lang.Double;
-
-
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
+
+/*
+ * Notes about Hansen model (=OU on a tree with multiple regimes)
+ * 
+ * In OU, there will be r selective optima or regimes. theta_k is the k-th regime. 
+ * The total number of regimes, r, is independent of the number of branches in the tree
+ * (and will usually be much much smaller), but theta_0 is the separate regime (optimum)
+ * the root might or might not be assigned.
+ * 
+ * Note that the likelihood described in Butler & King is GIVEN theta_0 (the root state),
+ * i.e., the process is conditioned on a particular theta_0 (that we can sample during MCMC,
+ * for example). In other words, we fix theta_0. However, we can assume theta_0 has a stationary
+ * distribution with mean theta_0 (I think!) and variance = \gamma = \frac{\sigma}{2\alpha}.
+ * Think of this stationary distribution as a parametric (depends on the actual parameters
+ * you are trying to estimate) prior.
+ * This changes the variance of the OU MVN likelihood (what here we call the OU T matrix), as we
+ * need to add a bit more variance due to treating theta_0 as a random variable.
+ * The mean of the OU process is still computed the same way, as it depends on what theta0 is.
+ * 
+ * The expected values at any time point in the tree (ancestral states) will be given by the
+ * weight matrix W (i.e., the design matrix, which depends on alpha) * the theta vector (or you
+ * can just compute the spelled-out formula in Butler & King + others). Doing W * theta vector is a trick
+ * that uses the GLS formulation. Differently from BM, the root value is not the expected value for each
+ * lineage (the latter being W * theta vector).
+ * Note that the thetas are not the ancestral states, they are just the optima pulling the trait values.
+ * In the specific case of the root, the root optimum (theta_0) will be the root value (i.e., the mean of
+ * the process = vector of theta_0s) if we assume stationarity (rootIsFixed=false). 
+ * 
+ * ---
+ * 
+ * Notes about this implementation
+ * 
+ * While technically you can do mergeRoot=false/true with rootIsFixed=false/true in any
+ * combination you like, it makes sense to only do mergeRoot=false with rootIsFixed=true,
+ * and only with non-ultrametric trees (with fossils). If you can't know anything about
+ * the root state you probably can't estimate its optimum; so rootIsFixed=false with
+ * mergeRoot=true probably isn't worth the additional parameter time. In some packages,
+ * the default is actually mergeRoot=true as most trees are ultrametric.
+ */
 
 public class OUUtils {
 	
@@ -26,25 +63,22 @@ public class OUUtils {
 	 * 
 	 * where d_ij is the length of the path between both species
 	 * and sigma^2/(2*alpha) is referred to as gamma and is the variance
-	 * of the stationary distribution of the process. So the stationary
-	 * distribution depends on sigma^2 and alpha (it follows those values
-	 * during MCMC). This equation assumes there is a single mean mu (root optimum) over the whole tree.
-	 * I do not understand how/why this assumption is made since
-	 * we are modelling OU in the first place, and in OU you have multiple
-	 * optima.
+	 * of the Gaussian stationary distribution of the process.
 	 * 
-	 * This is for ultrametric trees, where there isn't information about the root
-	 * ancestral state (the root optimum=root mean=root regime). So we integrate over a stationary distribution.
+	 * This is for ultrametric trees, where there isn't information about the root (mean) values.
+	 * This formula (="rootIsFixed=false") assumes we integrate over a stationary distribution with mean=theta_0 (i.e., the
+	 * first element of the theta vector) and variance is sigma/(2*alpha).
 	 * 
-	 * Equation 2 (OU T matrix, fixed root formula)
+	 * Equation 2 (OU T matrix, fixed root formula); this also appears in the appendix of Butler and King as 
+	 * equation A5
 	 * 
 	 * \frac{\sigma^2}{2\alpha}\mathb{V}\text{ with }V_{ij} = e^{-\alpha d_{ij}}(1-e^{-2\alpha t_{ij}})
 	 * 
 	 * where t_{ij} is the covariance between species i and j from the species tree.
 	 * 
-	 * This is for non-ultrametric trees, where fossils are available -- and the root mean (root optimum=root regime)
-	 * can be estimated. In this case, we estimate the root optimum AND then condition the process on it (fix the root value)
-	 * But if the tree is ultrametric and OU is stationary, this option should converge on the random root case).
+	 * This is for non-ultrametric trees, where fossils are available -- and the root state
+	 * is not assumed to come from a distribution centered at theta0's, but are conditioned upon.
+	 * But if the tree is ultrametric and OU is stationary, this option should converge on the random root case.
 	 * 
 	 * NOTE 1: sigma^2 does not go in because it is handled by MVNUtils.
 	 * 
@@ -53,7 +87,7 @@ public class OUUtils {
 	 * the code below does. It is not the vcv matrix yet because we haven't multiplied it
 	 * by sigma^2.
 	 */ 
-	public static void computeOUTMatOneTrait(int n, double alpha, double[][] tMat, double[][] ouTMat, boolean rootIsFixed) {
+	public static void computeOUTMatOneTrait(int n, double alpha, double[][] tMat, double[][] ouTMat, boolean rootIsRandVar) {
 		
 		double cellValue;
 		double divByTwoAlpha = 1.0 / (2.0 * alpha);
@@ -62,7 +96,7 @@ public class OUUtils {
 				
 				cellValue = divByTwoAlpha * Math.exp(-alpha * (tMat[i][i] + tMat[j][j] - 2.0 * tMat[i][j]));
 				
-				if (rootIsFixed) {
+				if (rootIsRandVar) {
 					cellValue *= (1.0 - Math.exp(-2.0 * alpha * tMat[i][j]));
 				}
 				
@@ -86,10 +120,9 @@ public class OUUtils {
 	 * \gamma is a discrete variable that represents branches on a path (\gamma - 1 is the parent of \gamma), with \gammas going from
 	 * 1 to the total number of branches on a path, \kappa{i}.
 	 * 
-	 * This is the more general description of the weight matrix, in which we actually estimate the root value (root optimum=root mean=root regime),
-	 * and thus have it as a separate parameter. We should use this when we have fossils (tree is non-ultrametric).
-	 * 
-	 * It does not make sense to use this option (mergeRoot=false) if we set rootIsFixed=false when computing the OUTmatrix.
+	 * This is the more general description of the weight matrix that appears in Butler & King, in which we allow the root to be annotated
+	 * in the tree and have its own optimum (theta_0).
+	 * We should use this when we have fossils (tree is non-ultrametric), and this optimum can be estimated.
 	 * 
 	 * and
 	 * 
@@ -100,12 +133,10 @@ public class OUUtils {
 	 * 
 	 * \text{Cov}(Y_i,Y_j)=\int_{0}^{C_{ij}}e^{-\mathbf{A}(C_{ii}-\nu)}\mathbf{R}e^{-\mathbf{A}^{T}(C_{jj}-\nu)}\text{d}\nu
 	 * 
-	 * We use this less general version when we don't have the root value (root optimum=root mean) as a separate parameter, and
-	 * instead set it to be equal to one of the thetas (one of the optima). Which theta (mean) to use for the root is 
-	 * provided by the user.
-	 * 
+	 * In this less general version, we ignore the root optimum metadata, and assume theta_0 is the same as one of the other thetas
+	 * (one of the optima). We should use this with ultrametric trees.
 	 */
-	public static void computeWMatOneTrait(TreeParser Tree, List<Node> allLeafNodes, int n, int r, double alpha, double[][] WMat, boolean mergeRoot) {
+	public static void computeWMatOneTrait(TreeParser Tree, List<Node> allLeafNodes, int n, int r, double alpha, double[][] WMat, boolean useRootMetaData) {
 		
 		Node nodeRoot = Tree.getRoot();
 		// List<Node> allLeaf = nodeRoot.getAllLeafNodes();
@@ -120,7 +151,7 @@ public class OUUtils {
 		*/
 		Tree.getMetaData(nodeRoot, regimes, "Regime"); // writes on regimes array
 		
-		if (mergeRoot) { 		// column dimension of WMat must be r
+		if (useRootMetaData) { 		// column dimension of WMat must be r
 			
 			rootIndexOffset = 0;
 			intRootRegime = regimes[nodeRoot.getNr()].intValue();

@@ -20,47 +20,21 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 	final static double EPSILON = 1e-4;
 	
 	/* 
-	 * F: root theta (=root mean=root ancestral trait value=root regime) is a separate parameter,
-	 * we "F"ix the root value (condition OU on this value)
-	 * R: root theta is not a parameter, it is a "R"andom value with a stationary distribution 
-	 * that we integrate over
+	 * The OU T matrix is what is referred to in Butler & King as the V (variance) matrix of
+	 * the OU process.
 	 * 
-	 * I: we set the root theta (=root mean=root ancestral trait value=root regime) to be its own "I"ndependent
-	 * parameter, and estimate the
-	 * M: we set the root theta to be the same ("M"erge) as the regime of one of its children, making it not be a parameter
+	 * We call it the T matrix here because it still not being multiplied by sigma^2.
+	 * 
+	 * R: rootIsRandVar=true
+	 * F: rootIsRandVar=false
+	 * I: useRootMetaData=true
+	 * M: useRootMetaData=false
 	 */
 	
 	private static double[][] ouTMat1FI, ouTMat1FM, ouTMat1RI, ouTMat1RM;
 	private static double[][] ouTMat2FI, ouTMat2FM, ouTMat2RI, ouTMat2RM;
 	private static double[][] ouTMat3FI, ouTMat3FM, ouTMat3RI, ouTMat3RM;
 	
-	/*
-	 * Test 1 contains 4 asserts. It checks the OU covariance matrix values in 4 different scenarios.
-	 * 
-	 * (1) Fixed root trait value, root optimum (what is often referred to the root mean, or root state)
-	 * is separate (I) from the "primary optimum" (the primary optimum is
-	 * the "ancestral" optimum that existed before the root, and kept being the optimum down one or both of 
-	 * the branches coming from the root).
-	 * 
-	 * (2) Fixed root trait value, root optimum is set to be the same (M) as whatever the primary optimum is.
-	 * The primary optimum is passed by the user as the optimum of the root (some regimem is picked and that
-	 * is both the primary optimum and the root optimum).
-	 * 	  
-	 * NOTE: Fixed root trait values means the ancestral state of the whole tree (the ancestral state at the root)
-	 * is a parameter that we are sampling from during MCMC. That's the "normal" MVN likelihood as described by
-	 * Felsenstein -- the x_0 parameter.
-	 * 
-	 * (3) Random root trait value, root optimum separate from the primary optimum
-	 * 
-	 * (4) Random root trait value, root optimum is set to be the same as whatever the primary optimum is (which is
-	 * defined by the user through the root meta data in the tree string).
-	 * 
-	 * NOTE: Random root trait value means the ancestral state of the whole tree (the ancestral state at the root)
-	 * is not a parameter that we sample from during MCMC. Instead, it comes from some stationary distribution.
-	 * The density function of that distribution is worked into the covariance matrix of OU (and ultimately into
-	 * the likelihood function of OU). That is why the covariance formulas for (F)ixed and (R)andom root cases
-	 * are different. 
-	 */
 	@BeforeClass
 	public static void setUPTest1() throws Exception {
 		

@@ -24,14 +24,15 @@ public class OUOneTraitComputeMVNLk {
 	final static double EPSILON = 1e-4;
 	
 	/* 
-	 * F: root theta (=root mean=root ancestral trait value=root regime) is a separate parameter,
-	 * we "F"ix the root value (condition OU on this value)
-	 * R: root theta is not a parameter, it is a "R"andom value with a stationary distribution 
-	 * that we integrate over
+	 * The T matrix comes from the phylogenetic tree.
+	 * The OU T matrix is equivalent to the V matrix in Butler & King (it's part of the variance 
+	 * of the OU process).
+	 * The W matrix is part of the mean of the OU process.
 	 * 
-	 * I: we set the root theta (=root mean=root ancestral trait value=root regime) to be its own "I"ndependent
-	 * parameter, and estimate the
-	 * M: we set the root theta to be the same ("M"erge) as the regime of one of its children, making it not be a parameter
+	 * R: rootIsRandVar=true
+	 * F: rootIsRandVar=false
+	 * I: useRootMetaData=true
+	 * M: useRootMetaData=false
 	 */
 		
 	// We are using the same trees as in OUOneTraitcomputeOUTMatOneTraitTest.java)
