@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import beast.core.BEASTObject;
 import beast.core.Input;
@@ -18,9 +19,9 @@ public class OneValueContTraits extends BEASTObject {
 	final public Input<TaxonSet> taxaInput = new Input<>("taxa", "contains list of taxa to map traits to.", Validate.REQUIRED);
 	
 	Integer nTraits, nSpp;
-	double[] spValues, traitValues;
 	String traitValueString;
 	String[] traitValueStrings;
+	Set<String> spNames;
 	Map<String, List<Double>> spValuesMap = new HashMap<>(); 
 	
 	@Override
@@ -28,9 +29,8 @@ public class OneValueContTraits extends BEASTObject {
 		// Getting inputs
 		nTraits = nTraitsInput.get();
 		nSpp = taxaInput.get().getTaxonCount();
+		spNames = taxaInput.get().getTaxaNames();
 		traitValueString = traitInput.get().replaceAll("\\s+","");
-		spValues = new double[nTraits]; // used by getter (different traits, same species)
-		traitValues = new double[nSpp]; // used by getter (same trait, different species)
 		
 		populateSpValuesMap();
 		checkAllSpHaveValues();
@@ -65,8 +65,14 @@ public class OneValueContTraits extends BEASTObject {
 		}
 	}
 	
+	/*
+	 * One species, all traits (same order as in string)
+	 */
 	public double[] getSpValues(String spName) {		
-		int i = 0;
+		double[] spValues = new double[nTraits]; // used by getter (different traits, same species)
+
+		
+		int i=0;
 		for (Double spValue: spValuesMap.get(spName)) {
 			spValues[i] = spValue.doubleValue();
 			i++;
@@ -75,7 +81,17 @@ public class OneValueContTraits extends BEASTObject {
 		return spValues;
 	}
 	
+	/*
+	 * One trait, all species (in TaxonSet order)
+	 */
 	public double[] getTraitValues(int traitIdx) {
+		double[] traitValues = new double[nSpp]; // used by getter (same trait, different species)
+		
+		int i=0;
+		for (String spName: spNames) {
+			traitValues[i] = getSpValues(spName)[traitIdx];
+			i++;
+		}
 		return traitValues;
 	}
 }

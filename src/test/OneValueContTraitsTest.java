@@ -14,6 +14,7 @@ public class OneValueContTraitsTest {
 	final static double EPSILON = 1e-4;
 	private double[] sp4, sp4Expected;
 	private double sp3;
+	private double[] trait1, trait2, trait1Expected, trait2Expected;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -34,11 +35,23 @@ public class OneValueContTraitsTest {
 		
 		double[] sp4 = twoTrait.getSpValues("sp4");
 		double[] sp4Expected = { 0.0, 1.0 };
+		
+		double[] trait1 = twoTrait.getTraitValues(0);
+		double[] trait1Expected = { 4.1, 4.5, 5.9, 0.0 };
+		
+		double[] trait2 = twoTrait.getTraitValues(1);
+		double[] trait2Expected = { 5.1, 5.5, 6.9, 1.0 };
 	}
 
 	@Test
-	public void test() {
+	public void test1() {
 		Assert.assertEquals(5.9, sp3, 0.0);
 		Assert.assertArrayEquals(sp4Expected, sp4, 0.0);
+	}
+	
+	@Test
+	public void test2() {
+		Assert.assertArrayEquals(trait1Expected, trait1, 0.0);
+		Assert.assertArrayEquals(trait2Expected, trait2, 0.0);
 	}
 }
