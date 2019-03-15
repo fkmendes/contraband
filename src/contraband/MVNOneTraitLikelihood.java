@@ -1,14 +1,10 @@
 package contraband;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
 import beast.core.Distribution;
-import beast.evolution.tree.Node;
 
 public abstract class MVNOneTraitLikelihood extends Distribution {
 
@@ -35,5 +31,12 @@ public abstract class MVNOneTraitLikelihood extends Distribution {
 	
 	protected void setOneTraitData(RealVector aOneTraitData) {
 		oneTraitData = aOneTraitData;
+	}
+	
+	@Override
+	public double calculateLogP() {
+		populateLogP();
+		
+		return logP;
 	}
 }

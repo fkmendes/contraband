@@ -35,7 +35,6 @@ public class BMMVNLikelihood extends MVNOneTraitLikelihood {
 	
 	private double[][] phyloTMatInput;
 	RealMatrix phyloTMat;
-	LUDecomposition vcvMatLUD;
 
 	@Override
 	public void initAndValidate() {
