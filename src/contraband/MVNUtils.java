@@ -11,7 +11,7 @@ import beast.evolution.tree.Tree;
 public class MVNUtils {
 	
 	/*
-	 * Recursive function for producing vcv matrix out of tree
+	 * Recursive function for producing T matrix out of tree
 	 */
 	public static void fillNodeLeftRightLeaves(Node node, double[] nodeToRootPaths, double[][] tMat, List<Node> leftLeaves, List<Node> rightLeaves) {
 		
@@ -69,12 +69,12 @@ public class MVNUtils {
 	}
 	
 	/*
-	 * Main lk computation function
+	 * MVN density function
+	 * 
+	 * Equation 5 in "Maximum-likelihood estimation of evolutionary trees from continuous characters"
+	 * by J. Felsenstein (1973) 
+	 * 
 	 */
-	
-	// author: Joseph Felsenstein
-	// title: Maximum likelihood estimation of evolutionary trees from continuous characters
-			// Equation 5
 	public static double getMVNLk(int n, double var, RealVector mean, RealVector data, RealMatrix invVcvMat, double varToNdetTMat) {		
 		
 		/*
@@ -98,8 +98,10 @@ public class MVNUtils {
 		return likelihood;
 	}
 	
+	/*
+	 * One-dimensional, simple normal density
+	 */
 	public static double normalDensity(double x, double mu, double sigma2) {
-		
-		return (1.0/Math.sqrt(2.0 * Math.PI * sigma2)) * Math.exp( - Math.pow(x - mu, 2)/(2.0 * sigma2));
+		return (1.0/Math.sqrt(2.0 * Math.PI * sigma2)) * Math.exp(-Math.pow(x - mu, 2)/(2.0 * sigma2));
 	}
 }
