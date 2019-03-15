@@ -22,7 +22,7 @@ import contraband.MVNUtils;
 public class BMOneTraitComputeMVNLk {
 	
 	final static double EPSILON = 1e-4;
-	private double resLk; 
+	private double resLk, resLogLk; 
 	
 	@Before
 	public void setUP() throws Exception {
@@ -47,20 +47,30 @@ public class BMOneTraitComputeMVNLk {
 		// trait values
 		double[] dataInput = new double[] { 4.1, 4.5, 5.9, 0.0 };
 		RealVector data = new ArrayRealVector(dataInput);
-					
+			
+		// for log-lik
 		RealMatrix tMat = new Array2DRowRealMatrix(tMatInput);
+		RealMatrix vcvMat = tMat.scalarMultiply(var);
+		LUDecomposition vcvMatLUD = new LUDecomposition(vcvMat);
+		double detVcvMat = vcvMatLUD.getDeterminant();
+		
+		// for lik
 		LUDecomposition tMatLUD = new LUDecomposition(tMat);
 		RealMatrix invTMat = tMatLUD.getSolver().getInverse(); // if only variance changes and not tree, we don't have to invert
 		RealMatrix invVcvMat = invTMat.scalarMultiply(1/var); // (var*tMat)^-1 = tMat^-1 / var
 		double varToNdetTMat = Math.pow(var, n) * tMatLUD.getDeterminant(); // det(var*tMat) = var^n * det(tMat)
 		
+		resLogLk = MVNUtils.getMVNLogLk(n, mean, data, invVcvMat, detVcvMat);
 		resLk = MVNUtils.getMVNLk(n, mean, data, invVcvMat, varToNdetTMat);
+	}
+	
+	@Test 
+	public void againstresLogLikelihood () {
+		Assert.assertEquals(-8.294697069, resLogLk, EPSILON);
 	}
 	
 	@Test 
 	public void againstresLikelihood () {
 		Assert.assertEquals(0.0002498382, resLk, EPSILON);
 	}
-
-
 }

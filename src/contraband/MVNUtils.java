@@ -81,21 +81,28 @@ public class MVNUtils {
 		 * This whole thing is the normalizing constant the guarantees
 		 * an integral of one (a proper density function)
 		 */
-		
 		double likelihood = 1.0 / ( Math.pow( (2.0 * Math.PI), n/2.0 ) * Math.pow( varToNdetTMat, 0.5 ) );
 		
 		/*
 		 * Now we multiply by the data stuff
 		 */
-		
 		likelihood *= Math.exp( 
 				invVcvMat
 				.preMultiply(data.subtract(mean)).mapMultiply(-0.5)
 				.dotProduct(data.subtract(mean))
 				);
-		System.out.println("Printing coming from MVNUtils lik " + likelihood);
 
 		return likelihood;
+	}
+	
+	public static double getMVNLogLk (int n, RealVector mean, RealVector data, RealMatrix invVcvMat, double detTMat) {
+		
+		double loglikelihood = -0.5 * (Math.log(detTMat) + n * Math.log(2.0 * Math.PI));
+		
+		loglikelihood += invVcvMat.preMultiply(data.subtract(mean)).mapMultiply(-0.5)
+				.dotProduct(data.subtract(mean));
+		
+		return loglikelihood;
 	}
 	
 	/*

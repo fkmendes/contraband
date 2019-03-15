@@ -1,32 +1,39 @@
 package contraband;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
 import beast.core.Distribution;
+import beast.evolution.tree.Node;
 
 public abstract class MVNOneTraitLikelihood extends Distribution {
 
-	int nSpp;
-	double[][] processTMat, processWMat;
-	RealVector processMeanVec, oneTraitData;
-	RealMatrix vcvMat, invVCVMat;
-	LUDecomposition vcvMatLUDecomposition;
-	double varToTheNthDet;
+	private int nSpp;
+	private RealVector processMeanVec, oneTraitData;
+	private RealMatrix vcvMat, invVCVMat;
+	private LUDecomposition vcvMatLUDecomposition;
+	private double detVCVMat;
 	
-	public void populatePhyloTMat() {};
-	
-	public void populateProcessTMat() {};
-	
-	public void populateProcessInvVCVMat() {};
-	
-	public void populateProcessMeanVec() {};
-	
-	// Note: maybe later we want to compute logP straight away inside MVNUtils if underflow happens
-	public void populateLogP() { 
-		logP = Math.log(MVNUtils.getMVNLk(nSpp, processMeanVec, oneTraitData, invVCVMat, varToTheNthDet));
+	protected void populateLogP() { 
+		logP = MVNUtils.getMVNLogLk(nSpp, processMeanVec, oneTraitData, invVCVMat, detVCVMat);
 	};
 	
+	// setters
+	protected void setProcessVCVMat(RealMatrix aVCVMat) {
+		vcvMat = aVCVMat;
+		vcvMatLUDecomposition = new LUDecomposition(vcvMat);
+		detVCVMat = vcvMatLUDecomposition.getDeterminant();
+	};
 	
+	protected void setProcessMeanVec(RealVector aMeanVector) {
+		processMeanVec = aMeanVector;
+	};
+	
+	protected void setOneTraitData(RealVector aOneTraitData) {
+		oneTraitData = aOneTraitData;
+	}
 }
