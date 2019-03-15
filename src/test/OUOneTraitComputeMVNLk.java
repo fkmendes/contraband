@@ -148,10 +148,10 @@ public class OUOneTraitComputeMVNLk {
 //		System.out.println();
 		
 		// Finally computing likelihoods for OU
-		ouLik1FI = MVNUtils.getMVNLk(n, sigsqFI, realOUWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);
-		ouLik1FM = MVNUtils.getMVNLk(n, sigsqFM, realOUWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
-		ouLik1RI = MVNUtils.getMVNLk(n, sigsqRI, realOUWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
-		ouLik1RM = MVNUtils.getMVNLk(n, sigsqRM, realOUWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
+		ouLik1FI = MVNUtils.getMVNLk(n, realOUWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);
+		ouLik1FM = MVNUtils.getMVNLk(n, realOUWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
+		ouLik1RI = MVNUtils.getMVNLk(n, realOUWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
+		ouLik1RM = MVNUtils.getMVNLk(n, realOUWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
 	}
 
 	// Test 2: Non-ultrametric tree (1 regimes)
@@ -249,10 +249,10 @@ public class OUOneTraitComputeMVNLk {
 		RealMatrix realOUWeightRM = new Array2DRowRealMatrix(ouWeightRM);
 
 		// Finally computing likelihoods for OU
-		ouLik2FI = MVNUtils.getMVNLk(n, sigsqFI, realOUWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);
-		ouLik2FM = MVNUtils.getMVNLk(n, sigsqFM, realOUWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
-		ouLik2RI = MVNUtils.getMVNLk(n, sigsqRI, realOUWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
-		ouLik2RM = MVNUtils.getMVNLk(n, sigsqRM, realOUWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
+		ouLik2FI = MVNUtils.getMVNLk(n, realOUWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);
+		ouLik2FM = MVNUtils.getMVNLk(n, realOUWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
+		ouLik2RI = MVNUtils.getMVNLk(n, realOUWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
+		ouLik2RM = MVNUtils.getMVNLk(n, realOUWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
 	}
 	
 	// Test 3: Non-ultrametric tree (5 regimes)
@@ -364,10 +364,10 @@ public class OUOneTraitComputeMVNLk {
 //		System.out.println();
 		
 		// Finally computing likelihoods for OU
-		ouLik3FI = MVNUtils.getMVNLk(n, sigsqFI, realOUWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);	
-		ouLik3FM = MVNUtils.getMVNLk(n, sigsqFM, realOUWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
-		ouLik3RI = MVNUtils.getMVNLk(n, sigsqRI, realOUWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
-		ouLik3RM = MVNUtils.getMVNLk(n, sigsqRM, realOUWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
+		ouLik3FI = MVNUtils.getMVNLk(n, realOUWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);	
+		ouLik3FM = MVNUtils.getMVNLk(n, realOUWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
+		ouLik3RI = MVNUtils.getMVNLk(n, realOUWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
+		ouLik3RM = MVNUtils.getMVNLk(n, realOUWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
 
 	}
 	

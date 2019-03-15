@@ -75,7 +75,7 @@ public class MVNUtils {
 	 * by J. Felsenstein (1973) 
 	 * 
 	 */
-	public static double getMVNLk(int n, double var, RealVector mean, RealVector data, RealMatrix invVcvMat, double varToNdetTMat) {		
+	public static double getMVNLk(int n, RealVector mean, RealVector data, RealMatrix invVcvMat, double varToNdetTMat) {		
 		
 		/*
 		 * This whole thing is the normalizing constant the guarantees
