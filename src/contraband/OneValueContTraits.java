@@ -17,8 +17,8 @@ public class OneValueContTraits extends BEASTObject {
 	final public Input<String> traitInput = new Input<>("traitValues", "contains String array, each string containing values for one of the traits for all species in sp_name=value form.", Validate.REQUIRED);
 	final public Input<TaxonSet> taxaInput = new Input<>("taxa", "contains list of taxa to map traits to.", Validate.REQUIRED);
 	
-	Integer nTraits;
-	double[] spValues;
+	Integer nTraits, nSpp;
+	double[] spValues, traitValues;
 	String traitValueString;
 	String[] traitValueStrings;
 	Map<String, List<Double>> spValuesMap = new HashMap<>(); 
@@ -27,8 +27,10 @@ public class OneValueContTraits extends BEASTObject {
 	public void initAndValidate() {
 		// Getting inputs
 		nTraits = nTraitsInput.get();
+		nSpp = taxaInput.get().getTaxonCount();
 		traitValueString = traitInput.get().replaceAll("\\s+","");
-		spValues = new double[nTraits]; // used by getter
+		spValues = new double[nTraits]; // used by getter (different traits, same species)
+		traitValues = new double[nSpp]; // used by getter (same trait, different species)
 		
 		populateSpValuesMap();
 		checkAllSpHaveValues();
@@ -71,5 +73,9 @@ public class OneValueContTraits extends BEASTObject {
 		}
 
 		return spValues;
+	}
+	
+	public double[] getTraitValues(int traitIdx) {
+		return traitValues;
 	}
 }

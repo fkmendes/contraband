@@ -50,7 +50,7 @@ public class BMOneTraitAnalyticalTest {
 					
 		RealMatrix tMat = new Array2DRowRealMatrix(tMatInput);
 		LUDecomposition tMatLUD = new LUDecomposition(tMat);
-		RealMatrix invTMat = tMatLUD.getSolver().getInverse(); // if only variance chances and not tree, we don't have to invert
+		RealMatrix invTMat = tMatLUD.getSolver().getInverse(); // if only variance changes and not tree, we don't have to invert
 		RealMatrix invVcvMat = invTMat.scalarMultiply(1/var); // (var*tMat)^-1 = tMat^-1 / var
 		double varToNdetTMat = Math.pow(var, n) * tMatLUD.getDeterminant(); // det(var*tMat) = var^n * det(tMat)
 		
