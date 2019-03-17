@@ -1,9 +1,7 @@
 package contraband;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -12,78 +10,78 @@ import org.apache.commons.math3.linear.RealVector;
 import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.RealParameter;
-import beast.evolution.tree.Node;
-import beast.util.TreeParser;
 import beast.core.Input.Validate;
 
 public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 
-	final public Input<TreeParser> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
 	final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Sigma^2, the variance of the process.", Validate.REQUIRED);
 	final public Input<RealParameter> meanInput = new Input<>("mean", "mu, or x_0, the mean of the process (and the values at the root).", Validate.REQUIRED);
 	final public Input<OneValueContTraits> oneTraitInput = new Input<>("data", "continuous data values for one trait.", Validate.REQUIRED);
 	
-	// for phylo T matrix
-	int nSpp;
-	private TreeParser tree;
-	private double[] nodeToRootPaths;
-	private List<Node> leftLeaves;
-	private List<Node> rightLeaves;
-	private double[][] BMPhyloTMatInput;
-	private RealMatrix BMPhyloTMat;
-	private LUDecomposition BMVCVMatLUD;
+	boolean updatePhyloTMat;
+	boolean updateVCVMat;
+	boolean updateMean;
 	
 	private double sigmasq;
 
-	private Double[] BMMeanVectorInput;
+	private Double BMSingleMeanValue;
 	private RealVector BMMeanVector;
 	private RealMatrix BMVCVMat, BMInvVCVMat;
+	private LUDecomposition BMVCVMatLUD;
 	
 	private OneValueContTraits oneTraitData;
 	private RealVector oneTraitDataVector;
 	
 	@Override
-	public void initAndValidate() {
-		tree = treeInput.get();
-		nSpp = tree.getLeafNodeCount();
-		BMPhyloTMatInput = new double[nSpp][nSpp];
-		nodeToRootPaths = new double[tree.getNodeCount()];
-		leftLeaves = new ArrayList<>();
-		rightLeaves = new ArrayList<>();
+	public void initAndValidate() {		
+		
+		super.initAndValidate();
+		
+		BMMeanVector = new ArrayRealVector(getNSpp());
 		
 		sigmasq = sigmasqInput.get().getValue();
-		BMMeanVectorInput = meanInput.get().getValues();
+		BMSingleMeanValue = meanInput.get().getValue();
 		oneTraitData = oneTraitInput.get();
 		
 		// this instance vars
-		populateMeanVector();
-		populateVCVMatrix();
-		populateInvVCVMatrix();
-		populateOneTraitDataVector();
+		populateOneTraitDataVector(); // won't change, so outside populateInstanceVars
+		populateInstanceVars(true, true, true);
 		
 		// setting parent class instance vars
 		populateParentInstanceVars(); 
 	}
 	
+	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean) {
+		if (updatePhyloTMat) { super.populatePhyloTMatrix(); }
+		if (updateMean) { populateMeanVector(); }
+		if (updateVCVMat) {
+			populateVCVMatrix();
+			populateInvVCVMatrix();
+		}
+	}
+	
+	private void populateParentInstanceVars() {
+		// setting parent members
+		setProcessMeanVec(BMMeanVector);
+		setProcessVCVMat(BMVCVMat);
+		setProcessInvVCVMat(BMInvVCVMat);
+		setProcessOneTraitDataVec(oneTraitDataVector);
+	}
+	
 	@Override
 	protected void populateMeanVector() {
-		// later see if I need to move get() from initandvalidate here, and check dirtiness before getting
-		// same for other parameters
-		
-		BMMeanVector = new ArrayRealVector(BMMeanVectorInput);
+		BMMeanVector.set(BMSingleMeanValue);
 	}
 	
 	@Override
 	protected void populateVCVMatrix() {
-		MVNUtils.populateTMatrix(tree, nodeToRootPaths, BMPhyloTMatInput, leftLeaves, rightLeaves); // updates phyloTMatInput
-		BMPhyloTMat = new Array2DRowRealMatrix(BMPhyloTMatInput);
-		BMVCVMat = BMPhyloTMat.scalarMultiply(sigmasq);
+		BMVCVMat = getPhyloTMat().scalarMultiply(sigmasq);
 	}
 	
 	@Override
 	protected void populateInvVCVMatrix() {
 		BMVCVMatLUD = new LUDecomposition(BMVCVMat);
-		BMInvVCVMat = BMVCVMatLUD.getSolver().getInverse(); // if only variance changes and not tree, we don't have to invert
+		BMInvVCVMat = BMVCVMatLUD.getSolver().getInverse();
 	}
 	
 	@Override
@@ -91,15 +89,21 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		oneTraitDataVector = new ArrayRealVector(oneTraitData.getTraitValues(0));
 	}
 	
-	private void populateParentInstanceVars() {
-		// setting parent members
-		setProcessNSPP(nSpp);
-		setProcessMeanVec(BMMeanVector);
-		setProcessVCVMat(BMVCVMat);
-		setProcessInvVCVMat(BMInvVCVMat);
-		setProcessOneTraitDataVec(oneTraitDataVector);
+	@Override
+	protected void populateLogP() {
+		updatePhyloTMat = false;
+		updateVCVMat = false;
+		updateMean = false;
+		
+		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
+		if (sigmasqInput.isDirty()) { updateVCVMat = true; }
+		if (meanInput.isDirty()) { updateMean = true; }
+			
+		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean);
+		
+		super.populateLogP();
 	}
-
+	
 	@Override
 	public List<String> getArguments() {
 		// TODO Auto-generated method stub

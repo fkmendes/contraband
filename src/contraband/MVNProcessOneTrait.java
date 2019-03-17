@@ -1,17 +1,36 @@
 package contraband;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
 import beast.core.Distribution;
+import beast.core.Input;
+import beast.core.Input.Validate;
+import beast.evolution.tree.Node;
+import beast.util.TreeParser;
 
 public abstract class MVNProcessOneTrait extends Distribution {
-		
-	private int nSpp;
 	
+	final public Input<TreeParser> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
+	
+	// for phylo T matrix
+	int nSpp;
+	private TreeParser tree;
+	private double[] nodeToRootPaths;
+	private List<Node> leftLeaves = new ArrayList<>();
+	private List<Node> rightLeaves = new ArrayList<>();
+	private double[][] phyloTMatInput;
+	private RealMatrix phyloTMat;
+		
 	// mean vector
-	private RealVector processMeanVec;
+	private RealVector meanVec;
 	
 	// VCV matrix
 	private RealMatrix vcvMat, invVCVMat;
@@ -20,8 +39,36 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	// data
 	RealVector oneTraitDataVector;
+
+	// stored stuff
+	private RealVector storedMeanVec;
+	private RealMatrix storedPhyloTMat, storedVCVMat, storedInvVCVMat;
+	private double storedDetVCVMat;
 	
-	protected void populatePhyloTMatrix() {};
+	public void initAndValidate() {
+		tree = treeInput.get();
+		nSpp = tree.getLeafNodeCount();
+		nodeToRootPaths = new double[tree.getNodeCount()];
+		phyloTMatInput = new double[nSpp][nSpp];
+		phyloTMat = new Array2DRowRealMatrix(phyloTMatInput);
+		
+		storedMeanVec = new ArrayRealVector(nSpp);
+		storedPhyloTMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
+		storedVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
+		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
+	}
+	
+	protected void populatePhyloTMatrix() {
+		MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatInput, leftLeaves, rightLeaves); // updates last 3 args
+		
+		for (int i=0; i<nSpp; ++i) {
+			for (int j=0; j<nSpp; ++j) {
+			phyloTMat.setEntry(i, j, phyloTMatInput[i][j]);
+			}
+		}
+
+		// phyloTMat = new Array2DRowRealMatrix(phyloTMatInput); // could be used instead of loops
+	};
 	
 	protected void populateMeanVector() {};
 	
@@ -32,13 +79,19 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	protected void populateOneTraitDataVector() {};
 	
 	protected void populateLogP() { 
-		logP = MVNUtils.getMVNLogLk(nSpp, processMeanVec, oneTraitDataVector, invVCVMat, detVCVMat);
+		logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVector, invVCVMat, detVCVMat);
 	};
 	
-	protected void setProcessNSPP(int aNSpp) {
-		nSpp = aNSpp;
+	// getters
+	protected int getNSpp() {
+		return nSpp;
 	}
 	
+	protected RealMatrix getPhyloTMat() {
+		return phyloTMat;
+	}
+	
+	// setters
 	protected void setProcessVCVMat(RealMatrix aVCVMat) {
 		vcvMat = aVCVMat;
 		vcvMatLUDecomposition = new LUDecomposition(vcvMat);
@@ -50,7 +103,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	}
 	
 	protected void setProcessMeanVec(RealVector aMeanVector) {
-		processMeanVec = aMeanVector;
+		meanVec = aMeanVector;
 	};
 	
 	protected void setProcessOneTraitDataVec(RealVector aOneTraitDataVector) {
@@ -62,5 +115,44 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		populateLogP();
 		
 		return logP;
+	}
+	
+	@Override
+	public void store() {
+		for (int i=0; i<nSpp; ++i) {
+			storedMeanVec.setEntry(i, meanVec.getEntry(i));
+			
+			for (int j=0; j<nSpp; ++j) {
+				storedPhyloTMat.setEntry(i, j, phyloTMat.getEntry(i, j));
+				storedVCVMat.setEntry(i, j, vcvMat.getEntry(i, j));
+				storedInvVCVMat.setEntry(i, j, invVCVMat.getEntry(i, j));
+			}
+		}
+		
+		storedDetVCVMat = detVCVMat;
+	}
+	
+	@Override
+	public void restore() {
+		RealVector realVecTmp;
+		RealMatrix realMatTmp;
+		
+		realVecTmp = meanVec;
+		meanVec = storedMeanVec;
+		storedMeanVec = realVecTmp;
+		
+		realMatTmp = phyloTMat;
+		phyloTMat = storedVCVMat;
+		storedPhyloTMat = realMatTmp;
+		
+		realMatTmp = vcvMat;
+		vcvMat = storedVCVMat;
+		storedVCVMat = realMatTmp;
+		
+		realMatTmp = invVCVMat;
+		invVCVMat = storedInvVCVMat;
+		storedInvVCVMat = realMatTmp;
+		
+		detVCVMat = storedDetVCVMat;
 	}
 }
