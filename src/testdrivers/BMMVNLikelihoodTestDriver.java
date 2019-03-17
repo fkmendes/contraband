@@ -36,7 +36,6 @@ public class BMMVNLikelihoodTestDriver {
 		// likelihood
 		BMMVNLikelihoodOneTrait BMLk = new BMMVNLikelihoodOneTrait();
 		BMLk.initByName("tree", myTree, "sigmasq", sigmasq, "mean", mean, "data", oneTraitData);
-
-		// System.out.println(BMLk.calculateLogP());
+		System.out.println(BMLk.calculateLogP());
 		}
 }

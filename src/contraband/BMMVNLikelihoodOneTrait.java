@@ -5,6 +5,7 @@ import java.util.Random;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
@@ -12,7 +13,6 @@ import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import beast.core.Input.Validate;
 
@@ -31,12 +31,13 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	private List<Node> rightLeaves;
 	private double[][] BMPhyloTMatInput;
 	private RealMatrix BMPhyloTMat;
+	private LUDecomposition BMVCVMatLUD;
 	
 	private double sigmasq;
 
 	private Double[] BMMeanVectorInput;
 	private RealVector BMMeanVector;
-	private RealMatrix BMVCVMatrix;
+	private RealMatrix BMVCVMat, BMInvVCVMat;
 	
 	private OneValueContTraits oneTraitData;
 	private RealVector oneTraitDataVector;
@@ -57,6 +58,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		// this instance vars
 		populateMeanVector();
 		populateVCVMatrix();
+		populateInvVCVMatrix();
 		populateOneTraitDataVector();
 		
 		// setting parent class instance vars
@@ -75,7 +77,13 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	protected void populateVCVMatrix() {
 		MVNUtils.populateTMatrix(tree, nodeToRootPaths, BMPhyloTMatInput, leftLeaves, rightLeaves); // updates phyloTMatInput
 		BMPhyloTMat = new Array2DRowRealMatrix(BMPhyloTMatInput);
-		BMVCVMatrix = BMPhyloTMat.scalarMultiply(sigmasq);
+		BMVCVMat = BMPhyloTMat.scalarMultiply(sigmasq);
+	}
+	
+	@Override
+	protected void populateInvVCVMatrix() {
+		BMVCVMatLUD = new LUDecomposition(BMVCVMat);
+		BMInvVCVMat = BMVCVMatLUD.getSolver().getInverse(); // if only variance changes and not tree, we don't have to invert
 	}
 	
 	@Override
@@ -87,7 +95,8 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		// setting parent members
 		setProcessNSPP(nSpp);
 		setProcessMeanVec(BMMeanVector);
-		setProcessVCVMat(BMVCVMatrix);
+		setProcessVCVMat(BMVCVMat);
+		setProcessInvVCVMat(BMInvVCVMat);
 		setProcessOneTraitDataVec(oneTraitDataVector);
 	}
 

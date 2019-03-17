@@ -27,14 +27,16 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	protected void populateVCVMatrix() {};
 	
+	protected void populateInvVCVMatrix() {};
+	
 	protected void populateOneTraitDataVector() {};
 	
 	protected void populateLogP() { 
 		logP = MVNUtils.getMVNLogLk(nSpp, processMeanVec, oneTraitDataVector, invVCVMat, detVCVMat);
 	};
 	
-	protected void setProcessNSPP(int aNSPP) {
-		nSpp = aNSPP;
+	protected void setProcessNSPP(int aNSpp) {
+		nSpp = aNSpp;
 	}
 	
 	protected void setProcessVCVMat(RealMatrix aVCVMat) {
@@ -42,6 +44,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		vcvMatLUDecomposition = new LUDecomposition(vcvMat);
 		detVCVMat = vcvMatLUDecomposition.getDeterminant();
 	};
+	
+	protected void setProcessInvVCVMat(RealMatrix aInvVCVMat) {
+		invVCVMat = aInvVCVMat;
+	}
 	
 	protected void setProcessMeanVec(RealVector aMeanVector) {
 		processMeanVec = aMeanVector;
