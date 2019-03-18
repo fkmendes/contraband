@@ -119,12 +119,17 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	public boolean requiresRecalculation() {
-		dirty = super.requiresRecalculation(); // if tree changed, dirty=true from parent, else dirty=false
+//		dirty = super.requiresRecalculation();
+//		
+//		if (sigmasqInput.isDirty() || meanInput.isDirty()) {
+//			dirty = true;
+//		}
+//
+//		return dirty;
 		
-		if (sigmasqInput.isDirty() || meanInput.isDirty()) {
-			dirty = true;
-		}
-
+		// at the moment, there's no tree caching or anything, so if anything changes
+		// gotta recalculate...
+		dirty = true;
 		return dirty;
 	}
 	
