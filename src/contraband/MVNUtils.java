@@ -13,7 +13,7 @@ public class MVNUtils {
 	/*
 	 * Recursive function for producing T matrix out of tree
 	 */
-	public static void fillNodeLeftRightLeaves(Node node, double[] nodeToRootPaths, double[][] tMat, List<Node> leftLeaves, List<Node> rightLeaves) {
+	public static void fillNodeLeftRightLeaves(Node node, double[] nodeToRootPaths, double[][] tMat, List<Node> leftLeaves, List<Node> rightLeaves, List<String> spOrderInTMat) {
 		
 		int nodeIdx = node.getNr();
 		
@@ -24,6 +24,7 @@ public class MVNUtils {
 			// System.out.println("I am leaf " + node.getID() + " with idx " + node.getNr());
 		 
 			tMat[nodeIdx][nodeIdx] = nodeToRootPaths[nodeIdx]; // populating diagonal entries (variances)
+			spOrderInTMat.add(node.getID());
 			return;
 		}
 		
@@ -58,14 +59,14 @@ public class MVNUtils {
 			}
 		}
 		
-		fillNodeLeftRightLeaves(left, nodeToRootPaths, tMat, leftLeaves, rightLeaves);
-		fillNodeLeftRightLeaves(right, nodeToRootPaths, tMat, leftLeaves, rightLeaves);
-		
+		fillNodeLeftRightLeaves(left, nodeToRootPaths, tMat, leftLeaves, rightLeaves, spOrderInTMat);
+		fillNodeLeftRightLeaves(right, nodeToRootPaths, tMat, leftLeaves, rightLeaves, spOrderInTMat);
+				
 		return;
 	}
 	
-	public static void populateTMatrix(Tree aTree, double[] nodeToRootPaths, double[][] tMat, List<Node> leftLeaves, List<Node> rightLeaves) {
-		fillNodeLeftRightLeaves(aTree.getRoot(), nodeToRootPaths, tMat, leftLeaves, rightLeaves);
+	public static void populateTMatrix(Tree aTree, double[] nodeToRootPaths, double[][] tMat, List<Node> leftLeaves, List<Node> rightLeaves, List<String> spOrderInTMat) {
+		fillNodeLeftRightLeaves(aTree.getRoot(), nodeToRootPaths, tMat, leftLeaves, rightLeaves, spOrderInTMat);
 	}
 	
 	/*

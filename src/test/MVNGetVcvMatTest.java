@@ -8,6 +8,7 @@ import beast.evolution.tree.Node;
 import beast.util.TreeParser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import contraband.MVNUtils;
 
@@ -27,8 +28,9 @@ public class MVNGetVcvMatTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
+		List<String> spNameInNewickOrder = new ArrayList<>();
 		
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMat, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMat, leftLeaves, rightLeaves, spNameInNewickOrder);
 		
 		//System.out.println("cov(sp20, sp17) = " + tMat[7][5]); 		// cov(sp20, sp17) = 10.8195673283
 		//System.out.println("cov(sp39, sp40) = " + tMat[24][26]); 	// cov(sp24, sp26) = 19.9373471939
@@ -43,13 +45,15 @@ public class MVNGetVcvMatTest {
 		double[] nodeToRootPaths2 = new double[myTreeNonUltra.getNodeCount()];
 		List<Node> leftLeaves2 = new ArrayList<>();
 		List<Node> rightLeaves2 = new ArrayList<>();
+		List<String> spOrderInTMat2 = new ArrayList<>();
 		
-		MVNUtils.populateTMatrix(myTreeNonUltra, nodeToRootPaths2, tMat2, leftLeaves2, rightLeaves2);
+		MVNUtils.populateTMatrix(myTreeNonUltra, nodeToRootPaths2, tMat2, leftLeaves2, rightLeaves2, spOrderInTMat2);
 		
-		//System.out.println("cov(sp20, sp17) = " + tMat2[7][5]); 	// cov(sp20, sp17) = 10.8195673283
-		//System.out.println("cov(sp39, sp40) = " + tMat2[24][26]); 	// cov(sp24, sp26) = 10.3952852439
-		//System.out.println("cov(sp39, sp39) = " + tMat2[24][24]); 	// cov(sp24, sp24) = 11.1952852439
-		//System.out.println("cov(sp40, sp40) = " + tMat2[26][26]); 	// cov(sp26, sp26) = 10.7952852439
+		// System.out.println(spOrderInTMat); // the order they appear is the order in the newick string
+		// System.out.println("cov(sp20, sp17) = " + tMat2[7][5]); 	// cov(sp20, sp17) = 10.8195673283
+		// System.out.println("cov(sp39, sp40) = " + tMat2[24][26]); 	// cov(sp24, sp26) = 10.3952852439
+		// System.out.println("cov(sp39, sp39) = " + tMat2[24][24]); 	// cov(sp24, sp24) = 11.1952852439
+		// System.out.println("cov(sp40, sp40) = " + tMat2[26][26]); 	// cov(sp26, sp26) = 10.7952852439
 		
 	}
 	

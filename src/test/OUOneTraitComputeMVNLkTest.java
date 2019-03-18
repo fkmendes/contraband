@@ -19,7 +19,7 @@ import contraband.MVNUtils;
 import beast.evolution.tree.Node;
 import contraband.OUUtils;
 
-public class OUOneTraitComputeMVNLk {
+public class OUOneTraitComputeMVNLkTest {
 	
 	final static double EPSILON = 1e-4;
 	
@@ -74,8 +74,9 @@ public class OUOneTraitComputeMVNLk {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
+		List<String> spNameInNewickOrder = new ArrayList<>();
 	
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNameInNewickOrder);
 	
 		// OU T matrix (we multiply by sigma later, so not yet covariance matrix)
 		double[][] ouTMatFI, ouTMatFM, ouTMatRI, ouTMatRM;
@@ -186,8 +187,9 @@ public class OUOneTraitComputeMVNLk {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
+		List<String> spNameInNewickOrder = new ArrayList<>();
 	
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNameInNewickOrder);
 	
 		// OU T matrix (we multiply by sigma later, so not yet covariance matrix)
 		double[][] ouTMatFI, ouTMatFM, ouTMatRI, ouTMatRM;
@@ -287,8 +289,9 @@ public class OUOneTraitComputeMVNLk {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
-	
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		List<String> spNameInNewickOrder = new ArrayList<>();
+		
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNameInNewickOrder);
 	
 		// OU T matrix (we multiply by sigma later, so not yet covariance matrix)
 		double[][] ouTMatFI, ouTMatFM, ouTMatRI, ouTMatRM;

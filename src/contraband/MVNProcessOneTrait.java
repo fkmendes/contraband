@@ -43,7 +43,8 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	RealVector oneTraitDataVector;
 
 	// stored stuff
-	private RealMatrix storedInvVCVMat;
+	private RealMatrix storedPhyloTMat; // needed for tree operators
+	private RealMatrix storedInvVCVMat; // (below) needed for morphology parameter operators
 	private double storedDetVCVMat;
 	
 	@Override
@@ -57,6 +58,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		phyloTMat = new Array2DRowRealMatrix(phyloTMatInput);
 
 		// stored stuff
+		storedPhyloTMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 	}
 	
@@ -131,6 +133,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	public void store() {	
 		for (int i=0; i<nSpp; ++i) {		
 			for (int j=0; j<nSpp; ++j) {
+				storedPhyloTMat.setEntry(i, j, phyloTMat.getEntry(i, j));
 				storedInvVCVMat.setEntry(i, j, invVCVMat.getEntry(i, j));
 			}
 		}
@@ -141,6 +144,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	@Override
 	public void restore() {
 		RealMatrix realMatTmp;
+		
+		realMatTmp = phyloTMat;
+		phyloTMat = storedPhyloTMat;
+		storedPhyloTMat = realMatTmp;
 		
 		realMatTmp = invVCVMat;
 		invVCVMat = storedInvVCVMat;

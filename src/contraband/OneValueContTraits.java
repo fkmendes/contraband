@@ -30,6 +30,7 @@ public class OneValueContTraits extends BEASTObject {
 		nTraits = nTraitsInput.get();
 		nSpp = taxaInput.get().getTaxonCount();
 		spNames = taxaInput.get().getTaxaNames();
+		System.out.println(spNames);
 		traitValueString = traitInput.get().replaceAll("\\s+","");
 		
 		populateSpValuesMap();
@@ -84,11 +85,11 @@ public class OneValueContTraits extends BEASTObject {
 	/*
 	 * One trait, all species (in TaxonSet order)
 	 */
-	public double[] getTraitValues(int traitIdx) {
+	public double[] getTraitValues(int traitIdx, List<String> spNamesInRightOrder) {
 		double[] traitValues = new double[nSpp]; // used by getter (same trait, different species)
 		
 		int i=0;
-		for (String spName: spNames) {
+		for (String spName: spNamesInRightOrder) {
 			traitValues[i] = getSpValues(spName)[traitIdx];
 			i++;
 		}

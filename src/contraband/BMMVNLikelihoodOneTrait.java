@@ -96,7 +96,10 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	protected void populateOneTraitDataVector() {
 		oneTraitData = oneTraitInput.get();
+		//TODO: this has to come out with traits in the same order as the species order in the newick format
+		//TODO: need to pass in the species order as argument of getTraitValues
 		oneTraitDataVector = new ArrayRealVector(oneTraitData.getTraitValues(0));
+		System.out.println(oneTraitDataVector);
 	}
 	
 	@Override

@@ -1,0 +1,55 @@
+package test;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import beast.core.parameter.RealParameter;
+import beast.evolution.alignment.Taxon;
+import beast.evolution.alignment.TaxonSet;
+import beast.util.TreeParser;
+import contraband.BMMVNLikelihoodOneTrait;
+import contraband.OneValueContTraits;
+
+public class BMMVNLikelihoodOneTraitTest2 {
+
+	double lnLk;
+	final static double EPSILON = 1e-6;
+	
+	@Before
+	public void setUp() throws Exception {
+		// tree
+		String treeStr = "(((((t35:2.336518061,t32:2.336518061):28.95257479,t10:31.28909285):8.654086516,t18:39.94317937):52.28906298,(((t47:31.00652286,t9:31.00652286):50.20634817,(t43:15.06939472,t38:15.06939472):66.14347631):10.61662549,(((((t20:20.94406932,t14:20.94406932):28.09437292,t19:49.03844224):31.16991698,(t24:54.88723469,(((t50:2.534803909,t8:2.534803909):35.18774941,t25:37.72255332):15.41876911,(t12:42.01655137,t5:42.01655137):11.12477106):1.745912255):25.32112453):2.610368667,t37:82.81872788):6.617999642,(t42:81.65977864,(t13:5.88018515,t41:5.88018515):75.77959349):7.776948892):2.392768999):0.4027458181):7.767757656,((t34:80.73867518,((t4:14.89974775,t36:14.89974775):7.855467399,t7:22.75521515):57.98346003):16.48666894,((((((((t29:32.9204832,t22:32.9204832):13.17504731,t46:46.09553051):1.732718052,t40:47.82824856):14.51317295,(t28:29.85457377,((t33:6.373725141,t21:6.373725141):1.191235246,t26:7.564960387):22.28961339):32.48684774):5.177695495,t48:67.51911701):2.445324178,(t39:56.9237382,((t2:5.876590264,t44:5.876590264):19.06403767,t23:24.94062793):31.98311027):13.04070299):0.3095854321,(((t11:13.30542076,t49:13.30542076):14.69428372,t45:27.99970449):1.437902517,t31:29.43760701):40.83641961):11.48412211,((((t16:30.59346099,(t30:0.03406798076,t1:0.03406798076):30.55939301):21.47527084,(t17:50.41024027,t15:50.41024027):1.658491566):14.63237622,(t3:10.35007739,t27:10.35007739):56.35103066):2.944577857,t6:69.64568591):12.11246283):15.46719539):2.774655878):0;";
+		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
+		
+		// initializing data
+		String[] spNames = new String[] { "t37", "t42", "t24", "t19", "t12", "t5",  "t18", "t25", "t10", "t47", "t9",  "t20", "t14", "t43", "t38", "t13", "t41", "t50", "t8", "t35", "t32", "t34", "t6", "t48", "t39", "t17", "t15", "t40", "t46", "t29", "t22", "t16", "t28", "t31", "t45", "t23", "t7", "t4", "t36", "t11", "t49", "t3", "t27", "t26", "t33", "t21", "t2", "t44", "t30", "t1" };
+		List<Taxon> taxaList = Taxon.createTaxonList(Arrays.asList(spNames));
+		TaxonSet taxonSet = new TaxonSet(taxaList);
+		String oneTraitValues = "t37=-17.9910808842965,t42=-42.0580932149821,t24=-6.69958475854054,t19=-11.8999668964096,t12=-9.90336898772516,t5=-8.11194020434443,t18=-15.3029489979119,t25=-18.6256862996248,t10=3.35761176196389,t47=7.97917579977502,t9=-1.2268150782989,t20=-8.84668848397333,t14=-2.33407465452496,t43=6.04707040124906,t38=-5.83821403232853,t13=-4.96735936503019,t41=-5.99891778243852,t50=-14.1143657775731,t8=-14.8415190240128,t35=-3.98105381045593,t32=-4.7296948621778,t34=9.4093032085509,t6=19.2849892787679,t48=-9.41456624648435,t39=21.432274962462,t17=14.6194080409123,t15=16.5127870857267,t40=14.4069753962419,t46=-8.13130066981109,t29=4.87680515876466,t22=-5.01624951562921,t16=6.25873454527491,t28=3.00355530225926,t31=-3.68011563065776,t45=-18.6142079793098,t23=7.4125399602256,t7=-5.28681937340583,t4=-2.71700027038001,t36=16.3174508934629,t11=3.50460194344099,t49=-1.9010185445038,t3=20.2126767462628,t27=18.7651646341043,t26=1.97222246147883,t33=-2.93355350990167,t21=-0.714212399212314,t2=3.09073153102264,t44=-2.85273567531206,t30=-0.0403568379187784,t1=0.113406307375154";
+		OneValueContTraits oneTraitData = new OneValueContTraits();
+		oneTraitData.initByName("nTraits", 1, "taxa", taxonSet, "traitValues", oneTraitValues);
+		
+		// sigmasq
+		Double[] sigmasqInput = new Double[] { 1.83896 };
+		RealParameter sigmasq = new RealParameter(sigmasqInput);
+		
+		// mean vector
+		Double[] meanVectorInput = new Double[] { -2.104493 };
+		RealParameter mean = new RealParameter(meanVectorInput);
+		
+		// likelihood
+		BMMVNLikelihoodOneTrait BMLk = new BMMVNLikelihoodOneTrait();
+		BMLk.initByName("tree", myTree, "sigmasq", sigmasq, "mean", mean, "oneTraitData", oneTraitData);
+		lnLk = BMLk.calculateLogP();
+		System.out.println(lnLk);
+	}
+
+	@Test
+	public void testLnLk() {
+		Assert.assertEquals(-180.292004, lnLk, EPSILON); 
+	}
+}

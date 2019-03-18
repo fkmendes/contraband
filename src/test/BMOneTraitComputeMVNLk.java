@@ -35,8 +35,9 @@ public class BMOneTraitComputeMVNLk {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
+		List<String> spOrderInTMat = new ArrayList<>();
 			
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spOrderInTMat);
 		GeneralUtils.display2DArray(tMatInput);
 
 		// var, mean

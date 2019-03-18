@@ -3,6 +3,8 @@
 
   <run id="mcmc" spec="MCMC" chainLength="5000000">
     <state id="state" storeEvery="5000">
+      <tree idref="TheTree" name="stateNode"/>
+      <parameter id="birthRate" name="stateNode">1.0</parameter>
       <stateNode idref="SigmaSq"/>
       <stateNode idref="Mean"/>
     </state>
@@ -11,10 +13,11 @@
 
       <!-- START prior -->
       <distribution id="prior" spec="util.CompoundDistribution">
-<!--         <distribution id="YuleModel" spec="beast.evolution.speciation.YuleModel" birthDiffRate="@birthRate" tree="@TheTree"/> -->
-<!--         <prior id="YuleBirthRatePrior" name="distribution" x="@birthRate"> -->
-<!--           <Uniform id="UniformBirth" name="distr" upper="Infinity"/> -->
-<!--         </prior> -->
+        <distribution id="YuleModel" spec="beast.evolution.speciation.YuleModel" birthDiffRate="@birthRate" tree="@TheTree"/>      
+        
+        <prior id="YuleBirthRatePrior" spec="beast.math.distributions.Prior" name="distribution" x="@birthRate">
+          <Uniform id="UniformBirth" spec="beast.math.distributions.Uniform" name="distr" upper="Infinity"/>
+        </prior>
                 
         <distribution id="SigmaSqPrior" spec="beast.math.distributions.Prior" x="@SigmaSq">
 	      <distr id="LogNormal.SigmaSq" spec="beast.math.distributions.LogNormalDistributionModel" offset="0.0" M="0.01" S="1.0"/>
@@ -28,9 +31,8 @@
 
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
 	    <distribution id="BMMVN" spec="contraband.BMMVNLikelihoodOneTrait">
-	    
-	      <tree id="FixedTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="(((sp1:1.0, sp2:1.0):1.0,sp3:2.0):1.0,sp4:3.0):0.0;" offset="0" singlechild="false">
-
+	      
+	      <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="(((sp1:1.0, sp2:1.0):1.0,sp3:2.0):1.0,sp4:3.0):0.0;" offset="0" singlechild="false">
 	        <taxonset id="TaxonSet" spec="TaxonSet">
 	          <taxon id="sp1" spec="Taxon"/>
 	          <taxon id="sp2" spec="Taxon"/>
@@ -51,10 +53,18 @@
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
 
+    <operator id="YuleBirthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>
+    <operator id="YuleModelTreeScaler" spec="ScaleOperator" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
+    <operator id="YuleModelTreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
+    <operator id="YuleModelUniformOperator" spec="Uniform" tree="@TheTree" weight="30.0"/>
+    <operator id="YuleModelSubtreeSlide" spec="SubtreeSlide" tree="@TheTree" weight="15.0"/>
+    <operator id="YuleModelNarrow" spec="Exchange" tree="@TheTree" weight="15.0"/>            
+    <operator id="YuleModelWide" spec="Exchange" isNarrow="false" tree="@TheTree" weight="3.0"/>
+    <operator id="YuleModelWilsonBalding" spec="WilsonBalding" tree="@TheTree" weight="3.0"/>
     <operator id="SigmaSqScaler" spec="ScaleOperator" parameter="@SigmaSq" scaleFactor="0.75" weight="3.0"/>
     <operator id="MeanScaler" spec="ScaleOperator" parameter="@Mean" scaleFactor="0.75" weight="3.0"/>
 
-    <logger id="tracelog" fileName="BMMVN_fixedtree.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="BMMVN_samplingtree.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
 	  <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
@@ -69,8 +79,8 @@
         <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:firsthalf" fileName="BMMVN_fixedtree.trees" logEvery="5000000" mode="tree">
-        <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@FixedTree"/>
+    <logger id="treelog.t:firsthalf" fileName="BMMVN_samplingtree.trees" logEvery="5000" mode="tree">
+        <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>
 </beast>
