@@ -30,7 +30,7 @@ public class BMMVNLikelihoodTestDriver {
 		RealParameter sigmasq = new RealParameter(sigmasqInput);
 		
 		// mean vector
-		Double[] meanVectorInput = new Double[] { 3.079142, 3.079142, 3.079142, 3.079142 };
+		Double[] meanVectorInput = new Double[] { 3.079142 };
 		RealParameter mean = new RealParameter(meanVectorInput);
 		
 		// likelihood

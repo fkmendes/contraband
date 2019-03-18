@@ -20,6 +20,8 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	final public Input<TreeParser> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
 	
+	private boolean dirty;
+	
 	// for phylo T matrix
 	int nSpp;
 	private TreeParser tree;
@@ -41,10 +43,15 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	RealVector oneTraitDataVector;
 
 	// stored stuff
+	private double[] storedNodeToRootPaths;
+	private List<Node> storedLeftLeaves;
+	private List<Node> storedRightLeaves;
+	private double[][] storedPhyloTMatInput;
 	private RealVector storedMeanVec;
 	private RealMatrix storedPhyloTMat, storedVCVMat, storedInvVCVMat;
 	private double storedDetVCVMat;
 	
+	@Override
 	public void initAndValidate() {
 		tree = treeInput.get();
 		nSpp = tree.getLeafNodeCount();
@@ -118,8 +125,24 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	}
 	
 	@Override
+	public boolean requiresRecalculation() {
+		dirty = false;
+		
+		if (treeInput.isDirty()) {
+			dirty = true;
+		}
+		
+		return dirty;
+	}
+	
+	@Override
 	public void store() {
+		System.arraycopy(nodeToRootPaths, 0, storedNodeToRootPaths, 0, nodeToRootPaths.length);
+		storedLeftLeaves.addAll(leftLeaves); // hopefully this is correct
+		storedRightLeaves.addAll(rightLeaves);
+		
 		for (int i=0; i<nSpp; ++i) {
+			System.arraycopy(phyloTMatInput, 0, storedPhyloTMatInput, 0, nSpp);
 			storedMeanVec.setEntry(i, meanVec.getEntry(i));
 			
 			for (int j=0; j<nSpp; ++j) {
@@ -134,9 +157,28 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	@Override
 	public void restore() {
+		double[] arrayTmp;
+		double[][] matrixTmp;
+		List<Node> nodeListTmp;
 		RealVector realVecTmp;
 		RealMatrix realMatTmp;
 		
+		nodeListTmp = leftLeaves;
+		leftLeaves = storedLeftLeaves;
+		storedLeftLeaves = nodeListTmp;
+		
+		nodeListTmp = rightLeaves;
+		rightLeaves = storedRightLeaves;
+		storedRightLeaves = nodeListTmp;
+		
+		arrayTmp = nodeToRootPaths;
+		nodeToRootPaths = storedNodeToRootPaths;
+		storedNodeToRootPaths = arrayTmp;
+		
+		matrixTmp = phyloTMatInput;
+		phyloTMatInput = storedPhyloTMatInput;
+		storedPhyloTMatInput = matrixTmp;
+				
 		realVecTmp = meanVec;
 		meanVec = storedMeanVec;
 		storedMeanVec = realVecTmp;

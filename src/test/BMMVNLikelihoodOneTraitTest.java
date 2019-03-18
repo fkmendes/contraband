@@ -1,25 +1,24 @@
 package test;
 
-import static org.junit.Assert.*;
-
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Taxon;
 import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.Node;
 import beast.util.TreeParser;
 import contraband.BMMVNLikelihoodOneTrait;
 import contraband.OneValueContTraits;
 
 public class BMMVNLikelihoodOneTraitTest {
 
+	double lnLk;
+	final static double EPSILON = 1e-8;
+	
 	@Before
 	public void setUp() throws Exception {
 		// tree
@@ -39,19 +38,17 @@ public class BMMVNLikelihoodOneTraitTest {
 		RealParameter sigmasq = new RealParameter(sigmasqInput);
 		
 		// mean vector
-		Double[] meanVectorInput = new Double[] { 3.079142, 3.079142, 3.079142, 3.079142 };
+		Double[] meanVectorInput = new Double[] { 3.079142 };
 		RealParameter mean = new RealParameter(meanVectorInput);
 		
 		// likelihood
 		BMMVNLikelihoodOneTrait BMLk = new BMMVNLikelihoodOneTrait();
 		BMLk.initByName("tree", myTree, "sigmasq", sigmasq, "mean", mean, "data", oneTraitData);
-		
-		System.out.println(BMLk.calculateLogP());
+		lnLk = BMLk.calculateLogP();
 	}
 
 	@Test
-	public void test() {
-		fail("Not yet implemented");
+	public void testLnLk() {
+		Assert.assertEquals(-8.29469706, lnLk, EPSILON); 
 	}
-
 }
