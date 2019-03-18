@@ -2,12 +2,12 @@ package contraband;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.RealParameter;
@@ -17,7 +17,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 
 	final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Sigma^2, the variance of the process.", Validate.REQUIRED);
 	final public Input<RealParameter> meanInput = new Input<>("mean", "mu, or x_0, the mean of the process (and the values at the root).", Validate.REQUIRED);
-	final public Input<OneValueContTraits> oneTraitInput = new Input<>("data", "continuous data values for one trait.", Validate.REQUIRED);
+	final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
 	
 	private boolean dirty;
 	
@@ -25,6 +25,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	private boolean updateVCVMat;
 	private boolean updateMean;
 	
+	private int nSpp;
 	private double sigmasq;
 
 	private Double bmSingleMeanValue;
@@ -36,28 +37,24 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	private RealVector oneTraitDataVector;
 	
 	// stored stuff
-	private double storedSigmasq;
-	private Double storedBMSingleMeanValue;
 	private RealVector storedBMMeanVector;
-	private RealMatrix storedBMVCVMat, storedBMInvVCVMat;
 	
 	@Override
 	public void initAndValidate() {	
 		
 		super.initAndValidate();
 		
-		bmMeanVector = new ArrayRealVector(getNSpp());
-		
-		sigmasq = sigmasqInput.get().getValue();
-		bmSingleMeanValue = meanInput.get().getValue();
-		oneTraitData = oneTraitInput.get();
+		nSpp = getNSpp();
+		bmMeanVector = new ArrayRealVector(nSpp);
+		storedBMMeanVector = new ArrayRealVector(nSpp);
 		
 		// this instance vars
 		populateOneTraitDataVector(); // won't change, so outside populateInstanceVars
 		populateInstanceVars(true, true, true);
 		
 		// setting parent class instance vars
-		populateParentInstanceVars(); 
+		setProcessOneTraitDataVec(oneTraitDataVector);
+		populateParentInstanceVars(true, true); 
 	}
 	
 	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean) {
@@ -69,21 +66,24 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		}
 	}
 	
-	private void populateParentInstanceVars() {
+	private void populateParentInstanceVars(boolean updateVCVMat, boolean updateMean) {
 		// setting parent members
-		setProcessMeanVec(bmMeanVector);
-		setProcessVCVMat(bmVCVMat);
-		setProcessInvVCVMat(bmInvVCVMat);
-		setProcessOneTraitDataVec(oneTraitDataVector);
+		if (updateMean) { setProcessMeanVec(bmMeanVector); }
+		if (updateVCVMat) {
+			setProcessVCVMat(bmVCVMat);
+			setProcessInvVCVMat(bmInvVCVMat);
+		}
 	}
 	
 	@Override
 	protected void populateMeanVector() {
+		bmSingleMeanValue = meanInput.get().getValue();
 		bmMeanVector.set(bmSingleMeanValue);
 	}
 	
 	@Override
 	protected void populateVCVMatrix() {
+		sigmasq = sigmasqInput.get().getValue();
 		bmVCVMat = getPhyloTMat().scalarMultiply(sigmasq);
 	}
 	
@@ -95,11 +95,12 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	protected void populateOneTraitDataVector() {
+		oneTraitData = oneTraitInput.get();
 		oneTraitDataVector = new ArrayRealVector(oneTraitData.getTraitValues(0));
 	}
 	
 	@Override
-	protected void populateLogP() {
+	public double calculateLogP() {
 		updatePhyloTMat = false;
 		updateVCVMat = false;
 		updateMean = false;
@@ -107,10 +108,13 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
 		if (sigmasqInput.isDirty()) { updateVCVMat = true; }
 		if (meanInput.isDirty()) { updateMean = true; }
-			
+		
 		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean);
+		populateParentInstanceVars(updateVCVMat, updateMean);
 		
 		super.populateLogP();
+		
+		return getLogP();
 	}
 	
 	@Override
@@ -120,39 +124,29 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		if (sigmasqInput.isDirty() || meanInput.isDirty()) {
 			dirty = true;
 		}
-		
+
 		return dirty;
 	}
 	
 	@Override
 	public void store() {
-		for (int i=0; i<getNSpp(); ++i) {
+		for (int i=0; i<nSpp; ++i) {
 			storedBMMeanVector.setEntry(i, bmMeanVector.getEntry(i));
-			
-			for (int j=0; j<nSpp; ++j) {
-				storedBMVCVMat.setEntry(i, j, bmVCVMat.getEntry(i, j));
-				storedBMInvVCVMat.setEntry(i, j, bmInvVCVMat.getEntry(i, j));
-			}
 		}
-		
-		// not storing LUDecomposition... hope this is not a problem later.
+
 		super.store();
 	}
 	
 	@Override
 	public void restore() {
 		RealVector realVecTmp;
-		RealMatrix realMatTmp;
 		
 		realVecTmp = bmMeanVector;
 		bmMeanVector = storedBMMeanVector;
 		storedBMMeanVector = realVecTmp;
 		
-		// finish this
-		
 		super.restore();
 	}
-	
 	
 	@Override
 	public List<String> getArguments() {

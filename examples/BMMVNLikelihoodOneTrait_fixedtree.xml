@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
+
+  <run id="mcmc" spec="MCMC" chainLength="5000000">
+    <state id="state" storeEvery="5000">
+      <stateNode idref="SigmaSq"/>
+      <stateNode idref="Mean"/>
+    </state>
+
+    <distribution id="posterior" spec="util.CompoundDistribution">
+
+      <!-- START prior -->
+      <distribution id="prior" spec="util.CompoundDistribution">
+        <distribution id="SigmaSqPrior" spec="beast.math.distributions.Prior" x="@SigmaSq">
+	  <distr id="LogNormal.SigmaSq" spec="beast.math.distributions.LogNormalDistributionModel" offset="0.0" M="0.01" S="1.0"/>
+        </distribution>
+
+        <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@Mean">
+	  <distr id="LogNormal.Mean" spec="beast.math.distributions.LogNormalDistributionModel" offset="0.0" M="0.01" S="1.0"/>
+        </distribution>
+      </distribution>
+      <!-- END prior -->
+
+      <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+	    <distribution id="BMMVN" spec="contraband.BMMVNLikelihoodOneTrait">
+	    
+	      <tree id="FixedTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="(((sp1:1.0, sp2:1.0):1.0,sp3:2.0):1.0,sp4:3.0):0.0;" offset="0" singlechild="false">
+
+	        <taxonset id="TaxonSet" spec="TaxonSet">
+	          <taxon id="sp1" spec="Taxon"/>
+	          <taxon id="sp2" spec="Taxon"/>
+	          <taxon id="sp3" spec="Taxon"/>
+	          <taxon id="sp4" spec="Taxon"/>
+	        </taxonset>
+	      </tree>
+
+	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" traitValues="sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 " nTraits="1">
+	        <taxa idref="TaxonSet"/>
+	      </oneTraitData>
+
+	      <sigmasq id="SigmaSq" dimension="1" spec="parameter.RealParameter">1.4822794118</sigmasq>
+	    
+	      <mean id="Mean" dimension="1" spec="parameter.RealParameter">3.079142</mean>
+	    </distribution> <!-- END BMVN -->
+	    
+      </distribution> <!-- END Likelihood -->
+    </distribution> <!-- END Posterior -->
+
+    <operator id="SigmaSqScaler" spec="ScaleOperator" parameter="@SigmaSq" scaleFactor="0.75" weight="3.0"/>
+    <operator id="MeanScaler" spec="ScaleOperator" parameter="@Mean" scaleFactor="0.75" weight="3.0"/>
+
+    <logger id="tracelog" fileName="BMMVN_fixedtree.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+	  <log idref="posterior"/>
+      <log idref="likelihood"/>
+      <log idref="prior"/>
+	  <log idref="SigmaSq"/>
+      <log idref="Mean"/>
+    </logger>
+
+    <logger id="screenlog" logEvery="1">
+        <log idref="posterior"/>
+        <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+    </logger>
+
+    <logger id="treelog.t:firsthalf" fileName="BMMVN_fixedtree.trees" logEvery="5000000" mode="tree">
+        <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@FixedTree"/>
+    </logger>
+  </run>
+</beast>
