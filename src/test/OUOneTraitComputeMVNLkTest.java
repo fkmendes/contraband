@@ -74,9 +74,9 @@ public class OUOneTraitComputeMVNLkTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
-		List<String> spNameInNewickOrder = new ArrayList<>();
+		String[] spNamesInPhyloTMatOrder = new String[n];
 	
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNameInNewickOrder);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder);
 	
 		// OU T matrix (we multiply by sigma later, so not yet covariance matrix)
 		double[][] ouTMatFI, ouTMatFM, ouTMatRI, ouTMatRM;
@@ -187,9 +187,9 @@ public class OUOneTraitComputeMVNLkTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
-		List<String> spNameInNewickOrder = new ArrayList<>();
+		String[] spNamesInPhyloTMatOrder = new String[n];
 	
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNameInNewickOrder);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder);
 	
 		// OU T matrix (we multiply by sigma later, so not yet covariance matrix)
 		double[][] ouTMatFI, ouTMatFM, ouTMatRI, ouTMatRM;
@@ -289,9 +289,9 @@ public class OUOneTraitComputeMVNLkTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
-		List<String> spNameInNewickOrder = new ArrayList<>();
+		String[] spNamesInPhyloTMatOrder = new String[n];
 		
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNameInNewickOrder);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder);
 	
 		// OU T matrix (we multiply by sigma later, so not yet covariance matrix)
 		double[][] ouTMatFI, ouTMatFM, ouTMatRI, ouTMatRM;

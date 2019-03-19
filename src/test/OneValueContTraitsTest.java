@@ -24,14 +24,14 @@ public class OneValueContTraitsTest {
 		TaxonSet taxonSet = new TaxonSet(taxaList);
 		String oneTraitValues = "sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 ";
 		String twoTraitValues = "sp1=4.1,sp2=4.5 ,sp4=0.0,sp3=5.9 |sp1=5.1, sp2=5.5,sp3=6.9,sp4=1.0";
-		List<String> spNameInNewickOrder = Arrays.asList("sp1", "sp2", "sp3", "sp4");
-		List<String> spNameInNewickOrder2 = Arrays.asList("sp4", "sp2", "sp3", "sp1");
+		String[] spNameInNewickOrder = { "sp1", "sp2", "sp3", "sp4" };
+		String[] spNameInNewickOrder2 = { "sp4", "sp2", "sp3", "sp1" };
 		
 		OneValueContTraits oneTrait = new OneValueContTraits();
-		oneTrait.initByName("nTraits", 1, "taxa", taxonSet, "traitValues", oneTraitValues);
+		oneTrait.initByName("nTraits", 1, "traitValues", oneTraitValues);
 		
 		OneValueContTraits twoTrait = new OneValueContTraits();
-		twoTrait.initByName("nTraits", 2, "taxa", taxonSet, "traitValues", twoTraitValues);
+		twoTrait.initByName("nTraits", 2, "traitValues", twoTraitValues);
 		
 		double[] spValues = oneTrait.getSpValues("sp3");
 		sp3 = spValues[0];

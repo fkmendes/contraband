@@ -5,10 +5,16 @@ library(stringr)
 
 n.sim <- 100
 n.spp <- 50
-sigma.meanlog <- 0.0
-sigma.sdlog <- 1.0
+## sigma.meanlog <- 0.0
+## sigma.sdlog <- 1.0
+sigma.rate <- 5
 x0.mean <- 0.0
-x0.sd <- 1.0
+x0.sd <- 2.0
+
+template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_template.xml"
+xmlfolder.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_xmls/"
+res.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_results/"
+shell.scripts.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_shellscripts/"
 
 ## in ape, branch numbering is done in postorder order: to see the order of branches, you can do tr <- reorder(tr, "po"); plor(tr); edgelabels()
 
@@ -19,11 +25,9 @@ lambda <- rexp(1, rate=80) # lambda from exponential (mean = 1/80)
 mu <- rexp(1, rate=100) # mu from exponential (mean = 1/100)
 tr <- sim.bd.taxa.age(n.spp, 1, lambda, mu, age=100, mrca=TRUE)[[1]]; write.tree(tr) # mrca=TRUE means the process starts at the root (i.e., no root edge)
 
-tr$edge.labels
-paste0("<taxon id="
-
 ## simulating quant trait data sets
-sigmas <- rlnorm(n.sim, meanlog=sigma.meanlog, sdlog=sigma.sdlog); sigmas[1] # 1.201629
+## sigmas <- rlnorm(n.sim, meanlog=sigma.meanlog, sdlog=sigma.sdlog); sigmas[1] # 1.201629
+sigmas <- rexp(n.sim, rate=sigma.rate); sigmas[1] # 0.02914
 x0s <- rnorm(n.sim, mean=x0.mean, sd=x0.sd); x0s[1] # 0.1836
 datasets <- vector("list", n.sim) # storing sims
 
@@ -42,29 +46,25 @@ for (i in 1:n.sim) {
 ## res$theta
 ## res$sigma
 
-template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_template.xml"
-for (sim.idx in 1:2) {
-    xml.file.name = gsub("template.xml", paste0(sim.idx, ".xml"), template.path)
+for (sim.idx in 1:n.sim) {
+    xml.file.name = basename(gsub("template.xml", paste0(sim.idx, ".xml"), template.path))
     if (file.exists(xml.file.name)) {
         file.remove(xml.file.name)
     }
     
-    file.name = gsub(".xml", "", xml.file.name)
+    file.name = basename(gsub(".xml", "", xml.file.name))
 
     template.lines = readLines(template.path)
     for (line in template.lines) {
-        line = gsub("\\[BMSigmaSqPriorMeanHere\\]", format(sigma.meanlog, nsmall=1), line)
-        line = gsub("\\[BMSigmaSqPriorStdDevHere\\]", format(sigma.sdlog, nsmall=1), line)
+        line = gsub("\\[BMSigmaSqPriorMeanHere\\]", format(sigma.rate, nsmall=1), line)
+        ## line = gsub("\\[BMSigmaSqPriorMeanHere\\]", format(sigma.meanlog, nsmall=1), line)
+        ## line = gsub("\\[BMSigmaSqPriorStdDevHere\\]", format(sigma.sdlog, nsmall=1), line)
         line = gsub("\\[BMMeanPriorMeanHere\\]", format(x0.mean, nsmall=1), line)
         line = gsub("\\[BMMeanPriorStdDevHere\\]", format(x0.sd, nsmall=1), line)
         line = gsub("\\[TreeHere\\]", write.tree(tr), line)
         line = gsub("\\[TaxonSetHere\\]", taxon.strs.4.template, line)
         line = gsub("\\[TraitValuesHere\\]", traits.4.template[[sim.idx]], line)
-        line = gsub("\\[FileNameHere\\]", file.name, line)
-        write(line, file=xml.file.name, append=TRUE)
+        line = gsub("\\[FileNameHere\\]", paste0(res.path, file.name), line)
+        write(line, file=paste0(xmlfolder.path, xml.file.name), append=TRUE)
     }
 }
-
-
-template <- readLines("/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_template.xml")
-parse.ith.sim.template(1, "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_template.xml", "./")

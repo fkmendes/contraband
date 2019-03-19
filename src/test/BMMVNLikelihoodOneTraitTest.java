@@ -25,13 +25,10 @@ public class BMMVNLikelihoodOneTraitTest {
 		String treeStr = "(((sp1[&Regime=1]:1.0, sp2[&Regime=1]:1.0)[&Regime=1]:1.0, sp3[&Regime=2]:2.0)[&Regime=0]:1.0, sp4[&Regime=0]:3.0)[&Regime=0];";
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 		
-		// initializing data
-		String[] spNames = new String[] { "sp1", "sp2", "sp3", "sp4" };
-		List<Taxon> taxaList = Taxon.createTaxonList(Arrays.asList(spNames));
-		TaxonSet taxonSet = new TaxonSet(taxaList);
+		// initializing data		
 		String oneTraitValues = "sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 ";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
-		oneTraitData.initByName("nTraits", 1, "taxa", taxonSet, "traitValues", oneTraitValues);
+		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues);
 		
 		// sigmasq
 		Double[] sigmasqInput = new Double[] { 1.4822794118 };

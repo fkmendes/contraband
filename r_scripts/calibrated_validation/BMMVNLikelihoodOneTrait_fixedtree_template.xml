@@ -13,7 +13,8 @@
       <distribution id="prior" spec="util.CompoundDistribution">
                 
         <distribution id="BMSigmaSqPrior" spec="beast.math.distributions.Prior" x="@BMSigmaSq">
-	      <distr id="LogNormal.BMSigmaSq" spec="beast.math.distributions.LogNormalDistributionModel" offset="0.0" M="[BMSigmaSqPriorMeanHere]" S="[BMSigmaSqPriorStdDevHere]"/>
+	  <!-- <distr id="LogNormal.BMSigmaSq" spec="beast.math.distributions.LogNormalDistributionModel" offset="0.0" M="[BMSigmaSqPriorMeanHere]" S="[BMSigmaSqPriorStdDevHere]"/> -->
+	  <distr id="Exp.BMSigmaSq" spec="beast.math.distributions.Exponential" offset="0.0" mean="[BMSigmaSqPriorMeanHere]"/>
         </distribution>
 
         <distribution id="BMMeanPrior" spec="beast.math.distributions.Prior" x="@BMMean">
@@ -32,13 +33,11 @@
 	        </taxonset>
 	      </tree>
 
-	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" traitValues="[TraitValuesHere]" nTraits="1">
-	        <taxa idref="TaxonSet"/>
-	      </oneTraitData>
+	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" traitValues="[TraitValuesHere]" nTraits="1"/>
 
-	      <sigmasq id="BMSigmaSq" dimension="1" spec="parameter.RealParameter">1.838962</sigmasq>
+	      <sigmasq id="BMSigmaSq" dimension="1" spec="parameter.RealParameter">1.743801</sigmasq>
 	    
-	      <mean id="BMMean" dimension="1" spec="parameter.RealParameter">-2.104493</mean>
+	      <mean id="BMMean" dimension="1" spec="parameter.RealParameter">0.1075313</mean>
 	    </distribution> <!-- END BMVN -->
 	    
       </distribution> <!-- END Likelihood -->
@@ -55,7 +54,7 @@
       <log idref="BMMean"/>
     </logger>
 
-    <logger id="screenlog" logEvery="1">
+    <logger id="screenlog" logEvery="20000">
         <log idref="posterior"/>
         <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
         <log idref="likelihood"/>

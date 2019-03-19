@@ -49,12 +49,14 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		storedBMMeanVector = new ArrayRealVector(nSpp);
 		
 		// this instance vars
-		populateOneTraitDataVector(); // won't change, so outside populateInstanceVars
 		populateInstanceVars(true, true, true);
+		populateOneTraitDataVector(); // won't change, so outside populateInstanceVars
+		                              // also has to come AFTER setting phyloTMat
+		                              // (as this sets the order of species names in T matrix)
 		
 		// setting parent class instance vars
+		populateParentInstanceVars(true, true);
 		setProcessOneTraitDataVec(oneTraitDataVector);
-		populateParentInstanceVars(true, true); 
 	}
 	
 	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean) {
@@ -98,8 +100,8 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		oneTraitData = oneTraitInput.get();
 		//TODO: this has to come out with traits in the same order as the species order in the newick format
 		//TODO: need to pass in the species order as argument of getTraitValues
-		oneTraitDataVector = new ArrayRealVector(oneTraitData.getTraitValues(0));
-		System.out.println(oneTraitDataVector);
+		oneTraitDataVector = new ArrayRealVector(oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder()));
+		// System.out.println(oneTraitDataVector);
 	}
 	
 	@Override

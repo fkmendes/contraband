@@ -44,8 +44,9 @@ public class EBcomputeEBtMatTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
+		String[] spNameInPhyloTMatOrder = new String[n];
 
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNameInPhyloTMatOrder);
 		
 		// GChunk and covariance calculation
 		double[][] gMat = new double[n][n];
@@ -76,8 +77,9 @@ public class EBcomputeEBtMatTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
-
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		String[] spNameInPhyloTMatOrder = new String[n];
+		
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNameInPhyloTMatOrder);
 		
 		// GChunk and covariance calculation
 		double[][] gMat = new double[n][n];

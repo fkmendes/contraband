@@ -28,9 +28,9 @@ public class MVNGetVcvMatTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
-		List<String> spNameInNewickOrder = new ArrayList<>();
+		String[] spNamesInPhyloTMatOrder = new String[myTree.getLeafNodeCount()];
 		
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMat, leftLeaves, rightLeaves, spNameInNewickOrder);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMat, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder);
 		
 		//System.out.println("cov(sp20, sp17) = " + tMat[7][5]); 		// cov(sp20, sp17) = 10.8195673283
 		//System.out.println("cov(sp39, sp40) = " + tMat[24][26]); 	// cov(sp24, sp26) = 19.9373471939
@@ -45,7 +45,7 @@ public class MVNGetVcvMatTest {
 		double[] nodeToRootPaths2 = new double[myTreeNonUltra.getNodeCount()];
 		List<Node> leftLeaves2 = new ArrayList<>();
 		List<Node> rightLeaves2 = new ArrayList<>();
-		List<String> spOrderInTMat2 = new ArrayList<>();
+		String[] spOrderInTMat2 = new String[myTree.getLeafNodeCount()];
 		
 		MVNUtils.populateTMatrix(myTreeNonUltra, nodeToRootPaths2, tMat2, leftLeaves2, rightLeaves2, spOrderInTMat2);
 		

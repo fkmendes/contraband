@@ -29,9 +29,9 @@ public class OUmultiTraitGeneralTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
-		List<String> spNameInNewickOrder = new ArrayList<>();
+		String[] spNameInPhyloTMatOrder = new String[myTree.getLeafNodeCount()];
 		
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNameInNewickOrder);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spNameInPhyloTMatOrder);
 		
 		double[][] Alpha = {{1, 0.2},
 							{0.2, 1}

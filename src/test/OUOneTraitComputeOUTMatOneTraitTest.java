@@ -59,7 +59,8 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()];
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		String[] spOrderInTMat = new String[n];
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spOrderInTMat);
 		
 	    // OU T matrix that will store the results (which will be asserted)
 		ouTMat1FI = new double[n][n];
@@ -107,8 +108,9 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()]; 
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
+		String[] spOrderInTMat = new String[n];
 		
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spOrderInTMat);
 		
 		// OU T matrix that will store the results (which will be asserted)
 		ouTMat2FI = new double[n][n];
@@ -157,8 +159,9 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 		double[] nodeToRootPaths = new double[myTree.getNodeCount()]; 
 		List<Node> leftLeaves = new ArrayList<>();
 		List<Node> rightLeaves = new ArrayList<>();
+		String[] spOrderInTMat = new String[n];
 		
-		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves);
+		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spOrderInTMat);
 		
 		// OU T matrix that will store the results (which will be asserted)
 		ouTMat3FI = new double[n][n];

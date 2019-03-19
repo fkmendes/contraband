@@ -28,6 +28,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private double[] nodeToRootPaths;
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
+	private String[] spNamesInPhyloTMatOrder;
 	private double[][] phyloTMatInput;
 	private RealMatrix phyloTMat;
 		
@@ -54,6 +55,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		nodeToRootPaths = new double[tree.getNodeCount()];
 		leftLeaves = new ArrayList<Node>();
 		rightLeaves = new ArrayList<Node>();
+		spNamesInPhyloTMatOrder = new String[nSpp];
 		phyloTMatInput = new double[nSpp][nSpp];
 		phyloTMat = new Array2DRowRealMatrix(phyloTMatInput);
 
@@ -63,7 +65,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	}
 	
 	protected void populatePhyloTMatrix() {
-		MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatInput, leftLeaves, rightLeaves); // updates last 3 args
+		MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatInput, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder); // updates last 3 args
 		
 		for (int i=0; i<nSpp; ++i) {
 			for (int j=0; j<nSpp; ++j) {
@@ -89,6 +91,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	// getters
 	protected int getNSpp() {
 		return nSpp;
+	}
+	
+	protected String[] getSpNamesInPhyloTMatOrder() {
+		return spNamesInPhyloTMatOrder;
 	}
 	
 	protected RealMatrix getPhyloTMat() {

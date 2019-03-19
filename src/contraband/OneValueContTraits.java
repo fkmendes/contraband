@@ -16,7 +16,7 @@ public class OneValueContTraits extends BEASTObject {
 
 	final public Input<Integer> nTraitsInput = new Input<>("nTraits", "contains number of traits.", Validate.REQUIRED);
 	final public Input<String> traitInput = new Input<>("traitValues", "contains String array, each string containing values for one of the traits for all species in sp_name=value form.", Validate.REQUIRED);
-	final public Input<TaxonSet> taxaInput = new Input<>("taxa", "contains list of taxa to map traits to.", Validate.REQUIRED);
+//	final public Input<TaxonSet> taxaInput = new Input<>("taxa", "contains list of taxa to map traits to.", Validate.REQUIRED);
 	
 	Integer nTraits, nSpp;
 	String traitValueString;
@@ -28,9 +28,9 @@ public class OneValueContTraits extends BEASTObject {
 	public void initAndValidate() {
 		// Getting inputs
 		nTraits = nTraitsInput.get();
-		nSpp = taxaInput.get().getTaxonCount();
-		spNames = taxaInput.get().getTaxaNames();
-		System.out.println(spNames);
+//		nSpp = taxaInput.get().getTaxonCount();
+//		spNames = taxaInput.get().getTaxaNames();
+		// System.out.println(spNames);
 		traitValueString = traitInput.get().replaceAll("\\s+","");
 		
 		populateSpValuesMap();
@@ -56,12 +56,13 @@ public class OneValueContTraits extends BEASTObject {
 				spName = spAndValue[0];
 				value = Double.parseDouble(spAndValue[1]);
 				
+				// System.out.println("Parsing species " + spName + " with value " + value);
+				
 				if (!spValuesMap.containsKey(spAndValue[0])) {
 					spValuesMap.put(spName, new ArrayList<Double>());
 				}
 				
 				spValuesMap.get(spName).add(value);
-				// System.out.println(spValuesMap.get(spName));
 			}
 		}
 	}
@@ -72,7 +73,6 @@ public class OneValueContTraits extends BEASTObject {
 	public double[] getSpValues(String spName) {		
 		double[] spValues = new double[nTraits]; // used by getter (different traits, same species)
 
-		
 		int i=0;
 		for (Double spValue: spValuesMap.get(spName)) {
 			spValues[i] = spValue.doubleValue();
@@ -85,11 +85,12 @@ public class OneValueContTraits extends BEASTObject {
 	/*
 	 * One trait, all species (in TaxonSet order)
 	 */
-	public double[] getTraitValues(int traitIdx, List<String> spNamesInRightOrder) {
+	public double[] getTraitValues(int traitIdx, String[] strings) {
+		nSpp = strings.length;
 		double[] traitValues = new double[nSpp]; // used by getter (same trait, different species)
 		
 		int i=0;
-		for (String spName: spNamesInRightOrder) {
+		for (String spName: strings) {
 			traitValues[i] = getSpValues(spName)[traitIdx];
 			i++;
 		}
