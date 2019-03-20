@@ -19,16 +19,28 @@ sigma.rate <- 5
 x0.mean <- 0.0
 x0.sd <- 2.0
 
-template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_template.xml"
-xmlfolder.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_xmls/"
-## res.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_results/"
-shell.scripts.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_shellscripts/"
+## template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_template.xml"
+## xmlfolder.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_xmls/"
+## shell.scripts.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_shellscripts/"
 rdata.path <- gsub("_template.xml", ".RData", template.path)
 
+## for non-ultrametric analysis (comment out or in w.r.t. to lines above)
+template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_nonultra_template.xml"
+xmlfolder.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_nonultra_xmls/"
+shell.scripts.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_nonultra_shellscripts/"
+
 # for server analyses
-xml.file.path <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/BMMVNOneTrait_xmls/"
-xml.file.prefix <- "BMMVNLikelihoodOneTrait_fixedtree_"
-res.path <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/BMMVNOneTrait_results/"
+## xml.file.path <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/BMMVNOneTrait_xmls/"
+## xml.file.prefix <- "BMMVNLikelihoodOneTrait_fixedtree_"
+## res.path <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/BMMVNOneTrait_results/"
+## jar.path <- "/nesi/project/nesi00390/fkmendes/contraband/contraband.jar"
+## time.needed <- "00:15:00"
+## job.prefix <- "BMMVNOneTrait"
+
+## for non-ultrametric analysis (comment out or in w.r.t. to lines above)
+xml.file.path <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/BMMVNOneTrait_nonultra_xmls/"
+xml.file.prefix <- "BMMVNLikelihoodOneTrait_fixedtree_nonultra_"
+res.path <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/BMMVNOneTrait_nonultra_results/"
 jar.path <- "/nesi/project/nesi00390/fkmendes/contraband/contraband.jar"
 time.needed <- "00:15:00"
 job.prefix <- "BMMVNOneTrait"
@@ -43,6 +55,8 @@ set.seed(123)
 lambda <- rexp(1, rate=80) # lambda from exponential (mean = 1/80)
 mu <- rexp(1, rate=100) # mu from exponential (mean = 1/100)
 tr <- sim.bd.taxa.age(n.spp, 1, lambda, mu, age=100, mrca=TRUE)[[1]]; write.tree(tr) # mrca=TRUE means the process starts at the root (i.e., no root edge)
+longest.20.branches <- tr$edge.length %in% tail(sort(tr$edge.length), n=20)
+tr$edge.length[longest.20.branches] = tr$edge.length[longest.20.branches] * .1 
 
 ## simulating quant trait data sets
 ## sigmas <- rlnorm(n.sim, meanlog=sigma.meanlog, sdlog=sigma.sdlog); sigmas[1] # 1.201629
@@ -50,7 +64,7 @@ sigmas <- rexp(n.sim, rate=sigma.rate); sigmas[1] # 0.02914
 x0s <- rnorm(n.sim, mean=x0.mean, sd=x0.sd); x0s[1] # 0.1836
 datasets <- vector("list", n.sim) # storing sims
 true.param.df <- data.frame(sigmas, x0s)
-names(true.param.df) <- c("mu", "sigmasq")
+names(true.param.df) <- c("sigmasq", "mu")
 save(true.param.df, file=rdata.path)
     
 ## for putting on template
@@ -70,6 +84,7 @@ if (simulate) {
 ## res$theta
 ## res$sigma
 
+## writing xmls
 if (write.xmls) {
     for (sim.idx in 1:n.sim) {
         xml.file.name = basename(gsub("template.xml", paste0(sim.idx, ".xml"), template.path))
@@ -95,6 +110,7 @@ if (write.xmls) {
     }
 }
 
+## writing shell scripts
 if (write.shellscripts) {
     for (sim.idx in 1:n.sim) {
         write.shell.script(shell.scripts.path, sim.idx, time.needed, job.prefix, jar.path, xml.file.path, xml.file.prefix)
