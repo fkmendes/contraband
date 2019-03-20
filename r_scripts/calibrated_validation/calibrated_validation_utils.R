@@ -1,3 +1,5 @@
+library(HDInterval)
+
 get.95 <- function(a.vector) {
     res = hdi(a.vector, cresMass=.95)
     return(c(res[[1]], res[[2]], mean(a.vector)))

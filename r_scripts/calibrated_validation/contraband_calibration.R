@@ -1,6 +1,6 @@
 library(mvMORPH)
 library(TreeSim)
-library(ape)
+library(phytools)
 library(stringr)
 
 source("calibrated_validation_utils.R")
@@ -30,7 +30,7 @@ xml.file.path <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validat
 xml.file.prefix <- "BMMVNLikelihoodOneTrait_fixedtree_"
 res.path <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/BMMVNOneTrait_results/"
 jar.path <- "/nesi/project/nesi00390/fkmendes/contraband/contraband.jar"
-time.needed <- "00:10:00"
+time.needed <- "00:15:00"
 job.prefix <- "BMMVNOneTrait"
 
 ############# DOING STUFF #############
@@ -50,7 +50,9 @@ sigmas <- rexp(n.sim, rate=sigma.rate); sigmas[1] # 0.02914
 x0s <- rnorm(n.sim, mean=x0.mean, sd=x0.sd); x0s[1] # 0.1836
 datasets <- vector("list", n.sim) # storing sims
 true.param.df <- data.frame(sigmas, x0s)
-
+names(true.param.df) <- c("mu", "sigmasq")
+save(true.param.df, file=rdata.path)
+    
 ## for putting on template
 traits.4.template <- vector("list", n.sim) 
 taxon.strs.4.template <- paste(paste0("<taxon id=\"", tr$tip.label, "\" spec=\"Taxon\"/>"), collapse="\n                  ")
@@ -58,7 +60,7 @@ taxon.strs.4.template <- paste(paste0("<taxon id=\"", tr$tip.label, "\" spec=\"T
 ## actually simulating and populating strs for template
 if (simulate) {
     for (i in 1:n.sim) {
-        datasets[[i]] = rTraitCont(tr, model="BM", sigma=sigmas[i], theta=x0s[i])
+        datasets[[i]] = fastBM(tr, sig2=sigmas[i], mean=x0s[i])
         traits.4.template[[i]] = paste(paste0(names(datasets[[i]]), "=", datasets[[i]]), collapse=",")
     }
 }
