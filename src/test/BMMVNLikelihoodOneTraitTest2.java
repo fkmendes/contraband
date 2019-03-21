@@ -1,15 +1,10 @@
 package test;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
 import beast.util.TreeParser;
 import contraband.BMMVNLikelihoodOneTrait;
 import contraband.OneValueContTraits;
@@ -19,6 +14,9 @@ public class BMMVNLikelihoodOneTraitTest2 {
 	double lnLk;
 	final static double EPSILON = 1e-6;
 	
+	/*
+	 * Same as Test1, but larger tree and other data
+	 */
 	@Before
 	public void setUp() throws Exception {
 		// tree

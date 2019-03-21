@@ -28,3 +28,26 @@ write.shell.script <- function(shell.scripts.path, sim.idx, time.needed, job.pre
         sep="\n")
         )
 }
+
+get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.mean, data.df) {
+    pl = ggplot() + geom_point(mapping=aes(x=data.df[,x.name], y=data.df[,y.name]), shape=20) +
+    coord_cartesian(ylim=c(x.min, x.max)) +
+    xlab(x.lab) + ylab("Posterior mean") +
+    geom_abline(slope=1, linetype="dotted") +
+    geom_abline(slope=0, intercept=prior.mean, color="blue") +
+    theme(
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        plot.background = element_blank(),
+        plot.title = element_text(hjust=0.5),
+        axis.line = element_line(),
+        axis.ticks = element_line(color="black"),
+        axis.text.x = element_text(color="black", size=10),
+        axis.text.y = element_text(color="black", size=10),
+        axis.title.x = element_text(size=12),
+        axis.title.y = element_text(size=12)
+    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max))
+ 
+    return(pl)
+}

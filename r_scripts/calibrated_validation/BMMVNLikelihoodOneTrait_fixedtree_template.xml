@@ -44,7 +44,7 @@
     </distribution> <!-- END Posterior -->
 
     <operator id="BMSigmaSqScaler" spec="ScaleOperator" parameter="@BMSigmaSq" scaleFactor="0.75" weight="3.0"/>
-    <operator id="BMMeanScaler" spec="ScaleOperator" parameter="@BMMean" scaleFactor="0.75" weight="3.0"/>
+    <operator id="BMMeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
 
     <logger id="tracelog" fileName="[FileNameHere].log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>

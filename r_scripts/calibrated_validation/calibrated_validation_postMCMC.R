@@ -1,7 +1,9 @@
 library(ggplot2)
 library(gtools)
+library(gridExtra)
 
 source("calibrated_validation_utils.R")
+load(rdata.path)
 
 n.sim <- 100
 n.param <- 2
@@ -9,19 +11,17 @@ sigma.rate <- 5
 
 param.names <- c("sigmasq", "mu")
 beast.param.names <- c("BMSigmaSq", "BMMean")
+mle.param.names <- c("sigmasq.mle", "mu.mle")
 
 ## template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_template.xml"
 ## res.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_results/"
 ## res.files <- mixedsort(paste0(res.path,list.files(res.path)))
 ## rdata.path <- gsub("_template.xml", ".RData", template.path)
-## load(rdata.path)
 
 ## for non-ultrametric analysis (comment out or in w.r.t. to lines above)
 template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_nonultra_template.xml"
 res.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_nonultra_results/"
 res.files <- mixedsort(paste0(res.path,list.files(res.path)))
-rdata.path <- gsub("_template.xml", ".RData", template.path)
-load(rdata.path)
 
 ############# DOING STUFF #############
 
@@ -51,46 +51,29 @@ min.x <- min(full.df$sigmasq)
 max.x <- max(full.df$sigmasq)
 min.y <- min(full.df$mean.sigmasq)
 max.y <- max(full.df$mean.sigmasq)
-plot = ggplot() + geom_point(data=full.df, mapping=aes(x=sigmasq, y=mean.sigmasq), shape=20) +
-    coord_cartesian(ylim=c(min.x, max.x)) +
-    xlab(expression(sigma^2)) + ylab("Posterior mean") +
-    geom_abline(slope=1, linetype="dotted") +
-    geom_abline(slope=0, intercept=(1/sigma.rate), color="blue") +
-    theme(
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        plot.background = element_blank(),
-        plot.title = element_text(hjust=0.5),
-        axis.line = element_line(),
-        axis.ticks = element_line(color="black"),
-        axis.text.x = element_text(color="black", size=10),
-        axis.text.y = element_text(color="black", size=10),
-        axis.title.x = element_text(size=12),
-        axis.title.y = element_text(size=12)
-    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(min.x,max.y))
-plot
+x.lab <- expression(sigma^2)
+prior.mean <- 1/sigma.rate
 
+pl1 <- get.plot("sigmasq", "mean.sigmasq", min.x, max.x, min.y, max.y, x.lab, prior.mean, full.df)
+pl1
+
+x.lab <- expression(mu)
+prior.mean <- x0.mean
 min.x <- min(full.df$mu)
 max.x <- max(full.df$mu)
 min.y <- min(full.df$mean.mu)
 max.y <- max(full.df$mean.mu)
-plot = ggplot() + geom_point(data=full.df, mapping=aes(x=mu, y=mean.mu), shape=20) +
-    coord_cartesian(ylim=c(min.x, max.x)) +
-    xlab(expression(mu)) + ylab("Posterior mean") +
-    geom_abline(slope=1, linetype="dotted") +
-    geom_abline(slope=0, intercept=0, color="blue") +
-    theme(
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        plot.background = element_blank(),
-        plot.title = element_text(hjust=0.5),
-        axis.line = element_line(),
-        axis.ticks = element_line(color="black"),
-        axis.text.x = element_text(color="black", size=10),
-        axis.text.y = element_text(color="black", size=10),
-        axis.title.x = element_text(size=12),
-        axis.title.y = element_text(size=12)
-    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(min.x,max.x))
-plot
+
+pl2 <- get.plot("mu", "mean.mu", min.x, max.x, min.y, max.y, x.lab, prior.mean, full.df)
+pl2
+
+sub.df <- full.df[full.df$"sigmasq"<.1,]
+min.x <- min(sub.df$mu)
+max.x <- max(sub.df$mu)
+min.y <- min(sub.df$mean.mu)
+max.y <- max(sub.df$mean.mu)
+
+pl2 <- get.plot("mu", "mean.mu", min.x, max.x, min.y, max.y, x.lab, prior.mean, sub.df)
+pl2
+
+grid.arrange(pl1, pl2, ncol=2)

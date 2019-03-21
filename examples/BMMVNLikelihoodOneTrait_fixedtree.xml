@@ -3,8 +3,8 @@
 
   <run id="mcmc" spec="MCMC" chainLength="5000000">
     <state id="state" storeEvery="5000">
-      <stateNode idref="SigmaSq"/>
-      <stateNode idref="Mean"/>
+      <stateNode idref="BMSigmaSq"/>
+      <stateNode idref="BMMean"/>
     </state>
 
     <distribution id="posterior" spec="util.CompoundDistribution">
@@ -16,12 +16,12 @@
 <!--           <Uniform id="UniformBirth" name="distr" upper="Infinity"/> -->
 <!--         </prior> -->
                 
-        <distribution id="SigmaSqPrior" spec="beast.math.distributions.Prior" x="@SigmaSq">
+        <distribution id="SigmaSqPrior" spec="beast.math.distributions.Prior" x="@BMSigmaSq">
 	      <distr id="LogNormal.SigmaSq" spec="beast.math.distributions.LogNormalDistributionModel" offset="0.0" M="0.01" S="1.0"/>
         </distribution>
 
-        <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@Mean">
-	      <distr id="LogNormal.Mean" spec="beast.math.distributions.LogNormalDistributionModel" offset="0.0" M="0.01" S="1.0"/>
+        <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@BMMean">
+	      <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
       </distribution>
       <!-- END prior -->
@@ -39,27 +39,26 @@
 	        </taxonset>
 	      </tree>
 
-	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" traitValues="sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 " nTraits="1">
-	        <taxa idref="TaxonSet"/>
-	      </oneTraitData>
+	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" traitValues="sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 " nTraits="1"/>
 
-	      <sigmasq id="SigmaSq" dimension="1" spec="parameter.RealParameter">1.4822794118</sigmasq>
+	      <sigmasq id="BMSigmaSq" dimension="1" spec="parameter.RealParameter">1.4822794118</sigmasq>
 	    
-	      <mean id="Mean" dimension="1" spec="parameter.RealParameter">3.079142</mean>
+	      <mean id="BMMean" dimension="1" spec="parameter.RealParameter">3.079142</mean>
 	    </distribution> <!-- END BMVN -->
 	    
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
 
-    <operator id="SigmaSqScaler" spec="ScaleOperator" parameter="@SigmaSq" scaleFactor="0.75" weight="3.0"/>
-    <operator id="MeanScaler" spec="ScaleOperator" parameter="@Mean" scaleFactor="0.75" weight="3.0"/>
-
+    <operator id="SigmaSqScaler" spec="ScaleOperator" parameter="@BMSigmaSq" scaleFactor="0.75" weight="3.0"/>
+<!--     <operator id="MeanScaler" spec="ScaleOperator" parameter="@BMMean" scaleFactor="0.75" weight="3.0"/> -->
+	<operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
+	
     <logger id="tracelog" fileName="BMMVN_fixedtree.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
 	  <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
-	  <log idref="SigmaSq"/>
-      <log idref="Mean"/>
+	  <log idref="BMSigmaSq"/>
+      <log idref="BMMean"/>
     </logger>
 
     <logger id="screenlog" logEvery="1">

@@ -80,6 +80,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	protected void populateMeanVector() {
 		bmSingleMeanValue = meanInput.get().getValue();
+		System.out.println("Proposed mean: " + bmSingleMeanValue);
 		bmMeanVector.set(bmSingleMeanValue);
 	}
 	
