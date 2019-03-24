@@ -89,6 +89,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	};
 	
 	// getters
+	protected TreeParser getTree() {
+		return tree;
+	}
+	
 	protected int getNSpp() {
 		return nSpp;
 	}

@@ -19,11 +19,14 @@ import beast.util.TreeParser;
  * (and will usually be much much smaller), but theta_0 is the separate regime (optimum)
  * the root might or might not be assigned.
  * 
- * Note that the likelihood described in Butler & King is GIVEN theta_0 (the root state),
- * i.e., the process is conditioned on a particular theta_0 (that we can sample during MCMC,
- * for example). In other words, we fix theta_0. However, we can assume theta_0 has a stationary
- * distribution with mean theta_0 (I think!) and variance = \gamma = \frac{\sigma}{2\alpha}.
- * Think of this stationary distribution as a parametric (depends on the actual parameters
+ * Note that the likelihood described in Butler & King is GIVEN y_0, the root value
+ * (which is often set to be = to the root optimum, theta_0 -- hence why the root state
+ * is often referred to as theta_0). As C. Ané pointed out to me, this is a very liberal assumption.
+ * In other words, the process is conditioned on a particular y_0 (theta_0) that we can sample during MCMC,
+ * for example). In other words, we sample theta_0, then fix it for the rest of the process.
+ *
+ * However, we can also assume y_0 has a stationary distribution with mean theta_0 and
+ * variance = \gamma = \frac{\sigma}{2\alpha}. Think of this stationary distribution as a parametric (depends on the actual parameters
  * you are trying to estimate) prior.
  * This changes the variance of the OU MVN likelihood (what here we call the OU T matrix), as we
  * need to add a bit more variance due to treating theta_0 as a random variable.
@@ -136,47 +139,42 @@ public class OUUtils {
 	 */
 	 public static void computeWMatOneTrait(TreeParser Tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
 	 // public static void computeWMatOneTrait(TreeParser Tree, List<Node> allLeafNodes, int n, int r, double alpha, double[][] wMat, boolean useRootMetaData) {
-		 Double[] regimes = new Double[rootNode.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
+		Double[] allNodeRegimes = new Double[rootNode.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
 		int rootIndexOffset;
-		int intRootRegime;	// Eldest regime index
+		int rootRegimeIdx;	// Eldest regime index
 
 		/* 
 		 * The regimes array is the computational equivalent of 
 		 * Beta_{i}^{\gamma} in equation A6 of Butler & King's Appendix 1
 		*/
-		Tree.getMetaData(rootNode, regimes, "Regime"); // writes on regimes array
+		Tree.getMetaData(rootNode, allNodeRegimes, "Regime"); // writes on regimes array
 		
 		if (useRootMetaData) { 		// column dimension of WMat must be r			
 			rootIndexOffset = 0;
-			intRootRegime = regimes[rootNode.getNr()].intValue();
+			rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue();
 			
 		} else { 		// column dimension of WMat must be r + 1
 			rootIndexOffset = 1;
-			intRootRegime = 0;	
+			rootRegimeIdx = 0;	
 		}
 		
-		for (Node sp: allLeafNodes) {
-				
+		for (Node sp: allLeafNodes) {	
 			int spNr = sp.getNr();	// Will specify the row index 
 				
 			// Adding the root chunk in the column of the eldest regime
 			double currentSpHeight = sp.getHeight();
 			double cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight));	
-//			wMat[spNr][intRootRegime] += cellValue;
-			wMat.addToEntry(spNr, intRootRegime, cellValue);
+			wMat.addToEntry(spNr, rootRegimeIdx, cellValue);
 			
 			while(!sp.isRoot()) {
-					
-				int intRegime = regimes[sp.getNr()].intValue() + rootIndexOffset;	// Will specify the column index
+				int regimeIdx = allNodeRegimes[sp.getNr()].intValue() + rootIndexOffset;	// Will specify the column index
 				cellValue = Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight));
-//				wMat[spNr][intRegime] += cellValue;
-				wMat.addToEntry(spNr, intRegime, cellValue);
+				wMat.addToEntry(spNr, regimeIdx, cellValue);
 					
 				sp = sp.getParent();
 			}
 		}		
 	}
-	
 	
 	// MultiTrait Covariance matrix functions
 	

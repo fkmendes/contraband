@@ -12,6 +12,7 @@ import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
+import beast.util.TreeParser;
 import beast.core.Input.Validate;
 
 public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
@@ -19,6 +20,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Sigma^2, the variance of the process.", Validate.REQUIRED);
 	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "Root trait value, or theta_0, also the mean of the stationary distribution at the root if one is assumed.", Validate.OPTIONAL);
 	final public Input<Boolean> eqDistInput = new Input<>("eqDist", "Whether or not to assume equilibrium (stationary) distribution at the root. The mean of that distribution will rootValue", Validate.REQUIRED);
+	final public Input<Boolean> useRootMetaDataInput = new Input<>("useRootMetaData", "Whether or not to use root meta data (specified optimum). If set to 'false', root optimum is set to eldest regime (regimes are numbered from the root toward the tips).", Validate.REQUIRED);
 	final public Input<RealParameter> alphaInput = new Input<>("alpha", "Pull toward optimum or optima.", Validate.REQUIRED);
 	final public Input<RealParameter> thetaInput = new Input<>("theta", "Optimum or optima values, these are the 'colors' of the branches.", Validate.REQUIRED);
 	final public Input<Integer> nOptimaInput = new Input<>("nOptima", "Number of adaptive optima.", Validate.REQUIRED);
@@ -26,25 +28,30 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	private boolean dirty;
 	private boolean eqDistAtRoot;
+	private boolean useRootMetaData;
 	
+	private boolean updateAlpha;
 	private boolean updatePhyloTMat;
 	private boolean updateVCVMat;
 	private boolean updateMean;
 	
 	// basic info
+	private TreeParser tree;
 	private Node rootNode;
 	private List<Node> allLeafNodes;
 	private int nSpp, nOptima;
 	
 	// parameters
 	private double sigmasq;
-	private Double rootValue, alpha;
+	private Double rootValue; // this is y_0, the value we condition on, or assume has a stationary distr
+	                          // the value we condition y_0 on is often theta_0 (root optimum), which is a very liberal assumption!
+	private Double alpha;
 	private Double[] theta;
 	
 	// to be populated for computation
-	private RealVector ouMeanVector;
-	private RealMatrix ouTMat, wMat, bmVCVMat, bmInvVCVMat;
-	private LUDecomposition bmVCVMatLUD;
+	private RealVector thetaVector, ouMeanVector;
+	private RealMatrix ouTMat, wMat, ouVCVMat, ouInvVCVMat;
+	private LUDecomposition ouVCVMatLUD;
 	
 	// data
 	private OneValueContTraits oneTraitData;
@@ -58,20 +65,29 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		
 		super.initAndValidate();
 		
+		tree = getTree();
 		rootNode = getRootNode();
 		allLeafNodes = rootNode.getAllLeafNodes();
 		nSpp = getNSpp();
 		nOptima = nOptimaInput.get();		
 		eqDistAtRoot = eqDistInput.get();
+		useRootMetaData = useRootMetaDataInput.get();
 		alpha = alphaInput.get().getValue();
 		
-		wMat = new Array2DRowRealMatrix(nSpp, nOptima);
+		if (useRootMetaData) {
+			thetaVector = new ArrayRealVector(nOptima+1);
+			wMat = new Array2DRowRealMatrix(nSpp, (nOptima+1));
+		}
+		else {
+			thetaVector = new ArrayRealVector(nOptima);
+			wMat = new Array2DRowRealMatrix(nSpp, nOptima);
+		}
 		ouMeanVector = new ArrayRealVector(nSpp);
 		storedBMMeanVector = new ArrayRealVector(nSpp);
 		ouTMat = new Array2DRowRealMatrix(nSpp, nSpp);
 		
 		// this instance vars
-		populateInstanceVars(true, true, true);
+		populateInstanceVars(true, true, true, true);
 		populateOneTraitDataVector(); // won't change, so outside populateInstanceVars
 		                              // also has to come AFTER setting phyloTMat
 		                              // (as this sets the order of species names in T matrix)
@@ -81,11 +97,11 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		setProcessOneTraitDataVec(oneTraitDataVector);
 	}
 	
-	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean) {
+	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean, boolean updateAlpha) {
+		if (updateAlpha) { alpha = alphaInput.get().getValue(); }
 		if (updatePhyloTMat) { super.populatePhyloTMatrix(); }
 		if (updateMean) { populateMeanVector(); }
 		if (updateVCVMat) {
-			populateOUTMatrix(eqDistAtRoot);
 			populateVCVMatrix();
 			populateInvVCVMatrix();
 		}
@@ -95,12 +111,13 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		// setting parent members
 		if (updateMean) { setProcessMeanVec(ouMeanVector); }
 		if (updateVCVMat) {
-			setProcessVCVMat(bmVCVMat);
-			setProcessInvVCVMat(bmInvVCVMat);
+			setProcessVCVMat(ouVCVMat);
+			setProcessInvVCVMat(ouInvVCVMat);
 		}
 	}
 	
 	private void populateOUTMatrix(boolean useEqDistBool) {
+		// alpha has already been dealt in populateInstanceVars
 		OUUtils.computeOUTMatOneTrait(nSpp, alpha, getPhyloTMatDouble(), ouTMat, useEqDistBool);
 	}
 	
@@ -111,42 +128,49 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		}
 		
 		theta = thetaInput.get().getValues();
+		int i = 0;
+		for (Double aTheta: theta) {
+			thetaVector.setEntry(i, aTheta);
+			i++;
+		} 
 		
-		// Do OU stuff here
+		OUUtils.computeWMatOneTrait(tree, rootNode, allLeafNodes, nSpp, nOptima, alpha, wMat, useRootMetaData);
+		ouMeanVector = wMat.operate(thetaVector);
 	}
 	
 	@Override
 	protected void populateVCVMatrix() {
+		// alpha has already been dealt in populateInstanceVars
+		populateOUTMatrix(eqDistAtRoot);
 		sigmasq = sigmasqInput.get().getValue();
-		bmVCVMat = getPhyloTMat().scalarMultiply(sigmasq);
+		ouVCVMat = ouTMat.scalarMultiply(sigmasq);
 	}
 	
 	@Override
 	protected void populateInvVCVMatrix() {
-		bmVCVMatLUD = new LUDecomposition(bmVCVMat);
-		bmInvVCVMat = bmVCVMatLUD.getSolver().getInverse();
+		ouVCVMatLUD = new LUDecomposition(ouVCVMat);
+		ouInvVCVMat = ouVCVMatLUD.getSolver().getInverse();
 	}
 	
 	@Override
 	protected void populateOneTraitDataVector() {
 		oneTraitData = oneTraitInput.get();
-		//TODO: this has to come out with traits in the same order as the species order in the newick format
-		//TODO: need to pass in the species order as argument of getTraitValues
 		oneTraitDataVector = new ArrayRealVector(oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder()));
-		// System.out.println(oneTraitDataVector);
 	}
 	
 	@Override
 	public double calculateLogP() {
+		updateAlpha = false;
 		updatePhyloTMat = false;
 		updateVCVMat = false;
 		updateMean = false;
 		
+		if (alphaInput.isDirty()) { updateAlpha = true; updateVCVMat = true; updateMean = true; }
 		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
-		if (sigmasqInput.isDirty()) { updateVCVMat = true; }
-		if (rootValueInput.isDirty() || thetaInput.isDirty()) { updateMean = true; }
+		if (sigmasqInput.isDirty() || alphaInput.isDirty()) { updateVCVMat = true; }
+		if (rootValueInput.isDirty() || thetaInput.isDirty() || alphaInput.isDirty()) { updateMean = true; }
 		
-		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean);
+		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean, updateAlpha);
 		populateParentInstanceVars(updateVCVMat, updateMean);
 		
 		super.populateLogP();
