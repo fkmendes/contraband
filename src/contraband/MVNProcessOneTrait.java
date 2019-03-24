@@ -29,7 +29,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
 	private String[] spNamesInPhyloTMatOrder;
-	private double[][] phyloTMatInput;
+	private double[][] phyloTMatDouble;
 	private RealMatrix phyloTMat;
 		
 	// mean vector
@@ -56,8 +56,8 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		leftLeaves = new ArrayList<Node>();
 		rightLeaves = new ArrayList<Node>();
 		spNamesInPhyloTMatOrder = new String[nSpp];
-		phyloTMatInput = new double[nSpp][nSpp];
-		phyloTMat = new Array2DRowRealMatrix(phyloTMatInput);
+		phyloTMatDouble = new double[nSpp][nSpp];
+		phyloTMat = new Array2DRowRealMatrix(phyloTMatDouble);
 
 		// stored stuff
 		storedPhyloTMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
@@ -65,11 +65,11 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	}
 	
 	protected void populatePhyloTMatrix() {
-		MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatInput, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder); // updates last 3 args
+		MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatDouble, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder); // updates last 3 args
 		
 		for (int i=0; i<nSpp; ++i) {
 			for (int j=0; j<nSpp; ++j) {
-			phyloTMat.setEntry(i, j, phyloTMatInput[i][j]);
+			phyloTMat.setEntry(i, j, phyloTMatDouble[i][j]);
 			}
 		}
 
@@ -93,8 +93,16 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		return nSpp;
 	}
 	
+	protected Node getRootNode() {
+		return tree.getRoot();
+	}
+	
 	protected String[] getSpNamesInPhyloTMatOrder() {
 		return spNamesInPhyloTMatOrder;
+	}
+	
+	protected double[][] getPhyloTMatDouble() {
+		return phyloTMatDouble;
 	}
 	
 	protected RealMatrix getPhyloTMat() {

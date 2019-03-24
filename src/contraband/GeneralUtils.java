@@ -43,16 +43,13 @@ public class GeneralUtils {
 		}
 	}
 	
-	public static void scalarBy2DArray(double[][] Mat, double scalar) {
-		
-		int rows = Mat.length;
-		int cols = Mat[0].length;
+	public static void scalarByRealMatrix(RealMatrix aRealMat, double scalar) {
+		int rows = aRealMat.getRowDimension();
+		int cols = aRealMat.getColumnDimension();
 		
 		for (int i = 0; i < rows; i++) {
-			
 		    for (int j = 0; j < cols; j++) {
-		    	
-		        Mat[i][j] *= scalar;  
+		    	aRealMat.multiplyEntry(i, j, scalar);
 		    }
 		}
 	}

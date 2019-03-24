@@ -87,20 +87,18 @@ public class OUUtils {
 	 * the code below does. It is not the vcv matrix yet because we haven't multiplied it
 	 * by sigma^2.
 	 */ 
-	public static void computeOUTMatOneTrait(int n, double alpha, double[][] tMat, double[][] ouTMat, boolean rootIsRandVar) {
-		
+	public static void computeOUTMatOneTrait(int n, double alpha, double[][] tMat, RealMatrix ouTMat, boolean rootIsRandVar) {	
 		double cellValue;
 		double divByTwoAlpha = 1.0 / (2.0 * alpha);
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < n; ++j) {
-				
 				cellValue = divByTwoAlpha * Math.exp(-alpha * (tMat[i][i] + tMat[j][j] - 2.0 * tMat[i][j]));
 				
 				if (rootIsRandVar) {
 					cellValue *= (1.0 - Math.exp(-2.0 * alpha * tMat[i][j]));
 				}
 				
-				ouTMat[i][j] = cellValue;  // exponent part
+				ouTMat.setEntry(i, j, cellValue);  // exponent part
 			}
 		}	
 	}
@@ -136,12 +134,9 @@ public class OUUtils {
 	 * In this less general version, we ignore the root optimum metadata, and assume theta_0 is the same as one of the other thetas
 	 * (one of the optima). We should use this with ultrametric trees.
 	 */
-	public static void computeWMatOneTrait(TreeParser Tree, List<Node> allLeafNodes, int n, int r, double alpha, double[][] WMat, boolean useRootMetaData) {
-		
-		Node nodeRoot = Tree.getRoot();
-		// List<Node> allLeaf = nodeRoot.getAllLeafNodes();
-		
-		Double[] regimes = new Double[nodeRoot.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
+	 public static void computeWMatOneTrait(TreeParser Tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
+	 // public static void computeWMatOneTrait(TreeParser Tree, List<Node> allLeafNodes, int n, int r, double alpha, double[][] wMat, boolean useRootMetaData) {
+		 Double[] regimes = new Double[rootNode.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
 		int rootIndexOffset;
 		int intRootRegime;	// Eldest regime index
 
@@ -149,15 +144,13 @@ public class OUUtils {
 		 * The regimes array is the computational equivalent of 
 		 * Beta_{i}^{\gamma} in equation A6 of Butler & King's Appendix 1
 		*/
-		Tree.getMetaData(nodeRoot, regimes, "Regime"); // writes on regimes array
+		Tree.getMetaData(rootNode, regimes, "Regime"); // writes on regimes array
 		
-		if (useRootMetaData) { 		// column dimension of WMat must be r
-			
+		if (useRootMetaData) { 		// column dimension of WMat must be r			
 			rootIndexOffset = 0;
-			intRootRegime = regimes[nodeRoot.getNr()].intValue();
+			intRootRegime = regimes[rootNode.getNr()].intValue();
 			
 		} else { 		// column dimension of WMat must be r + 1
-			
 			rootIndexOffset = 1;
 			intRootRegime = 0;	
 		}
@@ -168,14 +161,16 @@ public class OUUtils {
 				
 			// Adding the root chunk in the column of the eldest regime
 			double currentSpHeight = sp.getHeight();
-			double cellValue = Math.exp(-alpha * (nodeRoot.getHeight() - currentSpHeight));	
-			WMat[spNr][intRootRegime] += cellValue;
+			double cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight));	
+//			wMat[spNr][intRootRegime] += cellValue;
+			wMat.addToEntry(spNr, intRootRegime, cellValue);
 			
 			while(!sp.isRoot()) {
 					
 				int intRegime = regimes[sp.getNr()].intValue() + rootIndexOffset;	// Will specify the column index
 				cellValue = Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight));
-				WMat[spNr][intRegime] += cellValue;
+//				wMat[spNr][intRegime] += cellValue;
+				wMat.addToEntry(spNr, intRegime, cellValue);
 					
 				sp = sp.getParent();
 			}

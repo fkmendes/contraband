@@ -1,5 +1,7 @@
 package test;
 
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,10 +32,9 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 	 * I: useRootMetaData=true
 	 * M: useRootMetaData=false
 	 */
-	
-	private static double[][] ouTMat1FI, ouTMat1FM, ouTMat1RI, ouTMat1RM;
-	private static double[][] ouTMat2FI, ouTMat2FM, ouTMat2RI, ouTMat2RM;
-	private static double[][] ouTMat3FI, ouTMat3FM, ouTMat3RI, ouTMat3RM;
+	private static RealMatrix ouTMat1FI, ouTMat1FM, ouTMat1RI, ouTMat1RM;
+	private static RealMatrix ouTMat2FI, ouTMat2FM, ouTMat2RI, ouTMat2RM;
+	private static RealMatrix ouTMat3FI, ouTMat3FM, ouTMat3RI, ouTMat3RM;
 	
 	@BeforeClass
 	public static void setUPTest1() throws Exception {
@@ -63,21 +64,20 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spOrderInTMat);
 		
 	    // OU T matrix that will store the results (which will be asserted)
-		ouTMat1FI = new double[n][n];
-		ouTMat1FM = new double[n][n];
-		ouTMat1RI = new double[n][n];
-		ouTMat1RM = new double[n][n];
+		ouTMat1FI = new Array2DRowRealMatrix(n, n);
+		ouTMat1FM = new Array2DRowRealMatrix(n, n);
+		ouTMat1RI = new Array2DRowRealMatrix(n, n);
+		ouTMat1RM = new Array2DRowRealMatrix(n, n);
 	
 		OUUtils.computeOUTMatOneTrait(n, alphaFI, tMatInput, ouTMat1FI, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaFM, tMatInput, ouTMat1FM, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaRI, tMatInput, ouTMat1RI, false);
 		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMat1RM, false);
 		
-		// Let's print stuff
-		GeneralUtils.scalarBy2DArray(ouTMat1FI, sigsqFI);
-		GeneralUtils.scalarBy2DArray(ouTMat1FM, sigsqFM);
-		GeneralUtils.scalarBy2DArray(ouTMat1RI, sigsqRI);
-		GeneralUtils.scalarBy2DArray(ouTMat1RM, sigsqRM);
+		GeneralUtils.scalarByRealMatrix(ouTMat1FI, sigsqFI);
+		GeneralUtils.scalarByRealMatrix(ouTMat1FM, sigsqFM);
+		GeneralUtils.scalarByRealMatrix(ouTMat1RI, sigsqRI);
+		GeneralUtils.scalarByRealMatrix(ouTMat1RM, sigsqRM);
 	}
 	
 	/*
@@ -113,21 +113,20 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spOrderInTMat);
 		
 		// OU T matrix that will store the results (which will be asserted)
-		ouTMat2FI = new double[n][n];
-		ouTMat2FM = new double[n][n];
-		ouTMat2RI = new double[n][n];
-		ouTMat2RM = new double[n][n];
+		ouTMat2FI = new Array2DRowRealMatrix(n, n);
+		ouTMat2FM = new Array2DRowRealMatrix(n, n);
+		ouTMat2RI = new Array2DRowRealMatrix(n, n);
+		ouTMat2RM = new Array2DRowRealMatrix(n, n);
 		
 		OUUtils.computeOUTMatOneTrait(n, alphaFI, tMatInput, ouTMat2FI, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaFM, tMatInput, ouTMat2FM, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaRI, tMatInput, ouTMat2RI, false);
 		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMat2RM, false);
-		
-		// Let's print stuff
-		GeneralUtils.scalarBy2DArray(ouTMat2FI, sigsqFI);
-		GeneralUtils.scalarBy2DArray(ouTMat2FM, sigsqFM);
-		GeneralUtils.scalarBy2DArray(ouTMat2RI, sigsqRI);
-		GeneralUtils.scalarBy2DArray(ouTMat2RM, sigsqRM);
+
+		GeneralUtils.scalarByRealMatrix(ouTMat2FI, sigsqFI);
+		GeneralUtils.scalarByRealMatrix(ouTMat2FM, sigsqFM);
+		GeneralUtils.scalarByRealMatrix(ouTMat2RI, sigsqRI);
+		GeneralUtils.scalarByRealMatrix(ouTMat2RM, sigsqRM);
 	}
 	
 	/*
@@ -164,89 +163,84 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 		MVNUtils.populateTMatrix(myTree, nodeToRootPaths, tMatInput, leftLeaves, rightLeaves, spOrderInTMat);
 		
 		// OU T matrix that will store the results (which will be asserted)
-		ouTMat3FI = new double[n][n];
-		ouTMat3FM = new double[n][n];
-		ouTMat3RI = new double[n][n];
-		ouTMat3RM = new double[n][n];
+		ouTMat3FI = new Array2DRowRealMatrix(n, n);
+		ouTMat3FM = new Array2DRowRealMatrix(n, n);
+		ouTMat3RI = new Array2DRowRealMatrix(n, n);
+		ouTMat3RM = new Array2DRowRealMatrix(n, n);
 		
 		OUUtils.computeOUTMatOneTrait(n, alphaFI, tMatInput, ouTMat3FI, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaFM, tMatInput, ouTMat3FM, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaRI, tMatInput, ouTMat3RI, false);
 		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMat3RM, false);
 		
-		// Let's print stuff
-		GeneralUtils.scalarBy2DArray(ouTMat3FI, sigsqFI);
-		GeneralUtils.scalarBy2DArray(ouTMat3FM, sigsqFM);
-		GeneralUtils.scalarBy2DArray(ouTMat3RI, sigsqRI);
-		GeneralUtils.scalarBy2DArray(ouTMat3RM, sigsqRM);
+		GeneralUtils.scalarByRealMatrix(ouTMat3FI, sigsqFI);
+		GeneralUtils.scalarByRealMatrix(ouTMat3FM, sigsqFM);
+		GeneralUtils.scalarByRealMatrix(ouTMat3RI, sigsqRI);
+		GeneralUtils.scalarByRealMatrix(ouTMat3RM, sigsqRM);
 	}
 
 	@Test	// Test 1
 	public void againstRvarOUTest1 () {
-		Assert.assertEquals(1.563088e-29, 	ouTMat1FI[0][1], EPSILON);
-		Assert.assertEquals(2.000003e-02, 	ouTMat1FI[2][2], EPSILON);
-		Assert.assertEquals(1.221620e-56, 	ouTMat1FI[1][2], EPSILON);
-		Assert.assertEquals(1.563088e-29, 	ouTMat1FI[1][0], EPSILON);
+		Assert.assertEquals(1.563088e-29, 	ouTMat1FI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(2.000003e-02, 	ouTMat1FI.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(1.221620e-56, 	ouTMat1FI.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(1.563088e-29, 	ouTMat1FI.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(1.563088e-29, 	ouTMat1FM[0][1], EPSILON);
-		Assert.assertEquals(2.000003e-02, 	ouTMat1FM[2][2], EPSILON);
-		Assert.assertEquals(1.221620e-56, 	ouTMat1FM[1][2], EPSILON);
-		Assert.assertEquals(1.563088e-29, 	ouTMat1FM[1][0], EPSILON);
+		Assert.assertEquals(1.563088e-29, 	ouTMat1FM.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(2.000003e-02, 	ouTMat1FM.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(1.221620e-56, 	ouTMat1FM.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(1.563088e-29, 	ouTMat1FM.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(4.417827e-40, 	ouTMat1RI[0][1], EPSILON);
-		Assert.assertEquals(2.000003e-02, 	ouTMat1RI[2][2], EPSILON);
-		Assert.assertEquals(9.758589e-78, 	ouTMat1RI[1][2], EPSILON);
-		Assert.assertEquals(4.417827e-40, 	ouTMat1RI[1][0], EPSILON);
-		
-		Assert.assertEquals(4.417827e-40, 	ouTMat1RM[0][1], EPSILON);
-		Assert.assertEquals(2.000003e-02, 	ouTMat1RM[2][2], EPSILON);
-		Assert.assertEquals(9.758589e-78, 	ouTMat1RM[1][2], EPSILON);
-		Assert.assertEquals(4.417827e-40, 	ouTMat1RM[1][0], EPSILON);
+		Assert.assertEquals(4.417827e-40, 	ouTMat1RI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(2.000003e-02, 	ouTMat1RI.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(9.758589e-78, 	ouTMat1RI.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(4.417827e-40, 	ouTMat1RI.getEntry(1, 0), EPSILON);
 	}
+
 	
 	@Test	// Test 2
 	public void againstRvarOUTest2 () {
-		Assert.assertEquals(0.2711105, 		ouTMat2FI[0][1], EPSILON);
-		Assert.assertEquals(2.67973939, 	ouTMat2FI[2][2], EPSILON);
-		Assert.assertEquals(0.02357370, 	ouTMat2FI[1][2], EPSILON);
-		Assert.assertEquals(0.27111053, 	ouTMat2FI[1][0], EPSILON);
+		Assert.assertEquals(0.2711105, 		ouTMat2FI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(2.67973939, 	ouTMat2FI.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(0.02357370, 	ouTMat2FI.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(0.27111053, 	ouTMat2FI.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(2.475727, 		ouTMat2FM[0][1], EPSILON);
-		Assert.assertEquals(6.189318, 		ouTMat2FM[2][2], EPSILON);
-		Assert.assertEquals(1.237863, 		ouTMat2FM[1][2], EPSILON);
-		Assert.assertEquals(2.475727, 		ouTMat2FM[1][0], EPSILON);
+		Assert.assertEquals(2.475727, 		ouTMat2FM.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(6.189318, 		ouTMat2FM.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(1.237863, 		ouTMat2FM.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(2.475727, 		ouTMat2FM.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(0.20187480, 	ouTMat2RI[0][1], EPSILON);
-		Assert.assertEquals(2.672040045, 	ouTMat2RI[2][2], EPSILON);
-		Assert.assertEquals(0.015251805, 	ouTMat2RI[1][2], EPSILON);
-		Assert.assertEquals(0.201874800, 	ouTMat2RI[1][0], EPSILON);
+		Assert.assertEquals(0.20187480, 	ouTMat2RI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(2.672040045, 	ouTMat2RI.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(0.015251805, 	ouTMat2RI.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(0.201874800, 	ouTMat2RI.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(0.57628838, 	ouTMat2RM[0][1], EPSILON);
-		Assert.assertEquals(4.82816083, 	ouTMat2RM[2][2], EPSILON);
-		Assert.assertEquals(0.06878567, 	ouTMat2RM[1][2], EPSILON);
-		Assert.assertEquals(0.57628838, 	ouTMat2RM[1][0], EPSILON);
+		Assert.assertEquals(0.57628838, 	ouTMat2RM.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(4.82816083, 	ouTMat2RM.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(0.06878567, 	ouTMat2RM.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(0.57628838, 	ouTMat2RM.getEntry(1, 0), EPSILON);
 	}
 	
 	@Test 	// Test 3
 	public void againstRvarOUTest3 () {
-		Assert.assertEquals(4.640928e-07, 	ouTMat3FI[0][1], EPSILON);
-		Assert.assertEquals(7.428888e-01, 	ouTMat3FI[2][2], EPSILON);
-		Assert.assertEquals(3.668135e-10, 	ouTMat3FI[1][2], EPSILON);
-		Assert.assertEquals(4.640928e-07, 	ouTMat3FI[1][0], EPSILON);
+		Assert.assertEquals(4.640928e-07, 	ouTMat3FI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(7.428888e-01, 	ouTMat3FI.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(3.668135e-10, 	ouTMat3FI.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(4.640928e-07, 	ouTMat3FI.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(4.640928e-07, 	ouTMat3FM[0][1], EPSILON);
-		Assert.assertEquals(7.428888e-01, 	ouTMat3FM[2][2], EPSILON);
-		Assert.assertEquals(3.668135e-10, 	ouTMat3FM[1][2], EPSILON);
-		Assert.assertEquals(4.640928e-07, 	ouTMat3FM[1][0], EPSILON);
+		Assert.assertEquals(4.640928e-07, 	ouTMat3FM.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(7.428888e-01, 	ouTMat3FM.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(3.668135e-10, 	ouTMat3FM.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(4.640928e-07, 	ouTMat3FM.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(1.139565e-07, 	ouTMat3RI[0][1], EPSILON);
-		Assert.assertEquals(7.428742e-01, 	ouTMat3RI[2][2], EPSILON);
-		Assert.assertEquals(4.463248e-11, 	ouTMat3RI[1][2], EPSILON);
-		Assert.assertEquals(1.139565e-07, 	ouTMat3RI[1][0], EPSILON);
+		Assert.assertEquals(1.139565e-07, 	ouTMat3RI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(7.428742e-01, 	ouTMat3RI.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(4.463248e-11, 	ouTMat3RI.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(1.139565e-07, 	ouTMat3RI.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(1.139565e-07, 	ouTMat3RM[0][1], EPSILON);
-		Assert.assertEquals(7.428742e-01, 	ouTMat3RM[2][2], EPSILON);
-		Assert.assertEquals(4.463248e-11, 	ouTMat3RM[1][2], EPSILON);
-		Assert.assertEquals(1.139565e-07, 	ouTMat3RM[1][0], EPSILON);
+		Assert.assertEquals(1.139565e-07, 	ouTMat3RM.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(7.428742e-01, 	ouTMat3RM.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(4.463248e-11, 	ouTMat3RM.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(1.139565e-07, 	ouTMat3RM.getEntry(1, 0), EPSILON);
 	}
 }

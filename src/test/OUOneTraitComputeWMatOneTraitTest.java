@@ -2,6 +2,8 @@ package test;
 
 import java.util.List;
 
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,10 +28,9 @@ public class OUOneTraitComputeWMatOneTraitTest {
 	 */
 	
 	// We are using the same trees as in OUOneTraitcomputeOUTMatOneTraitTest.java)
-	
-	private static double[][] ouWeight1FI, ouWeight1FM, ouWeight1RI, ouWeight1RM;
-	private static double[][] ouWeight2FI, ouWeight2FM, ouWeight2RI, ouWeight2RM;
-	private static double[][] ouWeight3FI, ouWeight3FM, ouWeight3RI, ouWeight3RM;
+	private static RealMatrix ouWeight1FI, ouWeight1FM, ouWeight1RI, ouWeight1RM;
+	private static RealMatrix ouWeight2FI, ouWeight2FM, ouWeight2RI, ouWeight2RM;
+	private static RealMatrix ouWeight3FI, ouWeight3FM, ouWeight3RI, ouWeight3RM;
 	
 	// Test 1: Ultrametric tree (3 regimes)
 	@BeforeClass
@@ -47,15 +48,15 @@ public class OUOneTraitComputeWMatOneTraitTest {
 		
 		// Setting weight matrices dimensions
 		int n = myTree.getLeafNodeCount();
-		ouWeight1FI = new double[n][4];
-		ouWeight1FM = new double[n][3];
-		ouWeight1RI = new double[n][4];
-		ouWeight1RM = new double[n][3];
+		ouWeight1FI = new Array2DRowRealMatrix(n, 4);
+		ouWeight1FM = new Array2DRowRealMatrix(n, 3);
+		ouWeight1RI = new Array2DRowRealMatrix(n, 4);
+		ouWeight1RM = new Array2DRowRealMatrix(n, 3);
 
-	    OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 3, alphaFI, ouWeight1FI, false);
-	    OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 3, alphaFM, ouWeight1FM, true);
-	    OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 3, alphaRI, ouWeight1RI, false);
-	    OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 3, alphaRM, ouWeight1RM, true);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaFI, ouWeight1FI, false);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaFM, ouWeight1FM, true);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaRI, ouWeight1RI, false);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaRM, ouWeight1RM, true);
 	}
 	
 	// Test 2: Non-ultrametric tree (1 regimes)
@@ -74,15 +75,15 @@ public class OUOneTraitComputeWMatOneTraitTest {
 		
 		// Setting weight matrices dimensions
 		int n = myTree.getLeafNodeCount();
-		ouWeight2FI = new double[n][2];
-		ouWeight2FM = new double[n][1];
-		ouWeight2RI = new double[n][2];
-		ouWeight2RM = new double[n][1];
+		ouWeight2FI = new Array2DRowRealMatrix(n, 2);
+		ouWeight2FM = new Array2DRowRealMatrix(n, 1);
+		ouWeight2RI = new Array2DRowRealMatrix(n, 2);
+		ouWeight2RM = new Array2DRowRealMatrix(n, 1);
 
-		OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 1, alphaFI, ouWeight2FI, false);
-		OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 1, alphaFM, ouWeight2FM, true);
-		OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 1, alphaRI, ouWeight2RI, false);
-		OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 1, alphaRM, ouWeight2RM, true);
+		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaFI, ouWeight2FI, false);
+		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaFM, ouWeight2FM, true);
+		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaRI, ouWeight2RI, false);
+		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaRM, ouWeight2RM, true);
 	}
 	
 	// Test 3: Non-ultrametric tree (5 regimes)
@@ -101,89 +102,86 @@ public class OUOneTraitComputeWMatOneTraitTest {
 		
 		// Setting weight matrices dimensions
 		int n = myTree.getLeafNodeCount();
-		ouWeight3FI = new double[n][6];
-		ouWeight3FM = new double[n][5];
-		ouWeight3RI = new double[n][6];
-		ouWeight3RM = new double[n][5];
+		ouWeight3FI = new Array2DRowRealMatrix(n, 6);
+		ouWeight3FM = new Array2DRowRealMatrix(n, 5);
+		ouWeight3RI = new Array2DRowRealMatrix(n, 6);
+		ouWeight3RM = new Array2DRowRealMatrix(n, 5);
 		
-		OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 5, alphaFI, ouWeight3FI, false);
-		OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 5, alphaFM, ouWeight3FM, true);
-		OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 5, alphaRI, ouWeight3RI, false);
-		OUUtils.computeWMatOneTrait(myTree, allLeafNodes, n, 5, alphaRM, ouWeight3RM, true);
+		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaFI, ouWeight3FI, false);
+		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaFM, ouWeight3FM, true);
+		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaRI, ouWeight3RI, false);
+		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaRM, ouWeight3RM, true);
 	}
 
 	// Test 1
 	@Test
 	public void againstRweightMatTest1 () {
+		Assert.assertEquals(7.815427e-28, 	ouWeight1FI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(0, 				ouWeight1FI.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(1, 				ouWeight1FI.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(2.184887e-41, 	ouWeight1FI.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(7.815427e-28, 	ouWeight1FI[0][1], EPSILON);
-		Assert.assertEquals(0, 				ouWeight1FI[2][2], EPSILON);
-		Assert.assertEquals(1, 				ouWeight1FI[1][2], EPSILON);
-		Assert.assertEquals(2.184887e-41, 	ouWeight1FI[1][0], EPSILON);
+		Assert.assertEquals(1, 				ouWeight1FM.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(1, 				ouWeight1FM.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(0, 				ouWeight1FM.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(7.815427e-28, 	ouWeight1FM.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(1, 				ouWeight1FM[0][1], EPSILON);
-		Assert.assertEquals(1, 				ouWeight1FM[2][2], EPSILON);
-		Assert.assertEquals(0, 				ouWeight1FM[1][2], EPSILON);
-		Assert.assertEquals(7.815427e-28, 	ouWeight1FM[1][0], EPSILON);
+		Assert.assertEquals(2.208911e-38, 	ouWeight1RI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(0, 				ouWeight1RI.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(1, 				ouWeight1RI.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(3.282974e-57, 	ouWeight1RI.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(2.208911e-38, 	ouWeight1RI[0][1], EPSILON);
-		Assert.assertEquals(0, 				ouWeight1RI[2][2], EPSILON);
-		Assert.assertEquals(1, 				ouWeight1RI[1][2], EPSILON);
-		Assert.assertEquals(3.282974e-57, 	ouWeight1RI[1][0], EPSILON);
-		
-		Assert.assertEquals(1, 				ouWeight1RM[0][1], EPSILON);
-		Assert.assertEquals(1, 				ouWeight1RM[2][2], EPSILON);
-		Assert.assertEquals(0, 				ouWeight1RM[1][2], EPSILON);
-		Assert.assertEquals(2.208911e-38, 	ouWeight1RM[1][0], EPSILON);
+		Assert.assertEquals(1, 				ouWeight1RM.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(1, 				ouWeight1RM.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(0, 				ouWeight1RM.getEntry(1,	2), EPSILON);
+		Assert.assertEquals(2.208911e-38, 	ouWeight1RM.getEntry(1, 0), EPSILON);
 	}
 	
 	// Test 2
 	@Test
 	public void againstRweightMatTest2 () {
-		   
-		Assert.assertEquals(0.9495264, 	ouWeight2FI[0][1], EPSILON);
-		Assert.assertEquals(0.8935126, 	ouWeight2FI[1][1], EPSILON);
-		Assert.assertEquals(0.02392380, ouWeight2FI[2][0], EPSILON);
-		Assert.assertEquals(0.10648738, ouWeight2FI[3][0], EPSILON);
+		Assert.assertEquals(0.9495264, 	ouWeight2FI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(0.8935126, 	ouWeight2FI.getEntry(1, 1), EPSILON);
+		Assert.assertEquals(0.02392380, ouWeight2FI.getEntry(2, 0), EPSILON);
+		Assert.assertEquals(0.10648738, ouWeight2FI.getEntry(3, 0), EPSILON);
 		
-		Assert.assertEquals(1, ouWeight2FM[0][0], EPSILON);
-		Assert.assertEquals(1, ouWeight2FM[1][0], EPSILON);
-		Assert.assertEquals(1, ouWeight2FM[2][0], EPSILON);
-		Assert.assertEquals(1, ouWeight2FM[3][0], EPSILON);
+		Assert.assertEquals(1, ouWeight2FM.getEntry(0, 0), EPSILON);
+		Assert.assertEquals(1, ouWeight2FM.getEntry(1, 0), EPSILON);
+		Assert.assertEquals(1, ouWeight2FM.getEntry(2, 0), EPSILON);
+		Assert.assertEquals(1, ouWeight2FM.getEntry(3, 0), EPSILON);
 		
-		Assert.assertEquals(0.9680612, 	ouWeight2RI[0][1], EPSILON);
-		Assert.assertEquals(0.9244492, 	ouWeight2RI[1][1], EPSILON);
-		Assert.assertEquals(0.01350201, ouWeight2RI[2][0], EPSILON);
-		Assert.assertEquals(0.07555081, ouWeight2RI[3][0], EPSILON);
+		Assert.assertEquals(0.9680612, 	ouWeight2RI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(0.9244492, 	ouWeight2RI.getEntry(1, 1), EPSILON);
+		Assert.assertEquals(0.01350201, ouWeight2RI.getEntry(2, 0), EPSILON);
+		Assert.assertEquals(0.07555081, ouWeight2RI.getEntry(3, 0), EPSILON);
 		
-		Assert.assertEquals(1, ouWeight2RM[0][0], EPSILON);
-		Assert.assertEquals(1, ouWeight2RM[1][0], EPSILON);
-		Assert.assertEquals(1, ouWeight2RM[2][0], EPSILON);
-		Assert.assertEquals(1, ouWeight2RM[3][0], EPSILON);
+		Assert.assertEquals(1, ouWeight2RM.getEntry(0, 0), EPSILON);
+		Assert.assertEquals(1, ouWeight2RM.getEntry(1, 0), EPSILON);
+		Assert.assertEquals(1, ouWeight2RM.getEntry(2, 0), EPSILON);
+		Assert.assertEquals(1, ouWeight2RM.getEntry(3, 0), EPSILON);
 	}
 	
 	// Test 3
 	@Test
 	public void againstRweightMatTest3 () {
+		Assert.assertEquals(6.247136e-07, 	ouWeight3FI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(0, 				ouWeight3FI.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(0.9999994, 		ouWeight3FI.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(1.927008e-22, 	ouWeight3FI.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(6.247136e-07, 	ouWeight3FI[0][1], EPSILON);
-		Assert.assertEquals(0, 				ouWeight3FI[2][2], EPSILON);
-		Assert.assertEquals(0.9999994, 		ouWeight3FI[1][2], EPSILON);
-		Assert.assertEquals(1.927008e-22, 	ouWeight3FI[1][0], EPSILON);
+		Assert.assertEquals(0.9999994, 		ouWeight3FM.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(0, 				ouWeight3FM.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(0, 				ouWeight3FM.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(6.247136e-07, 	ouWeight3FM.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(0.9999994, 		ouWeight3FM[0][1], EPSILON);
-		Assert.assertEquals(0, 				ouWeight3FM[2][2], EPSILON);
-		Assert.assertEquals(0, 				ouWeight3FM[1][2], EPSILON);
-		Assert.assertEquals(6.247136e-07, 	ouWeight3FM[1][0], EPSILON);
+		Assert.assertEquals(1.533995e-07, 	ouWeight3RI.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(0, 				ouWeight3RI.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(0.9999998, 		ouWeight3RI.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(1.413785e-24, 	ouWeight3RI.getEntry(1, 0), EPSILON);
 		
-		Assert.assertEquals(1.533995e-07, 	ouWeight3RI[0][1], EPSILON);
-		Assert.assertEquals(0, 				ouWeight3RI[2][2], EPSILON);
-		Assert.assertEquals(0.9999998, 		ouWeight3RI[1][2], EPSILON);
-		Assert.assertEquals(1.413785e-24, 	ouWeight3RI[1][0], EPSILON);
-		
-		Assert.assertEquals(0.9999998, 		ouWeight3RM[0][1], EPSILON);
-		Assert.assertEquals(0, 				ouWeight3RM[2][2], EPSILON);
-		Assert.assertEquals(0, 				ouWeight3RM[1][2], EPSILON);
-		Assert.assertEquals(1.533995e-07, 	ouWeight3RM[1][0], EPSILON);
+		Assert.assertEquals(0.9999998, 		ouWeight3RM.getEntry(0, 1), EPSILON);
+		Assert.assertEquals(0, 				ouWeight3RM.getEntry(2, 2), EPSILON);
+		Assert.assertEquals(0, 				ouWeight3RM.getEntry(1, 2), EPSILON);
+		Assert.assertEquals(1.533995e-07, 	ouWeight3RM.getEntry(1, 0), EPSILON);
 	}
 }
