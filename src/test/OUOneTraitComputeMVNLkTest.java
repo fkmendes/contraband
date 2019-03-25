@@ -108,10 +108,10 @@ public class OUOneTraitComputeMVNLkTest {
 //		ouWeightRI = new double[n][4];
 //		ouWeightRM = new double[n][3];
 		 
-		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaFI, ouWeightFI, false);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaFM, ouWeightFM, true);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaRI, ouWeightRI, false);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaRM, ouWeightRM, true);
+		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaFI, ouWeightFI, true);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaFM, ouWeightFM, false);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaRI, ouWeightRI, true);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaRM, ouWeightRM, false);
 	    
 	    // Preparing for likelihood computation
 //	    RealMatrix realCovFI = new Array2DRowRealMatrix(ouTMatFI);
@@ -162,6 +162,8 @@ public class OUOneTraitComputeMVNLkTest {
 //		System.out.println("varToNdetRealCovFI");
 //		System.out.println(varToNdetRealCovFI);
 //		System.out.println();
+		
+		GeneralUtils.displayRealVector(ouWeightFI.operate(realThetaFI));
 		
 		// Finally computing likelihoods for OU
 		ouLik1FI = MVNUtils.getMVNLk(n, ouWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);
@@ -242,10 +244,10 @@ public class OUOneTraitComputeMVNLkTest {
 //		ouWeightRI = new double[n][2];
 //		ouWeightRM = new double[n][1];
 
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaFI, ouWeightFI, false);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaFM, ouWeightFM, true);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaRI, ouWeightRI, false);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaRM, ouWeightRM, true);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaFI, ouWeightFI, true);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaFM, ouWeightFM, false);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaRI, ouWeightRI, true);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaRM, ouWeightRM, false);
 
 	    // Preparing for likelihood computation
 //	    RealMatrix realCovFI = new Array2DRowRealMatrix(ouTMatFI);
@@ -365,10 +367,10 @@ public class OUOneTraitComputeMVNLkTest {
 //		ouWeightRI = new double[n][6];
 //		ouWeightRM = new double[n][5];
 
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaFI, ouWeightFI, false);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaFM, ouWeightFM, true);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaRI, ouWeightRI, false);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaRM, ouWeightRM, true);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaFI, ouWeightFI, true);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaFM, ouWeightFM, false);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaRI, ouWeightRI, true);
+	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaRM, ouWeightRM, false);
 	    
 	    // Preparing for likelihood computation
 //	    RealMatrix realCovFI = new Array2DRowRealMatrix(ouTMatFI);

@@ -149,7 +149,7 @@ public class OUUtils {
 		*/
 		Tree.getMetaData(rootNode, allNodeRegimes, "Regime"); // writes on regimes array
 		
-		if (useRootMetaData) { 		// column dimension of WMat must be r			
+		if (!useRootMetaData) { 		// column dimension of WMat must be r			
 			rootIndexOffset = 0;
 			rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue();
 			

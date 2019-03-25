@@ -80,7 +80,6 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	protected void populateMeanVector() {
 		bmSingleMeanValue = meanInput.get().getValue();
-		System.out.println("Proposed mean: " + bmSingleMeanValue);
 		bmMeanVector.set(bmSingleMeanValue);
 	}
 	
@@ -99,10 +98,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	protected void populateOneTraitDataVector() {
 		oneTraitData = oneTraitInput.get();
-		//TODO: this has to come out with traits in the same order as the species order in the newick format
-		//TODO: need to pass in the species order as argument of getTraitValues
 		oneTraitDataVector = new ArrayRealVector(oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder()));
-		// System.out.println(oneTraitDataVector);
 	}
 	
 	@Override

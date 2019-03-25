@@ -18,7 +18,7 @@ import beast.core.Input.Validate;
 public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 
 	final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Sigma^2, the variance of the process.", Validate.REQUIRED);
-	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "Root trait value, or theta_0, also the mean of the stationary distribution at the root if one is assumed.", Validate.OPTIONAL);
+	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "Root trait value, or theta_0, also the mean of the stationary distribution at the root if one is assumed.", Validate.REQUIRED);
 	final public Input<Boolean> eqDistInput = new Input<>("eqDist", "Whether or not to assume equilibrium (stationary) distribution at the root. The mean of that distribution will rootValue", Validate.REQUIRED);
 	final public Input<Boolean> useRootMetaDataInput = new Input<>("useRootMetaData", "Whether or not to use root meta data (specified optimum). If set to 'false', root optimum is set to eldest regime (regimes are numbered from the root toward the tips).", Validate.REQUIRED);
 	final public Input<RealParameter> alphaInput = new Input<>("alpha", "Pull toward optimum or optima.", Validate.REQUIRED);
@@ -65,6 +65,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		
 		super.initAndValidate();
 		
+		// reading in stuff
 		tree = getTree();
 		rootNode = getRootNode();
 		allLeafNodes = rootNode.getAllLeafNodes();
@@ -74,6 +75,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		useRootMetaData = useRootMetaDataInput.get();
 		alpha = alphaInput.get().getValue();
 		
+		// initializing stuff
 		if (useRootMetaData) {
 			thetaVector = new ArrayRealVector(nOptima+1);
 			wMat = new Array2DRowRealMatrix(nSpp, (nOptima+1));
@@ -82,6 +84,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 			thetaVector = new ArrayRealVector(nOptima);
 			wMat = new Array2DRowRealMatrix(nSpp, nOptima);
 		}
+		 
 		ouMeanVector = new ArrayRealVector(nSpp);
 		storedBMMeanVector = new ArrayRealVector(nSpp);
 		ouTMat = new Array2DRowRealMatrix(nSpp, nSpp);
@@ -128,12 +131,17 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		}
 		
 		theta = thetaInput.get().getValues();
+		
 		int i = 0;
+		if (useRootMetaData) {
+			thetaVector.setEntry(0, rootValue);
+			i++;
+		}
 		for (Double aTheta: theta) {
 			thetaVector.setEntry(i, aTheta);
 			i++;
 		} 
-		
+
 		OUUtils.computeWMatOneTrait(tree, rootNode, allLeafNodes, nSpp, nOptima, alpha, wMat, useRootMetaData);
 		ouMeanVector = wMat.operate(thetaVector);
 	}
