@@ -1,6 +1,9 @@
 package contraband;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
@@ -28,7 +31,7 @@ public class MVNUtils {
 			return;
 		}
 		
-		if (node.isRoot()) { nodeToRootPaths[nodeIdx] = 0.0;	}
+		if (node.isRoot()) { nodeToRootPaths[nodeIdx] = 0.0; }
 			
 		Node left = node.getChild(0);
 		int leftIdx = left.getNr();
@@ -67,6 +70,45 @@ public class MVNUtils {
 	
 	public static void populateTMatrix(Tree aTree, double[] nodeToRootPaths, double[][] tMat, List<Node> leftLeaves, List<Node> rightLeaves, String[] spOrderInTMat) {
 		fillNodeLeftRightLeaves(aTree.getRoot(), nodeToRootPaths, tMat, leftLeaves, rightLeaves, spOrderInTMat);
+	}
+
+	public static void populateNodeRateMatrix(Node node, Double[] nodeRates, RealMatrix rateMatrix) {
+		int nodeIdx = node.getNr();
+		double nodeRate = nodeRates[nodeIdx];
+		
+		if (node.isLeaf()) {
+			rateMatrix.setEntry(nodeIdx, nodeIdx, nodeRate);
+			return;
+		}
+		
+		Node leftChild = node.getChild(0);
+		List<Node> leftLeaves = new ArrayList<Node>();
+		if (!leftChild.isLeaf()) { leftLeaves = leftChild.getAllLeafNodes(); }
+		else { leftLeaves.add(leftChild); }
+		populateNodeRateMatrix(leftChild, nodeRates, rateMatrix);
+		
+		Node rightChild = node.getChild(1);
+		List<Node> rightLeaves = new ArrayList<Node>();
+		if (!rightChild.isLeaf()) { rightLeaves = rightChild.getAllLeafNodes(); }
+		else { rightLeaves.add(rightChild); }
+		populateNodeRateMatrix(rightChild, nodeRates, rateMatrix);
+		
+		if (!node.isRoot()) {		
+			for (Node leftLeaf: leftLeaves) {
+				int leftLeafIdx = leftLeaf.getNr();
+				
+				for (Node rightLeaf: rightLeaves) {
+					int rightLeafIdx = rightLeaf.getNr();
+					rateMatrix.setEntry(leftLeafIdx, rightLeafIdx, nodeRate);
+					rateMatrix.setEntry(rightLeafIdx, leftLeafIdx, nodeRate);
+				}
+			}
+		}
+	}
+	
+	public static void populateRateMatrix(Tree aTree, Double[] nodeRates, RealMatrix rateMatrix) {
+		Node rootNode = aTree.getRoot();
+		populateNodeRateMatrix(rootNode, nodeRates, rateMatrix);
 	}
 	
 	/*

@@ -137,7 +137,7 @@ public class OUUtils {
 	 * In this less general version, we ignore the root optimum metadata, and assume theta_0 is the same as one of the other thetas
 	 * (one of the optima). We should use this with ultrametric trees.
 	 */
-	 public static void computeWMatOneTrait(TreeParser Tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
+	 public static void computeWMatOneTrait(TreeParser tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
 	 // public static void computeWMatOneTrait(TreeParser Tree, List<Node> allLeafNodes, int n, int r, double alpha, double[][] wMat, boolean useRootMetaData) {
 		Double[] allNodeRegimes = new Double[rootNode.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
 		int rootIndexOffset;
@@ -147,7 +147,7 @@ public class OUUtils {
 		 * The regimes array is the computational equivalent of 
 		 * Beta_{i}^{\gamma} in equation A6 of Butler & King's Appendix 1
 		*/
-		Tree.getMetaData(rootNode, allNodeRegimes, "Regime"); // writes on regimes array
+		tree.getMetaData(rootNode, allNodeRegimes, "Regime"); // writes on regimes array
 		
 		if (!useRootMetaData) { 		// column dimension of WMat must be r			
 			rootIndexOffset = 0;

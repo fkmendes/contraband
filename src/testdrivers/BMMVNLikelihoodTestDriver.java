@@ -18,12 +18,9 @@ public class BMMVNLikelihoodTestDriver {
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 		
 		// initializing data
-		String[] spNames = new String[] { "sp1", "sp2", "sp3", "sp4" };
-		List<Taxon> taxaList = Taxon.createTaxonList(Arrays.asList(spNames));
-		TaxonSet taxonSet = new TaxonSet(taxaList);
 		String oneTraitValues = "sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 ";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
-		oneTraitData.initByName("nTraits", 1, "taxa", taxonSet, "traitValues", oneTraitValues);
+		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues);
 		
 		// sigmasq
 		Double[] sigmasqInput = new Double[] { 1.4822794118 };
