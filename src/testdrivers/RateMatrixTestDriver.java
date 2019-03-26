@@ -1,7 +1,5 @@
 package testdrivers;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -14,7 +12,7 @@ public class RateMatrixTestDriver {
 
 	public static void main(String[] args) {
 		// tree
-		String treeStr = "(((sp1[&Rate=1]:1.0, sp2[&Rate=1]:1.0)[&Rate=1]:1.0, sp3[&Rate=2.0]:2.0)[&Rate=2.0]:1.0, sp4[&Rate=3.0]:3.0)[&Rate=2.0];";
+		String treeStr = "(((sp1[&Rate=1]:1.0, sp2[&Rate=1]:1.0)[&Rate=1]:1.0, sp3[&Rate=2.0]:2.0)[&Rate=2.0]:1.0, sp4[&Rate=3.0]:3.0)[&Rate=4.0];";
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 
 		int nodeCount = myTree.getNodeCount();
@@ -26,8 +24,5 @@ public class RateMatrixTestDriver {
 		
 		MVNUtils.populateRateMatrix(myTree, nodeRates, rateMatrix);
 		GeneralUtils.displayRealMatrix(rateMatrix);
-//		for (int i=0; i<rateMatrix.length; ++i) {
-//			System.out.println(Arrays.toString(rateMatrix[i]));
-//		}
 	}
 }

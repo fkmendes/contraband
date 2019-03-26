@@ -104,6 +104,13 @@ public class MVNUtils {
 				}
 			}
 		}
+		else {
+			int nSpp = rateMatrix.getRowDimension();
+			for (int i=0; i<(nSpp-1); ++i) {
+				rateMatrix.setEntry((nSpp-1), i, nodeRate);
+				rateMatrix.setEntry(i, (nSpp-1), nodeRate);
+			}
+		}
 	}
 	
 	public static void populateRateMatrix(Tree aTree, Double[] nodeRates, RealMatrix rateMatrix) {
