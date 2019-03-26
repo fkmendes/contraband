@@ -68,6 +68,15 @@ public class OneValueContTraits extends BEASTObject {
 	}
 	
 	/*
+	 * One species, one trait (need to provide trait index)
+	 */
+	public double getSpValue(String spName, int idxOfTraitToReturn) {
+		double spValue = spValuesMap.get(spName).get(idxOfTraitToReturn);
+
+		return spValue;
+	}
+	
+	/*
 	 * One species, all traits (same order as in string)
 	 */
 	public double[] getSpValues(String spName) {		
