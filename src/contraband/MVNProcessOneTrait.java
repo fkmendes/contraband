@@ -19,12 +19,14 @@ import beast.util.TreeParser;
 public abstract class MVNProcessOneTrait extends Distribution {
 	
 	final public Input<TreeParser> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
+	final public Input<Double> rootEdgeLengthInput = new Input<>("rootEdgeLength", "root edge length.", 0.0, Validate.OPTIONAL);
 	
 	private boolean dirty;
 	
 	// for phylo T matrix
 	int nSpp;
 	private TreeParser tree;
+	private double rootEdgeLength;
 	private double[] nodeToRootPaths;
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
@@ -50,6 +52,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	@Override
 	public void initAndValidate() {
+		rootEdgeLength = rootEdgeLengthInput.get();
 		tree = treeInput.get();
 		nSpp = tree.getLeafNodeCount();
 		nodeToRootPaths = new double[tree.getNodeCount()];
@@ -73,7 +76,13 @@ public abstract class MVNProcessOneTrait extends Distribution {
 			}
 		}
 
-		// phyloTMat = new Array2DRowRealMatrix(phyloTMatInput); // could be used instead of loops
+		// setting root edge rows/cols in phyloTMat
+		if (rootEdgeLength != 0.0) {
+			for(int i=0; i<(nSpp-1); ++i) {
+				phyloTMat.setEntry(i, (nSpp-1), rootEdgeLength);
+				phyloTMat.setEntry((nSpp-1), i, rootEdgeLength);
+			}
+		}
 	};
 	
 	protected void populateMeanVector() {};

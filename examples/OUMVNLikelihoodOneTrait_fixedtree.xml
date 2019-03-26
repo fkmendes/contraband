@@ -15,8 +15,12 @@
 	  <distr id="Exp.OUSigmaSq" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
         </distribution>
 
+	<distribution id="AlphaPrior" spec="beast.math.distribution.Prior" x="@OUAlpha">
+	  <distr id="LogNormal.OUAlpha" spec="beast.math.distribution.Lognormal" S="" M=""/>
+	</distribution>
+	
         <distribution id="RootValuePrior" spec="beast.math.distributions.Prior" x="@OURootValue">
-	      <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+	      <distr id="Normal.OURootValue" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
       </distribution>
       <!-- END prior -->

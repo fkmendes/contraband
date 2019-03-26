@@ -1,22 +1,17 @@
 package test;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
 import beast.util.TreeParser;
 import contraband.BMMVNLikelihoodOneTrait;
 import contraband.OneValueContTraits;
 
 public class BMMVNLikelihoodOneTraitTest {
 
-	double lnLk;
+	double lnLk, lnLk2;
 	final static double EPSILON = 1e-8;
 	
 	@Before
@@ -42,10 +37,15 @@ public class BMMVNLikelihoodOneTraitTest {
 		BMMVNLikelihoodOneTrait BMLk = new BMMVNLikelihoodOneTrait();
 		BMLk.initByName("tree", myTree, "sigmasq", sigmasq, "mean", mean, "oneTraitData", oneTraitData);
 		lnLk = BMLk.calculateLogP();
+		
+		BMMVNLikelihoodOneTrait BMLk2 = new BMMVNLikelihoodOneTrait();
+		BMLk2.initByName("tree", myTree, "sigmasq", sigmasq, "mean", mean, "oneTraitData", oneTraitData, "rootEdgeLength", 1.0);
+		lnLk2 = BMLk2.calculateLogP();
 	}
 
 	@Test
 	public void testLnLk() {
-		Assert.assertEquals(-8.29469706, lnLk, EPSILON); 
+		Assert.assertEquals(-8.29469706, lnLk, EPSILON);
+		Assert.assertEquals(-9.43977535, lnLk2, EPSILON);
 	}
 }
