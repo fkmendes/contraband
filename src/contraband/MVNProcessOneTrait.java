@@ -78,10 +78,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 
 		// setting root edge rows/cols in phyloTMat
 		if (rootEdgeLength != 0.0) {
-			for(int i=0; i<(nSpp-1); ++i) {
-				phyloTMat.setEntry(i, (nSpp-1), rootEdgeLength);
-				phyloTMat.setEntry((nSpp-1), i, rootEdgeLength);
-			}
+			phyloTMat = phyloTMat.scalarAdd(rootEdgeLength);
 		}
 	};
 	
