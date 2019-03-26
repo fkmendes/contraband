@@ -35,9 +35,11 @@
 
 	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" traitValues="sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 " nTraits="1"/>
 
-	      <sigmasq id="OUSigmaSq" dimension="1" spec="parameter.RealParameter">1.4822794118</sigmasq>
-	    
-	      <rootValue id="OURootValue" dimension="1" spec="parameter.RealParameter">3.079142</rootValue>
+	      <sigmasq id="OUSigmaSq" dimension="1" spec="parameter.RealParameter">1.248328</sigmasq>
+
+	      <alpha id="OUalpha" dimension="1" spec="parameter.RealParameter">31.20814</alpha>
+	      
+	      <rootValue id="OURootValue" dimension="1" spec="parameter.RealParameter">2.228585e-40</rootValue>
 	    </distribution> <!-- END BMVN -->
 	    
       </distribution> <!-- END Likelihood -->

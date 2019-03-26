@@ -16,7 +16,6 @@ public class OneValueContTraits extends BEASTObject {
 
 	final public Input<Integer> nTraitsInput = new Input<>("nTraits", "contains number of traits.", Validate.REQUIRED);
 	final public Input<String> traitInput = new Input<>("traitValues", "contains String array, each string containing values for one of the traits for all species in sp_name=value form.", Validate.REQUIRED);
-//	final public Input<TaxonSet> taxaInput = new Input<>("taxa", "contains list of taxa to map traits to.", Validate.REQUIRED);
 	
 	Integer nTraits, nSpp;
 	String traitValueString;
@@ -28,9 +27,6 @@ public class OneValueContTraits extends BEASTObject {
 	public void initAndValidate() {
 		// Getting inputs
 		nTraits = nTraitsInput.get();
-//		nSpp = taxaInput.get().getTaxonCount();
-//		spNames = taxaInput.get().getTaxaNames();
-		// System.out.println(spNames);
 		traitValueString = traitInput.get().replaceAll("\\s+","");
 		
 		populateSpValuesMap();
