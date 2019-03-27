@@ -1,4 +1,5 @@
 package contraband;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -39,7 +40,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	private TreeParser tree;
 	private Node rootNode;
 	private List<Node> allLeafNodes;
-	private int nSpp, nOptima;
+	private Integer nSpp, nOptima;
 	
 	// parameters
 	private double sigmasq;
@@ -58,7 +59,8 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	private RealVector oneTraitDataVector;
 	
 	// stored stuff
-	private RealVector storedBMMeanVector;
+	private RealVector storedOUMeanVector;
+	private Double storedAlpha;
 	
 	@Override
 	public void initAndValidate() {	
@@ -75,7 +77,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		useRootMetaData = useRootMetaDataInput.get();
 		alpha = alphaInput.get().getValue();
 		
-		// initializing stuff
+		// initializing stuff whose size won't change for now
 		if (useRootMetaData) {
 			thetaVector = new ArrayRealVector(nOptima+1);
 			wMat = new Array2DRowRealMatrix(nSpp, (nOptima+1));
@@ -86,8 +88,10 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		}
 		 
 		ouMeanVector = new ArrayRealVector(nSpp);
-		storedBMMeanVector = new ArrayRealVector(nSpp);
 		ouTMat = new Array2DRowRealMatrix(nSpp, nSpp);
+		
+		// store
+		storedOUMeanVector = new ArrayRealVector(nSpp);
 		
 		// this instance vars
 		populateInstanceVars(true, true, true, true);
@@ -141,9 +145,17 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 			thetaVector.setEntry(i, aTheta);
 			i++;
 		} 
+//		System.out.println("Printing thetaVector");
+//		GeneralUtils.displayRealVector(thetaVector);
 
+		resetRealMatrix(wMat);
 		OUUtils.computeWMatOneTrait(tree, rootNode, allLeafNodes, nSpp, nOptima, alpha, wMat, useRootMetaData);
+//		System.out.println("Printing wMat");
+//		GeneralUtils.displayRealMatrix(wMat);
+
 		ouMeanVector = wMat.operate(thetaVector);
+//		System.out.println("Printing ouMeanVector");
+//		GeneralUtils.displayRealVector(ouMeanVector);
 	}
 	
 	@Override
@@ -204,20 +216,24 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	public void store() {
+		storedAlpha = alpha;
+		
 		for (int i=0; i<nSpp; ++i) {
-			storedBMMeanVector.setEntry(i, ouMeanVector.getEntry(i));
+			storedOUMeanVector.setEntry(i, ouMeanVector.getEntry(i));
 		}
-
+		
 		super.store();
 	}
 	
 	@Override
 	public void restore() {
 		RealVector realVecTmp;
-		
+				
 		realVecTmp = ouMeanVector;
-		ouMeanVector = storedBMMeanVector;
-		storedBMMeanVector = realVecTmp;
+		ouMeanVector = storedOUMeanVector;
+		storedOUMeanVector = realVecTmp;
+		
+		alpha = storedAlpha;
 		
 		super.restore();
 	}
@@ -238,5 +254,19 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	public void sample(State state, Random random) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void resetRealVector(RealVector aRealVector) {
+		for (int i=0; i<aRealVector.getDimension(); ++i) {
+			aRealVector.setEntry(i, 0.0);
+		}
+	}
+	
+	public void resetRealMatrix(RealMatrix aRealMatrix) {
+		for (int i=0; i<aRealMatrix.getRowDimension(); ++i) {
+			for (int j=0; j<aRealMatrix.getRowDimension(); ++j) {
+				aRealMatrix.setEntry(i, j, 0.0);
+			}
+		}
 	}
 }

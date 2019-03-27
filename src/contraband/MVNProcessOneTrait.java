@@ -90,7 +90,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	protected void populateOneTraitDataVector() {};
 	
-	protected void populateLogP() { 
+	protected void populateLogP() {
 		logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVector, invVCVMat, detVCVMat);
 	};
 	

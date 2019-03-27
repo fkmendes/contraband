@@ -5,6 +5,8 @@
     <state id="state" storeEvery="5000">
       <stateNode idref="OUSigmaSq"/>
       <stateNode idref="OURootValue"/>
+      <stateNode idref="OUAlpha"/>
+      <stateNode idref="OUTheta"/>
     </state>
 
     <distribution id="posterior" spec="util.CompoundDistribution">
@@ -15,49 +17,59 @@
 	  <distr id="Exp.OUSigmaSq" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
         </distribution>
 
-	<distribution id="AlphaPrior" spec="beast.math.distribution.Prior" x="@OUAlpha">
-	  <distr id="LogNormal.OUAlpha" spec="beast.math.distribution.Lognormal" S="" M=""/>
+	<distribution id="RootValuePrior" spec="beast.math.distributions.Prior" x="@OURootValue">
+	  <distr id="Normal.OURootValue" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+        </distribution>
+
+	<distribution id="AlphaPrior" spec="beast.math.distributions.Prior" x="@OUAlpha">
+	  <distr id="LogNormal.OUAlpha" spec="beast.math.distributions.LogNormalDistributionModel" S="1.0" M="1.0"/>
 	</distribution>
 	
-        <distribution id="RootValuePrior" spec="beast.math.distributions.Prior" x="@OURootValue">
-	      <distr id="Normal.OURootValue" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+	<distribution id="ThetaValuePrior" spec="beast.math.distributions.Prior" x="@OUTheta">
+	  <distr id="Normal.OUTheta" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
+
       </distribution>
       <!-- END prior -->
 
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
-	    <distribution id="OUMVN" spec="contraband.OUMVNLikelihoodOneTrait">	    
-	      <tree id="FixedTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="(((sp1[&Regime=1]:1.0, sp2[&Regime=1]:1.0)[&Regime=1]:1.0, sp3[&Regime=2]:2.0)[&Regime=0]:1.0, sp4[&Regime=0]:3.0)[&Regime=0];" offset="0" singlechild="false">
+	<distribution id="OUMVN" spec="contraband.OUMVNLikelihoodOneTrait" nOptima="3" eqDist="false" useRootMetaData="true">	    
+	  <tree id="FixedTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="(((sp1[&amp;Regime=1]:1.0,sp2[&amp;Regime=1]:1.0)[&amp;Regime=1]:1.0,sp3[&amp;Regime=2]:2.0)[&amp;Regime=0]:1.0,sp4[&amp;Regime=0]:3.0)[&amp;Regime=0];" offset="0" singlechild="false" binarizeMultifurcations="true">
 
-	        <taxonset id="TaxonSet" spec="TaxonSet">
-	          <taxon id="sp1" spec="Taxon"/>
-	          <taxon id="sp2" spec="Taxon"/>
-	          <taxon id="sp3" spec="Taxon"/>
-	          <taxon id="sp4" spec="Taxon"/>
-	        </taxonset>
-	      </tree>
+	    <taxonset id="TaxonSet" spec="TaxonSet">
+	      <taxon id="sp1" spec="Taxon"/>
+	      <taxon id="sp2" spec="Taxon"/>
+	      <taxon id="sp3" spec="Taxon"/>
+	      <taxon id="sp4" spec="Taxon"/>
+	    </taxonset>
+	  </tree>
 
-	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" traitValues="sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 " nTraits="1"/>
+	  <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" traitValues="sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 " nTraits="1"/>
 
-	      <sigmasq id="OUSigmaSq" dimension="1" spec="parameter.RealParameter">1.248328</sigmasq>
+	  <sigmasq id="OUSigmaSq" dimension="1" spec="parameter.RealParameter">1.248328</sigmasq>
 
-	      <alpha id="OUalpha" dimension="1" spec="parameter.RealParameter">31.20814</alpha>
+	  <alpha id="OUAlpha" dimension="1" spec="parameter.RealParameter">31.20814</alpha>
 	      
-	      <rootValue id="OURootValue" dimension="1" spec="parameter.RealParameter">2.228585e-40</rootValue>
-	    </distribution> <!-- END BMVN -->
-	    
+	  <rootValue id="OURootValue" dimension="1" spec="parameter.RealParameter">2.228585e-40</rootValue>
+
+	  <theta id="OUTheta" dimension="3" spec="parameter.RealParameter">-4.047373e-16 4.3 5.9</theta>
+	</distribution> <!-- END BMVN -->
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
 
     <operator id="SigmaSqScaler" spec="ScaleOperator" parameter="@OUSigmaSq" scaleFactor="0.75" weight="3.0"/>
-    <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@OURootValue" windowSize="10.0" weight="3.0"/>
+    <operator id="RootValueScaler" spec="RealRandomWalkOperator" parameter="@OURootValue" windowSize="10.0" weight="3.0"/>
+    <operator id="AlphaSqScaler" spec="ScaleOperator" parameter="@OUAlpha" scaleFactor="0.75" weight="3.0"/>
+    <operator id="ThetaValueScaler" spec="RealRandomWalkOperator" parameter="@OUTheta" windowSize="10.0" weight="3.0"/>
 	
     <logger id="tracelog" fileName="OUMVN_fixedtree.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
-	  <log idref="posterior"/>
+      <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
-	  <log idref="OUSigmaSq"/>
+      <log idref="OUSigmaSq"/>
       <log idref="OURootValue"/>
+      <log idref="OUAlpha"/>
+      <log idref="OUTheta"/>
     </logger>
 
     <logger id="screenlog" logEvery="1">
