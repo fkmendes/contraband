@@ -138,7 +138,6 @@ public class OUUtils {
 	 * (one of the optima). We should use this with ultrametric trees.
 	 */
 	 public static void computeWMatOneTrait(TreeParser tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
-	 // public static void computeWMatOneTrait(TreeParser Tree, List<Node> allLeafNodes, int n, int r, double alpha, double[][] wMat, boolean useRootMetaData) {
 		Double[] allNodeRegimes = new Double[rootNode.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
 		int rootIndexOffset;
 		int rootRegimeIdx;	// Eldest regime index

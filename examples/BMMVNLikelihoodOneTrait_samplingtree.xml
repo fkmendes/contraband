@@ -71,14 +71,14 @@
     </logger>
 
     <logger id="screenlog" logEvery="1">
-        <log idref="posterior"/>
-        <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
-        <log idref="likelihood"/>
-        <log idref="prior"/>
+      <log idref="posterior"/>
+      <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+      <log idref="likelihood"/>
+      <log idref="prior"/>
     </logger>
 
     <logger id="treelog.t:firsthalf" fileName="BMMVN_samplingtree.trees" logEvery="5000" mode="tree">
-        <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
+      <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>
 </beast>

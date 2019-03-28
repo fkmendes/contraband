@@ -1,5 +1,4 @@
 package contraband;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -221,18 +220,18 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		for (int i=0; i<nSpp; ++i) {
 			storedOUMeanVector.setEntry(i, ouMeanVector.getEntry(i));
 		}
-		
+
 		super.store();
 	}
 	
 	@Override
 	public void restore() {
 		RealVector realVecTmp;
-				
+
 		realVecTmp = ouMeanVector;
 		ouMeanVector = storedOUMeanVector;
 		storedOUMeanVector = realVecTmp;
-		
+
 		alpha = storedAlpha;
 		
 		super.restore();
@@ -264,7 +263,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	public void resetRealMatrix(RealMatrix aRealMatrix) {
 		for (int i=0; i<aRealMatrix.getRowDimension(); ++i) {
-			for (int j=0; j<aRealMatrix.getRowDimension(); ++j) {
+			for (int j=0; j<aRealMatrix.getColumnDimension(); ++j) {
 				aRealMatrix.setEntry(i, j, 0.0);
 			}
 		}

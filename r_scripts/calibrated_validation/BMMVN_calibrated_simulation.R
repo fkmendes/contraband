@@ -11,6 +11,7 @@ simulate <- TRUE
 write.xmls <- TRUE
 write.shellscripts <- TRUE
 
+n.param <- 2
 n.sim <- 100
 n.spp <- 50
 sigma.rate <- 5
@@ -61,7 +62,7 @@ tr <- sim.bd.taxa.age(n.spp, 1, lambda, mu, age=100, mrca=TRUE)[[1]]; write.tree
 sigmas <- rexp(n.sim, rate=sigma.rate); sigmas[1] # 0.02914
 x0s <- rnorm(n.sim, mean=x0.mean, sd=x0.sd); x0s[1] # 0.1836
 datasets <- vector("list", n.sim) # storing sims
-mles <- data.frame(matrix(NA,100,2))
+mles <- data.frame(matrix(NA,100,n.param))
 
 ## for putting on template
 traits.4.template <- vector("list", n.sim) 
