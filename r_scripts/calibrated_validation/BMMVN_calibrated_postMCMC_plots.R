@@ -4,7 +4,6 @@ library(gridExtra)
 library(sjPlot)
 
 source("calibrated_validation_utils.R")
-load(rdata.path)
 
 n.sim <- 100
 n.param <- 2
@@ -21,6 +20,7 @@ template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_va
 res.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_results/"
 res.files <- mixedsort(paste0(res.path,list.files(res.path)))
 rdata.path <- gsub("_template.xml", ".RData", template.path)
+load(rdata.path)
 
 ## for non-ultrametric analysis (comment out or in w.r.t. to lines above)
 ## template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_nonultra_template.xml"
