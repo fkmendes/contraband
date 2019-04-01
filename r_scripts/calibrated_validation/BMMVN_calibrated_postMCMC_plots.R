@@ -19,13 +19,14 @@ prior.means <- c(1/sigma.rate, x0s.mean)
 template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_template.xml"
 res.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_results/"
 res.files <- mixedsort(paste0(res.path,list.files(res.path)))
-rdata.path <- gsub("_template.xml", ".RData", template.path)
-load(rdata.path)
 
 ## for non-ultrametric analysis (comment out or in w.r.t. to lines above)
 ## template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_nonultra_template.xml"
 ## res.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_nonultra_results/"
 ## res.files <- mixedsort(paste0(res.path,list.files(res.path)))
+
+rdata.path <- gsub("_template.xml", ".RData", template.path)
+load(rdata.path)
 
 ############# DOING STUFF #############
 
@@ -93,7 +94,7 @@ plot(tr, show.tip.label=F)
 dev.off()
 
 png("~/Desktop/ultrametric_tree_BM_validation.png", height=10, width=20, unit="cm", res=300)
-plot_grid(plotlist=mget(paste0("plot", 1:2)))
+plot_grid(mget(paste0("plot", 1:2)))
 dev.off()
 
 ## png("~/Desktop/fossil_tree_BM_validation.png", height=10, width=20, unit="cm", res=300)
