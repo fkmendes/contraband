@@ -38,8 +38,8 @@ Rscript BM_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVN '00:30:00' BMM
 ### (1.2) Plotting the mean posterior of the two BM parameters against the true values
 
 ```
-Rscript BM_calibrated_postMCMC_plots.R ./ BMMVNLikelihoodOneTrait_fixedtree_template.xml BMMVN ultrametric
-Rscript BM_calibrated_postMCMC_plots.R ./ BMMVNLikelihoodOneTrait_fixedtree_nonultra_template.xml BMMVN nonultrametric
+Rscript BM_calibrated_postMCMC_plots.R ./ BMMVNLikelihoodOneTrait_fixedtree.RData 100 BMMVN ultra
+Rscript BM_calibrated_postMCMC_plots.R ./ BMMVNLikelihoodOneTrait_fixedtree_nonultra.RData 100 BMMVN nonultra
 ```
 
 ## (2) Brownian motion (BM) pruning likelihood
@@ -49,14 +49,26 @@ We use the same tree and data sets from the BMMVN calibration.
 
 ```
 cd /path/to/calibrated_validation/
-mkdir BMPrune_xmls/
-mkdir BMPrune_shellscripts/
+mkdir BMPrune_ultra_xmls/
+mkdir BMPrune_ultra_shellscripts/
 
-Rscript BM_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMPrune '00:10:00' BMPruneLikelihoodOneTrait_fixedtree_template.xml
+Rscript BM_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMPrune '00:15:00' BMPruneLikelihoodOneTrait_fixedtree_template.xml
+
+```
+
+Then we uncomment the hard-coded non-ultrametric tree, and run simulations on it as well.
+
+```
+cd /path/to/calibrated_validation/
+mkdir BMPrune_nonultra_xmls/
+mkdir BMPrune_nonultra_shellscripts/
+
+Rscript BM_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMPrune '00:15:00' BMPruneLikelihoodOneTrait_fixedtree_nonultra_template.xml
 ```
 
 ### (2.2) Plotting the mean posterior of the two BM parameters against the true values
 
 ```
-Rscript BM_calibrated_postMCMC_plots.R ./ BMPruneLikelihoodOneTrait_fixedtree_template.xml BMPrune
+Rscript BM_calibrated_postMCMC_plots.R ./ BMPruneLikelihoodOneTrait_fixedtree.RData 100 BMPrune ultra
+Rscript BM_calibrated_postMCMC_plots.R ./ BMPruneLikelihoodOneTrait_fixedtree_nonultra.RData 100 BMPrune nonultra
 ```
