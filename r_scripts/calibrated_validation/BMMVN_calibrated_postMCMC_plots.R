@@ -1,23 +1,29 @@
 library(ggplot2)
 library(gtools)
 library(sjPlot)
-
 source("calibrated_validation_utils.R")
 
-n.sim <- 100
+args = commandArgs(trailingOnly=TRUE)
+
+### SCRIPT FLAGS AND PATH VARIABLES ###
+
+cal.validation.folder <- args[1]
+res.path <- paste0(cal.validation.folder, "BMMVNLikelihoodOneTrait_results/")
+res.files <- mixedsort(paste0(res.path,list.files(res.path)))
+template.name <- args[2]
+template.path <- paste0(cal.validation.folder, template.name)
+n.sim <- args[2]
 n.param <- 2
 sigma.rate <- 5
 x0s.mean <- 0
+job.prefix <- args[3] # e.g., "BMMVN" or "BMPrune"
+tree.type <- args[4] # e.g., "ultrametric" or "nonultrametric"
 
 param.labs <- c(expression(sigma^2), expression(mu))
 param.names <- c("sigmasq", "mu")
 beast.param.names <- c("BMSigmaSq", "BMMean")
 mle.param.names <- c("sigmasq.mle", "mu.mle")
 prior.means <- c(1/sigma.rate, x0s.mean)
-
-template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_template.xml"
-res.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_results/"
-res.files <- mixedsort(paste0(res.path,list.files(res.path)))
 
 ## for non-ultrametric analysis (comment out or in w.r.t. to lines above)
 ## template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNLikelihoodOneTrait_fixedtree_nonultra_template.xml"
@@ -84,19 +90,10 @@ for (i in 1:n.param) {
 }
 list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
 
-png("~/Desktop/ultrametric_tree.png", height=10, width=10, unit="cm", res=100)
+png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_tree.png"), height=10, width=10, unit="cm", res=100)
 plot(tr, show.tip.label=F)
 dev.off()
 
-png("~/Desktop/fossil_tree.png", height=10, width=10, unit="cm", res=100)
-plot(tr, show.tip.label=F)
-dev.off()
-
-png("~/Desktop/ultrametric_tree_BM_validation.png", height=10, width=20, unit="cm", res=300)
+png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.png"), height=10, width=20, unit="cm", res=300)
 plot_grid(mget(paste0("plot", 1:2)))
 dev.off()
-
-## png("~/Desktop/fossil_tree_BM_validation.png", height=10, width=20, unit="cm", res=300)
-## plot_grid(plotlist=mget(paste0("plot", 1:2)))
-## dev.off()
-
