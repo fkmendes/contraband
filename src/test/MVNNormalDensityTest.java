@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class MVNnormalDensityTest {
+public class MVNNormalDensityTest {
 	
 	final static double EPSILON = 1e-4;
 	
@@ -18,9 +18,9 @@ public class MVNnormalDensityTest {
 		double[] mean = 	{2.3, 0.5, 3};
 		double[] sigsq = 	{1, 0.1, 4.2};
 		
-		res1 = MVNUtils.normalDensity(value[0], mean[0], sigsq[0]);
-		res2 = MVNUtils.normalDensity(value[1], mean[1], sigsq[1]);
-		res3 = MVNUtils.normalDensity(value[2], mean[2], sigsq[2]);	
+		res1 = MVNUtils.getNormalLk(value[0], mean[0], sigsq[0]);
+		res2 = MVNUtils.getNormalLk(value[1], mean[1], sigsq[1]);
+		res3 = MVNUtils.getNormalLk(value[2], mean[2], sigsq[2]);	
 		System.out.println(res2);
 	} 
 	
