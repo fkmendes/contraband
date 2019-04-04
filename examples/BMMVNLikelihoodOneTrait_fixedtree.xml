@@ -34,7 +34,9 @@
 	        </taxonset>
 	      </tree>
 
-	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" traitValues="sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 " nTraits="1"/>
+	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" nTraits="1" spNames="sp1,sp2,sp3,sp4">
+	      	<traitValues id="fixedTraitValues" spec="parameter.RealParameter">4.1 4.5 5.9 0.0</traitValues>
+	      </oneTraitData>
 
 	      <sigmasq id="BMSigmaSq" dimension="1" spec="parameter.RealParameter">1.4822794118</sigmasq>
 	    

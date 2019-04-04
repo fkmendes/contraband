@@ -1,12 +1,10 @@
 package test;
 
-import java.util.Arrays;
-import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
+
+import beast.core.parameter.RealParameter;
 import contraband.OneValueContTraits;
 
 public class OneValueContTraitsTest {
@@ -18,16 +16,17 @@ public class OneValueContTraitsTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		String oneTraitValues = "sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 ";
-		String twoTraitValues = "sp1=4.1,sp2=4.5 ,sp4=0.0,sp3=5.9 |sp1=5.1, sp2=5.5,sp3=6.9,sp4=1.0";
+		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
+		RealParameter twoTraitValues = new RealParameter(new Double[] { 4.1, 5.1, 4.5, 5.5, 5.9, 6.9, 0.0, 1.0 });
+		String spNames = "sp1,sp2,sp3,sp4";
 		String[] spNameInNewickOrder = { "sp1", "sp2", "sp3", "sp4" };
 		String[] spNameInNewickOrder2 = { "sp4", "sp2", "sp3", "sp1" };
 		
 		OneValueContTraits oneTrait = new OneValueContTraits();
-		oneTrait.initByName("nTraits", 1, "traitValues", oneTraitValues);
+		oneTrait.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
 		
 		OneValueContTraits twoTrait = new OneValueContTraits();
-		twoTrait.initByName("nTraits", 2, "traitValues", twoTraitValues);
+		twoTrait.initByName("nTraits", 2, "spNames", spNames, "traitValues", twoTraitValues);
 		
 		spValues = oneTrait.getSpValues("sp3");
 		sp3 = spValues[0];
@@ -35,7 +34,7 @@ public class OneValueContTraitsTest {
 		
 		sp4 = twoTrait.getSpValues("sp4");
 		sp4OneValue = twoTrait.getSpValue("sp4", 1);
-		
+	
 		sp4Expected = new double[] { 0.0, 1.0 };
 		
 		trait1 = twoTrait.getTraitValues(0, spNameInNewickOrder);

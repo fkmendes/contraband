@@ -1,11 +1,6 @@
 package testdrivers;
 
-import java.util.Arrays;
-import java.util.List;
-
 import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
 import beast.util.TreeParser;
 import contraband.BMMVNLikelihoodOneTrait;
 import contraband.OneValueContTraits;
@@ -18,9 +13,10 @@ public class BMMVNLikelihoodTestDriver {
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 		
 		// initializing data
-		String oneTraitValues = "sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 ";
+		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
+		String spNames = "sp1,sp2,sp3,sp4";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
-		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues);
+		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
 		
 		// sigmasq
 		Double[] sigmasqInput = new Double[] { 1.4822794118 };
