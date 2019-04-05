@@ -40,7 +40,7 @@ public class RateMatrixTest {
 		
 		MVNUtils.populateRateMatrix(myTree, nodeRates, rateMatrix);
 		
-		row1Expected = new double[] { 1.0, 1.0, 2.0, 4.0 };
+		row1Expected = new double[] { 1.0, 1.0, 2.0, 4.0 }; // all elements should have weighted averages for their colors, this is wrong!
 		row1 = rateMatrix.getRow(0);
 		row2Expected = new double[] { 1.0, 1.0, 2.0, 4.0 };
 		row2 = rateMatrix.getRow(1);

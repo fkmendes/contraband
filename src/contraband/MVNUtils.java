@@ -1,10 +1,7 @@
 package contraband;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
@@ -165,7 +162,7 @@ public class MVNUtils {
 	/*
 	 * One-dimensional, simple normal density for n samples, in log space
 	 */
-	public static double getSampleNormalLogLk(double[] samples, Double mu, Double logSigma2) {
+	public static double getSampleNormalLogLk(double[] samples, Double mu, Double logSigma2) {		
 		double n = samples.length;
 		
 		double sumToSubtract = 0.0;

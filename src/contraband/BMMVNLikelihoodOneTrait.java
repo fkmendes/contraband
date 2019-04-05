@@ -2,7 +2,6 @@ package contraband;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -46,17 +45,17 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		
 		nSpp = getNSpp();
 		bmMeanVector = new ArrayRealVector(nSpp);
+		oneTraitDataVector = new ArrayRealVector(nSpp);
 		storedBMMeanVector = new ArrayRealVector(nSpp);
 		
 		// this instance vars
 		populateInstanceVars(true, true, true);
-		populateOneTraitDataVector(); // won't change, so outside populateInstanceVars
+		// won't change, so outside populateInstanceVars
 		                              // also has to come AFTER setting phyloTMat
 		                              // (as this sets the order of species names in T matrix)
 		
 		// setting parent class instance vars
 		populateParentInstanceVars(true, true);
-		setProcessOneTraitDataVec(oneTraitDataVector);
 	}
 	
 	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean) {
@@ -66,6 +65,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 			populateVCVMatrix();
 			populateInvVCVMatrix();
 		}
+		populateOneTraitDataVector();
 	}
 	
 	private void populateParentInstanceVars(boolean updateVCVMat, boolean updateMean) {
@@ -75,6 +75,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 			setProcessVCVMat(bmVCVMat);
 			setProcessInvVCVMat(bmInvVCVMat);
 		}
+		setProcessOneTraitDataVec(oneTraitDataVector);
 	}
 	
 	@Override
@@ -98,7 +99,12 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	protected void populateOneTraitDataVector() {
 		oneTraitData = oneTraitInput.get();
-		oneTraitDataVector = new ArrayRealVector(oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder()));
+		
+		int i = 0;
+		for (double thisTraitValue: oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder())) {
+			oneTraitDataVector.setEntry(i, thisTraitValue);
+			++i;
+		}
 	}
 	
 	@Override
@@ -106,7 +112,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		updatePhyloTMat = false;
 		updateVCVMat = false;
 		updateMean = false;
-		
+
 		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
 		if (sigmasqInput.isDirty()) { updateVCVMat = true; }
 		if (meanInput.isDirty()) { updateMean = true; }
@@ -147,6 +153,10 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	public void restore() {
 		RealVector realVecTmp;
+		
+//		realVecTmp = oneTraitDataVector;
+//		oneTraitDataVector = storedOneTraitDataVector;
+//		storedOneTraitDataVector = realVecTmp;
 		
 		realVecTmp = bmMeanVector;
 		bmMeanVector = storedBMMeanVector;

@@ -43,9 +43,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private double detVCVMat;
 	
 	// data
-	RealVector oneTraitDataVector;
+	private RealVector oneTraitDataVector;
 
 	// stored stuff
+	private RealVector storedMeanVec; // need for integration with JIVE (unsure why...?)
 	private RealMatrix storedPhyloTMat; // needed for tree operators
 	private RealMatrix storedInvVCVMat; // (below) needed for morphology parameter operators
 	private double storedDetVCVMat;
@@ -63,6 +64,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		phyloTMat = new Array2DRowRealMatrix(phyloTMatDouble);
 
 		// stored stuff
+		storedMeanVec = new ArrayRealVector(nSpp);
 		storedPhyloTMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 	}
@@ -155,7 +157,9 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	@Override
 	public void store() {	
-		for (int i=0; i<nSpp; ++i) {		
+		for (int i=0; i<nSpp; ++i) {	
+			storedMeanVec.setEntry(i, meanVec.getEntry(i));
+			
 			for (int j=0; j<nSpp; ++j) {
 				storedPhyloTMat.setEntry(i, j, phyloTMat.getEntry(i, j));
 				storedInvVCVMat.setEntry(i, j, invVCVMat.getEntry(i, j));
@@ -168,6 +172,11 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	@Override
 	public void restore() {
 		RealMatrix realMatTmp;
+		RealVector realVecTmp;
+		
+		realVecTmp = meanVec;
+		meanVec = storedMeanVec;
+		storedMeanVec = realVecTmp;
 		
 		realMatTmp = phyloTMat;
 		phyloTMat = storedPhyloTMat;

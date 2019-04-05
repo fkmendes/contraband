@@ -31,26 +31,23 @@ public class JiveLikelihood extends Distribution {
 	}
 	
 	@Override
-	public double calculateLogP() {
-		if (logSigmasqsInput.isDirty()) { logSigmasqs = logSigmasqsInput.get().getValues(); }
-		if (meansInput.isDirty()) { mus = meansInput.get().getValues(); }
+	public double calculateLogP() {	
+		logSigmasqs = logSigmasqsInput.get().getValues();
+		mus = meansInput.get().getValues();
 		
 		double logLik = 0.0;
 		
 		int i = 0;
 		for (String spName: spNames) {
-			logLik += MVNUtils.getSampleNormalLogLk(sampleData.getSample(spName), mus[i], logSigmasqs[i]);
+			double thisSpLogLik = MVNUtils.getSampleNormalLogLk(sampleData.getSample(spName), mus[i], logSigmasqs[i]);
+			logLik += thisSpLogLik;
 			i++;
 		}
-		
+
 		return logLik;
 	}
 	
-	@Override
-	protected boolean requiresRecalculation() {
-		return super.requiresRecalculation();
-	}
-	
+
 	@Override
 	public List<String> getArguments() {
 		// TODO Auto-generated method stub

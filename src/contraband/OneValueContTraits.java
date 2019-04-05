@@ -3,12 +3,12 @@ package contraband;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import beast.core.BEASTObject;
+import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
 
-public class OneValueContTraits extends BEASTObject {
+public class OneValueContTraits extends CalculationNode {
 
 	final public Input<Integer> nTraitsInput = new Input<>("nTraits", "contains number of traits.", Validate.REQUIRED);
 	final public Input<String> spNamesInput = new Input<>("spNames", "specifies species names separated by comma (e.g., sp1,sp2,sp3), while specifying which real parameter refers to which species in traitValues.", Validate.REQUIRED);
@@ -17,7 +17,10 @@ public class OneValueContTraits extends BEASTObject {
 	Integer nTraits, nSpp;
 	String[] spNames;
 	Double[] traitValues, thisSpTraitValues;
-	Map<String, Double[]> spValuesMap = new HashMap<>(); 
+	Map<String, Double[]> spValuesMap;
+	
+	// stored stuff
+	Map<String, Double[]> storedSpValuesMap;
 	
 	@Override
 	public void initAndValidate() {
@@ -25,10 +28,12 @@ public class OneValueContTraits extends BEASTObject {
 		nTraits = nTraitsInput.get();
 		spNames = spNamesInput.get().replace("\\s+", "").split(",");
 		nSpp = spNames.length;
-		traitValues = traitInput.get().getValues();
+		spValuesMap = new HashMap<String, Double[]>();
 		
 		populateSpValuesMap();
 		checkAllSpHaveValues();
+		
+		storedSpValuesMap = new HashMap<String, Double[]>();
 	}
 
 	private void checkAllSpHaveValues() {
@@ -36,6 +41,7 @@ public class OneValueContTraits extends BEASTObject {
 	}
 	
 	private void populateSpValuesMap() {
+		traitValues = traitInput.get().getValues();
 		
 		// Looping over species
 		int ithSpp = 0;
@@ -75,7 +81,11 @@ public class OneValueContTraits extends BEASTObject {
 	/*
 	 * One species, one trait (need to provide trait index)
 	 */
-	public double getSpValue(String spName, int idxOfTraitToReturn) {
+	public double getSpValue(String spName, int idxOfTraitToReturn) {	
+		if (traitInput.isDirty()) {
+			populateSpValuesMap();
+		}
+
 		double spValue = spValuesMap.get(spName)[idxOfTraitToReturn];
 
 		return spValue;
@@ -84,7 +94,11 @@ public class OneValueContTraits extends BEASTObject {
 	/*
 	 * One species, all traits (same order as in string)
 	 */
-	public double[] getSpValues(String spName) {		
+	public double[] getSpValues(String spName) {	
+		if (traitInput.isDirty()) {
+			populateSpValuesMap();
+		}
+
 		double[] spValues = new double[nTraits]; // used by getter (different traits, same species)
 		
 		int i=0;
@@ -100,7 +114,10 @@ public class OneValueContTraits extends BEASTObject {
 	 * One trait, all species (order provided by spNamesInput) 
 	 */
 	public double[] getTraitValues(int traitIdx, String[] strings) {
-//		nSpp = strings.length;
+		if (traitInput.isDirty()) {
+			populateSpValuesMap();
+		}
+
 		double[] traitValues = new double[nSpp]; // used by getter (same trait, different species)
 		
 		int ithSpp=0;
@@ -109,5 +126,34 @@ public class OneValueContTraits extends BEASTObject {
 			ithSpp++;
 		}
 		return traitValues;
+	}
+	
+	public boolean amIDirty() {
+		return traitInput.isDirty();
+	}
+	
+	@Override
+	protected boolean requiresRecalculation() {
+		return true;
+	}
+	
+	@Override
+	public void store() {
+		for (String spName: spValuesMap.keySet()) {
+			storedSpValuesMap.put(spName, spValuesMap.get(spName).clone());
+		}
+		
+		super.store();
+	}
+	
+	@Override
+	public void restore() {
+		Map<String, Double[]> mapTmp;
+		
+		mapTmp = spValuesMap;
+		spValuesMap = storedSpValuesMap;
+		storedSpValuesMap = mapTmp;
+		
+		super.restore();
 	}
 }
