@@ -23,8 +23,8 @@ public class OneValueContTraitsTestDriver {
 		OneValueContTraits twoTrait = new OneValueContTraits();
 		twoTrait.initByName("nTraits", 2, "spNames", spNames, "traitValues", twoTraitValues);
 		
-		double[] spValues = oneTrait.getSpValues("sp3");
-		double[] spValues2 = twoTrait.getSpValues("sp4");
+		Double[] spValues = oneTrait.getSpValues("sp3");
+		Double[] spValues2 = twoTrait.getSpValues("sp4");
 		double spValue3 = twoTrait.getSpValue("sp2", 1);
 		
 		System.out.println(Arrays.toString(spValues));

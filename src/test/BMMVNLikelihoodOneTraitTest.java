@@ -17,7 +17,7 @@ public class BMMVNLikelihoodOneTraitTest {
 	@Before
 	public void setUp() throws Exception {
 		// tree
-		String treeStr = "((sp1:1.0, sp2:1.0):1.0,sp3:2.0);";
+		String treeStr = "((sp1:1.0,sp2:1.0):1.0,sp3:2.0);";
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 		
 		// initializing data	
@@ -27,11 +27,11 @@ public class BMMVNLikelihoodOneTraitTest {
 		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
 		
 		// sigmasq
-		Double[] sigmasqInput = new Double[] { 0.270476 };
+		Double[] sigmasqInput = new Double[] { 0.2704762 };
 		RealParameter sigmasq = new RealParameter(sigmasqInput);
 		
 		// mean vector
-		Double[] meanVectorInput = new Double[] { 4.9857143 };
+		Double[] meanVectorInput = new Double[] { 4.985714 };
 		RealParameter mean = new RealParameter(meanVectorInput);
 		
 		// likelihood

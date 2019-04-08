@@ -22,44 +22,45 @@ public class OUMVNLikelihoodOneTraitTest2 {
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 		
 		// initializing data		
-		String oneTraitValues = "sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 ";
+		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
+		String spNames = "sp1,sp2,sp3,sp4";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
-		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues);
+		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues, "spNames", spNames);
 		
 		// sigmasq
-		Double[] sigmasqInput = new Double[] { 4.003551 };
+		Double[] sigmasqInput = new Double[] { 4.601164 };
 		RealParameter sigmasq1 = new RealParameter(sigmasqInput);
-		sigmasqInput = new Double[] { 1.237864 };
-		RealParameter sigmasq2 = new RealParameter(sigmasqInput);
-		sigmasqInput = new Double[] { 4.601164 };
-		RealParameter sigmasq3 = new RealParameter(sigmasqInput);
 		sigmasqInput = new Double[] { 6.841867 };
+		RealParameter sigmasq2 = new RealParameter(sigmasqInput);
+		sigmasqInput = new Double[] { 4.003551 };
+		RealParameter sigmasq3 = new RealParameter(sigmasqInput);
+		sigmasqInput = new Double[] { 1.237864 };
 		RealParameter sigmasq4 = new RealParameter(sigmasqInput);
 		
 		// alpha
-		Double[] alphaInput = new Double[] { 0.7465763 };
+		Double[] alphaInput = new Double[] { 0.8609833 };
 		RealParameter alpha1 = new RealParameter(alphaInput);
-		alphaInput = new Double[] { 1.40338e-08 };
-		RealParameter alpha2 = new RealParameter(alphaInput);
-		alphaInput = new Double[] { 0.8609833 };
-		RealParameter alpha3 = new RealParameter(alphaInput);
 		alphaInput = new Double[] { 0.7085376 };
+		RealParameter alpha2 = new RealParameter(alphaInput);
+		alphaInput = new Double[] { 0.7465763 };
+		RealParameter alpha3 = new RealParameter(alphaInput);
+		alphaInput = new Double[] { 1.40338e-08 };
 		RealParameter alpha4 = new RealParameter(alphaInput);
 		
 		// root value
-		Double[] rootValueInput = new Double[] { -33.591241 };
+		Double[] rootValueInput = new Double[] { -46.965464 };
 		RealParameter rootValue1 = new RealParameter(rootValueInput);
-		rootValueInput = new Double[] {-46.965464 };
+		rootValueInput = new Double[] { -33.591241 };
 		RealParameter rootValue2 = new RealParameter(rootValueInput);
 		
 		// theta
-		Double[] thetaInput = { 6.449917 };
+		Double[] thetaInput = { 6.201598 };
 		RealParameter theta1 = new RealParameter(thetaInput);
-		thetaInput = new Double[] { 2.792045 };
-		RealParameter theta2 = new RealParameter(thetaInput);
-		thetaInput = new Double[] { 6.201598 };
-		RealParameter theta3 = new RealParameter(thetaInput);
 		thetaInput = new Double[] { 3.586504 };
+		RealParameter theta2 = new RealParameter(thetaInput);
+		thetaInput = new Double[] { 6.449917 };
+		RealParameter theta3 = new RealParameter(thetaInput);
+		thetaInput = new Double[] { 2.792045 };
 		RealParameter theta4 = new RealParameter(thetaInput);
 		
 		// likelihood 1 (condition on rootValue, theta_0 as parameter)
@@ -70,28 +71,28 @@ public class OUMVNLikelihoodOneTraitTest2 {
 		
 		// likelihood 2 (condition on rootValue, theta_0 = first theta)
 		OUMVNLikelihoodOneTrait OULk2 = new OUMVNLikelihoodOneTrait();
-				OULk2.initByName("tree", myTree, "sigmasq", sigmasq2, "alpha", alpha2, "theta", theta2, "nOptima", 3,
+				OULk2.initByName("tree", myTree, "sigmasq", sigmasq2, "alpha", alpha2, "theta", theta2, "nOptima", 1,
 						"useRootMetaData", false, "oneTraitData", oneTraitData, "rootValue", rootValue1, "eqDist", true);
 		lnLk2 = OULk2.calculateLogP();
 		
 		// likelihood 3 (rootValue as r.v., theta_0 as parameter)
 		OUMVNLikelihoodOneTrait OULk3 = new OUMVNLikelihoodOneTrait();
-				OULk3.initByName("tree", myTree, "sigmasq", sigmasq3, "alpha", alpha3, "theta", theta3, "nOptima", 3,
+				OULk3.initByName("tree", myTree, "sigmasq", sigmasq3, "alpha", alpha3, "theta", theta3, "nOptima", 1,
 						"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue2, "eqDist", false);
 		lnLk3 = OULk3.calculateLogP();
 		
 		// likelihood 4 (rootValue as r.v., theta_0 = first theta)
 		OUMVNLikelihoodOneTrait OULk4 = new OUMVNLikelihoodOneTrait();
-				OULk4.initByName("tree", myTree, "sigmasq", sigmasq4, "alpha", alpha4, "theta", theta4, "nOptima", 3,
+				OULk4.initByName("tree", myTree, "sigmasq", sigmasq4, "alpha", alpha4, "theta", theta4, "nOptima", 1,
 						"useRootMetaData", false, "oneTraitData", oneTraitData, "rootValue", rootValue2, "eqDist", false);
 		lnLk4 = OULk4.calculateLogP();
 	}
 
 	@Test
 	public void testLnLk() {
-		Assert.assertEquals(-7.630117, lnLk1, EPSILON); 
-		Assert.assertEquals(-8.457486, lnLk2, EPSILON);
-		Assert.assertEquals(-7.63854, lnLk3, EPSILON);
-		Assert.assertEquals(-8.817273, lnLk4, EPSILON); 
+		Assert.assertEquals(-7.63854, lnLk1, EPSILON); 
+		Assert.assertEquals(-8.817273, lnLk2, EPSILON);
+		Assert.assertEquals(-7.630117, lnLk3, EPSILON);
+		Assert.assertEquals(-8.457486, lnLk4, EPSILON); 
 	}
 }

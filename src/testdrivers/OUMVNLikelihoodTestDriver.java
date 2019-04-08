@@ -15,23 +15,20 @@ public class OUMVNLikelihoodTestDriver {
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 				
 		// initializing data		
-		String oneTraitValues = "sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 ";
+		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
+		String spNames = "sp1,sp2,sp3,sp4";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
-		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues);
+		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues, "spNames", spNames);
 				
 		// sigmasq
-//		Double[] sigmasqInput = new Double[] { 1.248328 };
 		Double[] sigmasqInput = new Double[] { 1.734117 };
 		RealParameter sigmasq = new RealParameter(sigmasqInput);
 				
 		// alpha
-//		Double[] alphaInput = new Double[] { 31.20814 };
 		Double[] alphaInput = new Double[] { 43.35287 };
 		RealParameter alpha = new RealParameter(alphaInput);	
 		
 		// root value
-//		Double[] rootValueInput = new Double[] { 2.228585e-40 };
-//		Double[] rootValueInput = new Double[] { 8.128044e-27 };
 		Double[] rootValueInput = new Double[] { 3.348633e-56 };
 		RealParameter rootValue = new RealParameter(rootValueInput);
 				
@@ -44,7 +41,7 @@ public class OUMVNLikelihoodTestDriver {
 		OULk.initByName("tree", myTree, "sigmasq", sigmasq, "alpha", alpha, "theta", theta, "nOptima", 3,
 				"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue, "eqDist", true);
 		
-		lnLk = OULk.calculateLogP();
-		System.out.println(lnLk);
+		lnLk = OULk.calculateLogP(); 
+		System.out.println(lnLk); // 2.1482918780359883
 	}
 }

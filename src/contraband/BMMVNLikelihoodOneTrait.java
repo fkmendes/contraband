@@ -101,7 +101,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		oneTraitData = oneTraitInput.get();
 		
 		int i = 0;
-		for (double thisTraitValue: oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder())) {
+		for (Double thisTraitValue: oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder())) {
 			oneTraitDataVector.setEntry(i, thisTraitValue);
 			++i;
 		}

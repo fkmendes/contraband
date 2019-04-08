@@ -97,7 +97,7 @@ public class OUUtils {
 			for (int j = 0; j < n; ++j) {
 				cellValue = divByTwoAlpha * Math.exp(-alpha * (tMat[i][i] + tMat[j][j] - 2.0 * tMat[i][j]));
 				
-				if (rootIsRandVar) {
+				if (!rootIsRandVar) {
 					cellValue *= (1.0 - Math.exp(-2.0 * alpha * tMat[i][j]));
 				}
 				

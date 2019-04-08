@@ -1,5 +1,6 @@
 package contraband;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class OneValueContTraits extends CalculationNode {
 	public void initAndValidate() {
 		// Getting inputs
 		nTraits = nTraitsInput.get();
+		thisSpTraitValues = new Double[nTraits];
 		spNames = spNamesInput.get().replace("\\s+", "").split(",");
 		nSpp = spNames.length;
 		spValuesMap = new HashMap<String, Double[]>();
@@ -43,13 +45,28 @@ public class OneValueContTraits extends CalculationNode {
 	private void populateSpValuesMap() {
 		traitValues = traitInput.get().getValues();
 		
-		// Looping over species
-		int ithSpp = 0;
-		for (String spName: spNames) {
-			thisSpTraitValues = Arrays.copyOfRange(traitValues, ithSpp*nTraits, ithSpp*nTraits+nTraits);
-			spValuesMap.put(spName, thisSpTraitValues);
-			ithSpp++;
+		// Looping over jth traits
+		for (int j=0; j < nTraits; ++j) {
+		
+			// Looping over ith species
+			int i=0;
+			for (String spName: spNames) {
+				if (!spValuesMap.containsKey(spName)) {
+					spValuesMap.put(spName, new Double[nTraits]);
+				}
+				
+				spValuesMap.get(spName)[j] = traitValues[(j*nSpp) + i];
+				++i;
+			}
 		}
+
+		// Looping over species
+//		int ithSpp = 0;
+//		for (String spName: spNames) {
+//			thisSpTraitValues = Arrays.copyOfRange(traitValues, ithSpp*nTraits, ithSpp*nTraits+nTraits);
+//			spValuesMap.put(spName, thisSpTraitValues);
+//			ithSpp++;
+//		}
 	}
 	
 //	private void populateSpValuesMap() {
@@ -81,12 +98,12 @@ public class OneValueContTraits extends CalculationNode {
 	/*
 	 * One species, one trait (need to provide trait index)
 	 */
-	public double getSpValue(String spName, int idxOfTraitToReturn) {	
+	public Double getSpValue(String spName, int idxOfTraitToReturn) {	
 		if (traitInput.isDirty()) {
 			populateSpValuesMap();
 		}
 
-		double spValue = spValuesMap.get(spName)[idxOfTraitToReturn];
+		Double spValue = spValuesMap.get(spName)[idxOfTraitToReturn];
 
 		return spValue;
 	}
@@ -94,37 +111,38 @@ public class OneValueContTraits extends CalculationNode {
 	/*
 	 * One species, all traits (same order as in string)
 	 */
-	public double[] getSpValues(String spName) {	
+	public Double[] getSpValues(String spName) {	
 		if (traitInput.isDirty()) {
 			populateSpValuesMap();
 		}
 
-		double[] spValues = new double[nTraits]; // used by getter (different traits, same species)
-		
-		int i=0;
-		for (Double spValue: spValuesMap.get(spName)) {
-			spValues[i] = spValue.doubleValue();
-			i++;
-		}
+//		double[] spValues = new double[nTraits]; // used by getter (different traits, same species)
+//		
+//		int i=0;
+//		for (Double spValue: spValuesMap.get(spName)) {
+//			spValues[i] = spValue.doubleValue();
+//			i++;
+//		}
 
-		return spValues;
+		return spValuesMap.get(spName);
 	}
 	
 	/*
 	 * One trait, all species (order provided by spNamesInput) 
 	 */
-	public double[] getTraitValues(int traitIdx, String[] strings) {
+	public Double[] getTraitValues(int traitIdx, String[] strings) {
 		if (traitInput.isDirty()) {
 			populateSpValuesMap();
 		}
 
-		double[] traitValues = new double[nSpp]; // used by getter (same trait, different species)
+		Double[] traitValues = new Double[nSpp]; // used by getter (same trait, different species)
 		
 		int ithSpp=0;
 		for (String spName: strings) {
 			traitValues[ithSpp] = getSpValues(spName)[traitIdx];
 			ithSpp++;
 		}
+		
 		return traitValues;
 	}
 	
