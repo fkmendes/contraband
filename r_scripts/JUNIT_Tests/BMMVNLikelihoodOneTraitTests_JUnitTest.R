@@ -1,8 +1,8 @@
 # author: Fabio K. Mendes
 # This R script gives us the expected values for JUnit tests
-# (1) 'BMMVNLikelihoodTest'
-# (2) 'BMMVNLikelihoodTest2'
-# (3) 'BMMVNLikelihoodTest3'
+# (1) 'BMMVNLikelihoodOneTraitTest'
+# (2) 'BMMVNLikelihoodOneTraitTest2'
+# (3) 'BMMVNLikelihoodOneTraitTest3'
 
 library(mvMORPH)
 library(TreeSim)
@@ -11,7 +11,7 @@ library(Rcpp)
 sourceCpp(file="./bm_direct_new.cpp")
 source("coalBM_lib.R")
 
-## (1) 'BMMVNLikelihoodTest'
+## (1) 'BMMVNLikelihoodOneTraitTest'
 
 tr <- read.tree(text="((sp1:1.0,sp2:1.0):1.0,sp3:2.0);")
 
@@ -42,7 +42,7 @@ res$mean # 4.9857143
 res$sigma.mat # 0.2704762
 res$lnL # -3.5779335 # this is analytically
 
-## (2) 'BMMVNLikelihoodTest2'
+## (2) 'BMMVNLikelihoodOneTraitTest2'
 
 set.seed(123)
 
@@ -65,7 +65,7 @@ res$sigma # 0.02813127
 res$theta # 2.405835
 res$LogLik # -75.79013
 
-## (3) 'BMMVNLikelihoodTest3'
+## (3) 'BMMVNLikelihoodOneTraitTest3'
 
 set.seed(123)
 

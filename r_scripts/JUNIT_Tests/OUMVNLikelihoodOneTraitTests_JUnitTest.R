@@ -1,13 +1,13 @@
 # author: Fabio K. Mendes
 # This R script gives us the expected values for JUnit tests
-# (1) 'OUMVNLikelihoodTest'
-# (2) 'OUMVNLikelihoodTest2'
-# (3) 'OUMVNLikelihoodTest3'
+# (1) 'OUMVNLikelihoodOneTraitTest'
+# (2) 'OUMVNLikelihoodOneTraitTest2'
+# (3) 'OUMVNLikelihoodOneTraitTest3'
 
 library(mvMORPH)
 library(TreeSim)
 
-## (1) 'OUMVNLikelihoodTest'
+## (1) 'OUMVNLikelihoodOneTraitTest'
 
 ## tr <- read.tree(text="(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):1.0,sp4:3.0);")
 ## plotTree(tr, node.numbers=T) # to see node numbers
@@ -30,7 +30,7 @@ res$theta # theta_0  2.228585e-40 --> this is the root value! (first element in 
 
 res$LogLik # 2.148292
 
-## (2) 'OUMVNLikelihoodTest2'
+## (2) 'OUMVNLikelihoodOneTraitTest2'
 
 tr <- read.tree(text="(((sp1:2.0,sp2:1.0):1.0,sp3:4.0):1.0,sp4:3.0);")
 
@@ -60,7 +60,7 @@ res$alpha # 1.40338e-08
 res$theta # theta_0 2.792045
 res$LogLik # -8.457486
 
-## (3) 'OUMVNLikelihoodTest3'
+## (3) 'OUMVNLikelihoodOneTraitTest3'
 
 set.seed(123)
 
