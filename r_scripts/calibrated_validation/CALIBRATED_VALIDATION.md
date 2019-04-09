@@ -72,3 +72,16 @@ Rscript BM_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMPrune '00:15:00' B
 Rscript BM_calibrated_postMCMC_plots.R ./ BMPruneLikelihoodOneTrait_fixedtree.RData 100 BMPrune ultra
 Rscript BM_calibrated_postMCMC_plots.R ./ BMPruneLikelihoodOneTrait_fixedtree_nonultra.RData 100 BMPrune nonultra
 ```
+
+## (2) Ornstein-Uhlenbeck (OU) multivariate normal likelihood
+### (2.1) Simulating one trait under the vanilla (1 optimum for the whole tree) Ornstein-Uhlenbeck (OU), writing .xmls from template and .sh scripts.
+
+We use an exponential prior (rate=5) for the evolutionary rate, sigma^2. We use a normal prior for the root value (mean=0.0 and stdev=2.0) and optimum (mean=1.0, stdev=2.0), and a lognormal prior for alpha (mean = stdev = 1.0).
+
+```
+cd /path/to/calibrated_validation/
+mkdir OUVanillaMVNOneTrait_ultra_xmls/
+mkdir OUVanillaMVNOneTrait_ultra_shellscripts/
+
+Rscript OUVanilla_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVN '00:30:00' OUVanillaMVNLikelihoodOneTrait_fixedtree_template.xml ultra OUVanillaMVNLikelihoodOneTrait_fixedtree_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+```

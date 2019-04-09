@@ -15,7 +15,7 @@
 
 \section{Multivariate-normal likelihood class}
 
-Priors for simulations were $\sigma^2 \sim \text{N}(0, 2)$, and $\mu \sim \text{Exp}(5)$. Tree (50 tips) was fixed, but came from a Yule prior.
+Priors for simulations were $\sigma^2 \sim \text{N}(0, 2)$, and $\mu \sim \text{Exp}(5)$. We simulated a single tree (50 tips) from a Yule prior and fixed it.
 
 \begin{figure}[!ht]
   \begin{minipage}[c]{.4\textwidth}
@@ -34,14 +34,14 @@ Priors for simulations were $\sigma^2 \sim \text{N}(0, 2)$, and $\mu \sim \text{
 \begin{center}
 \begin{tabular}{c | c}
     Parameter & Coverage (\%) \\\hline
-    $\mu$ & 94\\
-    $\sigma^2$ & 93
+    $\mu$ & 97\\
+    $\sigma^2$ & 91
 \end{tabular}
 \end{center}
 
 \newpage
 
-\noindent We used the same data sets for the non-ultrametric tree. Approximately half of the tips were made short manually (0.1 length).
+\noindent We re-simulated data on this other tree with approximately half of the tips made short manually (all branch lengths = 0.1).
 
 \begin{figure}[!ht]
   \begin{minipage}[c]{.4\textwidth}
@@ -60,8 +60,8 @@ Priors for simulations were $\sigma^2 \sim \text{N}(0, 2)$, and $\mu \sim \text{
 \begin{center}
 \begin{tabular}{c | c}
     Parameter & Coverage (\%) \\\hline
-    $\mu$ & 97\\
-    $\sigma^2$ & 90
+    $\mu$ & 99\\
+    $\sigma^2$ & 91
 \end{tabular}
 \end{center}
 

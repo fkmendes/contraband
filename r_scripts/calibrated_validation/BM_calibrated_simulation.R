@@ -64,7 +64,8 @@ datasets <- vector("list", n.sim) # storing sims
 mles <- data.frame(matrix(NA,100,n.param))
 
 ## for putting on template
-traits.4.template <- vector("list", n.sim) 
+traits.4.template <- vector("list", n.sim)
+spnames.4.template <- paste(tr$tip.label, collapse=",")
 taxon.strs.4.template <- paste(paste0("<taxon id=\"", tr$tip.label, "\" spec=\"Taxon\"/>"), collapse="\n                  ")
 
 ## actually simulating and populating strs for template
@@ -74,15 +75,14 @@ if (simulate) {
         cat(paste0("Calling fitContinuous for sim #",i,"\n"))
         mle.res = fitContinuous(tr, datasets[[i]], model="BM")
         mles[i,] = c(mle.res$opt$sigsq, mle.res$opt$z0)
-        traits.4.template[[i]] = paste(paste0(names(datasets[[i]]), "=", datasets[[i]]), collapse=",")
+        traits.4.template[[i]] = paste(datasets[[i]], collapse=" ")
     }
 
     ## saving true values and MLEs to .RData
     true.param.df <- cbind(data.frame(sigmas, x0s), mles)
     names(true.param.df) <- c("sigmasq", "mu", "sigmasq.mle", "mu.mle")
     save(tr, true.param.df, file=rdata.path)
-}
-else {
+} else {
     load(rdata.path) # don't simulate, just load saved simulation
 }
 
@@ -111,6 +111,7 @@ if (write.xmls) {
             line = gsub("\\[BMMeanPriorMeanHere\\]", format(x0.mean, nsmall=1), line)
             line = gsub("\\[BMMeanPriorStdDevHere\\]", format(x0.sd, nsmall=1), line)
             line = gsub("\\[TreeHere\\]", write.tree(tr), line)
+            line = gsub("\\[SpNamesHere\\]", spnames.4.template, line)
             line = gsub("\\[TaxonSetHere\\]", taxon.strs.4.template, line)
             line = gsub("\\[TraitValuesHere\\]", traits.4.template[[sim.idx]], line)
             line = gsub("\\[FileNameHere\\]", paste0(res.path, file.name), line)

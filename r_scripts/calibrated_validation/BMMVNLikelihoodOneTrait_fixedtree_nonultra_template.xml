@@ -13,7 +13,6 @@
       <distribution id="prior" spec="util.CompoundDistribution">
                 
         <distribution id="BMSigmaSqPrior" spec="beast.math.distributions.Prior" x="@BMSigmaSq">
-	  <!-- <distr id="LogNormal.BMSigmaSq" spec="beast.math.distributions.LogNormalDistributionModel" offset="0.0" M="[BMSigmaSqPriorMeanHere]" S="[BMSigmaSqPriorStdDevHere]"/> -->
 	  <distr id="Exp.BMSigmaSq" spec="beast.math.distributions.Exponential" offset="0.0" mean="[BMSigmaSqPriorMeanHere]"/>
         </distribution>
 
@@ -33,7 +32,9 @@
 	        </taxonset>
 	      </tree>
 
-	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" traitValues="[TraitValuesHere]" nTraits="1"/>
+	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" spNames="[SpNamesHere]" nTraits="1">
+		<traitValues id="fixedTraitValues" spec="parameter.RealParameter">[TraitValuesHere]</traitValues>
+              </oneTraitData>
 
 	      <sigmasq id="BMSigmaSq" dimension="1" spec="parameter.RealParameter">1.743801</sigmasq>
 	    
