@@ -64,7 +64,7 @@ public class ColorManager extends CalculationNode {
 	
 	private void fillNodeColorValues(Node aNode) {
 		int nodeIdx = aNode.getNr();
-		System.out.println("nodeIdx=" + nodeIdx);
+		// System.out.println("nodeIdx=" + nodeIdx); // for debugging 
 		
 		if (aNode.isLeaf()) {		 
 			spColorValuesMatrix[nodeIdx][nodeIdx] = nodeWeightedColorValues[nodeIdx]; // populating diagonal entries
@@ -73,10 +73,11 @@ public class ColorManager extends CalculationNode {
 		
 		if (aNode.isRoot()) { nodeWeightedColorValues[nodeIdx] = 0.0; }
 		
-		List<Node> leafNodes = aNode.getAllLeafNodes();
-		for (Node node: leafNodes) {
-			System.out.println("leaf: " + node.getID());
-		}
+		// for debugging
+//		List<Node> leafNodes = aNode.getAllLeafNodes();
+//		for (Node node: leafNodes) {
+//			System.out.println("leaf: " + node.getID());
+//		}
 		
 		Node left = aNode.getChild(0);
 		int leftIdx = left.getNr();
@@ -122,7 +123,8 @@ public class ColorManager extends CalculationNode {
 	}
 	
 	public double getNodeColorValue(Node aNode) {
-		populateColorValues();
+		colorValues = colorValuesInput.get().getValues();
+		colorAssignments = colorAssignmentInput.get().getValues();
 		
 		return colorValues[colorAssignments[aNode.getNr()]];
 	}
