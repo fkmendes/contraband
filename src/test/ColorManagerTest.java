@@ -31,7 +31,7 @@ public class ColorManagerTest {
 		ColorManager colors = new ColorManager();
 		colors.initByName("tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments);
 				
-		colorValuesMat = colors.getSpColorValuesMatrix();
+		colorValuesMat = colors.getSpColorValuesMat();
 		
 		expected1row = new double[] {
 				((0.8*1.0) + (0.6*1.0) + (0.4*2.0)),

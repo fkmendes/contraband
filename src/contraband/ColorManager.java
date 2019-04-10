@@ -22,7 +22,7 @@ public class ColorManager extends CalculationNode {
 	final public Input<IntegerParameter> colorAssignmentInput = new Input<>("colorAssignments", "Integers representing colors, one per branch.", Validate.REQUIRED);
 	
 	private int nSpp, nNodes;
-	private double[][] spColorValuesMatrix;
+	private double[][] spColorValuesMat;
 	private double[] nodeWeightedColorValues;
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
@@ -32,27 +32,36 @@ public class ColorManager extends CalculationNode {
 	private Integer[] colorAssignments;
 	
 	// stored stuff
-	double[][] storedSpColorValuesMatrix;
+	double[][] storedSpColorValuesMat;
 	
 	@Override
 	public void initAndValidate() {
-		readInput();
+		tree = treeInput.get();
+		colorValues = colorValuesInput.get().getValues();
+		colorAssignments = colorAssignmentInput.get().getValues();
+
 		checkDimensions();
 		
 		nSpp = tree.getLeafNodeCount();
 		nNodes = tree.getNodeCount();
 		nodeWeightedColorValues = new double[nNodes];
-		spColorValuesMatrix = new double[nSpp][nSpp];
+		spColorValuesMat = new double[nSpp][nSpp];
 		leftLeaves = new ArrayList<Node>();
 		rightLeaves = new ArrayList<Node>();
 		
-		storedSpColorValuesMatrix = new double[nSpp][nSpp];
+		storedSpColorValuesMat = new double[nSpp][nSpp];
 	}
 
-	private void readInput() {
-		tree = treeInput.get();
-		colorValues = colorValuesInput.get().getValues();
-		colorAssignments = colorAssignmentInput.get().getValues();
+	private void readInputBeforeGetters() {
+		if (treeInput.isDirty()) {
+			tree = treeInput.get();
+		}
+		if (colorValuesInput.isDirty()) {
+			colorValues = colorValuesInput.get().getValues();
+		}
+		if (colorAssignmentInput.isDirty()) {
+			colorAssignments = colorAssignmentInput.get().getValues();
+		}
 	}
 	
 	private void checkDimensions() {
@@ -62,7 +71,7 @@ public class ColorManager extends CalculationNode {
 		}
 	}
 	
-	private void populateColorValues() {
+	private void populateColorValueMat() {
 		fillNodeColorValues(tree.getRoot());
 	}
 	
@@ -71,7 +80,7 @@ public class ColorManager extends CalculationNode {
 		// System.out.println("nodeIdx=" + nodeIdx); // for debugging 
 		
 		if (aNode.isLeaf()) {		 
-			spColorValuesMatrix[nodeIdx][nodeIdx] = nodeWeightedColorValues[nodeIdx]; // populating diagonal entries
+			spColorValuesMat[nodeIdx][nodeIdx] = nodeWeightedColorValues[nodeIdx]; // populating diagonal entries
 			return;
 		}
 		
@@ -109,8 +118,8 @@ public class ColorManager extends CalculationNode {
 		
 		for (Node aLeftLeaf: leftLeaves) {
 			for (Node aRightLeaf: rightLeaves) {
-				spColorValuesMatrix[aLeftLeaf.getNr()][aRightLeaf.getNr()] = nodeWeightedColorValues[nodeIdx];
-				spColorValuesMatrix[aRightLeaf.getNr()][aLeftLeaf.getNr()] = nodeWeightedColorValues[nodeIdx];
+				spColorValuesMat[aLeftLeaf.getNr()][aRightLeaf.getNr()] = nodeWeightedColorValues[nodeIdx];
+				spColorValuesMat[aRightLeaf.getNr()][aLeftLeaf.getNr()] = nodeWeightedColorValues[nodeIdx];
 			}	
 		}
 		
@@ -120,15 +129,15 @@ public class ColorManager extends CalculationNode {
 		return;
 	}
 	
-	public double[][] getSpColorValuesMatrix() {
-		populateColorValues();
+	public double[][] getSpColorValuesMat() {
+		readInputBeforeGetters();
+		populateColorValueMat();
 		
-		return spColorValuesMatrix;
+		return spColorValuesMat;
 	}
 	
 	public double getNodeColorValue(Node aNode) {
-		colorValues = colorValuesInput.get().getValues();
-		colorAssignments = colorAssignmentInput.get().getValues();
+		readInputBeforeGetters();
 		
 		return colorValues[colorAssignments[aNode.getNr()]];
 	}
@@ -141,7 +150,7 @@ public class ColorManager extends CalculationNode {
 	@Override
 	public void store() {
 		for (int ithRow=0; ithRow<nNodes; ++ithRow) {
-			System.arraycopy(spColorValuesMatrix[ithRow], 0, storedSpColorValuesMatrix[ithRow], 0, spColorValuesMatrix[ithRow].length);
+			System.arraycopy(spColorValuesMat[ithRow], 0, storedSpColorValuesMat[ithRow], 0, spColorValuesMat[ithRow].length);
 		}
 		
 		super.store();
@@ -151,9 +160,9 @@ public class ColorManager extends CalculationNode {
 	public void restore() {
 		double[][] matTmp;
 		
-		matTmp = spColorValuesMatrix;
-		spColorValuesMatrix = storedSpColorValuesMatrix;
-		storedSpColorValuesMatrix = matTmp;
+		matTmp = spColorValuesMat;
+		spColorValuesMat = storedSpColorValuesMat;
+		storedSpColorValuesMat = matTmp;
 		
 		super.restore();
 	}

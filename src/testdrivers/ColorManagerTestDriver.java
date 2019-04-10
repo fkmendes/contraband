@@ -22,7 +22,7 @@ public class ColorManagerTestDriver {
 		ColorManager colors = new ColorManager();
 		colors.initByName("tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments);
 		
-		double[][] colorValuesMat = colors.getSpColorValuesMatrix();
+		double[][] colorValuesMat = colors.getSpColorValuesMat();
 		for (int i=0; i<colorValuesMat.length; ++i) {
 			System.out.println(Arrays.toString(colorValuesMat[i]));
 		}
