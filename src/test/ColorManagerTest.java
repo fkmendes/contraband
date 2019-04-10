@@ -19,7 +19,7 @@ public class ColorManagerTest {
 	public static double sp1, sp3, sp12, expectedSp1, expectedSp3, expectedSp12;
 	
 	@BeforeClass
-	public static void setUpTest1() throws Exception {
+	public static void setUp() throws Exception {
 		// tree
 		String treeStr = "(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):2.0,(sp4:2.5,sp5:2.5):1.5);";
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);

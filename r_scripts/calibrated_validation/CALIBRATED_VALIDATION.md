@@ -83,5 +83,11 @@ cd /path/to/calibrated_validation/
 mkdir OUVanillaMVNOneTrait_ultra_xmls/
 mkdir OUVanillaMVNOneTrait_ultra_shellscripts/
 
-Rscript OUVanilla_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVN '00:30:00' OUVanillaMVNLikelihoodOneTrait_fixedtree_template.xml ultra OUVanillaMVNLikelihoodOneTrait_fixedtree_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+Rscript OUVanilla_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUVanillaMVN '00:45:00' OUVanillaMVNLikelihoodOneTrait_fixedtree_template.xml ultra OUVanillaMVNLikelihoodOneTrait_fixedtree_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/contraband.jar
+```
+
+### (2.2) Plotting the mean posterior of the four vanilla OU parameters against the true values
+
+```
+Rscript OUVanilla_calibrated_postMCMC_plots.R ./ OUVanillaMVNLikelihoodOneTrait_fixedtree.RData 100 OUVanillaMVN ultra
 ```

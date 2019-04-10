@@ -28,7 +28,7 @@ prior.means <- c(1/sigma.rate, x0s.mean)
 ## res.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_ultra_results/"
 ## res.files <- mixedsort(paste0(res.path,list.files(res.path)))
 
-res.path <- paste0(cal.validation.folder, "BMMVNOneTrait_", tree.type, "_results/")
+res.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_results/")
 res.files <- mixedsort(paste0(res.path,list.files(res.path)))
 load(rdata.path)
 

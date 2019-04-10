@@ -11,6 +11,10 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
 
+/*
+ * This class implements an uncorrelated discrete-distribution local color
+ * where color here can be the evolutionary rate, or OU optimum 
+ */
 public class ColorManager extends CalculationNode {
 
 	final public Input<TreeParser> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
