@@ -8,7 +8,6 @@ import beast.evolution.tree.Node;
 import beast.util.TreeParser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import contraband.MVNUtils;
 

@@ -1,7 +1,6 @@
 package test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
