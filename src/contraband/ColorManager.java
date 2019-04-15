@@ -21,29 +21,48 @@ public class ColorManager extends CalculationNode {
 	final public Input<RealParameter> colorValuesInput = new Input<>("colorValues", "Real values (e.g., rates, optima, whatever colors represent) associated to each color.", Validate.REQUIRED);
 	final public Input<IntegerParameter> colorAssignmentInput = new Input<>("colorAssignments", "Integers representing colors, one per branch.", Validate.REQUIRED);
 	
+	final public Input<Boolean> coalCorrectionInput = new Input<>("coalCorrection", "Whether or not to do coalescent correction.", Validate.REQUIRED);
+	final public Input<IntegerParameter> rootEdgeColorAssignmentInput = new Input<>("rootEdgecolorAssignment", "Integer representing color of root edge.");
+	final public Input<Double> rootEdgeLengthInput = new Input<>("rootEdgeLength", "root edge length.", 0.0);
+	
+	private boolean doCoalCorrection;
+	
 	private int nSpp, nNodes;
 	private double[][] spColorValuesMat;
 	private double[] nodeWeightedColorValues;
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
+	private String[] spNamesInPhyloTMatOrder;
 	
 	private TreeParser tree;
 	private Double[] colorValues;
 	private Integer[] colorAssignments;
+	private Integer rootEdgeColorAssignment;
+	private Double rootEdgeLength;
 	
 	// stored stuff
 	double[][] storedSpColorValuesMat;
 	
 	@Override
-	public void initAndValidate() {
+	public void initAndValidate() {	
 		tree = treeInput.get();
 		colorValues = colorValuesInput.get().getValues();
 		colorAssignments = colorAssignmentInput.get().getValues();
 
 		checkDimensions();
 		
+		doCoalCorrection = coalCorrectionInput.get();
+		if (doCoalCorrection) {
+			System.out.println("merda");
+			rootEdgeColorAssignment = rootEdgeColorAssignmentInput.get().getValue();
+			rootEdgeLength = rootEdgeLengthInput.get();
+		}
+		
+		// TODO: add rootEdgeLength * rootEdge color to all cells of spColorValuesMat if doCoalCorrection = true
+		
 		nSpp = tree.getLeafNodeCount();
 		nNodes = tree.getNodeCount();
+		spNamesInPhyloTMatOrder = new String[nSpp];
 		nodeWeightedColorValues = new double[nNodes];
 		spColorValuesMat = new double[nSpp][nSpp];
 		leftLeaves = new ArrayList<Node>();
@@ -72,15 +91,16 @@ public class ColorManager extends CalculationNode {
 	}
 	
 	private void populateColorValueMat() {
-		fillNodeColorValues(tree.getRoot());
+		fillNodeColorValues(tree.getRoot(), spNamesInPhyloTMatOrder);
 	}
 	
-	private void fillNodeColorValues(Node aNode) {
+	private void fillNodeColorValues(Node aNode, String[] spOrderInTMat) {
 		int nodeIdx = aNode.getNr();
 		// System.out.println("nodeIdx=" + nodeIdx); // for debugging 
 		
 		if (aNode.isLeaf()) {		 
 			spColorValuesMat[nodeIdx][nodeIdx] = nodeWeightedColorValues[nodeIdx]; // populating diagonal entries
+			spOrderInTMat[nodeIdx] = aNode.getID();
 			return;
 		}
 		
@@ -123,8 +143,8 @@ public class ColorManager extends CalculationNode {
 			}	
 		}
 		
-		fillNodeColorValues(left);
-		fillNodeColorValues(right);
+		fillNodeColorValues(left, spOrderInTMat);
+		fillNodeColorValues(right, spOrderInTMat);
 				
 		return;
 	}
@@ -140,6 +160,10 @@ public class ColorManager extends CalculationNode {
 		readInputBeforeGetters();
 		
 		return colorValues[colorAssignments[aNode.getNr()]];
+	}
+	
+	public String[] getSpNamesInPhyloTMatOrder() {
+		return spNamesInPhyloTMatOrder;
 	}
 	
 	@Override

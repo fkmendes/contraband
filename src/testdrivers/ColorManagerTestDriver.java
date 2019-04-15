@@ -20,7 +20,7 @@ public class ColorManagerTestDriver {
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 3, 3, 0, 0, 0, 2, 1, 4, 0 });
 		
 		ColorManager colors = new ColorManager();
-		colors.initByName("tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments);
+		colors.initByName("tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 		
 		double[][] colorValuesMat = colors.getSpColorValuesMat();
 		for (int i=0; i<colorValuesMat.length; ++i) {
