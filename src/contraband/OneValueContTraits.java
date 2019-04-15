@@ -93,6 +93,8 @@ public class OneValueContTraits extends CalculationNode {
 //		}
 //	}
 	
+	// getters
+	
 	/*
 	 * One species, one trait (need to provide trait index)
 	 */
@@ -143,11 +145,12 @@ public class OneValueContTraits extends CalculationNode {
 		
 		return traitValues;
 	}
-	
-	public boolean amIDirty() {
-		return traitInput.isDirty();
+		
+	public Integer getNTraits() {
+		return nTraits;
 	}
 	
+	// caching
 	@Override
 	protected boolean requiresRecalculation() {
 		return true;
