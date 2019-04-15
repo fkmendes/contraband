@@ -14,6 +14,9 @@ public class BMMVNLikelihoodOneTraitTest {
 	double lnLk, lnLk2;
 	final static double EPSILON = 1e-6;
 	
+	/*
+	 * Small tree, simple BM. Second likelihood adds root edge.
+	 */
 	@Before
 	public void setUp() throws Exception {
 		// tree

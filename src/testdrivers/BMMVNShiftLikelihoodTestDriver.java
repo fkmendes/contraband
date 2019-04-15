@@ -7,6 +7,9 @@ import contraband.BMMVNShiftLikelihoodOneTrait;
 import contraband.ColorManager;
 import contraband.OneValueContTraits;
 
+/*
+ * This testdriver runs the BMMVNShift class with a single rate for the whole tree (matches/reduces to BMMVNLikelihoodTestDriver)
+ */
 public class BMMVNShiftLikelihoodTestDriver {
 
 	public static void main(String[] args) {

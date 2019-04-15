@@ -22,7 +22,7 @@ public class ColorManager extends CalculationNode {
 	final public Input<IntegerParameter> colorAssignmentInput = new Input<>("colorAssignments", "Integers representing colors, one per branch.", Validate.REQUIRED);
 	
 	final public Input<Boolean> coalCorrectionInput = new Input<>("coalCorrection", "Whether or not to do coalescent correction.", Validate.REQUIRED);
-	final public Input<IntegerParameter> rootEdgeColorAssignmentInput = new Input<>("rootEdgecolorAssignment", "Integer representing color of root edge.");
+	final public Input<IntegerParameter> rootEdgeColorAssignmentInput = new Input<>("rootEdgeColorAssignment", "Integer representing color of root edge.");
 	final public Input<Double> rootEdgeLengthInput = new Input<>("rootEdgeLength", "root edge length.", 0.0);
 	
 	private boolean doCoalCorrection;
@@ -37,8 +37,10 @@ public class ColorManager extends CalculationNode {
 	private TreeParser tree;
 	private Double[] colorValues;
 	private Integer[] colorAssignments;
+	
+	private Double rootEdgeColorValue, rootEdgeLength;
 	private Integer rootEdgeColorAssignment;
-	private Double rootEdgeLength;
+	private double rootEdgeVar;
 	
 	// stored stuff
 	double[][] storedSpColorValuesMat;
@@ -52,13 +54,14 @@ public class ColorManager extends CalculationNode {
 		checkDimensions();
 		
 		doCoalCorrection = coalCorrectionInput.get();
-		if (doCoalCorrection) {
-			System.out.println("merda");
-			rootEdgeColorAssignment = rootEdgeColorAssignmentInput.get().getValue();
-			rootEdgeLength = rootEdgeLengthInput.get();
-		}
 		
-		// TODO: add rootEdgeLength * rootEdge color to all cells of spColorValuesMat if doCoalCorrection = true
+		// TODO: this will change when I link it to the MSC
+		if (doCoalCorrection) {
+			rootEdgeColorAssignment = rootEdgeColorAssignmentInput.get().getValue();
+			rootEdgeColorValue = colorValues[rootEdgeColorAssignment];
+			rootEdgeLength = rootEdgeLengthInput.get();
+			rootEdgeVar = rootEdgeColorValue * rootEdgeLength;
+		}
 		
 		nSpp = tree.getLeafNodeCount();
 		nNodes = tree.getNodeCount();
@@ -74,10 +77,20 @@ public class ColorManager extends CalculationNode {
 	private void readInputBeforeGetters() {
 		if (treeInput.isDirty()) {
 			tree = treeInput.get();
+			
+			// TODO: this will change when I link it to the MSC
+			if (doCoalCorrection) {
+				rootEdgeColorAssignment = rootEdgeColorAssignmentInput.get().getValue();
+				rootEdgeColorValue = colorValues[rootEdgeColorAssignment];
+				rootEdgeLength = rootEdgeLengthInput.get();
+				rootEdgeVar = rootEdgeColorValue * rootEdgeLength;
+			}
 		}
+		
 		if (colorValuesInput.isDirty()) {
 			colorValues = colorValuesInput.get().getValues();
 		}
+		
 		if (colorAssignmentInput.isDirty()) {
 			colorAssignments = colorAssignmentInput.get().getValues();
 		}
@@ -92,6 +105,15 @@ public class ColorManager extends CalculationNode {
 	
 	private void populateColorValueMat() {
 		fillNodeColorValues(tree.getRoot(), spNamesInPhyloTMatOrder);
+		
+		// tree gets taller due to ILS, so it adds some variance to all cells in VCV matrix
+		if (rootEdgeVar != 0.0) {
+			for (int i=0; i<spColorValuesMat.length; ++i) {
+				for (int j=0; j<spColorValuesMat[i].length; ++j) {
+					spColorValuesMat[i][j] += rootEdgeVar;
+				}
+			}
+		}
 	}
 	
 	private void fillNodeColorValues(Node aNode, String[] spOrderInTMat) {

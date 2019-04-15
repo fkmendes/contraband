@@ -7,6 +7,9 @@ import contraband.BMMVNShiftLikelihoodOneTrait;
 import contraband.ColorManager;
 import contraband.OneValueContTraits;
 
+/*
+ * This testdriver runs the BMMVNShift class with a 2 different rates
+ */
 public class BMMVNShiftLikelihoodTestDriver2 {
 
 	public static void main(String[] args) {
