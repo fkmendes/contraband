@@ -1,6 +1,7 @@
 package contraband;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
@@ -42,6 +43,12 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	public void initAndValidate() {
 		
 		super.initAndValidate();
+		
+		nSpp = getNSpp();
+		
+		bmMeanVector = new ArrayRealVector(nSpp);
+		oneTraitDataVector = new ArrayRealVector(nSpp);
+		storedBMMeanVector = new ArrayRealVector(nSpp);
 		
 		bmVCVMatDouble = new double[nSpp][nSpp];
 		bmVCVMat = new Array2DRowRealMatrix(bmVCVMatDouble);
