@@ -28,9 +28,9 @@ public class ColorManagerTest {
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 3, 4, 0, 0, 0, 2, 1, 4, 0 });
 						
 		ColorManager colors = new ColorManager();
-		colors.initByName("tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		colors.initByName("nTraits", 1, "maxNColors", 5, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 				
-		colorValuesMat = colors.getSpColorValuesMat();
+		colorValuesMat = colors.getSpColorValuesMatOneTrait();
 		
 		expected1row = new double[] {
 				((0.8*1.0) + (0.6*1.0) + (0.4*2.0)),
@@ -60,9 +60,9 @@ public class ColorManagerTest {
 		Node sp3Node = myTree.getNode(2);
 		Node sp12Node = myTree.getNode(5);
 		
-		sp1 = colors.getNodeColorValue(sp1Node);
-		sp3 = colors.getNodeColorValue(sp3Node);
-		sp12 = colors.getNodeColorValue(sp12Node);
+		sp1 = colors.getNodeColorValue(sp1Node, 0);
+		sp3 = colors.getNodeColorValue(sp3Node, 0);
+		sp12 = colors.getNodeColorValue(sp12Node, 0);
 	}
 	
 	@Test

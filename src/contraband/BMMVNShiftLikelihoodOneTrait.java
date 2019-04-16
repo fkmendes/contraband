@@ -90,7 +90,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	
 	@Override
 	protected void populateVCVMatrix() {
-		bmVCVMatDouble = rateManager.getSpColorValuesMat();
+		bmVCVMatDouble = rateManager.getSpColorValuesMatOneTrait();
 		
 		for (int i=0; i<nSpp; ++i) {
 			for (int j=0; j<nSpp; ++j) {
@@ -110,7 +110,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		oneTraitData = oneTraitInput.get();
 		
 		int i = 0;
-		for (Double thisTraitValue: oneTraitData.getTraitValues(0, rateManager.getSpNamesInPhyloTMatOrder())) {
+		for (Double thisTraitValue: oneTraitData.getTraitValues(0, rateManager.getSpNamesInVCVMatOrder())) {
 			oneTraitDataVector.setEntry(i, thisTraitValue);
 			++i;
 		}

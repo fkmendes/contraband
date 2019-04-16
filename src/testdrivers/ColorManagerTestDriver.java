@@ -20,18 +20,18 @@ public class ColorManagerTestDriver {
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 3, 3, 0, 0, 0, 2, 1, 4, 0 });
 		
 		ColorManager colors = new ColorManager();
-		colors.initByName("tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		colors.initByName("nTraits", 1, "maxNColors", 5, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 		
-		double[][] colorValuesMat = colors.getSpColorValuesMat();
+		double[][] colorValuesMat = colors.getSpColorValuesMatOneTrait();
 		for (int i=0; i<colorValuesMat.length; ++i) {
 			System.out.println(Arrays.toString(colorValuesMat[i]));
 		}
 		
 		Node sp1Node = myTree.getNode(0);
-		System.out.println(colors.getNodeColorValue(sp1Node));
+		System.out.println(colors.getNodeColorValue(sp1Node, 0));
 		
 		Node sp3Node = myTree.getNode(2);
-		System.out.println(colors.getNodeColorValue(sp3Node));
+		System.out.println(colors.getNodeColorValue(sp3Node, 0));
 	}
 
 }

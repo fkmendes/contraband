@@ -17,8 +17,10 @@ import beast.util.TreeParser;
  */
 public class ColorManager extends CalculationNode {
 
+	final public Input<Integer> nTraitsInput = new Input<>("nTraits", "Number of traits.", Validate.REQUIRED);
+	final public Input<Integer> maxNColorsInput = new Input<>("maxNColors", "Maximum number of colors.", Validate.REQUIRED);
 	final public Input<TreeParser> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
-	final public Input<RealParameter> colorValuesInput = new Input<>("colorValues", "Real values (e.g., rates, optima, whatever colors represent) associated to each color.", Validate.REQUIRED);
+	final public Input<RealParameter> colorValuesInput = new Input<>("colorValues", "Real values (e.g., rates, optima, whatever colors represent) associated to each color (all values for 1st trait, then all values for 2nd trait, and so on).", Validate.REQUIRED);
 	final public Input<IntegerParameter> colorAssignmentInput = new Input<>("colorAssignments", "Integers representing colors, one per branch.", Validate.REQUIRED);
 	
 	final public Input<Boolean> coalCorrectionInput = new Input<>("coalCorrection", "Whether or not to do coalescent correction.", Validate.REQUIRED);
@@ -27,12 +29,12 @@ public class ColorManager extends CalculationNode {
 	
 	private boolean doCoalCorrection;
 	
-	private int nSpp, nNodes;
+	private int nTraits, maxNColors, nSpp, nNodes;
 	private double[][] spColorValuesMat;
 	private double[] nodeWeightedColorValues;
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
-	private String[] spNamesInPhyloTMatOrder;
+	private String[] spNamesInVCVMatOrder;
 	
 	private TreeParser tree;
 	private Double[] colorValues;
@@ -46,7 +48,9 @@ public class ColorManager extends CalculationNode {
 	double[][] storedSpColorValuesMat;
 	
 	@Override
-	public void initAndValidate() {	
+	public void initAndValidate() {
+		nTraits = nTraitsInput.get();
+		maxNColors = maxNColorsInput.get();
 		tree = treeInput.get();
 		colorValues = colorValuesInput.get().getValues();
 		colorAssignments = colorAssignmentInput.get().getValues();
@@ -54,7 +58,6 @@ public class ColorManager extends CalculationNode {
 		checkDimensions();
 		
 		doCoalCorrection = coalCorrectionInput.get();
-		
 		// TODO: this will change when I link it to the MSC
 		if (doCoalCorrection) {
 			rootEdgeColorAssignment = rootEdgeColorAssignmentInput.get().getValue();
@@ -65,7 +68,7 @@ public class ColorManager extends CalculationNode {
 		
 		nSpp = tree.getLeafNodeCount();
 		nNodes = tree.getNodeCount();
-		spNamesInPhyloTMatOrder = new String[nSpp];
+		spNamesInVCVMatOrder = new String[nSpp];
 		nodeWeightedColorValues = new double[nNodes];
 		spColorValuesMat = new double[nSpp][nSpp];
 		leftLeaves = new ArrayList<Node>();
@@ -99,12 +102,16 @@ public class ColorManager extends CalculationNode {
 	private void checkDimensions() {
 		int nBranches = tree.getNodeCount();
 		if (nBranches != colorAssignments.length) {
-			throw new RuntimeException("The number of color (rates, or optima) parameters does not match the number of branches in the tree.");
+			throw new RuntimeException("The number of color (rates, or optima) assignments does not match the number of branches in the tree. Every branch must be assigned a color.");
+		}
+		
+		if ((nTraits * maxNColors) != colorValues.length) {
+			throw new RuntimeException("The number of initialized color values does not match (max # of colors * # of traits).");
 		}
 	}
 	
-	private void populateColorValueMat() {
-		fillNodeColorValues(tree.getRoot(), spNamesInPhyloTMatOrder);
+	private void populateColorValueMat() {	
+		fillNodeColorValuesOneTrait(tree.getRoot(), spNamesInVCVMatOrder);
 		
 		// tree gets taller due to ILS, so it adds some variance to all cells in VCV matrix
 		if (rootEdgeVar != 0.0) {
@@ -116,7 +123,7 @@ public class ColorManager extends CalculationNode {
 		}
 	}
 	
-	private void fillNodeColorValues(Node aNode, String[] spOrderInTMat) {
+	private void fillNodeColorValuesOneTrait(Node aNode, String[] spOrderInTMat) {
 		int nodeIdx = aNode.getNr();
 		// System.out.println("nodeIdx=" + nodeIdx); // for debugging 
 		
@@ -165,27 +172,27 @@ public class ColorManager extends CalculationNode {
 			}	
 		}
 		
-		fillNodeColorValues(left, spOrderInTMat);
-		fillNodeColorValues(right, spOrderInTMat);
+		fillNodeColorValuesOneTrait(left, spOrderInTMat);
+		fillNodeColorValuesOneTrait(right, spOrderInTMat);
 				
 		return;
 	}
 	
-	public double[][] getSpColorValuesMat() {
+	public double[][] getSpColorValuesMatOneTrait() {
 		readInputBeforeGetters();
 		populateColorValueMat();
 		
 		return spColorValuesMat;
 	}
 	
-	public double getNodeColorValue(Node aNode) {
+	public double getNodeColorValue(Node aNode, int traitIdx) {
 		readInputBeforeGetters();
 		
-		return colorValues[colorAssignments[aNode.getNr()]];
+		return colorValues[(nTraits * traitIdx) + colorAssignments[aNode.getNr()]];
 	}
 	
-	public String[] getSpNamesInPhyloTMatOrder() {
-		return spNamesInPhyloTMatOrder;
+	public String[] getSpNamesInVCVMatOrder() {
+		return spNamesInVCVMatOrder;
 	}
 	
 	@Override

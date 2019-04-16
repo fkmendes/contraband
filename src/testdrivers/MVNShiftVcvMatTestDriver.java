@@ -26,9 +26,9 @@ public class MVNShiftVcvMatTestDriver {
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 1, 1, 0, 0, 0 });
 		
 		ColorManager colors = new ColorManager();
-		colors.initByName("tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments);
+		colors.initByName("nTraits", 1, "maxNColors", 2, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 		
-		double[][] colorValuesMat = colors.getSpColorValuesMat();
+		double[][] colorValuesMat = colors.getSpColorValuesMatOneTrait();
 		for (int i=0; i<colorValuesMat.length; ++i) {
 			System.out.println(Arrays.toString(colorValuesMat[i]));
 		}
