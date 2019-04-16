@@ -3,6 +3,7 @@ package contraband;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
@@ -34,10 +35,10 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	
 	// data
 	private OneValueContTraits oneTraitData;
-	private RealVector oneTraitDataVector;
+	private RealVector oneTraitDataVec;
 	
 	// stored stuff
-	private RealVector storedBMMeanVector;
+	private RealVector storedBMMeanVec;
 	
 	@Override
 	public void initAndValidate() {
@@ -47,13 +48,15 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		nSpp = getNSpp();
 		
 		bmMeanVector = new ArrayRealVector(nSpp);
-		oneTraitDataVector = new ArrayRealVector(nSpp);
-		storedBMMeanVector = new ArrayRealVector(nSpp);
-		
+		oneTraitDataVec = new ArrayRealVector(nSpp);
+				
 		bmVCVMatDouble = new double[nSpp][nSpp];
-		bmVCVMat = new Array2DRowRealMatrix(bmVCVMatDouble);
+		bmVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		
 		rateManager = rateManagerInput.get();
+		
+		// stored stuff
+		storedBMMeanVec = new ArrayRealVector(nSpp);
 		
 		// this instance vars
 		populateInstanceVars(true, true);
@@ -78,7 +81,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 			setProcessVCVMat(bmVCVMat);
 			setProcessInvVCVMat(bmInvVCVMat);
 		}
-		setProcessOneTraitDataVec(oneTraitDataVector); // also has to come AFTER setting phyloTMat
+		setProcessOneTraitDataVec(oneTraitDataVec); // also has to come AFTER setting phyloTMat
         											   // (as this sets the order of species names in T matrix)
 	}
 	
@@ -111,7 +114,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		
 		int i = 0;
 		for (Double thisTraitValue: oneTraitData.getTraitValues(0, rateManager.getSpNamesInVCVMatOrder())) {
-			oneTraitDataVector.setEntry(i, thisTraitValue);
+			oneTraitDataVec.setEntry(i, thisTraitValue);
 			++i;
 		}
 	}
@@ -135,7 +138,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	@Override
 	public void store() {
 		for (int i=0; i<nSpp; ++i) {
-			storedBMMeanVector.setEntry(i, bmMeanVector.getEntry(i));
+			storedBMMeanVec.setEntry(i, bmMeanVector.getEntry(i));
 		}
 
 		super.store();
@@ -144,10 +147,10 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	@Override
 	public void restore() {
 		RealVector realVecTmp;
-		
+
 		realVecTmp = bmMeanVector;
-		bmMeanVector = storedBMMeanVector;
-		storedBMMeanVector = realVecTmp;
+		bmMeanVector = storedBMMeanVec;
+		storedBMMeanVec = realVecTmp;
 		
 		super.restore();
 	}

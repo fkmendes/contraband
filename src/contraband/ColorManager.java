@@ -45,6 +45,8 @@ public class ColorManager extends CalculationNode {
 	private double rootEdgeVar;
 	
 	// stored stuff
+	Double[] storedColorValues;
+	Integer[] storedColorAssignments;
 	double[][] storedSpColorValuesMat;
 	
 	@Override
@@ -74,6 +76,9 @@ public class ColorManager extends CalculationNode {
 		leftLeaves = new ArrayList<Node>();
 		rightLeaves = new ArrayList<Node>();
 		
+		// stored stuff
+		storedColorValues = new Double[colorValues.length];
+		storedColorAssignments = new Integer[nNodes];
 		storedSpColorValuesMat = new double[nSpp][nSpp];
 	}
 
@@ -105,6 +110,8 @@ public class ColorManager extends CalculationNode {
 			throw new RuntimeException("The number of color (rates, or optima) assignments does not match the number of branches in the tree. Every branch must be assigned a color.");
 		}
 		
+		// when I implement multiple traits in MVN likelihood, I will probably have to initialize nTraitsˆ2 * maxNColors values... for now this is the number of values we need for pruning multiple
+		// characters with multiple colors
 		if ((nTraits * maxNColors) != colorValues.length) {
 			throw new RuntimeException("The number of initialized color values does not match (max # of colors * # of traits).");
 		}
@@ -202,7 +209,10 @@ public class ColorManager extends CalculationNode {
 	
 	@Override
 	public void store() {
-		for (int ithRow=0; ithRow<nNodes; ++ithRow) {
+		System.arraycopy(colorValues, 0, storedColorValues, 0, colorValues.length);
+		System.arraycopy(colorAssignments, 0, storedColorAssignments, 0, colorAssignments.length);
+		
+		for (int ithRow=0; ithRow<nSpp; ++ithRow) {
 			System.arraycopy(spColorValuesMat[ithRow], 0, storedSpColorValuesMat[ithRow], 0, spColorValuesMat[ithRow].length);
 		}
 		
@@ -211,7 +221,17 @@ public class ColorManager extends CalculationNode {
 	
 	@Override
 	public void restore() {
+		Integer[] vecTmpInt;
+		Double[] vecTmp;
 		double[][] matTmp;
+		
+		vecTmp = colorValues;
+		colorValues = storedColorValues;
+		storedColorValues = vecTmp;
+		
+		vecTmpInt = colorAssignments;
+		colorAssignments = storedColorAssignments;
+		storedColorAssignments = vecTmpInt;
 		
 		matTmp = spColorValuesMat;
 		spColorValuesMat = storedSpColorValuesMat;

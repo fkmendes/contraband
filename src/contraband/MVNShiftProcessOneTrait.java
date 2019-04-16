@@ -33,7 +33,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	private double detVCVMat;
 		
 	// data
-	private RealVector oneTraitDataVector;
+	private RealVector oneTraitDataVec;
 
 	// stored stuff
 	private RealVector storedMeanVec; // need for integration with JIVE (unsure why...?)
@@ -59,7 +59,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	protected void populateOneTraitDataVector() {};
 	
 	protected void populateLogP() {
-		logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVector, invVCVMat, detVCVMat);
+		logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
 	};
 	
 	// getters
@@ -95,7 +95,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	};
 	
 	protected void setProcessOneTraitDataVec(RealVector aOneTraitDataVector) {
-		oneTraitDataVector = aOneTraitDataVector;
+		oneTraitDataVec = aOneTraitDataVector;
 	}
 	
 	// caching
@@ -112,10 +112,12 @@ public class MVNShiftProcessOneTrait extends Distribution {
 
 	@Override
 	public void store() {	
-		for (int i=0; i<nSpp; ++i) {	
+		for (int i=0; i<nSpp; ++i) {
+//			storedOneTraitDataVec.setEntry(i, oneTraitDataVec.getEntry(i));
 			storedMeanVec.setEntry(i, meanVec.getEntry(i));
 			
 			for (int j=0; j<nSpp; ++j) {
+//				storedVCVMat.setEntry(i, j, vcvMat.getEntry(i, j));
 				storedInvVCVMat.setEntry(i, j, invVCVMat.getEntry(i, j));
 			}
 		}
