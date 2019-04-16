@@ -113,11 +113,9 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	@Override
 	public void store() {	
 		for (int i=0; i<nSpp; ++i) {
-//			storedOneTraitDataVec.setEntry(i, oneTraitDataVec.getEntry(i));
 			storedMeanVec.setEntry(i, meanVec.getEntry(i));
 			
 			for (int j=0; j<nSpp; ++j) {
-//				storedVCVMat.setEntry(i, j, vcvMat.getEntry(i, j));
 				storedInvVCVMat.setEntry(i, j, invVCVMat.getEntry(i, j));
 			}
 		}
