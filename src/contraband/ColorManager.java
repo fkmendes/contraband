@@ -18,7 +18,7 @@ import beast.util.TreeParser;
 public class ColorManager extends CalculationNode {
 
 	final public Input<Integer> nTraitsInput = new Input<>("nTraits", "Number of traits.", Validate.REQUIRED);
-	final public Input<Integer> maxNColorsInput = new Input<>("maxNColors", "Maximum number of colors.", Validate.REQUIRED);
+	final public Input<Integer> nColorsInput = new Input<>("nColors", "Maximum number of colors.", Validate.REQUIRED);
 	final public Input<TreeParser> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
 	final public Input<RealParameter> colorValuesInput = new Input<>("colorValues", "Real values (e.g., rates, optima, whatever colors represent) associated to each color (all values for 1st trait, then all values for 2nd trait, and so on).", Validate.REQUIRED);
 	final public Input<IntegerParameter> colorAssignmentInput = new Input<>("colorAssignments", "Integers representing colors, one per branch.", Validate.REQUIRED);
@@ -29,7 +29,7 @@ public class ColorManager extends CalculationNode {
 	
 	private boolean doCoalCorrection;
 	
-	private int nTraits, maxNColors, nSpp, nNodes;
+	private int nTraits, nColors, nSpp, nNodes;
 	private double[][] spColorValuesMat;
 	private double[] nodeWeightedColorValues;
 	private List<Node> leftLeaves;
@@ -52,7 +52,7 @@ public class ColorManager extends CalculationNode {
 	@Override
 	public void initAndValidate() {
 		nTraits = nTraitsInput.get();
-		maxNColors = maxNColorsInput.get();
+		nColors = nColorsInput.get();
 		tree = treeInput.get();
 		colorValues = colorValuesInput.get().getValues();
 		colorAssignments = colorAssignmentInput.get().getValues();
@@ -112,7 +112,7 @@ public class ColorManager extends CalculationNode {
 		
 		// when I implement multiple traits in MVN likelihood, I will probably have to initialize nTraitsˆ2 * maxNColors values... for now this is the number of values we need for pruning multiple
 		// characters with multiple colors
-		if ((nTraits * maxNColors) != colorValues.length) {
+		if ((nTraits * nColors) != colorValues.length) {
 			throw new RuntimeException("The number of initialized color values does not match (max # of colors * # of traits).");
 		}
 	}

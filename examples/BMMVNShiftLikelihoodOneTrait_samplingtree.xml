@@ -47,7 +47,7 @@
 	      	<traitValues id="fixedTraitValues" spec="parameter.RealParameter">4.1 4.5 5.2</traitValues>
 	      </oneTraitData>
 
-		  <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" maxNColors="2" coalCorrection="false">
+		  <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" nColors="2" coalCorrection="false">
 		    <tree idref="TheTree"/>
 		    <colorValues id="rateValues" spec="parameter.RealParameter">0.1 0.1</colorValues>
 		    <colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0</colorAssignments>

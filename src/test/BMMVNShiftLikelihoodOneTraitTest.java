@@ -30,10 +30,10 @@ public class BMMVNShiftLikelihoodOneTraitTest {
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 0, 0, 0, 0, 0 });
 		IntegerParameter rootEdgeColorAssignment = new IntegerParameter(new Integer[] { 0 });
 		ColorManager colors = new ColorManager();
-		colors.initByName("nTraits", 1, "maxNColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		colors.initByName("nTraits", 1, "nColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 		
 		ColorManager colors2 = new ColorManager();
-		colors2.initByName("nTraits", 1, "maxNColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", true, "rootEdgeLength", 1.0, "rootEdgeColorAssignment", rootEdgeColorAssignment);
+		colors2.initByName("nTraits", 1, "nColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", true, "rootEdgeLength", 1.0, "rootEdgeColorAssignment", rootEdgeColorAssignment);
 				
 		// initializing data	
 		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9 });
