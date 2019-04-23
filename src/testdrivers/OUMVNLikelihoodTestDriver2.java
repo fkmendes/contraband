@@ -1,8 +1,11 @@
 package testdrivers;
 
+import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
+import contraband.ColorManager;
 import contraband.OUMVNLikelihoodOneTrait;
+import contraband.OUMVNLikelihoodOneTrait_NoTreeSampling;
 import contraband.OneValueContTraits;
 
 public class OUMVNLikelihoodTestDriver2 {
@@ -11,13 +14,20 @@ public class OUMVNLikelihoodTestDriver2 {
 	
 	public static void main(String[] args) {
 		// tree
-		String treeStr = "(((sp1[&Regime=0]:2.0, sp2[&Regime=0]:1.0)[&Regime=0]:1.0, sp3[&Regime=0]:4.0)[&Regime=0]:1.0, sp4[&Regime=0]:3.0)[&Regime=0];";
+		String treeStr = "(((sp1:2.0,sp2:1.0):1.0,sp3:4.0):1.0,sp4:3.0);";
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
-				
-		// initializing data		
-		String oneTraitValues = "sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 ";
+			
+		RealParameter colorValues = new RealParameter(new Double[] { 6.449917 }); // thetas
+		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 0, 0, 0, 0, 0, 0, 0 });
+							
+		ColorManager optima = new ColorManager();
+		optima.initByName("nTraits", 1, "nColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		
+		// initializing data
+		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
+		String spNames = "sp1,sp2,sp3,sp4";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
-		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues);
+		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues, "spNames", spNames);
 				
 		// sigmasq
 		Double[] sigmasqInput = new Double[] { 4.003551 };
@@ -31,13 +41,9 @@ public class OUMVNLikelihoodTestDriver2 {
 		Double[] rootValueInput = new Double[] { -33.591241 };
 		RealParameter rootValue = new RealParameter(rootValueInput);
 				
-		// theta
-		Double[] thetaInput = { 6.449917 };
-		RealParameter theta = new RealParameter(thetaInput);
-				
 		// likelihood
 		OUMVNLikelihoodOneTrait OULk = new OUMVNLikelihoodOneTrait();
-		OULk.initByName("tree", myTree, "sigmasq", sigmasq, "alpha", alpha, "theta", theta, "nOptima", 1,
+		OULk.initByName("tree", myTree, "sigmasq", sigmasq, "alpha", alpha, "optimumManager", optima,
 				"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue, "eqDist", true);
 		
 		lnLk = OULk.calculateLogP();

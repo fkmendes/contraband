@@ -28,7 +28,7 @@ public class ColorManagerTest {
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 3, 4, 0, 0, 0, 2, 1, 4, 0 });
 						
 		ColorManager colors = new ColorManager();
-		colors.initByName("nTraits", 1, "maxNColors", 5, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		colors.initByName("nTraits", 1, "nColors", 5, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 				
 		colorValuesMat = colors.getSpColorValuesMatOneTrait();
 		

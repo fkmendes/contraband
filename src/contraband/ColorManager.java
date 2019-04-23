@@ -185,6 +185,21 @@ public class ColorManager extends CalculationNode {
 		return;
 	}
 	
+	/*
+	 * Getters
+	 */
+	public int getNColors() {
+		return nColors;
+	}
+	
+	public Double[] getColorValues() {
+		return colorValues;
+	}
+	
+	public Integer[] getColorAssignments() {
+		return colorAssignments;
+	}
+	
 	public double[][] getSpColorValuesMatOneTrait() {
 		readInputBeforeGetters();
 		populateColorValueMat();

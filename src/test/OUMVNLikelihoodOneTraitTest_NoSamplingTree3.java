@@ -4,14 +4,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
-import contraband.ColorManager;
-import contraband.OUMVNLikelihoodOneTrait;
+import contraband.GeneralUtils;
+import contraband.OUMVNLikelihoodOneTrait_NoTreeSampling;
 import contraband.OneValueContTraits;
 
-public class OUMVNLikelihoodOneTraitTest3 {
+public class OUMVNLikelihoodOneTraitTest_NoSamplingTree3 {
 
 	double lnLk;
 	final static double EPSILON = 1e-5;
@@ -28,11 +27,6 @@ public class OUMVNLikelihoodOneTraitTest3 {
 		OneValueContTraits oneTraitData = new OneValueContTraits();
 		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues, "spNames", spNames);
 		
-		RealParameter colorValues = new RealParameter(new Double[] { 1.435158 }); // thetas
-		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-		ColorManager optima = new ColorManager();
-		optima.initByName("nTraits", 1, "nColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
-		
 		// sigmasq
 		Double[] sigmasqInput = new Double[] { 0.01507664 };
 		RealParameter sigmasq = new RealParameter(sigmasqInput);
@@ -45,9 +39,13 @@ public class OUMVNLikelihoodOneTraitTest3 {
 		Double[] rootValueInput = new Double[] { 6.082900e-87 };
 		RealParameter rootValue = new RealParameter(rootValueInput);
 		
+		// theta
+		Double[] thetaInput = { 1.435158 };
+		RealParameter theta = new RealParameter(thetaInput);
+		
 		// likelihood 1 (condition on rootValue, theta_0 as parameter)
-		OUMVNLikelihoodOneTrait OULk = new OUMVNLikelihoodOneTrait();
-		OULk.initByName("tree", myTree, "sigmasq", sigmasq, "alpha", alpha, "optimumManager", optima,
+		OUMVNLikelihoodOneTrait_NoTreeSampling OULk = new OUMVNLikelihoodOneTrait_NoTreeSampling();
+		OULk.initByName("tree", myTree, "sigmasq", sigmasq, "alpha", alpha, "theta", theta, "nOptima", 1,
 				"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue, "eqDist", false);
 		lnLk = OULk.calculateLogP();
 	}

@@ -175,6 +175,40 @@ public class OUUtils {
 		}		
 	}
 	
+	 /*
+	  * I am currently editing OUMVNLikelihoodOneTrait to deal with ColorManager. When passing all WMat tests, will replace the function above with this one
+	  */
+	 public static void computeWMatOneTrait2(Integer[] allNodeRegimes, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
+			int rootIndexOffset;
+			int rootRegimeIdx;	// Eldest regime index
+			
+			if (!useRootMetaData) { 		// column dimension of WMat must be r			
+				rootIndexOffset = 0;
+				rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue();
+				
+			} else { 		// column dimension of WMat must be r + 1
+				rootIndexOffset = 1;
+				rootRegimeIdx = 0;	
+			}
+			
+			for (Node sp: allLeafNodes) {	
+				int spNr = sp.getNr();	// Will specify the row index 
+					
+				// Adding the root chunk in the column of the eldest regime
+				double currentSpHeight = sp.getHeight();
+				double cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight));	
+				wMat.addToEntry(spNr, rootRegimeIdx, cellValue);
+				
+				while(!sp.isRoot()) {
+					int regimeIdx = allNodeRegimes[sp.getNr()].intValue() + rootIndexOffset;	// Will specify the column index
+					cellValue = Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight));
+					wMat.addToEntry(spNr, regimeIdx, cellValue);
+						
+					sp = sp.getParent();
+				}
+			}		
+		}
+	 
 	// MultiTrait Covariance matrix functions
 	
 	public static RealMatrix getExpAlphaMat(int m, RealMatrix eigenDiag, RealMatrix eigenVecMat, double time) {

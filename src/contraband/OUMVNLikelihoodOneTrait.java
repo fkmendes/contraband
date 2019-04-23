@@ -21,11 +21,12 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "Root trait value, or theta_0, also the mean of the stationary distribution at the root if one is assumed.", Validate.REQUIRED);
 	final public Input<Boolean> eqDistInput = new Input<>("eqDist", "Whether or not to assume equilibrium (stationary) distribution at the root. The mean of that distribution will rootValue", Validate.REQUIRED);
 	final public Input<Boolean> useRootMetaDataInput = new Input<>("useRootMetaData", "Whether or not to use root meta data (specified optimum). If set to 'false', root optimum is set to eldest regime (regimes are numbered from the root toward the tips).", Validate.REQUIRED);
-	final public Input<RealParameter> alphaInput = new Input<>("alpha", "Pull toward optimum or optima.", Validate.REQUIRED);
-	final public Input<RealParameter> thetaInput = new Input<>("theta", "Optimum or optima values, these are the 'colors' of the branches.", Validate.REQUIRED);
-	final public Input<Integer> nOptimaInput = new Input<>("nOptima", "Number of adaptive optima.", Validate.REQUIRED);
 	final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
-	
+	final public Input<ColorManager> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
+	final public Input<RealParameter> alphaInput = new Input<>("alpha", "Pull toward optimum or optima.", Validate.REQUIRED);
+//	final public Input<RealParameter> thetaInput = new Input<>("theta", "Optimum or optima values, these are the 'colors' of the branches.", Validate.REQUIRED);
+//	final public Input<Integer> nOptimaInput = new Input<>("nOptima", "Number of adaptive optima.", Validate.REQUIRED);
+		
 	private boolean dirty;
 	private boolean eqDistAtRoot;
 	private boolean useRootMetaData;
@@ -41,16 +42,21 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	private List<Node> allLeafNodes;
 	private Integer nSpp, nOptima;
 	
-	// parameters
+	/* parameters below */
 	private double sigmasq;
 	private Double rootValue; // this is y_0, the value we condition on, or assume has a stationary distr
 	                          // the value we condition y_0 on is often theta_0 (root optimum), which is a very liberal assumption!
-	private Double alpha;
-	private Double[] theta;
 	
-	// to be populated for computation
+	// mean vector
+	private ColorManager optimumManager;
+	private RealMatrix wMat;
+	private Double[] theta;
+	private Integer[] thetaAssignments;
+	private Double alpha;
+	
+	// VCV matrix
 	private RealVector thetaVector, ouMeanVector;
-	private RealMatrix ouTMat, wMat, ouVCVMat, ouInvVCVMat;
+	private RealMatrix ouTMat, ouVCVMat, ouInvVCVMat;
 	private LUDecomposition ouVCVMatLUD;
 	
 	// data
@@ -70,10 +76,11 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		tree = getTree();
 		rootNode = getRootNode();
 		allLeafNodes = rootNode.getAllLeafNodes();
-		nSpp = getNSpp();
-		nOptima = nOptimaInput.get();		
+		nSpp = getNSpp();	
 		eqDistAtRoot = eqDistInput.get();
 		useRootMetaData = useRootMetaDataInput.get();
+		optimumManager = optimumManagerInput.get();
+		nOptima = optimumManager.getNColors();
 		alpha = alphaInput.get().getValue();
 		
 		// initializing stuff whose size won't change for now
@@ -133,7 +140,8 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 			rootValue = rootValueInput.get().getValue();
 		}
 		
-		theta = thetaInput.get().getValues();
+		theta = optimumManager.getColorValues();
+		thetaAssignments = optimumManager.getColorAssignments();
 		
 		int i = 0;
 		if (useRootMetaData) {
@@ -144,17 +152,11 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 			thetaVector.setEntry(i, aTheta);
 			i++;
 		} 
-//		System.out.println("Printing thetaVector");
-//		GeneralUtils.displayRealVector(thetaVector);
 
 		resetRealMatrix(wMat);
-		OUUtils.computeWMatOneTrait(tree, rootNode, allLeafNodes, nSpp, nOptima, alpha, wMat, useRootMetaData);
-//		System.out.println("Printing wMat");
-//		GeneralUtils.displayRealMatrix(wMat);
+		OUUtils.computeWMatOneTrait2(thetaAssignments, rootNode, allLeafNodes, nSpp, nOptima, alpha, wMat, useRootMetaData);
 
 		ouMeanVector = wMat.operate(thetaVector);
-//		System.out.println("Printing ouMeanVector");
-//		GeneralUtils.displayRealVector(ouMeanVector);
 	}
 	
 	@Override
@@ -187,7 +189,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		if (alphaInput.isDirty()) { updateAlpha = true; updateVCVMat = true; updateMean = true; }
 		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
 		if (sigmasqInput.isDirty() || alphaInput.isDirty()) { updateVCVMat = true; }
-		if (rootValueInput.isDirty() || thetaInput.isDirty() || alphaInput.isDirty()) { updateMean = true; }
+		if (rootValueInput.isDirty() || alphaInput.isDirty() || optimumManagerInput.isDirty()) { updateMean = true; }
 		
 		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean, updateAlpha);
 		populateParentInstanceVars(updateVCVMat, updateMean);
