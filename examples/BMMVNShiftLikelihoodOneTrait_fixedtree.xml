@@ -12,16 +12,16 @@
 
       <!-- START prior -->
       <distribution id="prior" spec="util.CompoundDistribution">               
-		<distribution id="rateValuesPrior" spec="beast.math.distributions.Prior" x="@rateValues">
-	  	  <distr id="Exp.rateValues" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
-		</distribution>
+	<distribution id="rateValuesPrior" spec="beast.math.distributions.Prior" x="@rateValues">
+	  <distr id="Exp.rateValues" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
+	</distribution>
 		
-		<distribution id="rateAssignmentsPrior" spec="beast.math.distributions.Prior" x="@rateAssignments">
-	  	  <distr id="Exp.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
-		</distribution>
+	<distribution id="rateAssignmentsPrior" spec="beast.math.distributions.Prior" x="@rateAssignments">
+	  <distr id="Unif.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
+	</distribution>
 
         <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@BMMean">
-	      <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+	  <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
       </distribution>
       <!-- END prior -->
@@ -40,11 +40,11 @@
 	      	<traitValues id="fixedTraitValues" spec="parameter.RealParameter">4.1 4.5</traitValues>
 	      </oneTraitData>
 
-		  <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" nColors="2" coalCorrection="false">
-		    <tree idref="FixedTree"/>
-		    <colorValues id="rateValues" spec="parameter.RealParameter">0.1 0.1</colorValues>
-		    <colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0</colorAssignments>
-		  </rateManager>
+	      <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" nColors="2" coalCorrection="false">
+		<tree idref="FixedTree"/>
+		<colorValues id="rateValues" spec="parameter.RealParameter">0.1 0.1</colorValues>
+		<colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0</colorAssignments>
+	      </rateManager>
 	    
 	      <mean id="BMMean" dimension="1" spec="parameter.RealParameter">0.0</mean>
 	    </distribution> <!-- END BMVN -->

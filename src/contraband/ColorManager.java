@@ -48,6 +48,8 @@ public class ColorManager extends CalculationNode {
 	Double[] storedColorValues;
 	Integer[] storedColorAssignments;
 	double[][] storedSpColorValuesMat;
+//	private double[] storedNodeWeightedColorValues;
+//	private String[] storedSpNamesInVCVMatOrder;
 	
 	@Override
 	public void initAndValidate() {
@@ -80,6 +82,8 @@ public class ColorManager extends CalculationNode {
 		storedColorValues = new Double[colorValues.length];
 		storedColorAssignments = new Integer[nNodes];
 		storedSpColorValuesMat = new double[nSpp][nSpp];
+//		storedNodeWeightedColorValues = new double[nNodes];
+//		storedSpNamesInVCVMatOrder = new String[nSpp];
 	}
 
 	private void readInputBeforeGetters() {
@@ -192,7 +196,14 @@ public class ColorManager extends CalculationNode {
 		return nColors;
 	}
 	
+	public int getNNodes() {
+		return nNodes;
+	}
+	
 	public Double[] getColorValues() {
+		// readInputBeforeGetters();
+		colorValues = colorValuesInput.get().getValues();
+		
 		return colorValues;
 	}
 	
@@ -226,6 +237,8 @@ public class ColorManager extends CalculationNode {
 	public void store() {
 		System.arraycopy(colorValues, 0, storedColorValues, 0, colorValues.length);
 		System.arraycopy(colorAssignments, 0, storedColorAssignments, 0, colorAssignments.length);
+//		System.arraycopy(nodeWeightedColorValues, 0, storedNodeWeightedColorValues, 0, nNodes);
+//		System.arraycopy(spNamesInVCVMatOrder, 0, storedSpNamesInVCVMatOrder, 0, nSpp);
 		
 		for (int ithRow=0; ithRow<nSpp; ++ithRow) {
 			System.arraycopy(spColorValuesMat[ithRow], 0, storedSpColorValuesMat[ithRow], 0, spColorValuesMat[ithRow].length);
@@ -237,12 +250,22 @@ public class ColorManager extends CalculationNode {
 	@Override
 	public void restore() {
 		Integer[] vecTmpInt;
-		Double[] vecTmp;
+//		String[] vecTmpStr;
+//		double[] vecTmp;
+		Double[] vecTmpDouble;
 		double[][] matTmp;
 		
-		vecTmp = colorValues;
+//		vecTmp = nodeWeightedColorValues;
+//		nodeWeightedColorValues = storedNodeWeightedColorValues;
+//		storedNodeWeightedColorValues = vecTmp;
+		
+//		vecTmpStr = spNamesInVCVMatOrder;
+//		spNamesInVCVMatOrder = storedSpNamesInVCVMatOrder;
+//		storedSpNamesInVCVMatOrder = vecTmpStr;
+		
+		vecTmpDouble = colorValues;
 		colorValues = storedColorValues;
-		storedColorValues = vecTmp;
+		storedColorValues = vecTmpDouble;
 		
 		vecTmpInt = colorAssignments;
 		colorAssignments = storedColorAssignments;

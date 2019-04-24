@@ -5,8 +5,11 @@ import java.util.Random;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+
+import com.sun.javafx.geom.transform.SingularMatrixException;
 
 import beast.core.Input;
 import beast.core.State;
@@ -26,24 +29,19 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	final public Input<RealParameter> alphaInput = new Input<>("alpha", "Pull toward optimum or optima.", Validate.REQUIRED);
 //	final public Input<RealParameter> thetaInput = new Input<>("theta", "Optimum or optima values, these are the 'colors' of the branches.", Validate.REQUIRED);
 //	final public Input<Integer> nOptimaInput = new Input<>("nOptima", "Number of adaptive optima.", Validate.REQUIRED);
-		
+	
 	private boolean dirty;
 	private boolean eqDistAtRoot;
 	private boolean useRootMetaData;
-	
-	private boolean updateAlpha;
-	private boolean updatePhyloTMat;
-	private boolean updateVCVMat;
-	private boolean updateMean;
-	
+	private boolean matrixWasSingularCantInvertBarf;
+		
 	// basic info
-	private TreeParser tree;
-	private Node rootNode;
 	private List<Node> allLeafNodes;
-	private Integer nSpp, nOptima;
+	private int nSpp; // takes some time to compute, so part of state!
+	private int nOptima; // could remove from state technically, but am calling it a few times, so will stay here!
 	
 	/* parameters below */
-	private double sigmasq;
+	private Double alpha; // could remove from state technically, but am calling it a few times, so will stay here!
 	private Double rootValue; // this is y_0, the value we condition on, or assume has a stationary distr
 	                          // the value we condition y_0 on is often theta_0 (root optimum), which is a very liberal assumption!
 	
@@ -52,7 +50,6 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	private RealMatrix wMat;
 	private Double[] theta;
 	private Integer[] thetaAssignments;
-	private Double alpha;
 	
 	// VCV matrix
 	private RealVector thetaVector, ouMeanVector;
@@ -64,8 +61,15 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	private RealVector oneTraitDataVector;
 	
 	// stored stuff
+//	private RealMatrix storedWMat;
+	private RealMatrix storedVCVMat;
+//	private RealVector storedThetaVector;
+//	private Double[] storedTheta;
+//	private Integer[] storedThetaAssignments;
+	
 	private RealVector storedOUMeanVector;
-	private Double storedAlpha;
+//	private Double storedAlpha;
+//	private Double storedRootValue;
 	
 	@Override
 	public void initAndValidate() {	
@@ -73,30 +77,35 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		super.initAndValidate();
 		
 		// reading in stuff
-		tree = getTree();
-		rootNode = getRootNode();
-		allLeafNodes = rootNode.getAllLeafNodes();
+		allLeafNodes = getRootNode().getAllLeafNodes();
 		nSpp = getNSpp();	
 		eqDistAtRoot = eqDistInput.get();
 		useRootMetaData = useRootMetaDataInput.get();
 		optimumManager = optimumManagerInput.get();
 		nOptima = optimumManager.getNColors();
-		alpha = alphaInput.get().getValue();
+		// alpha = alphaInput.get().getValue();
 		
 		// initializing stuff whose size won't change for now
 		if (useRootMetaData) {
 			thetaVector = new ArrayRealVector(nOptima+1);
+//			storedThetaVector = new ArrayRealVector(nOptima+1);
 			wMat = new Array2DRowRealMatrix(nSpp, (nOptima+1));
+//			storedWMat = new Array2DRowRealMatrix(nSpp, (nOptima+1));
 		}
 		else {
 			thetaVector = new ArrayRealVector(nOptima);
+//			storedThetaVector = new ArrayRealVector(nOptima);
 			wMat = new Array2DRowRealMatrix(nSpp, nOptima);
+//			storedWMat = new Array2DRowRealMatrix(nSpp, nOptima);
 		}
 		 
 		ouMeanVector = new ArrayRealVector(nSpp);
 		ouTMat = new Array2DRowRealMatrix(nSpp, nSpp);
 		
 		// store
+//		storedTheta = new Double[nOptima];
+//		storedThetaAssignments = new Integer[optimumManager.getNNodes()];	
+		storedVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedOUMeanVector = new ArrayRealVector(nSpp);
 		
 		// this instance vars
@@ -112,8 +121,8 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean, boolean updateAlpha) {
 		if (updateAlpha) { alpha = alphaInput.get().getValue(); }
-		if (updatePhyloTMat) { super.populatePhyloTMatrix(); }
 		if (updateMean) { populateMeanVector(); }
+		if (updatePhyloTMat) { super.populatePhyloTMatrix(); }
 		if (updateVCVMat) {
 			populateVCVMatrix();
 			populateInvVCVMatrix();
@@ -136,9 +145,9 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	protected void populateMeanVector() {
-		if (rootValueInput.get() != null) {
-			rootValue = rootValueInput.get().getValue();
-		}
+//		if (rootValueInput.get() != null || rootValueInput.isDirty()) {
+		rootValue = rootValueInput.get().getValue();
+//		}
 		
 		theta = optimumManager.getColorValues();
 		thetaAssignments = optimumManager.getColorAssignments();
@@ -154,7 +163,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		} 
 
 		resetRealMatrix(wMat);
-		OUUtils.computeWMatOneTrait2(thetaAssignments, rootNode, allLeafNodes, nSpp, nOptima, alpha, wMat, useRootMetaData);
+		OUUtils.computeWMatOneTrait(thetaAssignments, getRootNode(), allLeafNodes, nSpp, nOptima, alpha, wMat, useRootMetaData);
 
 		ouMeanVector = wMat.operate(thetaVector);
 	}
@@ -163,14 +172,20 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	protected void populateVCVMatrix() {
 		// alpha has already been dealt in populateInstanceVars
 		populateOUTMatrix(eqDistAtRoot);
-		sigmasq = sigmasqInput.get().getValue();
+		Double sigmasq = sigmasqInput.get().getValue();
 		ouVCVMat = ouTMat.scalarMultiply(sigmasq);
 	}
 	
 	@Override
 	protected void populateInvVCVMatrix() {
 		ouVCVMatLUD = new LUDecomposition(ouVCVMat);
-		ouInvVCVMat = ouVCVMatLUD.getSolver().getInverse();
+		
+		try {
+			ouInvVCVMat = ouVCVMatLUD.getSolver().getInverse();
+			setMatrixIsSingular(false);
+		} catch (org.apache.commons.math3.linear.SingularMatrixException e) {
+			setMatrixIsSingular(true);
+		}
 	}
 	
 	@Override
@@ -181,10 +196,10 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	public double calculateLogP() {
-		updateAlpha = false;
-		updatePhyloTMat = false;
-		updateVCVMat = false;
-		updateMean = false;
+		boolean updateAlpha = false;
+		boolean updatePhyloTMat = false;
+		boolean updateVCVMat = false;
+		boolean updateMean = false;
 		
 		if (alphaInput.isDirty()) { updateAlpha = true; updateVCVMat = true; updateMean = true; }
 		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
@@ -217,24 +232,63 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	public void store() {
-		storedAlpha = alpha;
+//		storedRootValue = rootValue;
+		
+//		System.arraycopy(theta, 0, storedTheta, 0, theta.length);
+//		System.arraycopy(thetaAssignments, 0, storedThetaAssignments, 0, thetaAssignments.length);
 		
 		for (int i=0; i<nSpp; ++i) {
 			storedOUMeanVector.setEntry(i, ouMeanVector.getEntry(i));
+
+			for (int j=0; j<nSpp; ++j) {
+				storedVCVMat.setEntry(i, j, ouVCVMat.getEntry(i, j));
+			}
+			
+//			for (int j=0; j<wMat.getColumnDimension(); ++j) {
+//				storedWMat.setEntry(i, j, wMat.getEntry(i, j));
+//			}
 		}
 
+//		for (int i=0; i<thetaVector.getDimension(); ++i) {
+//			storedThetaVector.setEntry(i, thetaVector.getEntry(i));
+//		}
+		
 		super.store();
 	}
 	
 	@Override
 	public void restore() {
 		RealVector realVecTmp;
+		RealMatrix	realMatTmp;
+//		Double[] arrayTmp;
+//		Integer[] arrayTmp2;
 
+//		arrayTmp = theta;
+//		theta = storedTheta;
+//		storedTheta = arrayTmp;
+//		
+//		arrayTmp2 = thetaAssignments;
+//		thetaAssignments = storedThetaAssignments;
+//		storedThetaAssignments = arrayTmp2;
+//		
+//		realMatTmp = wMat;
+//		wMat = storedWMat;
+//		storedWMat= realMatTmp;
+//		
+//		realVecTmp = thetaVector;
+//		thetaVector = storedThetaVector;
+//		storedThetaVector = realVecTmp;
+	
+		realMatTmp = ouVCVMat;
+		ouVCVMat = storedVCVMat;
+		storedVCVMat = realMatTmp;
+		
 		realVecTmp = ouMeanVector;
 		ouMeanVector = storedOUMeanVector;
 		storedOUMeanVector = realVecTmp;
 
-		alpha = storedAlpha;
+//		alpha = storedAlpha;
+//		rootValue = storedRootValue;
 		
 		super.restore();
 	}

@@ -18,13 +18,13 @@
           <Uniform id="UniformBirth" spec="beast.math.distributions.Uniform" name="distr" upper="Infinity"/>
         </prior>
                     
-		<distribution id="rateValuesPrior" spec="beast.math.distributions.Prior" x="@rateValues">
-	  	  <distr id="Exp.rateValues" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
-		</distribution>
+	<distribution id="rateValuesPrior" spec="beast.math.distributions.Prior" x="@rateValues">
+	  <distr id="Exp.rateValues" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
+	</distribution>
 		
-		<distribution id="rateAssignmentsPrior" spec="beast.math.distributions.Prior" x="@rateAssignments">
-	  	  <distr id="Exp.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
-		</distribution>
+	<distribution id="rateAssignmentsPrior" spec="beast.math.distributions.Prior" x="@rateAssignments">
+	  <distr id="Exp.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
+	</distribution>
 
         <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@BMMean">
 	      <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
@@ -59,7 +59,7 @@
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
 
-	<operator id="YuleBirthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>
+    <operator id="YuleBirthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>
     <operator id="YuleModelTreeScaler" spec="ScaleOperator" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
     <operator id="YuleModelTreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
     <operator id="YuleModelUniformOperator" spec="Uniform" tree="@TheTree" weight="30.0"/>

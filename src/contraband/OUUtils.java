@@ -137,50 +137,51 @@ public class OUUtils {
 	 * In this less general version, we ignore the root optimum metadata, and assume theta_0 is the same as one of the other thetas
 	 * (one of the optima). We should use this with ultrametric trees.
 	 */
-	 public static void computeWMatOneTrait(TreeParser tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
-		Double[] allNodeRegimes = new Double[rootNode.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
-		int rootIndexOffset;
-		int rootRegimeIdx;	// Eldest regime index
-
-		/* 
-		 * The regimes array is the computational equivalent of 
-		 * Beta_{i}^{\gamma} in equation A6 of Butler & King's Appendix 1
-		*/
-		tree.getMetaData(rootNode, allNodeRegimes, "Regime"); // writes on regimes array
-		
-		if (!useRootMetaData) { 		// column dimension of WMat must be r			
-			rootIndexOffset = 0;
-			rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue();
-			
-		} else { 		// column dimension of WMat must be r + 1
-			rootIndexOffset = 1;
-			rootRegimeIdx = 0;	
-		}
-		
-		for (Node sp: allLeafNodes) {	
-			int spNr = sp.getNr();	// Will specify the row index 
-				
-			// Adding the root chunk in the column of the eldest regime
-			double currentSpHeight = sp.getHeight();
-			double cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight));	
-			wMat.addToEntry(spNr, rootRegimeIdx, cellValue);
-			
-			while(!sp.isRoot()) {
-				int regimeIdx = allNodeRegimes[sp.getNr()].intValue() + rootIndexOffset;	// Will specify the column index
-				cellValue = Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight));
-				wMat.addToEntry(spNr, regimeIdx, cellValue);
-					
-				sp = sp.getParent();
-			}
-		}		
-	}
-	
-	 /*
-	  * I am currently editing OUMVNLikelihoodOneTrait to deal with ColorManager. When passing all WMat tests, will replace the function above with this one
-	  */
-	 public static void computeWMatOneTrait2(Integer[] allNodeRegimes, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
+	 public static void computeWMatOneTrait(Integer[] allNodeRegimes, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
 			int rootIndexOffset;
 			int rootRegimeIdx;	// Eldest regime index
+			
+			if (!useRootMetaData) { 		// column dimension of WMat must be r			
+				rootIndexOffset = 0;
+				rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue();
+				
+			} else { 		// column dimension of WMat must be r + 1
+				rootIndexOffset = 1;
+				rootRegimeIdx = 0;	
+			}
+			
+			for (Node sp: allLeafNodes) {	
+				int spNr = sp.getNr();	// Will specify the row index 
+					
+				// Adding the root chunk in the column of the eldest regime
+				double currentSpHeight = sp.getHeight();
+				double cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight));	
+				wMat.addToEntry(spNr, rootRegimeIdx, cellValue);
+				
+				while(!sp.isRoot()) {
+					int regimeIdx = allNodeRegimes[sp.getNr()].intValue() + rootIndexOffset;	// Will specify the column index
+					cellValue = Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight));
+					wMat.addToEntry(spNr, regimeIdx, cellValue);
+						
+					sp = sp.getParent();
+				}
+			}		
+		}
+	 
+	 /*
+	  * DEPRECATED: uses tree meta data, cannot operate on it
+	  */
+	 @Deprecated
+	 public static void computeWMatOneTrait(TreeParser tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
+			Double[] allNodeRegimes = new Double[rootNode.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
+			int rootIndexOffset;
+			int rootRegimeIdx;	// Eldest regime index
+
+			/* 
+			 * The regimes array is the computational equivalent of 
+			 * Beta_{i}^{\gamma} in equation A6 of Butler & King's Appendix 1
+			*/
+			tree.getMetaData(rootNode, allNodeRegimes, "Regime"); // writes on regimes array
 			
 			if (!useRootMetaData) { 		// column dimension of WMat must be r			
 				rootIndexOffset = 0;
