@@ -29,7 +29,7 @@ public class ColorManager extends CalculationNode {
 	
 	private boolean doCoalCorrection;
 	
-	private int nTraits, nColors, nSpp, nNodes;
+	private int nSpp, nNodes; // why part of state? because requires traversing tree
 	private double[][] spColorValuesMat;
 	private double[] nodeWeightedColorValues;
 	private List<Node> leftLeaves;
@@ -47,14 +47,10 @@ public class ColorManager extends CalculationNode {
 	// stored stuff
 	Double[] storedColorValues;
 	Integer[] storedColorAssignments;
-	double[][] storedSpColorValuesMat;
-//	private double[] storedNodeWeightedColorValues;
-//	private String[] storedSpNamesInVCVMatOrder;
+//	double[][] storedSpColorValuesMat;
 	
 	@Override
 	public void initAndValidate() {
-		nTraits = nTraitsInput.get();
-		nColors = nColorsInput.get();
 		tree = treeInput.get();
 		colorValues = colorValuesInput.get().getValues();
 		colorAssignments = colorAssignmentInput.get().getValues();
@@ -81,7 +77,7 @@ public class ColorManager extends CalculationNode {
 		// stored stuff
 		storedColorValues = new Double[colorValues.length];
 		storedColorAssignments = new Integer[nNodes];
-		storedSpColorValuesMat = new double[nSpp][nSpp];
+//		storedSpColorValuesMat = new double[nSpp][nSpp];
 //		storedNodeWeightedColorValues = new double[nNodes];
 //		storedSpNamesInVCVMatOrder = new String[nSpp];
 	}
@@ -116,6 +112,8 @@ public class ColorManager extends CalculationNode {
 		
 		// when I implement multiple traits in MVN likelihood, I will probably have to initialize nTraitsˆ2 * maxNColors values... for now this is the number of values we need for pruning multiple
 		// characters with multiple colors
+		Integer nTraits = nTraitsInput.get();
+		Integer nColors = nColorsInput.get();
 		if ((nTraits * nColors) != colorValues.length) {
 			throw new RuntimeException("The number of initialized color values does not match (max # of colors * # of traits).");
 		}
@@ -192,8 +190,12 @@ public class ColorManager extends CalculationNode {
 	/*
 	 * Getters
 	 */
-	public int getNColors() {
-		return nColors;
+	public Integer getNTraits() {
+		return nTraitsInput.get();
+	}
+	
+	public Integer getNColors() {
+		return nColorsInput.get();
 	}
 	
 	public int getNNodes() {
@@ -221,6 +223,7 @@ public class ColorManager extends CalculationNode {
 	public double getNodeColorValue(Node aNode, int traitIdx) {
 		readInputBeforeGetters();
 		
+		Integer nTraits = nTraitsInput.get();
 		return colorValues[(nTraits * traitIdx) + colorAssignments[aNode.getNr()]];
 	}
 	
@@ -237,31 +240,14 @@ public class ColorManager extends CalculationNode {
 	public void store() {
 		System.arraycopy(colorValues, 0, storedColorValues, 0, colorValues.length);
 		System.arraycopy(colorAssignments, 0, storedColorAssignments, 0, colorAssignments.length);
-//		System.arraycopy(nodeWeightedColorValues, 0, storedNodeWeightedColorValues, 0, nNodes);
-//		System.arraycopy(spNamesInVCVMatOrder, 0, storedSpNamesInVCVMatOrder, 0, nSpp);
-		
-		for (int ithRow=0; ithRow<nSpp; ++ithRow) {
-			System.arraycopy(spColorValuesMat[ithRow], 0, storedSpColorValuesMat[ithRow], 0, spColorValuesMat[ithRow].length);
-		}
-		
+			
 		super.store();
 	}
 	
 	@Override
 	public void restore() {
 		Integer[] vecTmpInt;
-//		String[] vecTmpStr;
-//		double[] vecTmp;
 		Double[] vecTmpDouble;
-		double[][] matTmp;
-		
-//		vecTmp = nodeWeightedColorValues;
-//		nodeWeightedColorValues = storedNodeWeightedColorValues;
-//		storedNodeWeightedColorValues = vecTmp;
-		
-//		vecTmpStr = spNamesInVCVMatOrder;
-//		spNamesInVCVMatOrder = storedSpNamesInVCVMatOrder;
-//		storedSpNamesInVCVMatOrder = vecTmpStr;
 		
 		vecTmpDouble = colorValues;
 		colorValues = storedColorValues;
@@ -270,10 +256,6 @@ public class ColorManager extends CalculationNode {
 		vecTmpInt = colorAssignments;
 		colorAssignments = storedColorAssignments;
 		storedColorAssignments = vecTmpInt;
-		
-		matTmp = spColorValuesMat;
-		spColorValuesMat = storedSpColorValuesMat;
-		storedSpColorValuesMat = matTmp;
 		
 		super.restore();
 	}

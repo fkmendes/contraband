@@ -20,12 +20,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	private boolean dirty;
 	
-	private boolean updatePhyloTMat;
-	private boolean updateVCVMat;
-	private boolean updateMean;
-	
 	private int nSpp;
-	private double sigmasq;
 
 	private Double bmSingleMeanValue;
 	private RealVector bmMeanVector;
@@ -84,7 +79,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	protected void populateVCVMatrix() {
-		sigmasq = sigmasqInput.get().getValue();
+		Double sigmasq = sigmasqInput.get().getValue();
 		bmVCVMat = getPhyloTMat().scalarMultiply(sigmasq);
 	}
 	
@@ -107,9 +102,9 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	public double calculateLogP() {
-		updatePhyloTMat = false;
-		updateVCVMat = false;
-		updateMean = false;
+		boolean updatePhyloTMat = false;
+		boolean updateVCVMat = false;
+		boolean updateMean = false;
 
 		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
 		if (sigmasqInput.isDirty()) { updateVCVMat = true; }

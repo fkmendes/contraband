@@ -109,7 +109,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		storedOUMeanVector = new ArrayRealVector(nSpp);
 		
 		// this instance vars
-		populateInstanceVars(true, true, true, true);
+		populateInstanceVars(true, true, true);
 		populateOneTraitDataVector(); // won't change, so outside populateInstanceVars
 		                              // also has to come AFTER setting phyloTMat
 		                              // (as this sets the order of species names in T matrix)
@@ -119,8 +119,9 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		setProcessOneTraitDataVec(oneTraitDataVector);
 	}
 	
-	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean, boolean updateAlpha) {
-		if (updateAlpha) { alpha = alphaInput.get().getValue(); }
+	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean) {
+		alpha = alphaInput.get().getValue(); // needs to be done here because populateMeanVector and populateOUTMatrix use it
+		
 		if (updateMean) { populateMeanVector(); }
 		if (updatePhyloTMat) { super.populatePhyloTMatrix(); }
 		if (updateVCVMat) {
@@ -139,16 +140,12 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	}
 	
 	private void populateOUTMatrix(boolean useEqDistBool) {
-		// alpha has already been dealt in populateInstanceVars
 		OUUtils.computeOUTMatOneTrait(nSpp, alpha, getPhyloTMatDouble(), ouTMat, useEqDistBool);
 	}
 	
 	@Override
 	protected void populateMeanVector() {
-//		if (rootValueInput.get() != null || rootValueInput.isDirty()) {
-		rootValue = rootValueInput.get().getValue();
-//		}
-		
+		rootValue = rootValueInput.get().getValue();		
 		theta = optimumManager.getColorValues();
 		thetaAssignments = optimumManager.getColorAssignments();
 		
@@ -196,17 +193,16 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	public double calculateLogP() {
-		boolean updateAlpha = false;
 		boolean updatePhyloTMat = false;
 		boolean updateVCVMat = false;
 		boolean updateMean = false;
 		
-		if (alphaInput.isDirty()) { updateAlpha = true; updateVCVMat = true; updateMean = true; }
+		if (alphaInput.isDirty()) { updateVCVMat = true; updateMean = true; }
 		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
 		if (sigmasqInput.isDirty() || alphaInput.isDirty()) { updateVCVMat = true; }
 		if (rootValueInput.isDirty() || alphaInput.isDirty() || optimumManagerInput.isDirty()) { updateMean = true; }
 		
-		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean, updateAlpha);
+		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean);
 		populateParentInstanceVars(updateVCVMat, updateMean);
 		
 		super.populateLogP();

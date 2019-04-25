@@ -28,9 +28,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private boolean matrixWasSingularCantInvertBarf;
 	
 	// for phylo T matrix
-	private int nSpp;
 	private TreeParser tree;
-	private double rootEdgeLength;
+	private int nSpp; // tree has to be traversed, so part of state!
+	
+	// things below are part of state because I do not want to call new on them every time I compute likelihood
 	private double[] nodeToRootPaths;
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
@@ -53,14 +54,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private RealVector storedMeanVec; // need for integration with JIVE (unsure why...?)
 	private RealMatrix storedPhyloTMat; // needed for tree operators
 	private RealMatrix storedInvVCVMat; // (below) needed for morphology parameter operators
-//	private RealMatrix storedVCVMat;
 	private double storedDetVCVMat;
-	private double[][] storedPhyloTMatDouble;
-	private double[] storedNodeToRootPaths;
 	
 	@Override
 	public void initAndValidate() {
-		rootEdgeLength = rootEdgeLengthInput.get();
 		tree = treeInput.get();
 		nSpp = tree.getLeafNodeCount();
 		nodeToRootPaths = new double[tree.getNodeCount()];
@@ -70,15 +67,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		phyloTMatDouble = new double[nSpp][nSpp];
 		phyloTMat = new Array2DRowRealMatrix(phyloTMatDouble);
 
-		// stored stuff
-		storedPhyloTMatDouble = new double[nSpp][nSpp];
-		storedNodeToRootPaths = new double[tree.getNodeCount()];
-		
+		// stored stuff		
 		storedMeanVec = new ArrayRealVector(nSpp);
 		storedPhyloTMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
-		
-//		storedVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 	}
 	
 	protected void populatePhyloTMatrix() {
@@ -91,6 +83,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		}
 
 		// setting root edge rows/cols in phyloTMat
+		Double rootEdgeLength = rootEdgeLengthInput.get();
 		if (rootEdgeLength != 0.0) {
 			phyloTMat = phyloTMat.scalarAdd(rootEdgeLength);
 		}
@@ -179,17 +172,12 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	@Override
 	public void store() {
-		System.arraycopy(nodeToRootPaths, 0, storedNodeToRootPaths, 0, nodeToRootPaths.length);
-		
 		for (int i=0; i<nSpp; ++i) {	
 			storedMeanVec.setEntry(i, meanVec.getEntry(i));
-			
-			System.arraycopy(phyloTMatDouble[i], 0, storedPhyloTMatDouble[i], 0, phyloTMatDouble[i].length);
 			
 			for (int j=0; j<nSpp; ++j) {
 				storedPhyloTMat.setEntry(i, j, phyloTMat.getEntry(i, j));
 				storedInvVCVMat.setEntry(i, j, invVCVMat.getEntry(i, j));
-//				storedVCVMat.setEntry(i, j, vcvMat.getEntry(i, j));
 			}
 		}
 		
@@ -200,16 +188,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	public void restore() {
 		RealMatrix realMatTmp;
 		RealVector realVecTmp;
-		double[][] matTmp;
-		double[] vecTmp;
-		
-		vecTmp = nodeToRootPaths;
-		nodeToRootPaths = storedNodeToRootPaths;
-		storedNodeToRootPaths = vecTmp;
-		
-		matTmp = phyloTMatDouble;
-		phyloTMatDouble = storedPhyloTMatDouble;
-		storedPhyloTMatDouble = matTmp;
 		
 		realVecTmp = meanVec;
 		meanVec = storedMeanVec;
@@ -222,10 +200,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		realMatTmp = invVCVMat;
 		invVCVMat = storedInvVCVMat;
 		storedInvVCVMat = realMatTmp;
-		
-//		realMatTmp = vcvMat;
-//		vcvMat = storedVCVMat;
-//		storedVCVMat = realMatTmp;
 		
 		detVCVMat = storedDetVCVMat;
 	}
