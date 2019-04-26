@@ -1,3 +1,4 @@
+
 # contraband: Calibrated validation of BM-related classes
 
 This file will guide you through reproducing the simulations and graphs for conducting calibrated validation of the relevant likelihoods in the contraband package.
@@ -14,7 +15,7 @@ You are going to need the following R packages:
 Also, make sure the file calibrated_validation_utils.R is inside the calibrated_validation/ folder, or whatever folder you use for holding all files.
 
 ## (1) Brownian motion (BM) multivariate normal likelihood
-### (1.1) Simulating one trait under Brownian Motion (BM), writing .xmls from template and .sh scripts.
+### (1.1) Simulating one trait under Brownian motion (BM), writing .xmls from template and .sh scripts.
 
 We use an exponential prior for the evolutionary rate (sigma^2), with rate 5. We use a normal prior for the mean of the process (=root value) with mean=0.0 and stdev=2.0.
 
@@ -42,8 +43,22 @@ Rscript BM_calibrated_postMCMC_plots.R ./ BMMVNLikelihoodOneTrait_fixedtree.RDat
 Rscript BM_calibrated_postMCMC_plots.R ./ BMMVNLikelihoodOneTrait_fixedtree_nonultra.RData 100 BMMVN nonultra
 ```
 
-## (2) Brownian motion (BM) pruning likelihood
-### (2.1) Simulating one trait under Brownian Motion (BM), writing .xmls from template and .sh scripts.
+## (2) Brownian motion with multiple rates (BMShift) multivariate normal likelihood 
+### (2.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts.
+
+We use the same priors as in 1.1.
+
+```
+cd /path/to/calibrated_validation/
+mkdir BMMVNShiftOneTraitOneRate_ultra_xmls/
+mkdir BMMVNShiftOneTraitOneRate_nonultra_xmls/
+
+Rscript BMShiftOneRate_calibrated_simulation.R
+```
+
+
+## (3) Brownian motion (BM) pruning likelihood
+### (3.1) Simulating one trait under Brownian Motion (BM), writing .xmls from template and .sh scripts.
 
 We use the same tree and data sets from the BMMVN calibration.
 
@@ -66,15 +81,15 @@ mkdir BMPrune_nonultra_shellscripts/
 Rscript BM_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMPrune '00:15:00' BMPruneLikelihoodOneTrait_fixedtree_nonultra_template.xml
 ```
 
-### (2.2) Plotting the mean posterior of the two BM parameters against the true values
+### (3.2) Plotting the mean posterior of the two BM parameters against the true values
 
 ```
 Rscript BM_calibrated_postMCMC_plots.R ./ BMPruneLikelihoodOneTrait_fixedtree.RData 100 BMPrune ultra
 Rscript BM_calibrated_postMCMC_plots.R ./ BMPruneLikelihoodOneTrait_fixedtree_nonultra.RData 100 BMPrune nonultra
 ```
 
-## (2) Ornstein-Uhlenbeck (OU) multivariate normal likelihood
-### (2.1) Simulating one trait under the vanilla (1 optimum for the whole tree) Ornstein-Uhlenbeck (OU), writing .xmls from template and .sh scripts.
+## (4) Ornstein-Uhlenbeck (OU) multivariate normal likelihood
+### (4.1) Simulating one trait under the vanilla (1 optimum for the whole tree) Ornstein-Uhlenbeck (OU), writing .xmls from template and .sh scripts.
 
 We use an exponential prior (rate=5) for the evolutionary rate, sigma^2. We use a normal prior for the root value (mean=0.0 and stdev=2.0) and optimum (mean=1.0, stdev=2.0), and a lognormal prior for alpha (mean = stdev = 1.0).
 
@@ -96,7 +111,7 @@ mkdir OUVanillaMVNOneTrait_nonultra_shellscripts/
 Rscript OUVanilla_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUVanillaMVN '00:45:00' OUVanillaMVNLikelihoodOneTrait_fixedtree_nonultra_template.xml nonultra OUVanillaMVNLikelihoodOneTrait_fixedtree_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/contraband.jar
 ```
 
-### (2.2) Plotting the mean posterior of the four vanilla OU parameters against the true values
+### (4.2) Plotting the mean posterior of the four vanilla OU parameters against the true values
 
 ```
 Rscript OUVanilla_calibrated_postMCMC_plots.R ./ OUVanillaMVNLikelihoodOneTrait_fixedtree.RData 100 OUVanillaMVN ultra
