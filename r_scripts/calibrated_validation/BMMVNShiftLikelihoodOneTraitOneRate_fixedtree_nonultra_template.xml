@@ -29,7 +29,7 @@
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
 	    <distribution id="BMMVNShift" spec="contraband.BMMVNShiftLikelihoodOneTrait">
 	    
-	      <tree id="FixedTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="[TreeHere];" offset="0" singlechild="false">
+	      <tree id="FixedTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="[TreeHere]" offset="0" singlechild="false">
 	        <taxonset id="TaxonSet" spec="TaxonSet">
 		  [TaxonSetHere]
 	        </taxonset>
@@ -55,7 +55,7 @@
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
     <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
 	
-    <logger id="tracelog" fileName="BMMVNShiftOneTraitOneRate_fixedtree_nonultra.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="[FileNameHere].log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
@@ -71,7 +71,7 @@
         <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:firsthalf" fileName="BMMVNShiftOneTraitOnerate_fixedtree.trees" logEvery="5000000" mode="tree">
+    <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="5000000" mode="tree">
         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@FixedTree"/>
     </logger>
   </run>

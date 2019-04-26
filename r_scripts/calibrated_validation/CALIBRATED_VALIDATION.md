@@ -30,6 +30,7 @@ Rscript BM_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVN '00:30:00' BMM
 Here we simulate 100 data sets, on a tree with 50 species, set the job prefixes to 'BMMVN', and tell the cluster the jobs should take 30 minutes each. Here, "ultra" because I'm using an ultrametric tree, and the other arguments are self-explanatory. You can then simulate under a nonultrametric tree by just replacing the "tr" variable (and changing other arguments accordingly (see below). I hard-coded this in the script -- just uncomment it, or use whatever tree you want.
 
 ```
+cd /path/to/calibrated_validation/
 mkdir BMMVNOneTrait_nonultra_xmls/
 mkdir BMMVNOneTrait_nonultra_shellscripts/
 
@@ -50,10 +51,10 @@ We use the same priors as in 1.1.
 
 ```
 cd /path/to/calibrated_validation/
-mkdir BMMVNShiftOneTraitOneRate_ultra_xmls/
 mkdir BMMVNShiftOneTraitOneRate_nonultra_xmls/
+mkdir BMMVNShiftOneTraitOneRate_nonultra_shellscripts/
 
-Rscript BMShiftOneRate_calibrated_simulation.R
+Rscript BMShiftOneRate_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShift '00:45:00' BMMVNShiftLikelihoodOneTraitOneRate_fixedtree_nonultra_template.xml nonultra BMMVNShiftLikelihoodOneTraitOneRate_fixedtree_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
 ```
 
 
