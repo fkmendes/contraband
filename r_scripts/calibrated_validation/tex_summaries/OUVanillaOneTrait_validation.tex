@@ -1,0 +1,42 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage[left=2.5cm, right=2.5cm, top=2cm]{geometry}
+
+\title{One-trait vanilla Ornstein-Uhlenbeck calibrated validation}
+\author{F\'{a}bio K. Mendes}
+\date{March 2019}
+
+\begin{document}
+
+\centering
+One trait vanilla Ornstein-Uhlenbeck calibrated validation
+
+\begin{center}
+  \includegraphics[width=10cm]{ultrametric_tree_OUVanilla_validation.png}
+  \includegraphics[width=8cm]{ultrametric_OUVanilla_tree.png}
+
+  \begin{tabular}{c | c}
+    Parameter & Coverage (\%) \\\hline
+    $\sigma^2$ & 95\\
+    Root value & 96\\
+    $\theta$ & 96\\
+    $\alpha$ & 95\\
+  \end{tabular}
+\end{center}
+
+\newpage
+
+\vspace{3cm}
+\begin{center}
+\includegraphics[width=10cm]{nonultrametric_tree_OUVanilla_validation.png}
+\includegraphics[width=8cm]{nonultrametric_OUVanilla_tree.png}
+
+\begin{tabular}{c | c}
+    Parameter & Coverage (\%) \\\hline
+    $\sigma^2$ & 94\\
+    Root value & 94\\
+    $\theta$ & 95\\
+    $\alpha$ & 94\\
+\end{tabular}
+\end{center}
+\end{document}
