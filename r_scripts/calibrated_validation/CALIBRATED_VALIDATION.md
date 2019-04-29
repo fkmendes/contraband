@@ -45,21 +45,31 @@ Rscript BM_calibrated_postMCMC_plots.R ./ BMMVNLikelihoodOneTrait_fixedtree_nonu
 ```
 
 ## (2) Brownian motion with multiple rates (BMShift) multivariate normal likelihood 
-### (2.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts.
+### (2.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts
 
-We use the same priors as in 1.1.
+We use the same priors as in 1.1, and do both ultrametric and nonultrametric trees.
 
 ```
 cd /path/to/calibrated_validation/
-mkdir BMMVNShiftOneTraitOneRate_nonultra_xmls/
-mkdir BMMVNShiftOneTraitOneRate_nonultra_shellscripts/
+mkdir BMMVNShiftOneTraitOneRate_ultra_xmls/
+mkdir BMMVNShiftOneTraitOneRate_ultra_shellscripts/
 
-Rscript BMShiftOneRate_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShift '00:45:00' BMMVNShiftLikelihoodOneTraitOneRate_fixedtree_nonultra_template.xml nonultra BMMVNShiftLikelihoodOneTraitOneRate_fixedtree_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+Rscript BMShiftOneRate_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftOneRate '00:45:00' BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_ultra_template.xml ultra BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_ultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+
+# remember to un/comment the tree specification lines in BMShiftOneRate_calibrated_simulation.R
+
+Rscript BMShiftOneRate_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftOneRate '00:45:00' BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_nonultra_template.xml nonultra BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
 ```
 
+### (2.2) Plotting the mean posterior of the two BM parameters against the true values
+
+```
+Rscript BMShiftOneRate_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_ultra.RData 100 BMMVNShiftOneRate ultra
+Rscript BMShiftOneRate_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_nonultra.RData 100 BMMVNShiftOneRate nonultra
+```
 
 ## (3) Brownian motion (BM) pruning likelihood
-### (3.1) Simulating one trait under Brownian Motion (BM), writing .xmls from template and .sh scripts.
+### (3.1) Simulating one trait under Brownian Motion (BM), writing .xmls from template and .sh scripts
 
 We use the same tree and data sets from the BMMVN calibration.
 
