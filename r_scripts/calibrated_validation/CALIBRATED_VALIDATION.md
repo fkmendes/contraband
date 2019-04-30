@@ -64,8 +64,8 @@ Rscript BMShiftOneRate_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShi
 ### (2.2) Plotting the mean posterior of the two BM parameters against the true values
 
 ```
-Rscript BMShiftOneRate_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_ultra.RData 100 BMMVNShiftOneRate ultra
-Rscript BMShiftOneRate_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_nonultra.RData 100 BMMVNShiftOneRate nonultra
+Rscript BMShiftOneRate_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_ultra.RData 100 BMMVNShiftOneRate ultra
+Rscript BMShiftOneRate_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_nonultra.RData 100 BMMVNShiftOneRate nonultra
 ```
 
 ## (3) Brownian motion (BM) pruning likelihood

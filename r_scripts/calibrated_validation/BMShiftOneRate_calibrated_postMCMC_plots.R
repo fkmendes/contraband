@@ -15,7 +15,7 @@ n.sim <- as.numeric(args[3])
 n.param <- 2
 sigma.rate <- 5
 x0s.mean <- 0
-job.prefix <- args[4] # e.g., "BMMVNShift" or "BMPruneShift"
+job.prefix <- args[4] # e.g., "BMMVNShiftOneRate" or "BMPruneShiftOneRate"
 tree.type <- args[5] # e.g., "ultrametric" or "nonultrametric"
 
 param.labs <- c(expression(sigma^2), expression(mu))
@@ -29,7 +29,7 @@ prior.means <- c(1/sigma.rate, x0s.mean)
 ## res.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/BMMVNOneTrait_ultra_results/"
 ## res.files <- mixedsort(paste0(res.path,list.files(res.path)))
 
-res.path <- paste0(cal.validation.folder, job.prefix, "OneTraitOneRate_", tree.type, "_results/")
+res.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_results/")
 res.files <- mixedsort(paste0(res.path,list.files(res.path)))
 load(rdata.path)
 
@@ -60,18 +60,18 @@ table((full.df$sigmasq >= full.df$lower.sigmasq) & (full.df$sigmasq <= full.df$u
 ## ultrametric
 ## mu
 ##   FALSE  TRUE
-##       6    94
+##       3    97
 ## sigma
 ##   FALSE  TRUE
-##      7    93
+##      8    92
 
 ## nonultrametric
 ## mu
 ##   FALSE  TRUE
-##       5    95
+##       3    97
 ## sigma
 ##   FALSE  TRUE
-##      10    90
+##      8    92
 
 ### PLOTS ###
 

@@ -40,7 +40,7 @@ names(log.df) <- as.vector(outer(c("lower", "upper", "mean"), param.names, paste
 cols <- seq(length.out=n.param, by=3) # 3=lower, upper, mean
 for (i in 1:n.sim) {
     this.sim.df <- read.delim(res.files[i], comment.char='#')
-    
+
     k = 1
     for (j in cols) {
         beast.param.name = as.character(beast.param.names[k])
@@ -58,19 +58,19 @@ table((full.df$sigmasq >= full.df$lower.sigmasq) & (full.df$sigmasq <= full.df$u
 
 ## ultrametric
 ## mu
-##   FALSE  TRUE 
+##   FALSE  TRUE
 ##       6    94
 ## sigma
-##   FALSE  TRUE 
-##      7    93 
+##   FALSE  TRUE
+##      7    93
 
 ## ultrametric
 ## mu
-##   FALSE  TRUE 
+##   FALSE  TRUE
 ##       5    95
 ## sigma
-##   FALSE  TRUE 
-##      10    90 
+##   FALSE  TRUE
+##      10    90
 
 ### PLOTS ###
 
@@ -86,7 +86,7 @@ for (i in 1:n.param) {
                               full.df)
     names(all.plots)[i] = paste0("plot", i)
 }
-list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
+list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I can use plot_grid
 
 png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.png"), height=15, width=10, unit="cm", res=300)
 plot_grid(mget(paste0("plot", 1:2)))
