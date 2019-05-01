@@ -17,7 +17,7 @@ public class BMMVNShiftLikelihoodOneTraitTest2 {
 	final static double EPSILON = 1e-5;
 	
 	/*
-	 * Small tree, simple BM. Second likelihood adds root edge. Should match/reduce to BMMVNLikelihoodOneTraitTest
+	 * Large tree, one-rate BM (on shift-BM class)
 	 */
 	@Before
 	public void setUp() throws Exception {
@@ -26,19 +26,19 @@ public class BMMVNShiftLikelihoodOneTraitTest2 {
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 		
 		// VCV Mat
-		RealParameter colorValues = new RealParameter(new Double[] { 0.02813127 });
+		RealParameter colorValues = new RealParameter(new Double[] { 0.06847802 });
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
 		ColorManager colors = new ColorManager();
 		colors.initByName("nTraits", 1, "nColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 				
 		// initializing data	
-		RealParameter oneTraitValues = new RealParameter(new Double[] { 1.44328035263938,3.50655783665801,2.29555775828889,5.27046225284362,0.530549210673224,-0.368179938156466,0.815471685036162,2.36440615897368,0.175573596016938,0.491308438121729,-0.885496203211391,5.25090092164527,4.5030514546132,2.19144454232363,2.71119474862089,3.80879445057103,3.46409119464282,0.847786178303177,1.60806408491409,0.547111053325457,0.463967494705812,3.02072340616352,2.80516460780011,3.79540161037042,4.27779475259434,2.03094267471497,3.13807747280727,0.944275002969514,1.54863412006962,1.46096257283766,0.501600894450101,4.35582751232989,4.53286880080503,2.22222895258926,4.21286791328812,5.90694686097006,1.08900067374343,2.02041235594081,2.35582048390211,4.36319759634288,3.74261911168354,1.26352894420471,2.06627716143412,3.17509471532883,3.28578252973877,2.24446251234181,3.37402888328658,3.67966179487162,4.45836708983263,4.48179955076661 });
+		RealParameter oneTraitValues = new RealParameter(new Double[] { -1.98102089083783, 0.368221479864884, -2.88206789097561, 4.1584950949635, -0.00844451532825974, -2.53652645094459, 1.49253360790008, 0.860345193251339, 2.34223152425472, -0.799642041763574, 2.95604288792148, 2.77398773288718, 1.29414159577677, -6.45163527858711, -3.4910947199795, -0.134187705609486, -0.142843938373703, 1.96381042760098, 2.43882757691384, 2.88182895484916, 3.43830441895749, 2.47333215100859, 0.304330853565934, -6.07220493234317, 0.257366287252572, -0.646689981206873, -0.969408565879601, -5.64312827761184, -4.45283272974081, -2.57622923519127, -0.154025403982667, -1.05882534303589, -1.2255223679612, -1.83844113541221, -4.80014501272491, -2.65348584683595, -0.889683582858697, -0.7191201409195, 1.03859041594185, -1.54742048206181, -2.30228393056959, -1.58539047472242, -0.522727237241902, -0.531092662298977, -1.53710013936109, -1.86653599613174, -1.50415600947128, -0.806534414120411, -1.20121412215974, -1.12832020868563 });
 		String spNames = "t37,t42,t24,t19,t12,t5,t18,t25,t10,t47,t9,t20,t14,t43,t38,t13,t41,t50,t8,t35,t32,t34,t6,t48,t39,t17,t15,t40,t46,t29,t22,t16,t28,t31,t45,t23,t7,t4,t36,t11,t49,t3,t27,t26,t33,t21,t2,t44,t30,t1";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
 		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
 		
 		// mean vector
-		Double[] meanVectorInput = new Double[] { 2.405835 };
+		Double[] meanVectorInput = new Double[] { -0.3689661 };
 		RealParameter mean = new RealParameter(meanVectorInput);
 		
 		// likelihood
@@ -50,6 +50,6 @@ public class BMMVNShiftLikelihoodOneTraitTest2 {
 
 	@Test
 	public void testLnLk() {
-		Assert.assertEquals(-75.79013, lnLk, EPSILON); 
+		Assert.assertEquals(-98.0309, lnLk, EPSILON); 
 	}
 }

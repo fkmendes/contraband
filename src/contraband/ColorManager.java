@@ -133,7 +133,7 @@ public class ColorManager extends CalculationNode {
 		int nodeIdx = aNode.getNr(); 
 		
 		if (aNode.isLeaf()) {		
-			System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx); // for debugging 
+//			System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx); // uncomment to see index of all leaves 
 			spColorValuesMat[nodeIdx][nodeIdx] = nodeWeightedColorValues[nodeIdx]; // populating diagonal entries
 			spOrderInTMat[nodeIdx] = aNode.getID();
 			return;
@@ -141,7 +141,7 @@ public class ColorManager extends CalculationNode {
 		
 		if (aNode.isRoot()) { nodeWeightedColorValues[nodeIdx] = 0.0; }
 		
-		// for debugging
+		// uncomment to see index of internal nodes and which internal node is which
 //		System.out.println("Internal node, nodeIdx=" + nodeIdx); // for debugging
 //		List<Node> leafNodes = aNode.getAllLeafNodes();
 //		for (Node node: leafNodes) {

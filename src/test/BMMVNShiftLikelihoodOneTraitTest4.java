@@ -1,4 +1,8 @@
-package testdrivers;
+package test;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
@@ -7,12 +11,16 @@ import contraband.BMMVNShiftLikelihoodOneTrait;
 import contraband.ColorManager;
 import contraband.OneValueContTraits;
 
-/*
- * This testdriver runs the BMMVNShift class with a 2 different rates
- */
-public class BMMVNShiftLikelihoodTestDriver2 {
+public class BMMVNShiftLikelihoodOneTraitTest4 {
 
-	public static void main(String[] args) {
+	double lnLk;
+	final static double EPSILON = 1e-4;
+	
+	/*
+	 * Large tree, with fossils, one-rate BM (on shift-BM class)
+	 */
+	@Before
+	public void setUp() throws Exception {
 		// tree
 		String treeStr = "((sp1:1.0,sp2:1.0):1.0,sp3:2.0);";
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
@@ -21,9 +29,9 @@ public class BMMVNShiftLikelihoodTestDriver2 {
 		RealParameter colorValues = new RealParameter(new Double[] { 0.1160941, 0.01914707 });
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 1, 1, 0, 0, 0 });
 		ColorManager colors = new ColorManager();
-		colors.initByName("tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
-		
-		// initializing data
+		colors.initByName("tree", myTree, "nTraits", 1, "nColors", 2, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+				
+		// initializing data	
 		RealParameter oneTraitValues = new RealParameter(new Double[] { -0.9291812, -0.7312343, -1.6712572 });
 		String spNames = "sp1,sp2,sp3";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
@@ -36,6 +44,12 @@ public class BMMVNShiftLikelihoodTestDriver2 {
 		// likelihood
 		BMMVNShiftLikelihoodOneTrait BMLk = new BMMVNShiftLikelihoodOneTrait();
 		BMLk.initByName("tree", myTree, "rateManager", colors, "mean", mean, "oneTraitData", oneTraitData);
-		System.out.println(BMLk.calculateLogP()); // -0.8583676
-	}	
+		lnLk = BMLk.calculateLogP();
+		System.out.println(lnLk); // -0.8583677116744495
+	}
+
+	@Test
+	public void testLnLk() {
+		Assert.assertEquals(-0.8583676, lnLk, EPSILON); 
+	}
 }
