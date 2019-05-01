@@ -10,14 +10,14 @@ write.shell.script <- function(shell.scripts.path, sim.idx, time.needed, job.pre
     if (file.exists(shell.file.name)) {
         file.remove(shell.file.name)
     }
-    
+
     xml.file.name = paste0(xml.file.path, xml.file.prefix, sim.idx, ".xml")
 
     write(file=shell.file.name, paste(
         paste0("#!/bin/bash -e\n#SBATCH -J ", job.prefix, sim.idx),
         "#SBATCH -A nesi00390",
         paste0("#SBATCH --time=", time.needed),
-        "#SBATCH --mem-per-cpu=12288",
+        "#SBATCH --mem-per-cpu=1.5G",
         "#SBATCH --cpus-per-task=1",
         "#SBATCH --ntasks=1",
         "#SBATCH --hint=nomultithread",

@@ -77,9 +77,6 @@ public class ColorManager extends CalculationNode {
 		// stored stuff
 		storedColorValues = new Double[colorValues.length];
 		storedColorAssignments = new Integer[nNodes];
-//		storedSpColorValuesMat = new double[nSpp][nSpp];
-//		storedNodeWeightedColorValues = new double[nNodes];
-//		storedSpNamesInVCVMatOrder = new String[nSpp];
 	}
 
 	private void readInputBeforeGetters() {
@@ -133,10 +130,10 @@ public class ColorManager extends CalculationNode {
 	}
 	
 	private void fillNodeColorValuesOneTrait(Node aNode, String[] spOrderInTMat) {
-		int nodeIdx = aNode.getNr();
-		// System.out.println("nodeIdx=" + nodeIdx); // for debugging 
+		int nodeIdx = aNode.getNr(); 
 		
-		if (aNode.isLeaf()) {		 
+		if (aNode.isLeaf()) {		
+			System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx); // for debugging 
 			spColorValuesMat[nodeIdx][nodeIdx] = nodeWeightedColorValues[nodeIdx]; // populating diagonal entries
 			spOrderInTMat[nodeIdx] = aNode.getID();
 			return;
@@ -145,9 +142,10 @@ public class ColorManager extends CalculationNode {
 		if (aNode.isRoot()) { nodeWeightedColorValues[nodeIdx] = 0.0; }
 		
 		// for debugging
+//		System.out.println("Internal node, nodeIdx=" + nodeIdx); // for debugging
 //		List<Node> leafNodes = aNode.getAllLeafNodes();
 //		for (Node node: leafNodes) {
-//			System.out.println("leaf: " + node.getID());
+//			System.out.println("Daughter leaf: " + node.getID());
 //		}
 		
 		Node left = aNode.getChild(0);

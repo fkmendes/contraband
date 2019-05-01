@@ -7,7 +7,6 @@ import org.junit.Test;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
-import contraband.BMMVNLikelihoodOneTrait;
 import contraband.BMMVNShiftLikelihoodOneTrait;
 import contraband.ColorManager;
 import contraband.OneValueContTraits;

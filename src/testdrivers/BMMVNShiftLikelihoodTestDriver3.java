@@ -1,0 +1,55 @@
+package testdrivers;
+
+import beast.core.parameter.IntegerParameter;
+import beast.core.parameter.RealParameter;
+import beast.util.TreeParser;
+import contraband.BMMVNShiftLikelihoodOneTrait;
+import contraband.ColorManager;
+import contraband.OneValueContTraits;
+
+/*
+ * This testdriver runs the BMMVNShift class with 3 different rates on a 50-tip tree
+ */
+public class BMMVNShiftLikelihoodTestDriver3 {
+
+	public static void main(String[] args) {
+		// tree
+		String treeStr = "(((((t35:2.336518061,t32:2.336518061):28.95257479,t10:31.28909285):8.654086516,t18:39.94317937):52.28906298,(((t47:31.00652286,t9:31.00652286):50.20634817,(t43:15.06939472,t38:15.06939472):66.14347631):10.61662549,(((((t20:20.94406932,t14:20.94406932):28.09437292,t19:49.03844224):31.16991698,(t24:54.88723469,(((t50:2.534803909,t8:2.534803909):35.18774941,t25:37.72255332):15.41876911,(t12:42.01655137,t5:42.01655137):11.12477106):1.745912255):25.32112453):2.610368667,t37:82.81872788):6.617999642,(t42:81.65977864,(t13:5.88018515,t41:5.88018515):75.77959349):7.776948892):2.392768999):0.4027458181):7.767757656,((t34:80.73867518,((t4:14.89974775,t36:14.89974775):7.855467399,t7:22.75521515):57.98346003):16.48666894,((((((((t29:32.9204832,t22:32.9204832):13.17504731,t46:46.09553051):1.732718052,t40:47.82824856):14.51317295,(t28:29.85457377,((t33:6.373725141,t21:6.373725141):1.191235246,t26:7.564960387):22.28961339):32.48684774):5.177695495,t48:67.51911701):2.445324178,(t39:56.9237382,((t2:5.876590264,t44:5.876590264):19.06403767,t23:24.94062793):31.98311027):13.04070299):0.3095854321,(((t11:13.30542076,t49:13.30542076):14.69428372,t45:27.99970449):1.437902517,t31:29.43760701):40.83641961):11.48412211,((((t16:30.59346099,(t30:0.03406798076,t1:0.03406798076):30.55939301):21.47527084,(t17:50.41024027,t15:50.41024027):1.658491566):14.63237622,(t3:10.35007739,t27:10.35007739):56.35103066):2.944577857,t6:69.64568591):12.11246283):15.46719539):2.774655878):0.0;";
+		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
+		
+		// VCV Mat
+		RealParameter colorValues = new RealParameter(new Double[] { 0.008273238, 0.09537098, 0.05096277 });
+		
+		// first 5 rows are tips
+		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] {
+				0, 0, 0, 2, 2, 2, 0, 0, 0, 0,
+				2, 1, 2, 1, 1, 1, 2, 2, 1, 0,
+				1, 1, 0, 0, 0, 0, 1, 0, 0, 0,
+				2, 0, 1, 0, 1, 2, 2, 0, 1, 0,
+				1, 0, 1, 0, 2, 2, 0, 0, 2, 0,
+				
+				0, 0, 0, 0, 0, 0, 2, 2, 2, 2,
+				2, 2, 2, 2, 2, 2, 2, 2, 0, 0,
+				0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0
+				});
+		ColorManager colors = new ColorManager();
+		colors.initByName("tree", myTree, "nTraits", 1, "nColors", 3, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		
+		// initializing data
+		RealParameter oneTraitValues = new RealParameter(new Double[] { 0.397067150127224, 3.85873860469849, 0.273032205500636, 2.70572236910152, -0.671556271108191, -1.72255860693762, -0.583225779784213, 0.5514407470753, 0.106096914404911, -0.168732582305119, 0.913534023421874, 4.59079421613506, 4.2605839316364, -0.110868964985083, 0.0100660253403776, 3.53155011398765, 3.20608388067467, -2.40817134252311, -2.41704769432112, 0.57328295659726, 0.722863848077609, 0.418796702072184, 0.351445793709821, 1.68384043406411, 5.18743949451665, 0.799797862829182, -0.173180698862974, -1.27043195458372, 1.83234891714181, -0.195343290324594, 2.5672996419904, 1.25630246010019, 4.85598389460701, 0.684428705605823, 0.349091122944104, 1.42936840978152, -2.32393987428615, -2.36408341281568, -1.82456582194184, 0.445815917776977, 0.643525909256299, -0.560824716330915, -0.766351844818661, 2.39592426013111, 1.60079423555155, 2.4443182707602, -1.18647351540494, 0.414522270865257, 1.37688803283897, 1.34352224712644 });
+		String spNames = "t37,t42,t24,t19,t12,t5,t18,t25,t10,t47,t9,t20,t14,t43,t38,t13,t41,t50,t8,t35,t32,t34,t6,t48,t39,t17,t15,t40,t46,t29,t22,t16,t28,t31,t45,t23,t7,t4,t36,t11,t49,t3,t27,t26,t33,t21,t2,t44,t30,t1";
+		OneValueContTraits oneTraitData = new OneValueContTraits();
+		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
+		
+		// mean vector
+		Double[] meanVectorInput = new Double[] { 0.1514956 };
+		RealParameter mean = new RealParameter(meanVectorInput);
+		
+		// likelihood
+		BMMVNShiftLikelihoodOneTrait BMLk = new BMMVNShiftLikelihoodOneTrait();
+		BMLk.initByName("tree", myTree, "rateManager", colors, "mean", mean, "oneTraitData", oneTraitData);
+		System.out.println(BMLk.calculateLogP()); // -72.441267
+	}	
+}
