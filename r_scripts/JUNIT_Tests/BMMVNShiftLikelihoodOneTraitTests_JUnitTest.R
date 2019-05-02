@@ -81,6 +81,24 @@ res$theta # 0.4877995
 res$LogLik # -168.0481
 
 ## (6) 'BMMVNShiftLikelihoodOneTraitTest4'
+tr <- read.tree(text="((sp1:1.0,sp2:1.0):1.0,sp3:2.0);")
+tr <- paintSubTree(tr, node=5, state=2, stem=FALSE)
+plotSimmap(tr)
+
+dat <- data.frame(c(-0.9291812, -0.7312343, -1.6712572))
+rownames(dat) <- c("sp1", "sp2", "sp3")
+
+res <- mvBM(tr, dat, model="BMM")
+
+res$LogLik # -0.8583677
+res$sigma # 0.1160941 0.01914707
+res$theta # -1.125558
+
+## (7) 'BMMVNShiftLikelihoodOneTraitTest5'
+set.seed(123)
+lambda <- rexp(1, rate=80) # lambda from exponential (mean = 1/80)
+mu <- rexp(1, rate=100) # mu from exponential (mean = 1/100)
+tr <- sim.bd.taxa.age(n.spp, 1, lambda, mu, age=100, mrca=TRUE)[[1]];
 tr <- paintSubTree(tr, node=78, state=2, stem=TRUE)
 tr <- paintSubTree(tr, node=60, state=3, stem=TRUE)
 plotSimmap(tr)
