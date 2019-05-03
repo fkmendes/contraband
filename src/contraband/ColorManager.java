@@ -1,6 +1,7 @@
 package contraband;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import beast.core.CalculationNode;
@@ -34,7 +35,7 @@ public class ColorManager extends CalculationNode {
 	private double[] nodeWeightedColorValues;
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
-	private String[] spNamesInVCVMatOrder;
+	private String[] spNamesInASCIIBeticalOrTaxonSetOrder;
 	
 	private TreeParser tree;
 	private Double[] colorValues;
@@ -68,7 +69,7 @@ public class ColorManager extends CalculationNode {
 		
 		nSpp = tree.getLeafNodeCount();
 		nNodes = tree.getNodeCount();
-		spNamesInVCVMatOrder = new String[nSpp];
+		spNamesInASCIIBeticalOrTaxonSetOrder = new String[nSpp];
 		nodeWeightedColorValues = new double[nNodes];
 		spColorValuesMat = new double[nSpp][nSpp];
 		leftLeaves = new ArrayList<Node>();
@@ -117,7 +118,7 @@ public class ColorManager extends CalculationNode {
 	}
 	
 	private void populateColorValueMat() {	
-		fillNodeColorValuesOneTrait(tree.getRoot(), spNamesInVCVMatOrder);
+		fillNodeColorValuesOneTrait(tree.getRoot(), spNamesInASCIIBeticalOrTaxonSetOrder);
 		
 		// tree gets taller due to ILS, so it adds some variance to all cells in VCV matrix
 		if (rootEdgeVar != 0.0) {
@@ -127,6 +128,8 @@ public class ColorManager extends CalculationNode {
 				}
 			}
 		}
+		
+		System.out.println("Just populated color matrix. Species order in VCV Mat is:" + Arrays.toString(spNamesInASCIIBeticalOrTaxonSetOrder));
 	}
 	
 	private void fillNodeColorValuesOneTrait(Node aNode, String[] spOrderInTMat) {
@@ -226,7 +229,7 @@ public class ColorManager extends CalculationNode {
 	}
 	
 	public String[] getSpNamesInVCVMatOrder() {
-		return spNamesInVCVMatOrder;
+		return spNamesInASCIIBeticalOrTaxonSetOrder;
 	}
 	
 	@Override

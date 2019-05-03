@@ -1,5 +1,6 @@
 package contraband;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import beast.core.CalculationNode;
@@ -57,14 +58,6 @@ public class OneValueContTraits extends CalculationNode {
 				++i;
 			}
 		}
-
-		// Looping over species
-//		int ithSpp = 0;
-//		for (String spName: spNames) {
-//			thisSpTraitValues = Arrays.copyOfRange(traitValues, ithSpp*nTraits, ithSpp*nTraits+nTraits);
-//			spValuesMap.put(spName, thisSpTraitValues);
-//			ithSpp++;
-//		}
 	}
 	
 //	private void populateSpValuesMap() {
@@ -99,9 +92,9 @@ public class OneValueContTraits extends CalculationNode {
 	 * One species, one trait (need to provide trait index)
 	 */
 	public Double getSpValue(String spName, int idxOfTraitToReturn) {	
-		if (traitInput.isDirty()) {
-			populateSpValuesMap();
-		}
+//		if (traitInput.isDirty()) {
+//			populateSpValuesMap();
+//		}
 
 		Double spValue = spValuesMap.get(spName)[idxOfTraitToReturn];
 
@@ -112,16 +105,8 @@ public class OneValueContTraits extends CalculationNode {
 	 * One species, all traits (same order as in string)
 	 */
 	public Double[] getSpValues(String spName) {	
-		if (traitInput.isDirty()) {
-			populateSpValuesMap();
-		}
-
-//		double[] spValues = new double[nTraits]; // used by getter (different traits, same species)
-//		
-//		int i=0;
-//		for (Double spValue: spValuesMap.get(spName)) {
-//			spValues[i] = spValue.doubleValue();
-//			i++;
+//		if (traitInput.isDirty()) {
+//			populateSpValuesMap();
 //		}
 
 		return spValuesMap.get(spName);
@@ -131,9 +116,9 @@ public class OneValueContTraits extends CalculationNode {
 	 * One trait, all species (order provided by spNamesInput) 
 	 */
 	public Double[] getTraitValues(int traitIdx, String[] strings) {
-		if (traitInput.isDirty()) {
-			populateSpValuesMap();
-		}
+//		if (traitInput.isDirty()) {
+//			populateSpValuesMap();
+//		}
 
 		Double[] traitValues = new Double[nSpp]; // used by getter (same trait, different species)
 		
@@ -142,6 +127,9 @@ public class OneValueContTraits extends CalculationNode {
 			traitValues[ithSpp] = getSpValues(spName)[traitIdx];
 			ithSpp++;
 		}
+		
+		System.out.println("Species names for trait values below:" + Arrays.toString(strings));
+		System.out.println("traitValues inside OneValueContTraits=" + Arrays.toString(traitValues));
 		
 		return traitValues;
 	}

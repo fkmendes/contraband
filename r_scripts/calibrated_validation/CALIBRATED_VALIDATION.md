@@ -51,8 +51,8 @@ We use the same priors as in 1.1, and do both ultrametric and nonultrametric tre
 
 ```
 cd /path/to/calibrated_validation/
-mkdir BMMVNShiftOneTraitOneRate_ultra_xmls/
-mkdir BMMVNShiftOneTraitOneRate_ultra_shellscripts/
+mkdir BMMVNShiftOneRateOneTrait_ultra_xmls/
+mkdir BMMVNShiftOneRateOneTrait_ultra_shellscripts/
 
 Rscript BMShiftOneRate_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftOneRate '00:45:00' BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_ultra_template.xml ultra BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_ultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
 
@@ -66,6 +66,26 @@ Rscript BMShiftOneRate_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShi
 ```
 Rscript BMShiftOneRate_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_ultra.RData 100 BMMVNShiftOneRate ultra
 Rscript BMShiftOneRate_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_nonultra.RData 100 BMMVNShiftOneRate nonultra
+```
+
+## (2.3) Simulating one trait, with three rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts 
+
+Note that BEAST2 will number internal nodes according to either ASCII-sorted names, or following the order of the provided TaxonSet. This means that the setting of different rates will only match that of BMMVNShiftLikelihoodOneTraitTest5 if we let ASCII-betical sorting happen (i.e., by not providing a TaxonSet). So template here is different from the usual.
+
+Also, note that inside BMShiftThreeRates_calibrated_simulation.R, mvMORPH seems to call the third sigma^2 (the green color) "sigma[[2]]". So I had to adjust these accordingly both in this script and in the plotting script.
+
+```
+cd /path/to/calibrated_validation/
+mkdir BMMVNShiftThreeRatesOneTrait_ultra_xmls/
+mkdir BMMVNShiftThreeRatesOneTrait_ultra_shellscripts/
+
+Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftThreeRates '01:30:00' BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra_template.xml ultra BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+```
+
+## (2.4) Plotting the mean posterior of the four BM parameters (three sigmas^2 and root value)
+
+```
+Rscript BMShiftThreeRates_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra.RData 100 BMMVNShiftThreeRates ultra
 ```
 
 ## (3) Brownian motion (BM) pruning likelihood

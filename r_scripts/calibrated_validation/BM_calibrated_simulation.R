@@ -102,7 +102,7 @@ if (write.xmls) {
         if (file.exists(paste0(xmlfolder.path, xml.file.name))) {
             file.remove(paste0(xmlfolder.path, xml.file.name))
         }
-        
+
         file.name = basename(gsub(".xml", "", xml.file.name))
 
         template.lines = readLines(template.path)

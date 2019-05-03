@@ -60,6 +60,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	protected void populateLogP() {
 		logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
+		System.out.println("logP="+logP);
 	};
 	
 	// getters

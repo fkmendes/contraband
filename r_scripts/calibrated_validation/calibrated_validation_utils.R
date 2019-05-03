@@ -17,7 +17,7 @@ write.shell.script <- function(shell.scripts.path, sim.idx, time.needed, job.pre
         paste0("#!/bin/bash -e\n#SBATCH -J ", job.prefix, sim.idx),
         "#SBATCH -A nesi00390",
         paste0("#SBATCH --time=", time.needed),
-        "#SBATCH --mem-per-cpu=1.5G",
+        "#SBATCH --mem-per-cpu=1G",
         "#SBATCH --cpus-per-task=1",
         "#SBATCH --ntasks=1",
         "#SBATCH --hint=nomultithread",

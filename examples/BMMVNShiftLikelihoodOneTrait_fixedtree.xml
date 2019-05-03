@@ -16,9 +16,9 @@
 	  <distr id="Exp.rateValues" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
 	</distribution>
 		
-	<distribution id="rateAssignmentsPrior" spec="beast.math.distributions.Prior" x="@rateAssignments">
-	  <distr id="Unif.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
-	</distribution>
+	<!-- <distribution id="rateAssignmentsPrior" spec="beast.math.distributions.Prior" x="@rateAssignments"> -->
+	<!--   <distr id="Unif.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/> -->
+	<!-- </distribution> -->
 
         <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@BMMean">
 	  <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
@@ -52,7 +52,7 @@
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
 
-    <operator id="RateAssignmentWalker" spec="IntRandomWalkOperator" parameter="@rateAssignments" windowSize="1" weight="10.0"/>
+    <!-- <operator id="RateAssignmentWalker" spec="IntRandomWalkOperator" parameter="@rateAssignments" windowSize="1" weight="10.0"/> -->
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
     <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
 	
