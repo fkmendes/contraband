@@ -47,12 +47,14 @@ Rscript BM_calibrated_postMCMC_plots.R ./ BMMVNLikelihoodOneTrait_fixedtree_nonu
 ## (2) Brownian motion with multiple rates (BMShift) multivariate normal likelihood 
 ### (2.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts
 
-We use the same priors as in 1.1, and do both ultrametric and nonultrametric trees.
+We use the same priors as in 1.1, and do ultrametric and nonultrametric trees like before.
 
 ```
 cd /path/to/calibrated_validation/
 mkdir BMMVNShiftOneRateOneTrait_ultra_xmls/
 mkdir BMMVNShiftOneRateOneTrait_ultra_shellscripts/
+mkdir BMMVNShiftOneRateOneTrait_nonultra_xmls/
+mkdir BMMVNShiftOneRateOneTrait_nonultra_shellscripts/
 
 Rscript BMShiftOneRate_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftOneRate '00:45:00' BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_ultra_template.xml ultra BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_ultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
 
@@ -74,6 +76,8 @@ Note that BEAST2 will number internal nodes according to either ASCII-sorted nam
 
 Also, note that inside BMShiftThreeRates_calibrated_simulation.R, mvMORPH seems to call the third sigma^2 (the green color) "sigma[[2]]". So I had to adjust these accordingly both in this script and in the plotting script.
 
+As before, we validate on ultrametric and nonultrametric trees.
+
 ```
 cd /path/to/calibrated_validation/
 mkdir BMMVNShiftThreeRatesOneTrait_ultra_xmls/
@@ -81,11 +85,12 @@ mkdir BMMVNShiftThreeRatesOneTrait_ultra_shellscripts/
 mkdir BMMVNShiftThreeRatesOneTrait_nonultra_xmls/
 mkdir BMMVNShiftThreeRatesOneTrait_nonultra_shellscripts/
 
-Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftThreeRates '01:30:00' BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra_template.xml ultra BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftThreeRates '01:00:00' BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra_template.xml ultra BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar 
 
-# remember to un/comment the tree specification lines in BMShiftThreeRates_calibrated_simulation.R
+# remember to un/comment the tree specification lines in BMShiftOneRate_calibrated_simulation.R
 
-Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftThreeRates '01:30:00' BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra_template.xml nonultra BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
+Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftThreeRates '01:00:00' BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra_template.xml nonultra BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar 
+>>>>>>> Stashed changes
 ```
 
 ## (2.4) Plotting the mean posterior of the four BM parameters (three sigmas^2 and root value)
