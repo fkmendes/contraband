@@ -78,14 +78,21 @@ Also, note that inside BMShiftThreeRates_calibrated_simulation.R, mvMORPH seems 
 cd /path/to/calibrated_validation/
 mkdir BMMVNShiftThreeRatesOneTrait_ultra_xmls/
 mkdir BMMVNShiftThreeRatesOneTrait_ultra_shellscripts/
+mkdir BMMVNShiftThreeRatesOneTrait_nonultra_xmls/
+mkdir BMMVNShiftThreeRatesOneTrait_nonultra_shellscripts/
 
 Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftThreeRates '01:30:00' BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra_template.xml ultra BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+
+# remember to un/comment the tree specification lines in BMShiftThreeRates_calibrated_simulation.R
+
+Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftThreeRates '01:30:00' BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra_template.xml nonultra BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
 ```
 
 ## (2.4) Plotting the mean posterior of the four BM parameters (three sigmas^2 and root value)
 
 ```
 Rscript BMShiftThreeRates_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra.RData 100 BMMVNShiftThreeRates ultra
+Rscript BMShiftThreeRates_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra.RData 100 BMMVNShiftThreeRates nonultra
 ```
 
 ## (3) Brownian motion (BM) pruning likelihood

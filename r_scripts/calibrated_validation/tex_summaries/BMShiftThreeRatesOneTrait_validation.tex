@@ -6,7 +6,7 @@
 
 \title{One-trait, three-rate Brownian Motion calibrated validation
   (rate-shift model)}
-\author{F\'{a}bio K. Mendes and Rong Zhang}
+\author{F\'{a}bio K. Mendes}
 \date{March 2019}
 
 \begin{document}
@@ -35,6 +35,30 @@ Priors for simulations were $\mu \sim \text{N}(0, 2)$, and $\sigma^2 \sim \text{
   $\sigma_1^2$ & 96\\
   $\sigma_2^2$ & 99\\
   $\sigma_3^2$ & 95
+\end{tabular}
+\end{center}
+
+\newpage
+
+\noindent We re-simulated data on this other tree with approximately half of the tips made short manually (all branch lengths = 0.1).
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=12cm]{../BMMVNShiftThreeRates_nonultra_graphs.png}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=5cm]{../BMMVNShiftThreeRates_nonultra_tree.png}
+\end{figure}
+
+\begin{center}
+\begin{tabular}{c | c}
+  Parameter & Coverage (\%) \\\hline
+  $\mu$ & 89\\
+  $\sigma_1^2$ & 97\\
+  $\sigma_2^2$ & 97\\
+  $\sigma_3^2$ & 96
 \end{tabular}
 \end{center}
 

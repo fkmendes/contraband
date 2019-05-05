@@ -68,6 +68,18 @@ table((full.df$sigma3 >= full.df$lower.sigma3) & (full.df$sigma3 <= full.df$uppe
 ## FALSE  TRUE
 ##     5    95
 
+## FALSE  TRUE
+##    11    89
+
+## FALSE  TRUE
+##     3    97
+
+## FALSE  TRUE
+##     3    97
+
+## FALSE  TRUE
+##     4    96
+
 ### PLOTS ###
 
 all.plots <- vector("list", n.param)
