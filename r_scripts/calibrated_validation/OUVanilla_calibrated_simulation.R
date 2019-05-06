@@ -12,8 +12,8 @@ write.shellscripts <- args[3]
 cal.validation.folder <- args[4]
 n.sim <- as.numeric(args[5])
 n.spp <- as.numeric(args[6])
-job.prefix <- args[7] # e.g., "OUVanillaMVN"
-time.needed <- args[8] # e.g., "00:15:00"
+job.prefix <- args[7] # e.g., "OUMVNVanilla"
+time.needed <- args[8] # e.g., "00:45:00"
 template.name <- args[9]
 tree.type <- args[10]
 xmlfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
@@ -36,18 +36,6 @@ th.mean <- 1.0 # theta1
 th.sd <- 2.0 #
 alpha.mean <- alpha.sd <- 1.0
 
-## template.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/OUVanillaMVNLikelihoodOneTrait_fixedtree_template.xml"
-## xmlfolder.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/OUVanillaMVNOneTrait_xmls/"
-## shell.scripts.path <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/OUVanillaMVNOneTrait_shellscripts/"
-## rdata.path <- gsub("_template.xml", ".RData", template.path)
-
-# for server analyses
-## xml.file.path <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/OUVanillaMVNOneTrait_xmls/"
-## xml.file.prefix <- "OUVanillaMVNLikelihoodOneTrait_fixedtree_"
-## res.path <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/OUVanillaMVNOneTrait_results/"
-## jar.path <- "/nesi/project/nesi00390/fkmendes/contraband/contraband.jar"
-## time.needed <- "01:00:00"
-
 ############# DOING STUFF #############
 
 ## in ape, branch numbering is done in postorder order: to see the order of branches, you can do tr <- reorder(tr, "po"); plor(tr); edgelabels()
@@ -57,12 +45,10 @@ set.seed(123)
 ## simulating birth-death tree
 lambda <- rexp(1, rate=80) # lambda from exponential (mean = 1/80)
 mu <- rexp(1, rate=100) # mu from exponential (mean = 1/100)
-## tr <- sim.bd.taxa.age(n.spp, 1, lambda, mu, age=100, mrca=TRUE)[[1]]; write.tree(tr) # mrca=TRUE means the process starts at the root (i.e., no root edge)
+## tr <- sim.bd.taxa.age(n.spp, 1, lambda, mu, age=100, mrca=TRUE)[[1]]
+## write.tree(tr) # mrca=TRUE means the process starts at the root (i.e., no root edge)
 tr <- read.tree(text="(((((t35:0.1,t32:0.1):0.1,t10:0.1):0.1,t18:0.1):0.1,(((t47:0.1,t9:0.1):0.1,(t43:0.1,t38:0.1):0.1):0.1,(((((t20:0.1,t14:0.1):0.1,t19:0.1):0.1,(t24:0.1,(((t50:0.1,t8:0.1):0.1,t25:0.1):0.1,(t12:0.1,t5:0.1):0.1):0.1):0.1):0.1,t37:0.1):0.1,(t42:0.1,(t13:0.1,t41:0.1):0.1):0.1):0.1):0.1):0.1,((t34:80.73867518,((t4:14.89974775,t36:14.89974775):7.855467399,t7:22.75521515):57.98346003):16.48666894,((((((((t29:32.9204832,t22:32.9204832):13.17504731,t46:46.09553051):1.732718052,t40:47.82824856):14.51317295,(t28:29.85457377,((t33:6.373725141,t21:6.373725141):1.191235246,t26:7.564960387):22.28961339):32.48684774):5.177695495,t48:67.51911701):2.445324178,(t39:56.9237382,((t2:5.876590264,t44:5.876590264):19.06403767,t23:24.94062793):31.98311027):13.04070299):0.3095854321,(((t11:13.30542076,t49:13.30542076):14.69428372,t45:27.99970449):1.437902517,t31:29.43760701):40.83641961):11.48412211,((((t16:30.59346099,(t30:0.03406798076,t1:0.03406798076):30.55939301):21.47527084,(t17:50.41024027,t15:50.41024027):1.658491566):14.63237622,(t3:10.35007739,t27:10.35007739):56.35103066):2.944577857,t6:69.64568591):12.11246283):15.46719539):2.774655878):0;")
-tr2 <- tr
-tr2$tip.label <- paste0(tr$tip.label, "[&amp;Regime=0]")
-tr2.newick <- gsub("):", ")[&amp;Regime=0]:", write.tree(tr2))
-tr2.newick <- gsub("-", ";", tr2.newick) # gotta do this because weird dashes appear above
+theta.assignments <- paste(rep(0, (tr$Nnode+length(tr$tip.label))), collapse=" ")
 
 ## simulating quant trait data sets
 sigmas <- rexp(n.sim, rate=sigma.rate);
@@ -75,7 +61,7 @@ mles <- data.frame(matrix(NA,100,n.param))
 ## for putting on template
 traits.4.template <- vector("list", n.sim)
 spnames.4.template <- paste(tr$tip.label, collapse=",")
-taxon.strs.4.template <- paste(paste0("<taxon id=\"", tr$tip.label, "\" spec=\"Taxon\"/>"), collapse="\n              ")
+## taxon.strs.4.template <- paste(paste0("<taxon id=\"", tr$tip.label, "\" spec=\"Taxon\"/>"), collapse="\n              ")
 
 ## simulating quant trait data sets
 if (simulate) {
@@ -121,11 +107,12 @@ if (write.xmls) {
         if (file.exists(paste0(xmlfolder.path, xml.file.name))) {
             file.remove(paste0(xmlfolder.path, xml.file.name))
         }
-        
+
         file.name = basename(gsub(".xml", "", xml.file.name))
 
         template.lines = readLines(template.path)
         for (line in template.lines) {
+            line = gsub("\\[ThetaAssignmentsHere\\]", theta.assignments, line)
             line = gsub("\\[OUSigmaSqPriorMeanHere\\]", format(1/sigma.rate, nsmall=1), line)
             line = gsub("\\[OURootValuePriorMeanHere\\]", format(rv.mean, nsmall=1), line)
             line = gsub("\\[OURootValuePriorStdDevHere\\]", format(rv.sd, nsmall=1), line)
@@ -133,9 +120,9 @@ if (write.xmls) {
             line = gsub("\\[OUAlphaPriorStdDevHere\\]", format(alpha.sd, nsmall=1), line)
             line = gsub("\\[OUThetaPriorMeanHere\\]", format(th.mean, nsmall=1), line)
             line = gsub("\\[OUThetaPriorStdDevHere\\]", format(th.sd, nsmall=1), line)
-            line = gsub("\\[TreeHere\\]", tr2.newick, line)
+            line = gsub("\\[TreeHere\\]", write.tree(tr), line)
             line = gsub("\\[SpNamesHere\\]", spnames.4.template, line)
-            line = gsub("\\[TaxonSetHere\\]", taxon.strs.4.template, line)
+            ## line = gsub("\\[TaxonSetHere\\]", taxon.strs.4.template, line)
             line = gsub("\\[TraitValuesHere\\]", traits.4.template[[sim.idx]], line)
             line = gsub("\\[FileNameHere\\]", paste0(res.path, file.name), line)
             write(line, file=paste0(xmlfolder.path, xml.file.name), append=TRUE)

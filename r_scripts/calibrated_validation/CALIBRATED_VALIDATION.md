@@ -137,25 +137,20 @@ We use an exponential prior (rate=5) for the evolutionary rate, sigma^2. We use 
 
 ```
 cd /path/to/calibrated_validation/
-mkdir OUVanillaMVNOneTrait_ultra_xmls/
-mkdir OUVanillaMVNOneTrait_ultra_shellscripts/
+mkdir OUMVNVanillaOneTrait_nonultra_xmls/
+mkdir OUMVNVanillaOneTrait_nonultra_shellscripts/
 
-Rscript OUVanilla_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUVanillaMVN '00:45:00' OUVanillaMVNLikelihoodOneTrait_fixedtree_template.xml ultra OUVanillaMVNLikelihoodOneTrait_fixedtree_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/contraband.jar
-```
+Rscript OUVanilla_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNVanilla '01:15:00' OUMVNLikelihoodVanillaOneTrait_fixedtree_ultra_template.xml ultra OUMVNLikelihoodVanillaOneTrait_fixedtree_ultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
 
-We follow the same procedure as in BM. There is a hard-coded tree (you must uncomment it) that just makes some of the branch lengths very short, but you can edit that to be whatever tree you want. We use the same priors, but simulate along this non-ultrametric tree instead.
+# remember to un/comment the tree specification lines in OUVanilla_calibrated_simulation
 
-```
-cd /path/to/calibrated_validation/
-mkdir OUVanillaMVNOneTrait_nonultra_xmls/
-mkdir OUVanillaMVNOneTrait_nonultra_shellscripts/
-
-Rscript OUVanilla_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUVanillaMVN '00:45:00' OUVanillaMVNLikelihoodOneTrait_fixedtree_nonultra_template.xml nonultra OUVanillaMVNLikelihoodOneTrait_fixedtree_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/contraband.jar
+Rscript OUVanilla_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNVanilla '01:20:00' OUMVNLikelihoodVanillaOneTrait_fixedtree_nonultra_template.xml nonultra OUMVNLikelihoodVanillaOneTrait_fixedtree_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
 ```
 
 ### (4.2) Plotting the mean posterior of the four vanilla OU parameters against the true values
 
 ```
-Rscript OUVanilla_calibrated_postMCMC_plots.R ./ OUVanillaMVNLikelihoodOneTrait_fixedtree.RData 100 OUVanillaMVN ultra
-Rscript OUVanilla_calibrated_postMCMC_plots.R ./ OUVanillaMVNLikelihoodOneTrait_fixedtree_nonultra.RData 100 OUVanillaMVN nonultra
+Rscript OUVanilla_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodVanillaOneTrait_fixedtree_ultra.RData 100 OUMVNVanilla ultra
+
+Rscript OUVanilla_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodVanillaOneTrait_fixedtree_nonultra.RData 100 OUMVNVanilla nonultra
 ```
