@@ -90,7 +90,6 @@ Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVN
 # remember to un/comment the tree specification lines in BMShiftOneRate_calibrated_simulation.R
 
 Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftThreeRates '01:00:00' BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra_template.xml nonultra BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar 
->>>>>>> Stashed changes
 ```
 
 ## (2.4) Plotting the mean posterior of the four BM parameters (three sigmas^2 and root value)
