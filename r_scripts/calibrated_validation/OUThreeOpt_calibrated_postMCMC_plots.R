@@ -12,20 +12,25 @@ args = commandArgs(trailingOnly=TRUE)
 cal.validation.folder <- args[1]
 rdata.path <- args[2]
 n.sim <- as.numeric(args[3])
-n.sim <- 100
-n.param <- 6
-sigma.rate <- 5
-rv.mean <- 0.0 # root value
-th.mean <- 0.0 # theta
-alpha.mean <- 1.0
+n.param <- as.numeric(args[6])
 job.prefix <- args[4] # e.g., "OUThreeOptMVN"
 tree.type <- args[5] # e.g., "ultra" or "nonultra"
 
-param.labs <- c(expression(sigma^2), expression(y[0]), expression(theta[1]), expression(theta[2]), expression(theta[3]), expression(alpha))
-param.names <- c("sigmasq", "rv", "theta1", "theta2", "theta3", "alpha")
-beast.param.names <- c("OUSigmaSq", "OURootValue", "OUTheta1", "OUTheta3", "OUTheta2", "OUAlpha")
-mle.param.names <- c("sigmasq.mle", "rv.mle", "theta1.mle", "theta2.mle", "theta3.mle", "alpha.mle")
-prior.means <- c(1/sigma.rate, rv.mean, th.mean, th.mean, th.mean, alpha.mean)
+param.names <- strsplit(args[7], ",")[[1]]
+beast.param.names <- strsplit(args[8], ",")[[1]]
+param.labs.preparse <- strsplit(args[9], ",")[[1]]
+prior.means.preparse <- strsplit(args[10], ",")[[1]]
+param.labs <- prior.means <- c()
+for (i in 1:n.param) {
+    param.labs[i] = eval(parse(text=param.labs.preparse[i]))
+    prior.means[i] = eval(parse(text=prior.means.preparse[i]))
+}
+mle.param.names <- strsplit(args[11], ",")[[1]]
+
+## sigma.rate <- 5
+## rv.mean <- 0.0 # root value
+## th.mean <- 0.0 # theta
+## alpha.mean <- 1.0
 
 res.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_results/")
 res.files <- mixedsort(paste0(res.path,list.files(res.path)))
@@ -52,12 +57,11 @@ for (i in 1:n.sim) {
 full.df <- cbind(true.param.df, log.df)
 
 # coverage
-table((full.df$sigmasq >= full.df$lower.sigmasq) & (full.df$sigmasq <= full.df$upper.sigmasq))
-table((full.df$rv >= full.df$lower.rv) & (full.df$rv <= full.df$upper.rv))
-table((full.df$theta1 >= full.df$lower.theta1) & (full.df$theta1 <= full.df$upper.theta1))
-table((full.df$theta2 >= full.df$lower.theta2) & (full.df$theta2 <= full.df$upper.theta2))
-table((full.df$theta3 >= full.df$lower.theta3) & (full.df$theta3 <= full.df$upper.theta3))
-table((full.df$alpha >= full.df$lower.alpha) & (full.df$alpha <= full.df$upper.alpha))
+for (i in 1:n.param) {
+    upper = paste(c("upper", param.names[i]), collapse=".")
+    lower = paste(c("lower", param.names[i]), collapse=".")
+    print(table((full.df[,param.names[i]] >= full.df[,lower]) & (full.df[,param.names[i]] <= full.df[,upper])))
+}
 
 ## ultrametric
 ## FALSE  TRUE
@@ -79,6 +83,23 @@ table((full.df$alpha >= full.df$lower.alpha) & (full.df$alpha <= full.df$upper.a
 ##     8    92
 
 ## nonultrametric
+## FALSE  TRUE
+##     9    91
+
+## FALSE  TRUE
+##     8    92
+
+## FALSE  TRUE
+##     6    94
+
+## FALSE  TRUE
+##     4    96
+
+## FALSE  TRUE
+##     3    97
+
+## FALSE  TRUE
+##     7    93
 
 all.plots <- vector("list", n.param)
 for (i in 1:n.param) {

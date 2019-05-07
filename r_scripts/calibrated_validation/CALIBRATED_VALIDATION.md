@@ -177,6 +177,7 @@ Rscript OUThreeOpt_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNThreeOp
 ### (4.4) Plotting the mean posterior of the six OU parameters (three optima) against the true values
 
 ```
-Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrait_fixedtree_ultra.RData 100 OUMVNThreeOpt ultra
-Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrait_fixedtree_nonultra.RData 100 OUMVNThreeOpt nonultra
+Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrait_fixedtree_ultra.RData 100 OUMVNThreeOpt ultra 6 sigmasq,rv,theta1,theta2,theta3,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta3,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(theta[3]),expression(alpha)" "1/5,0.0,0.0,1.0" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,theta3.mle,alpha.mle
+
+Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrait_fixedtree_nonultra.RData 100 OUMVNThreeOpt nonultra 6 sigmasq,rv,theta1,theta2,theta3,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta3,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(theta[3]),expression(alpha)" "1/5,0.0,0.0,1.0" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,theta3.mle,alpha.mle
 ```
