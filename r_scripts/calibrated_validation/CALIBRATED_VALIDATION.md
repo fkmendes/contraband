@@ -137,6 +137,8 @@ We use an exponential prior (rate=5) for the evolutionary rate, sigma^2. We use 
 
 ```
 cd /path/to/calibrated_validation/
+mkdir OUMVNVanillaOneTrait_ultra_xmls/
+mkdir OUMVNVanillaOneTrait_ultra_shellscripts/
 mkdir OUMVNVanillaOneTrait_nonultra_xmls/
 mkdir OUMVNVanillaOneTrait_nonultra_shellscripts/
 
@@ -151,6 +153,30 @@ Rscript OUVanilla_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNVanilla 
 
 ```
 Rscript OUVanilla_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodVanillaOneTrait_fixedtree_ultra.RData 100 OUMVNVanilla ultra
-
 Rscript OUVanilla_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodVanillaOneTrait_fixedtree_nonultra.RData 100 OUMVNVanilla nonultra
+```
+
+## (4.3) Simulating one trait with three adaptive optima under Orstein-Uhlenbeck (OU), writing .xmls from template and .sh scripts.
+
+The priors we use are the same as those in (4.1).
+
+```
+cd /path/to/calibrated_validation/
+mkdir OUMVNThreeOptOneTrait_ultra_xmls/
+mkdir OUMVNThreeOptOneTrait_ultra_shellscripts/
+mkdir OUMVNThreeOptOneTrait_nonultra_xmls/
+mkdir OUMVNThreeOptOneTrait_nonultra_shellscripts/
+
+Rscript OUThreeOpt_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNThreeOpt '01:45:00' OUMVNLikelihoodThreeOptOneTrait_fixedtree_ultra_template.xml ultra OUMVNThreeOptOneTrait_fixedtree_ultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+
+# remember to un/comment the tree specification lines in OUThreeOpt_calibrated_simulation
+
+Rscript OUThreeOpt_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNThreeOpt '01:45:00' OUMVNLikelihoodThreeOptOneTrait_fixedtree_nonultra_template.xml nonultra OUMVNThreeOptOneTrait_fixedtree_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+```
+
+### (4.4) Plotting the mean posterior of the six OU parameters (three optima) against the true values
+
+```
+Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrait_fixedtree_ultra.RData 100 OUMVNThreeOpt ultra
+Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrait_fixedtree_nonultra.RData 100 OUMVNThreeOpt nonultra
 ```
