@@ -1,6 +1,12 @@
 # author: Fabio K. Mendes
 # This R script gives us the expected values for JUnit tests
 # (1) 'MVNShiftVcvMatTest'
+# (2) 'MVNShiftVcvMatTest2'
+# (3) 'BMMVNShiftLikelihoodOneTraitTest'
+# (4) 'BMMVNShiftLikelihoodOneTraitTest2'
+# (5) 'BMMVNShiftLikelihoodOneTraitTest3'
+# (6) 'BMMVNShiftLikelihoodOneTraitTest4'
+# (7) 'BMMVNShiftLikelihoodOneTraitTest5'
 
 library(mvMORPH)
 library(phytools)

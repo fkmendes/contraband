@@ -17,8 +17,6 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	final public Input<ColorManager> rateManagerInput = new Input<>("rateManager", "color manager object that paints branches with their own rates.", Validate.REQUIRED);
 		
 	private boolean dirty;
-	private boolean updateVCVMat;
-	private boolean updateMean;
 	
 	private int nSpp;
 
@@ -120,8 +118,8 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	
 	@Override
 	public double calculateLogP() {
-		updateVCVMat = false;
-		updateMean = false;
+		boolean updateVCVMat = false;
+		boolean updateMean = false;
 
 		if (treeInput.isDirty() || rateManagerInput.isDirty()) {  updateVCVMat = true; }
 		if (meanInput.isDirty()) { updateMean = true; }
