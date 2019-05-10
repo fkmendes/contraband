@@ -1,5 +1,6 @@
 package contraband;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -7,6 +8,7 @@ import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.State;
 import beast.core.Input.Validate;
+import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 
 /*
@@ -20,11 +22,13 @@ import beast.core.parameter.RealParameter;
 public class WNLikelihood extends Distribution {
 
 	final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
-	final public Input<RealParameter> sigmaSqsInput = new Input<>("sigmaSqs", "Sigma^2 of each species' normal density.", Validate.REQUIRED);
+	final public Input<RealParameter> sigmaSqsInput = new Input<>("logSigmaSqs", "Sigma^2 of each species' normal density.", Validate.REQUIRED);
 	final public Input<RealParameter> meansInput = new Input<>("mus", "Means of each species' normal density.", Validate.REQUIRED);
+	final public Input<IntegerParameter> normalAssignmentsInput = new Input<>("normalAssignments", "Which normal density each species has.", Validate.REQUIRED);
 	
 	private OneValueContTraits sampleData;
 	private String[] spNames;
+	private Double[] mus, logSigmaSqs;
 	
 	@Override
 	public void initAndValidate() {
@@ -32,15 +36,26 @@ public class WNLikelihood extends Distribution {
 
 		sampleData = oneTraitInput.get();
 		spNames = sampleData.getSpNames();
+		
+		mus = new Double[sampleData.getNSpp()];
+		logSigmaSqs = new Double[sampleData.getNSpp()];
 	}
 	
 	@Override
 	public double calculateLogP() {
 		Double[] samples = sampleData.getTraitValues(0, spNames);
-		Double[] sigmaSqs = sigmaSqsInput.get().getValues();
-		Double[] mus = meansInput.get().getValues();
+		Integer[] normalAssignments = normalAssignmentsInput.get().getValues();
+		Double[] allSigmaSqsValues = sigmaSqsInput.get().getValues();
+		Double[] allMusValues = meansInput.get().getValues();
 		
-		return MVNUtils.getSampleMultipleNormalLogLk(samples, mus, sigmaSqs);
+		int i = 0;
+		for (Integer assignment: normalAssignments) {
+			mus[i] = allMusValues[assignment];
+			logSigmaSqs[i] = allSigmaSqsValues[assignment];
+			i++;
+		}
+		
+		return MVNUtils.getSampleMultipleNormalLogLk(samples, mus, logSigmaSqs);
 	}
 	
 	@Override
