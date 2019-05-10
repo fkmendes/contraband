@@ -155,12 +155,12 @@ public class MVNUtils {
 	/*
 	 * One-dimensional, simple normal density
 	 */
-	public static double getNormalLk(double x, double mu, double sigma2) {
-		return (1.0/Math.sqrt(2.0 * Math.PI * sigma2)) * Math.exp(-Math.pow(x - mu, 2)/(2.0 * sigma2));
+	public static double getNormalLk(double x, double mu, double sigmaSq) {
+		return (1.0/Math.sqrt(2.0 * Math.PI * sigmaSq)) * Math.exp(-Math.pow(x - mu, 2)/(2.0 * sigmaSq));
 	}
 	
 	/*
-	 * One-dimensional, simple normal density for n samples, in log space
+	 * One-dimensional, simple normal density for n samples (same normal density!), in log space
 	 */
 	public static double getSampleNormalLogLk(double[] samples, Double mu, Double logSigma2) {		
 		double n = samples.length;
@@ -170,8 +170,28 @@ public class MVNUtils {
 			sumToSubtract += Math.pow(samples[i]-mu, 2);
 		}
 		
-		return (-((n/2) * Math.log(2.0 * Math.PI)) +
-			   -((n/2) * logSigma2) +
-			   -(1/(2 * Math.exp(logSigma2))) * sumToSubtract);
+		return (-((n/2.0) * Math.log(2.0 * Math.PI)) +
+			   -((n/2.0) * logSigma2) +
+			   -(1.0/(2.0 * Math.exp(logSigma2))) * sumToSubtract);
+	}
+	
+	/*
+	 * One-dimensional, simple normal density for n samples (each sample has its own normal density!), in log space
+	 * 
+	 * Used in white noise (WN) likelihood
+	 */
+	public static double getSampleMultipleNormalLogLk(Double[] samples, Double[] mus, Double[] sigmaSqs) {
+		double n = samples.length;
+		
+		double firstTerm = (n/2.0) * Math.log(2.0 * Math.PI);
+	
+		double secondTerm = 0.0;
+		double sumToSubtract = 0.0;
+		for (int i=0; i<n; ++i) {
+			secondTerm += 0.5 * Math.log(sigmaSqs[i]);
+			sumToSubtract += (1.0/(2*sigmaSqs[i])) * Math.pow(samples[i]-mus[i], 2);
+		}
+		
+		return -firstTerm - secondTerm - sumToSubtract;
 	}
 }

@@ -1,6 +1,5 @@
 package contraband;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import beast.core.CalculationNode;
@@ -87,6 +86,14 @@ public class OneValueContTraits extends CalculationNode {
 //	}
 	
 	// getters
+	public int getNSpp() {
+		return nSpp;
+	}
+	
+	
+	public String[] getSpNames() {
+		return spNames;
+	}
 	
 	/*
 	 * One species, one trait (need to provide trait index)
@@ -128,8 +135,8 @@ public class OneValueContTraits extends CalculationNode {
 			ithSpp++;
 		}
 		
-		System.out.println("Species names for trait values below:" + Arrays.toString(strings));
-		System.out.println("traitValues inside OneValueContTraits=" + Arrays.toString(traitValues));
+//		System.out.println("Species names for trait values below:" + Arrays.toString(strings));
+//		System.out.println("traitValues inside OneValueContTraits=" + Arrays.toString(traitValues));
 		
 		return traitValues;
 	}

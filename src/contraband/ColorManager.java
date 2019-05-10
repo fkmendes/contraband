@@ -129,7 +129,7 @@ public class ColorManager extends CalculationNode {
 			}
 		}
 		
-		System.out.println("Just populated color matrix. Species order in VCV Mat is:" + Arrays.toString(spNamesInASCIIBeticalOrTaxonSetOrder));
+//		System.out.println("Just populated color matrix. Species order in VCV Mat is:" + Arrays.toString(spNamesInASCIIBeticalOrTaxonSetOrder));
 	}
 	
 	private void fillNodeColorValuesOneTrait(Node aNode, String[] spOrderInTMat) {
