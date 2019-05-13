@@ -45,6 +45,7 @@ public class OUOneTraitComputeMVNLkTest {
 	public static void setUPTest1() throws Exception {
 
 		String treeStr = "(((sp1[&Regime=1]:1.0, sp2[&Regime=1]:1.0)[&Regime=1]:1.0, sp3[&Regime=2]:2.0)[&Regime=0]:1.0, sp4[&Regime=0]:3.0)[&Regime=0];";
+		Integer[] colorAssignments = new Integer[] { 1, 1, 2, 0, 1, 0, 0, 0 };
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 		List<Node> allLeafNodes = myTree.getRoot().getAllLeafNodes();
 		
@@ -83,12 +84,6 @@ public class OUOneTraitComputeMVNLkTest {
 		ouTMatFM = new Array2DRowRealMatrix(n, n);
 		ouTMatRI = new Array2DRowRealMatrix(n, n);
 		ouTMatRM = new Array2DRowRealMatrix(n, n);
-		
-//		double[][] ouTMatFI, ouTMatFM, ouTMatRI, ouTMatRM;
-//		ouTMatFI = new double[n][n];
-//		ouTMatFM = new double[n][n];
-//		ouTMatRI = new double[n][n];
-//		ouTMatRM = new double[n][n];
 
 		OUUtils.computeOUTMatOneTrait(n, alphaFI, tMatInput, ouTMatFI, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaFM, tMatInput, ouTMatFM, true);
@@ -101,42 +96,29 @@ public class OUOneTraitComputeMVNLkTest {
 		ouWeightFM = new Array2DRowRealMatrix(n, 3);
 		ouWeightRI = new Array2DRowRealMatrix(n, 4);
 		ouWeightRM = new Array2DRowRealMatrix(n, 3);
-		
-//		double[][] ouWeightFI, ouWeightFM, ouWeightRI, ouWeightRM;
-//		ouWeightFI = new double[n][4];
-//		ouWeightFM = new double[n][3];
-//		ouWeightRI = new double[n][4];
-//		ouWeightRM = new double[n][3];
 		 
-		OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaFI, ouWeightFI, true);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaFM, ouWeightFM, false);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaRI, ouWeightRI, true);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 3, alphaRM, ouWeightRM, false);
+		OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 3, alphaFI, ouWeightFI, true);
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 3, alphaFM, ouWeightFM, false);
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 3, alphaRI, ouWeightRI, true);
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 3, alphaRM, ouWeightRM, false);
 	    
 	    // Preparing for likelihood computation
-//	    RealMatrix realCovFI = new Array2DRowRealMatrix(ouTMatFI);
-//		LUDecomposition realCovFILUD = new LUDecomposition(realCovFI);
+
 	    LUDecomposition realCovFILUD = new LUDecomposition(ouTMatFI);
 		RealMatrix invRealCovFI = realCovFILUD.getSolver().getInverse(); 
 		RealMatrix invFullCovFI = invRealCovFI.scalarMultiply(1/sigsqFI); 
 		double varToNdetRealCovFI = Math.pow(sigsqFI, n) * realCovFILUD.getDeterminant(); 
-		
-//	    RealMatrix realCovFM = new Array2DRowRealMatrix(ouTMatFM);
-//		LUDecomposition realCovFMLUD = new LUDecomposition(realCovFM);
+
 		LUDecomposition realCovFMLUD = new LUDecomposition(ouTMatFM);
 		RealMatrix invRealCovFM = realCovFMLUD.getSolver().getInverse(); 
 		RealMatrix invFullCovFM = invRealCovFM.scalarMultiply(1/sigsqFM); 
 		double varToNdetRealCovFM = Math.pow(sigsqFM, n) * realCovFMLUD.getDeterminant(); 
-		
-//	    RealMatrix realCovRI = new Array2DRowRealMatrix(ouTMatRI);
-//		LUDecomposition realCovRILUD = new LUDecomposition(realCovRI);
+
 		LUDecomposition realCovRILUD = new LUDecomposition(ouTMatRI);
 		RealMatrix invRealCovRI = realCovRILUD.getSolver().getInverse(); 
 		RealMatrix invFullCovRI = invRealCovRI.scalarMultiply(1/sigsqRI); 
 		double varToNdetRealCovRI = Math.pow(sigsqRI, n) * realCovRILUD.getDeterminant(); 
 		
-//	    RealMatrix realCovRM = new Array2DRowRealMatrix(ouTMatRM);
-//		LUDecomposition realCovRMLUD = new LUDecomposition(realCovRM);
 		LUDecomposition realCovRMLUD = new LUDecomposition(ouTMatRM);
 		RealMatrix invRealCovRM = realCovRMLUD.getSolver().getInverse(); 
 		RealMatrix invFullCovRM = invRealCovRM.scalarMultiply(1/sigsqRM); 
@@ -147,22 +129,6 @@ public class OUOneTraitComputeMVNLkTest {
 		RealVector realThetaRI = new ArrayRealVector(thetaRI);
 		RealVector realThetaRM = new ArrayRealVector(thetaRM);	
 		
-//		RealMatrix realOUWeightFI = new Array2DRowRealMatrix(ouWeightFI);
-//		RealMatrix realOUWeightFM = new Array2DRowRealMatrix(ouWeightFM);
-//		RealMatrix realOUWeightRI = new Array2DRowRealMatrix(ouWeightRI);
-//		RealMatrix realOUWeightRM = new Array2DRowRealMatrix(ouWeightRM);
-		
-//		System.out.println("sigsqFI " + sigsqFI);
-//		System.out.println("realThetaFI: ");
-//		GeneralUtils.displayRealVector(realOUWeightFI.operate(realThetaFI));
-//		System.out.println("realData: ");
-//		System.out.println(realData);
-//		System.out.println("invFullCovFI");
-//		GeneralUtils.displayRealMatrix(invFullCovFI);
-//		System.out.println("varToNdetRealCovFI");
-//		System.out.println(varToNdetRealCovFI);
-//		System.out.println();
-		
 		GeneralUtils.displayRealVector(ouWeightFI.operate(realThetaFI));
 		
 		// Finally computing likelihoods for OU
@@ -170,11 +136,6 @@ public class OUOneTraitComputeMVNLkTest {
 		ouLik1FM = MVNUtils.getMVNLk(n, ouWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
 		ouLik1RI = MVNUtils.getMVNLk(n, ouWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
 		ouLik1RM = MVNUtils.getMVNLk(n, ouWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
-		
-//		ouLik1FI = MVNUtils.getMVNLk(n, realOUWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);
-//		ouLik1FM = MVNUtils.getMVNLk(n, realOUWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
-//		ouLik1RI = MVNUtils.getMVNLk(n, realOUWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
-//		ouLik1RM = MVNUtils.getMVNLk(n, realOUWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
 	}
 
 	// Test 2: Non-ultrametric tree (1 regimes)
@@ -182,6 +143,7 @@ public class OUOneTraitComputeMVNLkTest {
 	public static void setUPTest2() throws Exception {
 
 		String treeStrNonUltra = "(((sp1[&Regime=0]:2.0, sp2[&Regime=0]:1.0)[&Regime=0]:1.0, sp3[&Regime=0]:4.0)[&Regime=0]:1.0, sp4[&Regime=0]:3.0)[&Regime=0];";
+		Integer[] colorAssignments = new Integer[] { 0, 0, 0, 0, 0, 0, 0, 0 };
 		TreeParser myTree = new TreeParser(treeStrNonUltra, false, false, true, 0);
 		List<Node> allLeafNodes = myTree.getRoot().getAllLeafNodes();
 
@@ -219,17 +181,11 @@ public class OUOneTraitComputeMVNLkTest {
 		ouTMatFM = new Array2DRowRealMatrix(n, n);
 		ouTMatRI = new Array2DRowRealMatrix(n, n);
 		ouTMatRM = new Array2DRowRealMatrix(n, n);
-		
-//		double[][] ouTMatFI, ouTMatFM, ouTMatRI, ouTMatRM;
-//		ouTMatFI = new double[n][n];
-//		ouTMatFM = new double[n][n];
-//		ouTMatRI = new double[n][n];
-//		ouTMatRM = new double[n][n];
 
-		OUUtils.computeOUTMatOneTrait(n, alphaFI, tMatInput, ouTMatFI, true);
-		OUUtils.computeOUTMatOneTrait(n, alphaFM, tMatInput, ouTMatFM, true);
-		OUUtils.computeOUTMatOneTrait(n, alphaRI, tMatInput, ouTMatRI, false);
-		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMatRM, false);
+		OUUtils.computeOUTMatOneTrait(n, alphaFI, tMatInput, ouTMatFI, false);
+		OUUtils.computeOUTMatOneTrait(n, alphaFM, tMatInput, ouTMatFM, false);
+		OUUtils.computeOUTMatOneTrait(n, alphaRI, tMatInput, ouTMatRI, true);
+		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMatRM, true);
 	
 		// Setting weight matrices dimensions
 		RealMatrix ouWeightFI, ouWeightFM, ouWeightRI, ouWeightRM;
@@ -237,42 +193,28 @@ public class OUOneTraitComputeMVNLkTest {
 		ouWeightFM = new Array2DRowRealMatrix(n, 1);
 		ouWeightRI = new Array2DRowRealMatrix(n, 2);
 		ouWeightRM = new Array2DRowRealMatrix(n, 1);
-		
-//		double[][] ouWeightFI, ouWeightFM, ouWeightRI, ouWeightRM;
-//		ouWeightFI = new double[n][2]; // Don't forget to put the correct column dimensions (r = # regimes or r + 1 in the Isolated root case)
-//		ouWeightFM = new double[n][1];
-//		ouWeightRI = new double[n][2];
-//		ouWeightRM = new double[n][1];
-
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaFI, ouWeightFI, true);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaFM, ouWeightFM, false);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaRI, ouWeightRI, true);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 1, alphaRM, ouWeightRM, false);
+	    
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 1, alphaFI, ouWeightFI, true);
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 1, alphaFM, ouWeightFM, false);
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 1, alphaRI, ouWeightRI, true);
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 1, alphaRM, ouWeightRM, false);
 
 	    // Preparing for likelihood computation
-//	    RealMatrix realCovFI = new Array2DRowRealMatrix(ouTMatFI);
-//		LUDecomposition realCovFILUD = new LUDecomposition(realCovFI);
 	    LUDecomposition realCovFILUD = new LUDecomposition(ouTMatFI);
 		RealMatrix invRealCovFI = realCovFILUD.getSolver().getInverse(); 
 		RealMatrix invFullCovFI = invRealCovFI.scalarMultiply(1/sigsqFI); 
 		double varToNdetRealCovFI = Math.pow(sigsqFI, n) * realCovFILUD.getDeterminant(); 
 		
-//	    RealMatrix realCovFM = new Array2DRowRealMatrix(ouTMatFM);
-//		LUDecomposition realCovFMLUD = new LUDecomposition(realCovFM);
 		LUDecomposition realCovFMLUD = new LUDecomposition(ouTMatFM);
 		RealMatrix invRealCovFM = realCovFMLUD.getSolver().getInverse(); 
 		RealMatrix invFullCovFM = invRealCovFM.scalarMultiply(1/sigsqFM); 
 		double varToNdetRealCovFM = Math.pow(sigsqFM, n) * realCovFMLUD.getDeterminant(); 
 		
-//	    RealMatrix realCovRI = new Array2DRowRealMatrix(ouTMatRI);
-//		LUDecomposition realCovRILUD = new LUDecomposition(realCovRI);
 		LUDecomposition realCovRILUD = new LUDecomposition(ouTMatRI);
 		RealMatrix invRealCovRI = realCovRILUD.getSolver().getInverse(); 
 		RealMatrix invFullCovRI = invRealCovRI.scalarMultiply(1/sigsqRI); 
 		double varToNdetRealCovRI = Math.pow(sigsqRI, n) * realCovRILUD.getDeterminant(); 
 		
-//	    RealMatrix realCovRM = new Array2DRowRealMatrix(ouTMatRM);
-//		LUDecomposition realCovRMLUD = new LUDecomposition(realCovRM);
 		LUDecomposition realCovRMLUD = new LUDecomposition(ouTMatRM);
 		RealMatrix invRealCovRM = realCovRMLUD.getSolver().getInverse(); 
 		RealMatrix invFullCovRM = invRealCovRM.scalarMultiply(1/sigsqRM); 
@@ -282,22 +224,12 @@ public class OUOneTraitComputeMVNLkTest {
 		RealVector realThetaFM = new ArrayRealVector(thetaFM);
 		RealVector realThetaRI = new ArrayRealVector(thetaRI);
 		RealVector realThetaRM = new ArrayRealVector(thetaRM);
-		
-//		RealMatrix realOUWeightFI = new Array2DRowRealMatrix(ouWeightFI);
-//		RealMatrix realOUWeightFM = new Array2DRowRealMatrix(ouWeightFM);
-//		RealMatrix realOUWeightRI = new Array2DRowRealMatrix(ouWeightRI);
-//		RealMatrix realOUWeightRM = new Array2DRowRealMatrix(ouWeightRM);
 
 		// Finally computing likelihoods for OU
 		ouLik2FI = MVNUtils.getMVNLk(n, ouWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);
 		ouLik2FM = MVNUtils.getMVNLk(n, ouWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
 		ouLik2RI = MVNUtils.getMVNLk(n, ouWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
 		ouLik2RM = MVNUtils.getMVNLk(n, ouWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
-		
-//		ouLik2FI = MVNUtils.getMVNLk(n, realOUWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);
-//		ouLik2FM = MVNUtils.getMVNLk(n, realOUWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
-//		ouLik2RI = MVNUtils.getMVNLk(n, realOUWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
-//		ouLik2RM = MVNUtils.getMVNLk(n, realOUWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
 	}
 	
 	// Test 3: Non-ultrametric tree (5 regimes)
@@ -305,6 +237,9 @@ public class OUOneTraitComputeMVNLkTest {
 	public static void setUPTest3() throws Exception {
 
 		String treeStrNonUltraBig = "(((((sp1[&Regime=1]:1.0, sp2[&Regime=1]:1.0)[&Regime=1]:1.0, sp3[&Regime=0]:1.0)[&Regime=0]:2.0, (sp4[&Regime=2]:1.0, sp5[&Regime=2]:1.0)[&Regime=2]:3.0)[&Regime=0]:2.0, sp6[&Regime=3]:6.0)[&Regime=0]:1.0, sp7[&Regime=4]:3.0)[&Regime=0];";
+		Integer[] colorAssignments = new Integer[] {
+				1, 1, 0, 2, 2, 3, 4, 0,
+				1, 0, 2, 0, 0, 0 };
 		TreeParser myTree = new TreeParser(treeStrNonUltraBig, false, false, true, 0);
 		List<Node> allLeafNodes = myTree.getRoot().getAllLeafNodes();
 		
@@ -342,12 +277,6 @@ public class OUOneTraitComputeMVNLkTest {
 		ouTMatFM = new Array2DRowRealMatrix(n, n);
 		ouTMatRI = new Array2DRowRealMatrix(n, n);
 		ouTMatRM = new Array2DRowRealMatrix(n, n);
-		
-//		double[][] ouTMatFI, ouTMatFM, ouTMatRI, ouTMatRM;
-//		ouTMatFI = new double[n][n];
-//		ouTMatFM = new double[n][n];
-//		ouTMatRI = new double[n][n];
-//		ouTMatRM = new double[n][n];
 
 		OUUtils.computeOUTMatOneTrait(n, alphaFI, tMatInput, ouTMatFI, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaFM, tMatInput, ouTMatFM, true);
@@ -360,42 +289,28 @@ public class OUOneTraitComputeMVNLkTest {
 		ouWeightFM = new Array2DRowRealMatrix(n, 5);
 		ouWeightRI = new Array2DRowRealMatrix(n, 6);
 		ouWeightRM = new Array2DRowRealMatrix(n, 5);
-		
-//		double[][] ouWeightFI, ouWeightFM, ouWeightRI, ouWeightRM;
-//		ouWeightFI = new double[n][6]; // Don't forget to put the correct column dimensions
-//		ouWeightFM = new double[n][5];
-//		ouWeightRI = new double[n][6];
-//		ouWeightRM = new double[n][5];
 
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaFI, ouWeightFI, true);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaFM, ouWeightFM, false);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaRI, ouWeightRI, true);
-	    OUUtils.computeWMatOneTrait(myTree, myTree.getRoot(), allLeafNodes, n, 5, alphaRM, ouWeightRM, false);
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 5, alphaFI, ouWeightFI, true);
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 5, alphaFM, ouWeightFM, false);
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 5, alphaRI, ouWeightRI, true);
+	    OUUtils.computeWMatOneTrait(colorAssignments, myTree.getRoot(), allLeafNodes, n, 5, alphaRM, ouWeightRM, false);
 	    
 	    // Preparing for likelihood computation
-//	    RealMatrix realCovFI = new Array2DRowRealMatrix(ouTMatFI);
-//		LUDecomposition realCovFILUD = new LUDecomposition(realCovFI);
 	    LUDecomposition realCovFILUD = new LUDecomposition(ouTMatFI);
 		RealMatrix invRealCovFI = realCovFILUD.getSolver().getInverse(); 
 		RealMatrix invFullCovFI = invRealCovFI.scalarMultiply(1/sigsqFI); 
 		double varToNdetRealCovFI = Math.pow(sigsqFI, n) * realCovFILUD.getDeterminant(); 
 		
-//	    RealMatrix realCovFM = new Array2DRowRealMatrix(ouTMatFM);
-//		LUDecomposition realCovFMLUD = new LUDecomposition(realCovFM);
 		LUDecomposition realCovFMLUD = new LUDecomposition(ouTMatFM);
 		RealMatrix invRealCovFM = realCovFMLUD.getSolver().getInverse(); 
 		RealMatrix invFullCovFM = invRealCovFM.scalarMultiply(1/sigsqFM); 
 		double varToNdetRealCovFM = Math.pow(sigsqFM, n) * realCovFMLUD.getDeterminant(); 
 		
-//	    RealMatrix realCovRI = new Array2DRowRealMatrix(ouTMatRI);
-//		LUDecomposition realCovRILUD = new LUDecomposition(realCovRI);
 		LUDecomposition realCovRILUD = new LUDecomposition(ouTMatRI);
 		RealMatrix invRealCovRI = realCovRILUD.getSolver().getInverse(); 
 		RealMatrix invFullCovRI = invRealCovRI.scalarMultiply(1/sigsqRI); 
 		double varToNdetRealCovRI = Math.pow(sigsqRI, n) * realCovRILUD.getDeterminant(); 
 		
-//	    RealMatrix realCovRM = new Array2DRowRealMatrix(ouTMatRM);
-//		LUDecomposition realCovRMLUD = new LUDecomposition(realCovRM);
 		LUDecomposition realCovRMLUD = new LUDecomposition(ouTMatRM);
 		RealMatrix invRealCovRM = realCovRMLUD.getSolver().getInverse(); 
 		RealMatrix invFullCovRM = invRealCovRM.scalarMultiply(1/sigsqRM); 
@@ -406,36 +321,11 @@ public class OUOneTraitComputeMVNLkTest {
 		RealVector realThetaRI = new ArrayRealVector(thetaRI);
 		RealVector realThetaRM = new ArrayRealVector(thetaRM);	
 		
-//		RealMatrix realOUWeightFI = new Array2DRowRealMatrix(ouWeightFI);
-//		RealMatrix realOUWeightFM = new Array2DRowRealMatrix(ouWeightFM);
-//		RealMatrix realOUWeightRI = new Array2DRowRealMatrix(ouWeightRI);
-//		RealMatrix realOUWeightRM = new Array2DRowRealMatrix(ouWeightRM);
-		
-//		System.out.println("Before");
-//		
-//		System.out.println("n = " + n);
-//		System.out.println("sigsqFI = " + sigsqFI);
-//		System.out.println("realThetaFI: ");
-//		GeneralUtils.displayRealVector(realOUWeightFI.operate(realThetaFI));
-//		System.out.println("realData: ");
-//		System.out.println(realData);
-//		System.out.println("invFullCovFI: ");
-//		GeneralUtils.displayRealMatrix(invFullCovFI);
-//		System.out.println("varToNdetRealCovFI");
-//		System.out.println(varToNdetRealCovFI);
-//		System.out.println();
-		
 		// Finally computing likelihoods for OU
 		ouLik3FI = MVNUtils.getMVNLk(n, ouWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);	
 		ouLik3FM = MVNUtils.getMVNLk(n, ouWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
 		ouLik3RI = MVNUtils.getMVNLk(n, ouWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
 		ouLik3RM = MVNUtils.getMVNLk(n, ouWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
-		
-//		ouLik3FI = MVNUtils.getMVNLk(n, realOUWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);	
-//		ouLik3FM = MVNUtils.getMVNLk(n, realOUWeightFM.operate(realThetaFM), realData, invFullCovFM, varToNdetRealCovFM);
-//		ouLik3RI = MVNUtils.getMVNLk(n, realOUWeightRI.operate(realThetaRI), realData, invFullCovRI, varToNdetRealCovRI);
-//		ouLik3RM = MVNUtils.getMVNLk(n, realOUWeightRM.operate(realThetaRM), realData, invFullCovRM, varToNdetRealCovRM);
-
 	}
 	
 	@Test // Test 1
@@ -461,6 +351,4 @@ public class OUOneTraitComputeMVNLkTest {
 		Assert.assertEquals(-8.89219, 	Math.log(ouLik3RI), EPSILON);
 		Assert.assertEquals(-8.89219, 	Math.log(ouLik3RM), EPSILON);
 	}
-	
-
 }

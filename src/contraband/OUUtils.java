@@ -139,15 +139,15 @@ public class OUUtils {
 	 */
 	 public static void computeWMatOneTrait(Integer[] allNodeRegimes, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
 			int rootIndexOffset;
-			int rootRegimeIdx;	// Eldest regime index
+			int rootRegimeIdx;	// Specified in colorAssignment (last position)
 			
-			if (!useRootMetaData) { 		// column dimension of WMat must be r			
-				rootIndexOffset = 0;
-				rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue();
-				
-			} else { 		// column dimension of WMat must be r + 1
-				rootIndexOffset = 1;
-				rootRegimeIdx = 0;	
+			if (useRootMetaData) {
+				rootIndexOffset = 1; // column dimension of WMat must be r + 1
+				rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue(); // getting meta data!
+			}
+			else {
+				rootIndexOffset = 0; // column dimension of WMat must be r	
+				rootRegimeIdx = 0; // not getting metadata, and using the color that has index 0
 			}
 			
 			for (Node sp: allLeafNodes) {	
@@ -171,8 +171,7 @@ public class OUUtils {
 	 /*
 	  * DEPRECATED: uses tree meta data, cannot operate on it
 	  */
-	 @Deprecated
-	 public static void computeWMatOneTrait(TreeParser tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
+	 public static void computeWMatOneTrait2(TreeParser tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
 			Double[] allNodeRegimes = new Double[rootNode.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
 			int rootIndexOffset;
 			int rootRegimeIdx;	// Eldest regime index

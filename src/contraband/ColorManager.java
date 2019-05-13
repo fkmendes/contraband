@@ -1,7 +1,6 @@
 package contraband;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import beast.core.CalculationNode;

@@ -21,8 +21,7 @@ public class MVNUtils {
 			/*
 			 * For comparing it w/ vcv.phylo in R
 			 */
-			// System.out.println("I am leaf " + node.getID() + " with idx " + node.getNr());
-		 
+//			System.out.println("Leaf " + node.getID() + ", nodeIdx=" + nodeIdx); // uncomment to see index of all leaves 
 			tMat[nodeIdx][nodeIdx] = nodeToRootPaths[nodeIdx]; // populating diagonal entries (variances)
 			spOrderInTMat[nodeIdx] = node.getID();
 			return;
@@ -30,6 +29,13 @@ public class MVNUtils {
 		
 		if (node.isRoot()) { nodeToRootPaths[nodeIdx] = 0.0; }
 			
+		// uncomment to see index of internal nodes and which internal node is which
+//		System.out.println("Internal node, nodeIdx=" + nodeIdx); // for debugging
+//		List<Node> leafNodes = node.getAllLeafNodes();
+//		for (Node aNode: leafNodes) {
+//			System.out.println("Daughter leaf: " + aNode.getID());
+//		}
+		
 		Node left = node.getChild(0);
 		int leftIdx = left.getNr();
 		nodeToRootPaths[leftIdx] = nodeToRootPaths[nodeIdx] + left.getLength();
