@@ -120,6 +120,10 @@ png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.png"), he
 plot_grid(mget(paste0("plot", 1:n.param)))
 dev.off()
 
+## pdf(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.pdf"), height=10, width=7)
+## plot_grid(mget(paste0("plot", 1:n.param)))
+## dev.off()
+
 png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_tree.png"), height=10, width=10, unit="cm", res=300)
 plotSimmap(tr, ftype="off")
 dev.off()
