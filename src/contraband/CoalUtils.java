@@ -27,6 +27,15 @@ public class CoalUtils {
 	}
 	
 	/*
+	 * Return probability of two lineages coalescing into one
+	 * conditioning on a coalescent event within a branch of
+	 * length t with population size pop
+	 */
+	public static double getProbOfTwo2OneCondOnCoal(double t, double pop) {
+		return 1 - ( (t/pop) / Math.exp(t/pop)-1 );
+	}
+	
+	/*
 	 * Fold distributions of # of starting lineages (k),
 	 * one from each daughter population, into the distribution
 	 * of the parent (ancestral) population
