@@ -69,17 +69,28 @@ gij(1, 10, 1) # 0.2277612
 
 ## J. Heled's python code for gij (he calls it pn2k, where n lineages in the present, k in the past)
 ## Note that his code had bugs (he forgot to float-ify his fractions)...
-from numpy import exp
-def pn2k(n, k, dt, pop) :
-    # n-k rates
-    # backwards rates
-    rs = [(i*(i-1))/(2) for i in range(k,n+1)]
-    # work backwards
-    # rate of no coal (last)
-    cis = [1]
-    for i in range(1, n-k+1) :
-        r = rs[i]
-        for j in range(len(cis)):
-            cis[j] *= float(r)/(r-rs[j]) # here he forgot to floatify
-        cis.append(-sum(cis))
-    return sum([c*exp((-float(r)/pop)*dt) for r,c in zip(rs,cis)])
+## from numpy import exp
+## def pn2k(n, k, dt, pop) :
+##     # n-k rates
+##     # backwards rates
+##     rs = [(i*(i-1))/(2) for i in range(k,n+1)]
+##     # work backwards
+##     # rate of no coal (last)
+##     cis = [1]
+##     for i in range(1, n-k+1) :
+##         r = rs[i]
+##         for j in range(len(cis)):
+##             cis[j] *= float(r)/(r-rs[j]) # here he forgot to floatify
+##         cis.append(-sum(cis))
+##     return sum([c*exp((-float(r)/pop)*dt) for r,c in zip(rs,cis)])
+
+## pn2k(10, 2, 3, 1) # 0.12119509364945107
+
+## (modified) J. Heled's python code for mean root height
+## def meanRootHeight(nLineages, pop):
+##     e = 0
+##     for k in range(nLineages, 1, -1) :
+##        e += 2.0*pop / (k*(k-1))
+##     return e
+
+## meanRootHeight(5,10) # 16.0
