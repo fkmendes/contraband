@@ -1,7 +1,8 @@
 
 # contraband: Calibrated validation of BM-related classes
 
-This file will guide you through reproducing the simulations and graphs for conducting calibrated validation of the relevant likelihoods in the contraband package.
+This file will guide you through reproducing the simulations and graph-plotting we did for our well-calibrated validation. Note that first we fix the tree to verify the BM-related likelihoods by themselves, and but we also validate with respect to a tree prior.
+
 You are going to need the following R packages:
 
 * mvMORPH
@@ -14,6 +15,9 @@ You are going to need the following R packages:
 
 Also, make sure the file calibrated_validation_utils.R is inside the calibrated_validation/ folder, or whatever folder you use for holding all files.
 
+---
+
+## Fixed tree calibrated validation
 ## (1) Brownian motion (BM) multivariate normal likelihood
 ### (1.1) Simulating one trait under Brownian motion (BM), writing .xmls from template and .sh scripts.
 
@@ -70,7 +74,7 @@ Rscript BMShiftOneRate_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRat
 Rscript BMShiftOneRate_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateOneTrait_fixedtree_nonultra.RData 100 BMMVNShiftOneRate nonultra
 ```
 
-## (2.3) Simulating one trait, with three rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts 
+### (2.3) Simulating one trait, with three rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts 
 
 Note that BEAST2 will number internal nodes according to either ASCII-sorted names, or following the order of the provided TaxonSet. This means that the setting of different rates will only match that of BMMVNShiftLikelihoodOneTraitTest5 if we let ASCII-betical sorting happen (i.e., by not providing a TaxonSet). So template here is different from the usual.
 
@@ -92,7 +96,7 @@ Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVN
 Rscript BMShiftThreeRates_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftThreeRates '01:00:00' BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra_template.xml nonultra BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar 
 ```
 
-## (2.4) Plotting the mean posterior of the four BM parameters (three sigmas^2 and root value)
+### (2.4) Plotting the mean posterior of the four BM parameters (three sigmas^2 and root value)
 
 ```
 Rscript BMShiftThreeRates_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodThreeRatesOneTrait_fixedtree_ultra.RData 100 BMMVNShiftThreeRates ultra
@@ -156,7 +160,7 @@ Rscript OUVanilla_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodVanillaOneTrait_
 Rscript OUVanilla_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodVanillaOneTrait_fixedtree_nonultra.RData 100 OUMVNVanilla nonultra
 ```
 
-## (4.3) Simulating one trait with three adaptive optima under Orstein-Uhlenbeck (OU), writing .xmls from template and .sh scripts.
+### (4.3) Simulating one trait with three adaptive optima under Orstein-Uhlenbeck (OU), writing .xmls from template and .sh scripts.
 
 The priors we use are the same as those in (4.1).
 
@@ -180,4 +184,15 @@ Rscript OUThreeOpt_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNThreeOp
 Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrait_fixedtree_ultra.RData 100 OUMVNThreeOpt ultra 6 sigmasq,rv,theta1,theta2,theta3,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta3,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(theta[3]),expression(alpha)" "1/5,0.0,0.0,1.0" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,theta3.mle,alpha.mle
 
 Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrait_fixedtree_nonultra.RData 100 OUMVNThreeOpt nonultra 6 sigmasq,rv,theta1,theta2,theta3,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta3,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(theta[3]),expression(alpha)" "1/5,0.0,0.0,1.0" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,theta3.mle,alpha.mle
+```
+
+---
+
+## Sampling tree validation
+## (5) Brownian motion with multiple rates (BMShift) multivariate normal likelihood 
+## (5.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts
+
+We use the same priors as in 1.1, and do ultrametric and nonultrametric trees like before, but now the trees vary with every simulation and come from a Yule prior.
+
+```
 ```

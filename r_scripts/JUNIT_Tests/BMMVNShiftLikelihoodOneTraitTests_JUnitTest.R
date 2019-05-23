@@ -6,8 +6,10 @@
 # (4) 'BMMVNShiftLikelihoodOneTraitTest2'
 # (5) 'BMMVNShiftLikelihoodOneTraitTest3'
 # (6) 'BMMVNShiftLikelihoodOneTraitTest4'
-# (7) 'BMMVNShiftLikelihoodOneTraitTest5'
+# (7) 'BMMVNShiftLikelihoodOneTraitTest6'
+# (8) 'BMMVNShiftLikelihoodOneTraitTest7'
 
+library(FossilSim)
 library(mvMORPH)
 library(phytools)
 
@@ -119,3 +121,23 @@ res <- mvBM(tr, dat, model="BMM")
 res$sigma # 0.006827732 0.08324919 0.02754859
 res$theta # -0.03060231
 res$LogLik # -65.26436
+
+## (8) 'BMMVNShiftLikelihoodOneTraitTest6'
+set.seed(123)
+tr <- sim.fbd.taxa(10, 1, 0.01, 0.005, 0.01, complete=TRUE)[[1]]
+dat <- mvSIM(tr, nsim=1, model="BM1", param=list(ntraits=1, sigma=0.1, theta=0.0))
+res <- mvBM(tr, dat, model="BM1")
+
+res$sigma # 0.06715078
+res$theta # -0.4990207
+res$LogLik # -48.54424
+
+## (9) 'BMMVNShiftLikelihoodOneTraitTest7'
+set.seed(123)
+tr <- sim.fbd.taxa(10, 1, 0.01, 0.005, 0.01, complete=FALSE)[[1]]
+dat <- mvSIM(tr, nsim=1, model="BM1", param=list(ntraits=1, sigma=0.1, theta=0.0))
+res <- mvBM(tr, dat, model="BM1")
+
+res$sigma # 0.07044749
+res$theta # 0.8925689
+res$LogLik # -38.44236

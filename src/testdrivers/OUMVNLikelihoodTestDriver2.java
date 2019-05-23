@@ -5,7 +5,6 @@ import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.ColorManager;
 import contraband.OUMVNLikelihoodOneTrait;
-import contraband.OUMVNLikelihoodOneTrait_NoTreeSampling;
 import contraband.OneValueContTraits;
 
 public class OUMVNLikelihoodTestDriver2 {
