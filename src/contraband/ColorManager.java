@@ -92,6 +92,12 @@ public class ColorManager extends CalculationNode {
 			}
 		}
 		
+		tree = treeInput.get();
+		nSpp = tree.getLeafNodeCount();
+		nNodes = tree.getNodeCount();
+		colorValues = colorValuesInput.get().getValues();
+		colorAssignments = colorAssignmentInput.get().getValues();
+		
 		if (colorValuesInput.isDirty()) {
 			colorValues = colorValuesInput.get().getValues();
 		}
