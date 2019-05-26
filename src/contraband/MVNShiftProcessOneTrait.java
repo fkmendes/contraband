@@ -21,7 +21,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	private boolean dirty;
 	
-	private TreeParser tree;
+//	private TreeParser tree;
 	private int nSpp;
 	
 	// mean vector
@@ -42,7 +42,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	@Override
 	public void initAndValidate() {
-		tree = treeInput.get();
+		TreeParser tree = treeInput.get();
 		nSpp = tree.getLeafNodeCount();
 
 		// stored stuff
@@ -64,7 +64,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	// getters
 	protected TreeParser getTree() {
-		return tree;
+		return treeInput.get();
 	}
 	
 	protected int getNSpp() {
@@ -72,6 +72,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	}
 	
 	protected Node getRootNode() {
+		TreeParser tree = treeInput.get();
 		return tree.getRoot();
 	}
 	

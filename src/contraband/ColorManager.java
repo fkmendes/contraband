@@ -9,6 +9,7 @@ import beast.core.Input.Validate;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
+import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 
 /*
@@ -36,7 +37,7 @@ public class ColorManager extends CalculationNode {
 	private List<Node> rightLeaves;
 	private String[] spNamesInASCIIBeticalOrTaxonSetOrder;
 	
-	private TreeParser tree;
+//	private TreeParser tree;
 	private Double[] colorValues;
 	private Integer[] colorAssignments;
 	
@@ -47,11 +48,11 @@ public class ColorManager extends CalculationNode {
 	// stored stuff
 	Double[] storedColorValues;
 	Integer[] storedColorAssignments;
-//	double[][] storedSpColorValuesMat;
+	double[][] storedSpColorValuesMat;
 	
 	@Override
 	public void initAndValidate() {
-		tree = treeInput.get();
+		Tree tree = treeInput.get();
 		colorValues = colorValuesInput.get().getValues();
 		colorAssignments = colorAssignmentInput.get().getValues();
 
@@ -77,11 +78,18 @@ public class ColorManager extends CalculationNode {
 		// stored stuff
 		storedColorValues = new Double[colorValues.length];
 		storedColorAssignments = new Integer[nNodes];
+		storedSpColorValuesMat = new double[nSpp][nSpp];
 	}
 
 	private void readInputBeforeGetters() {
+		
 		if (treeInput.isDirty()) {
-			tree = treeInput.get();
+			System.out.println("treeInput was dirty.");
+		}
+//		if (treeInput.isDirty()) {
+		Tree tree = treeInput.get();
+		nSpp = tree.getLeafNodeCount();
+		nNodes = tree.getNodeCount();
 			
 			// TODO: this will change when I link it to the MSC
 			if (doCoalCorrection) {
@@ -90,13 +98,7 @@ public class ColorManager extends CalculationNode {
 				rootEdgeLength = rootEdgeLengthInput.get();
 				rootEdgeVar = rootEdgeColorValue * rootEdgeLength;
 			}
-		}
-		
-		tree = treeInput.get();
-		nSpp = tree.getLeafNodeCount();
-		nNodes = tree.getNodeCount();
-		colorValues = colorValuesInput.get().getValues();
-		colorAssignments = colorAssignmentInput.get().getValues();
+//		}
 		
 		if (colorValuesInput.isDirty()) {
 			colorValues = colorValuesInput.get().getValues();
@@ -105,9 +107,12 @@ public class ColorManager extends CalculationNode {
 		if (colorAssignmentInput.isDirty()) {
 			colorAssignments = colorAssignmentInput.get().getValues();
 		}
+		
+		System.out.println("Place holder 1.");
 	}
 	
 	private void checkDimensions() {
+		Tree tree = treeInput.get();
 		int nBranches = tree.getNodeCount();
 		if (nBranches != colorAssignments.length) {
 			throw new RuntimeException("The number of color (rates, or optima) assignments does not match the number of branches in the tree. Every branch must be assigned a color.");
@@ -123,6 +128,7 @@ public class ColorManager extends CalculationNode {
 	}
 	
 	private void populateColorValueMat() {	
+		Tree tree = treeInput.get();
 		fillNodeColorValuesOneTrait(tree.getRoot(), spNamesInASCIIBeticalOrTaxonSetOrder);
 		
 		// tree gets taller due to ILS, so it adds some variance to all cells in VCV matrix
@@ -141,7 +147,7 @@ public class ColorManager extends CalculationNode {
 		int nodeIdx = aNode.getNr(); 
 		
 		if (aNode.isLeaf()) {		
-//			System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx); // uncomment to see index of all leaves 
+			System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // uncomment to see index of all leaves 
 			spColorValuesMat[nodeIdx][nodeIdx] = nodeWeightedColorValues[nodeIdx]; // populating diagonal entries
 			spOrderInTMat[nodeIdx] = aNode.getID();
 			return;
@@ -150,7 +156,7 @@ public class ColorManager extends CalculationNode {
 		if (aNode.isRoot()) { nodeWeightedColorValues[nodeIdx] = 0.0; }
 		
 		// uncomment to see index of internal nodes and which internal node is which
-//		System.out.println("Internal node, nodeIdx=" + nodeIdx); // for debugging
+		System.out.println("Internal node, nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // for debugging;
 //		List<Node> leafNodes = aNode.getAllLeafNodes();
 //		for (Node node: leafNodes) {
 //			System.out.println("Daughter leaf: " + node.getID());
@@ -223,6 +229,8 @@ public class ColorManager extends CalculationNode {
 		readInputBeforeGetters();
 		populateColorValueMat();
 		
+		System.out.println("Place holder 2.");
+		
 		return spColorValuesMat;
 	}
 	
@@ -246,6 +254,12 @@ public class ColorManager extends CalculationNode {
 	public void store() {
 		System.arraycopy(colorValues, 0, storedColorValues, 0, colorValues.length);
 		System.arraycopy(colorAssignments, 0, storedColorAssignments, 0, colorAssignments.length);
+		
+		for (int i=0; i<spColorValuesMat.length; ++i) {			
+			for (int j=0; j<spColorValuesMat[i].length; ++j) {
+				storedSpColorValuesMat[i][j] = spColorValuesMat[i][j];
+			}
+		}
 			
 		super.store();
 	}
@@ -254,6 +268,7 @@ public class ColorManager extends CalculationNode {
 	public void restore() {
 		Integer[] vecTmpInt;
 		Double[] vecTmpDouble;
+//		double[][] doubleMatTmp;
 		
 		vecTmpDouble = colorValues;
 		colorValues = storedColorValues;
@@ -262,6 +277,10 @@ public class ColorManager extends CalculationNode {
 		vecTmpInt = colorAssignments;
 		colorAssignments = storedColorAssignments;
 		storedColorAssignments = vecTmpInt;
+		
+//		doubleMatTmp = spColorValuesMat;
+//		spColorValuesMat = storedSpColorValuesMat;
+//		storedSpColorValuesMat = doubleMatTmp;
 		
 		super.restore();
 	}
