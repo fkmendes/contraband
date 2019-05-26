@@ -44,6 +44,7 @@ public class JiveLikelihood extends Distribution {
 			i++;
 		}
 
+		System.out.println("Jive's logP=" + logLik);
 		return logLik;
 	}
 	
