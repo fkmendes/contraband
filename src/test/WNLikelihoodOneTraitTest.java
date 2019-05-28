@@ -23,14 +23,14 @@ public class WNLikelihoodOneTraitTest {
 		OneValueContTraits oneTraitData = new OneValueContTraits();
 		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
 		
-		double logVar = Math.log(0.9733856);
-		System.out.println(logVar);
-		RealParameter colorValues = new RealParameter(new Double[] { logVar, 0.0, 1.0 });	
+		// double logVar = Math.log(0.9733856);
+		// System.out.println(logVar);
+		RealParameter colorValues = new RealParameter(new Double[] { 0.9733856, 0.0, 1.0 });	
 		RealParameter means = new RealParameter(new Double[] { 0.3681067, 0.1, 0.2 });
 		IntegerParameter normalAssignments = new IntegerParameter(new Integer[] { 0, 0, 0 });
 		
 		WNLikelihood WNLk = new WNLikelihood();
-		WNLk.initByName("oneTraitData", oneTraitData, "logSigmaSqs", colorValues, "mus", means, "normalAssignments", normalAssignments);
+		WNLk.initByName("oneTraitData", oneTraitData, "sigmaSqs", colorValues, "mus", means, "normalAssignments", normalAssignments);
 		lnLk = WNLk.calculateLogP();
 		System.out.println(lnLk);
 	}

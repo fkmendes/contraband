@@ -188,8 +188,6 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		
 		super.populateLogP();
 		
-		System.out.println("OU logP=" + logP);
-		
 		return getLogP();
 	}
 	

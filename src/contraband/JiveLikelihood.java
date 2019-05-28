@@ -16,7 +16,7 @@ public class JiveLikelihood extends Distribution {
 	final public Input<RealParameter> meansInput = new Input<>("mus", "mus, the means of the normal densities, one per species.", Validate.REQUIRED);
 	
 	private ManyValuesOneContTrait sampleData;
-	private Double[] logSigmasqs, mus; // in the order of spNames from sampleData
+	// private Double[] logSigmasqs, mus; // in the order of spNames from sampleData
 	private int nSpp;
 	private String[] spNames;
 	
@@ -26,28 +26,32 @@ public class JiveLikelihood extends Distribution {
 		nSpp = sampleData.getNSpp();
 		spNames = sampleData.getSpNames().toArray(new String[nSpp]);
 		
-		logSigmasqs = logSigmasqsInput.get().getValues();
-		mus = meansInput.get().getValues();
+//		logSigmasqs = logSigmasqsInput.get().getValues();
+//		mus = meansInput.get().getValues();
 	}
 	
 	@Override
 	public double calculateLogP() {	
-		logSigmasqs = logSigmasqsInput.get().getValues();
-		mus = meansInput.get().getValues();
+		Double[] logSigmasqs = logSigmasqsInput.get().getValues();
+		Double[] mus = meansInput.get().getValues();
 		
-		double logLik = 0.0;
+		logP = 0.0;
 		
 		int i = 0;
 		for (String spName: spNames) {
 			double thisSpLogLik = MVNUtils.getSampleNormalLogLk(sampleData.getSample(spName), mus[i], logSigmasqs[i]);
-			logLik += thisSpLogLik;
+			logP += thisSpLogLik;
 			i++;
 		}
 
-		System.out.println("Jive's logP=" + logLik);
-		return logLik;
+		return logP;
 	}
 	
+	@Override
+	protected boolean requiresRecalculation() {
+		// TODO Auto-generated method stub
+		return super.requiresRecalculation();
+	}
 
 	@Override
 	public List<String> getArguments() {

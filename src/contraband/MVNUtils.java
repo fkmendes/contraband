@@ -186,7 +186,7 @@ public class MVNUtils {
 	 * 
 	 * Used in white noise (WN) likelihood
 	 */
-	public static double getSampleMultipleNormalLogLk(Double[] samples, Double[] mus, Double[] logSigmaSqs) {
+	public static double getSampleMultipleNormalLogLk(Double[] samples, Double[] mus, Double[] sigmaSqs) {
 		double n = samples.length;
 		
 		double firstTerm = (n/2.0) * Math.log(2.0 * Math.PI);
@@ -194,8 +194,8 @@ public class MVNUtils {
 		double secondTerm = 0.0;
 		double sumToSubtract = 0.0;
 		for (int i=0; i<n; ++i) {
-			secondTerm += 0.5 * logSigmaSqs[i];
-			sumToSubtract += (1.0/(2*Math.exp(logSigmaSqs[i]))) * Math.pow(samples[i]-mus[i], 2);
+			secondTerm += 0.5 * Math.log(sigmaSqs[i]);
+			sumToSubtract += (1.0/(2*sigmaSqs[i])) * Math.pow(samples[i]-mus[i], 2);
 		}
 		
 		return -firstTerm - secondTerm - sumToSubtract;

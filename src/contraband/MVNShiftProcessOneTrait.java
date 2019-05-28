@@ -14,14 +14,15 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.State;
 import beast.evolution.tree.Node;
-import beast.util.TreeParser;
+import beast.evolution.tree.Tree;
 
 public class MVNShiftProcessOneTrait extends Distribution {
-	final public Input<TreeParser> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
+	final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
 	
 	private boolean dirty;
+	private boolean matrixWasSingularCantInvertBarf;
 	
-//	private TreeParser tree;
+//	private Tree tree;
 	private int nSpp;
 	
 	// mean vector
@@ -42,7 +43,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	@Override
 	public void initAndValidate() {
-		TreeParser tree = treeInput.get();
+		Tree tree = treeInput.get();
 		nSpp = tree.getLeafNodeCount();
 
 		// stored stuff
@@ -59,11 +60,16 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	protected void populateOneTraitDataVector() {};
 	
 	protected void populateLogP() {
-		logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
+		if (matrixWasSingularCantInvertBarf) {
+			logP = Double.NEGATIVE_INFINITY;
+		}
+		else {
+			logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
+		}
 	};
 	
 	// getters
-	protected TreeParser getTree() {
+	protected Tree getTree() {
 		return treeInput.get();
 	}
 	
@@ -72,7 +78,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	}
 	
 	protected Node getRootNode() {
-		TreeParser tree = treeInput.get();
+		Tree tree = treeInput.get();
 		return tree.getRoot();
 	}
 	
@@ -97,6 +103,10 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	protected void setProcessOneTraitDataVec(RealVector aOneTraitDataVector) {
 		oneTraitDataVec = aOneTraitDataVector;
+	}
+	
+	protected void setMatrixIsSingular(boolean matrixIsSingular) {
+		matrixWasSingularCantInvertBarf = matrixIsSingular;
 	}
 	
 	// caching

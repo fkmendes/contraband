@@ -14,11 +14,11 @@ import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.evolution.tree.Node;
-import beast.util.TreeParser;
+import beast.evolution.tree.Tree;
 
 public abstract class MVNProcessOneTrait extends Distribution {
 	
-	final public Input<TreeParser> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
+	final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
 	final public Input<Double> rootEdgeLengthInput = new Input<>("rootEdgeLength", "root edge length.", 0.0, Validate.OPTIONAL);
 	
 	// TODO: rootEdgeLength is not a parameter, so in the future after I implement the coalescent correction, this should be figured out
@@ -28,7 +28,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private boolean matrixWasSingularCantInvertBarf;
 	
 	// for phylo T matrix
-	private TreeParser tree;
+	private Tree tree;
 	private int nSpp; // tree has to be traversed, so part of state!
 	
 	// things below are part of state because I do not want to call new on them every time I compute likelihood
@@ -107,7 +107,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	};
 	
 	// getters
-	protected TreeParser getTree() {
+	protected Tree getTree() {
 		return tree;
 	}
 	
@@ -171,7 +171,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	}
 	
 	@Override
-	public void store() {
+	public void store() {	
 		for (int i=0; i<nSpp; ++i) {	
 			storedMeanVec.setEntry(i, meanVec.getEntry(i));
 			

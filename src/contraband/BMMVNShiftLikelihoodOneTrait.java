@@ -102,7 +102,13 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	@Override
 	protected void populateInvVCVMatrix() {
 		bmVCVMatLUD = new LUDecomposition(bmVCVMat);
-		bmInvVCVMat = bmVCVMatLUD.getSolver().getInverse();
+		
+		try {
+			bmInvVCVMat = bmVCVMatLUD.getSolver().getInverse();
+			setMatrixIsSingular(false);
+		} catch (org.apache.commons.math3.linear.SingularMatrixException e) {
+			setMatrixIsSingular(true);
+		}
 	}
 	
 	@Override

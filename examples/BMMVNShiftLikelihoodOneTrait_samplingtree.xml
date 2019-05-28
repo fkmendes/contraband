@@ -35,13 +35,13 @@
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
 	    <distribution id="BMMVNShift" spec="contraband.BMMVNShiftLikelihoodOneTrait">
 	    
-	      <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,sp2:1.0):1.0,sp3:1.0):0.0;" offset="0" singlechild="false">
-	        <taxonset id="TaxonSet" spec="TaxonSet">
-	          <taxon id="sp1" spec="Taxon"/>
-	          <taxon id="sp2" spec="Taxon"/>
-	          <taxon id="sp3" spec="Taxon"/>
-	        </taxonset>
-	      </tree>
+	      <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,sp2:1.0):1.0,sp3:1.0):0.0;" offset="0" singlechild="false"/>
+<!-- 	        <taxonset id="TaxonSet" spec="TaxonSet"> -->
+<!-- 	          <taxon id="sp1" spec="Taxon"/> -->
+<!-- 	          <taxon id="sp2" spec="Taxon"/> -->
+<!-- 	          <taxon id="sp3" spec="Taxon"/> -->
+<!-- 	        </taxonset> -->
+<!-- 	      </tree> -->
 
 	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" nTraits="1" spNames="sp1,sp2,sp3">
 	      	<traitValues id="fixedTraitValues" spec="parameter.RealParameter">4.1 4.5 5.2</traitValues>

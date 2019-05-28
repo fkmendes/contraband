@@ -1,5 +1,6 @@
 package testdrivers;
 
+import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import contraband.MVNUtils;
 import contraband.OneValueContTraits;
@@ -24,9 +25,12 @@ public class WNLikelihoodTestDriver {
 		
 		RealParameter colorValues = new RealParameter(sigmaSqs);
 		RealParameter means = new RealParameter(mus);
+
+		Integer[] assignments = new Integer[] { 0, 0, 0 };
+		IntegerParameter normalAssignments = new IntegerParameter(assignments);
 		
 		WNLikelihood WNLk = new WNLikelihood();
-		WNLk.initByName("oneTraitData", oneTraitData, "sigmaSqs", colorValues, "mus", means);
+		WNLk.initByName("oneTraitData", oneTraitData, "sigmaSqs", colorValues, "mus", means, "normalAssignments", normalAssignments);
 		System.out.println(WNLk.calculateLogP());
 	}	
 }
