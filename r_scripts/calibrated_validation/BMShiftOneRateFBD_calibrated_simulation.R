@@ -60,23 +60,30 @@ set.seed(123)
 lambda <- rexp(1000, rate=80) # lambda from exponential (mean = 1/80)
 mu <- rexp(1000, rate=100) # mu from exponential (mean = 1/100)
 psi <- rexp(1000, rate=150) # psi from exponential (mean = 1/100)
-trs <- vector("list", n.sim)
+trs <- vector("list", n.sim + 50)
+trs.heights <- vector("list", n.sim + 50)
 
 success <- 1
 counter <- 1
-while (success <= 150) {
+while (success <= n.sim + 50) {
     if (lambda[counter] > mu[counter]) {
         cat(paste(c("Simulating tree", success, "with FBD.\n"), sep=" "))
         trs[[success]] = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
+        trs.heights[[success]] = max(node.depth.edgelength(trs[[success]]))
         success = success + 1
     }
     else {
-        print("merda")
+        print("Failed simulating FBD tree.")
     }
     counter = counter + 1
 }
 rate.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep(0, 2*length(x$tip.label)-1), collapse=" ")))))
 spnames.4.template <- unlist(as.vector((lapply(trs, function(x) paste(x$tip.label, collapse=",")))))
+mean.trs.h <- mean(unlist(trs.heights))
+
+## having a look at tree heights
+## hist(unlist(trs.heights), prob=T)
+## lines(density(rexp(10000, 1/mean.trs.h)), col="red")
 
 ## simulating quant trait data sets
 sigmas <- rexp(n.sim, rate=sigma.rate); # sigmas[1] # 0.02914
@@ -85,11 +92,11 @@ datasets <- vector("list", n.sim) # storing sims
 mles <- data.frame(matrix(NA,100,n.param))
 
 ## for putting on template
-traits.4.template <- vector("list", n.sim)
-## taxon.strs.4.template <- paste(paste0("<taxon id=\"", tr$tip.label, "\" spec=\"Taxon\"/>"), collapse="\n                  ")
-
-        ## if ((trs[[i]]$edge.length[trs[[i]]$edge[,1]==(length(trs[[i]]$tip.label)+1) & (trs[[i]]$edge[,2]<(length(trs[[i]]$tip.label)+1))]) == 0) {
-
+taxon.strs.4.template <- vector("list", n.sim + 50)
+for (i in 1:(n.sim+50)) {
+    taxon.strs.4.template[[i]] = paste(paste0("<taxon id=\"", trs[[i]]$tip.label, "\" spec=\"Taxon\"/>"), collapse="\n                  ")
+}
+traits.4.template <- vector("list", n.sim + 50) 
 
 ## actually simulating and populating strs for template
 counter <- 1
