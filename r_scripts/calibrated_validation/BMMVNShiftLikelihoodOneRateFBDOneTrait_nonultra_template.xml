@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution.speciation" required="BEAST v2.5.0" version="2.5">
  
-  <run id="mcmc" spec="MCMC" chainLength="5000000">
-    <state id="state" storeEvery="5000">
+  <run id="mcmc" spec="MCMC" chainLength="10000000">
+    <state id="state" storeEvery="10000">
       <tree idref="TheTree" name="stateNode"/>
       <parameter id="FBDbirthRate" name="stateNode">0.1</parameter>
       <parameter id="FBDdeathRate" name="stateNode">0.05</parameter>
       <parameter id="FBDsamplingRate" name="stateNode">0.01</parameter>
-      <parameter id="FBDorigin" name="stateNode">200.0</parameter>
+      <parameter id="FBDorigin" name="stateNode">[InitialOriginValue]</parameter>
       <stateNode idref="rateValues"/>
-      <stateNode idref="rateAssignments"/>
+      <!-- <stateNode idref="rateAssignments"/> -->
       <stateNode idref="BMMean"/>
     </state>
 	    
@@ -30,9 +30,10 @@
         </distribution>                                                                                                                                                                               
 	<distribution id="FBDsamplingRatePrior" spec="beast.math.distributions.Prior" x="@FBDsamplingRate">
 	  <distr id="FBDsamplingRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="[FBDsamplingRatePriorMeanHere]"/>
-        </distribution>                                                                                                                                                                               
+        </distribution>
+
 	<distribution id="FBDoriginPrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
-	  <distr id="FBDoriginExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="[FBForiginPriorMeanHere]"/>
+	  <distr id="FBDoriginExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="[FBDoriginPriorMeanHere]"/>
         </distribution>
         
 	<distribution id="rateValuesPrior" spec="beast.math.distributions.Prior" x="@rateValues">
@@ -48,18 +49,15 @@
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
 	<distribution id="BMMVNShift" spec="contraband.BMMVNShiftLikelihoodOneTrait">
 	  <!-- <tree idref="TheTree"/> -->
-	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,f2:0.10):1.0,(sp2:1.0,f1:0.8):1.0)" offset="0" singlechild="false">
+	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="[TreeHere]" offset="0" singlechild="false">
 
-	      <taxonset id="MyTaxa" spec="TaxonSet">
-		<taxon id="f1" spec="Taxon"/>
-		<taxon id="f2" spec="Taxon"/>
-		<taxon id="sp1" spec="Taxon"/>
-		<taxon id="sp2" spec="Taxon"/>
-	      </taxonset>
+	    <taxonset id="TaxonSet" spec="TaxonSet">
+	      [TaxonSetHere]
+	    </taxonset>
 	  </tree>
 
-	  <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" nTraits="1" spNames="sp1,sp2,f1,f2">
-	    <traitValues id="fixedTraitValues" spec="parameter.RealParameter">-5.05744071356103 -1.11052196957346 -0.575427737395457 -0.202953693279079</traitValues>
+	  <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" nTraits="1" spNames="[SpNamesHere]">
+	    <traitValues id="fixedTraitValues" spec="parameter.RealParameter">[TraitValuesHere]</traitValues>
 	  </oneTraitData>
 
 	  <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" nColors="1" coalCorrection="false">
@@ -67,10 +65,10 @@
 	    
 	    <colorValues id="rateValues" spec="parameter.RealParameter">0.06715078</colorValues>
 	    
-	    <colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="0">0 0 0 0 0 0 0</colorAssignments>
+	    <colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="0">[RateAssignmentsHere]</colorAssignments>
 	  </rateManager>
 	    
-	  <mean id="BMMean" dimension="1" spec="parameter.RealParameter">-0.4990207</mean>
+	  <mean id="BMMean" dimension="1" spec="parameter.RealParameter">0.0</mean>
 	</distribution> <!-- END BMVN -->
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
@@ -92,24 +90,23 @@
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
     <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
 	
-    <logger id="tracelog" fileName="BMMVNShift_samplingtree.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="[FileNameHere].log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
       <log idref="rateValues"/>
-      <log idref="rateAssignments"/>
       <log idref="BMMean"/>
     </logger>
 
     <logger id="screenlog" logEvery="20000">
-        <log idref="posterior"/>
-        <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
-        <log idref="likelihood"/>
-        <log idref="prior"/>
+      <log idref="posterior"/>
+      <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+      <log idref="likelihood"/>
+      <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:firsthalf" fileName="BMMVNShift_samplingtree.trees" logEvery="5000" mode="tree">
-        <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
+    <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="10000" mode="tree">
+      <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>
 </beast>

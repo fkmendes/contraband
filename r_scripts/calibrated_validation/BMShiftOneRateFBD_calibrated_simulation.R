@@ -10,14 +10,14 @@ source("calibrated_validation_utils.R")
 ### SCRIPT FLAGS AND PATH VARIABLES ###
 
 simulate <- TRUE
-write.xmls <- FALSE
-write.shellscripts <- FALSE
+write.xmls <- TRUE
+write.shellscripts <- TRUE
 cal.validation.folder <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/"
 n.sim <- 100
 n.spp <- 50
 job.prefix <- "BMMVNShiftOneRateFBD"
-time.needed <- "01:00:00"
-template.name <- "BMMVNShiftLikelihoodOneRateFBDOneTrait_fixedtree_nonultra_template.xml"
+time.needed <- "02:00:00"
+template.name <- "BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml"
 tree.type <- "nonultra"
 
 ## simulate <- args[1]
@@ -32,16 +32,17 @@ tree.type <- "nonultra"
 ## tree.type <- args[10]
 xmlfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
 ## xml.file.prefix <- args[11]
-xml.file.prefix <- "BMOneRateFBD"
+xml.file.prefix <- paste0("BMMVNShiftLikelihoodOneRateFBDOneTrait_", tree.type, "_")
 shell.scripts.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_shellscripts/")
 template.path <- paste0(cal.validation.folder, template.name)
 rdata.path <- gsub("_template.xml", ".RData", template.path)
 
 # cluster stuff
+## cluster.validation.folder <- cal.validation.folder
 cluster.validation.folder <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/"
 ## cluster.validation.folder <- args[12]
-xml.file.path <- paste0(cluster.validation.folder, "BMMVNShiftOneRateOneTraitFBD_", tree.type, "_xmls/")
-res.path <- paste0(cluster.validation.folder, "BMMVNShiftOneRateOneTraitFBD_", tree.type, "_results/")
+xml.file.path <- paste0(cluster.validation.folder, "BMMVNShiftOneRateFBDOneTrait_", tree.type, "_xmls/")
+res.path <- paste0(cluster.validation.folder, "BMMVNShiftOneRateFBDOneTrait_", tree.type, "_results/")
 jar.path <- paste0(cluster.validation.folder, "contraband.jar")
 ## jar.path <- args[13]
 
@@ -59,18 +60,28 @@ set.seed(123)
 ## simulating fossilized birth-death trees
 lambda <- rexp(1000, rate=80) # lambda from exponential (mean = 1/80)
 mu <- rexp(1000, rate=100) # mu from exponential (mean = 1/100)
-psi <- rexp(1000, rate=150) # psi from exponential (mean = 1/100)
+psi <- rexp(1000, rate=150) # psi from exponential (mean = 1/150)
 trs <- vector("list", n.sim + 50)
-trs.heights <- vector("list", n.sim + 50)
+trs.heights <- vector("list", n.sim)
 
 success <- 1
 counter <- 1
+## add 50 trees just in case some trees have SA at the root (in which case likelihoods cant be computed)
 while (success <= n.sim + 50) {
     if (lambda[counter] > mu[counter]) {
-        cat(paste(c("Simulating tree", success, "with FBD.\n"), sep=" "))
-        trs[[success]] = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
-        trs.heights[[success]] = max(node.depth.edgelength(trs[[success]]))
-        success = success + 1
+        tr = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
+
+        if (length(tr$tip.label) <= 200) {
+            cat(paste(c("Simulating tree", success, "with FBD.\n"), sep=" "))
+            trs[[success]] = tr
+            ## trs[[success]] = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
+            trs.heights[[success]] = max(node.depth.edgelength(trs[[success]]))
+            success = success + 1
+        }
+
+        else {
+            print("Tree was too large")
+        }
     }
     else {
         print("Failed simulating FBD tree.")
@@ -96,7 +107,7 @@ taxon.strs.4.template <- vector("list", n.sim + 50)
 for (i in 1:(n.sim+50)) {
     taxon.strs.4.template[[i]] = paste(paste0("<taxon id=\"", trs[[i]]$tip.label, "\" spec=\"Taxon\"/>"), collapse="\n                  ")
 }
-traits.4.template <- vector("list", n.sim + 50) 
+traits.4.template <- vector("list", n.sim) 
 
 ## actually simulating and populating strs for template
 counter <- 1
@@ -129,13 +140,8 @@ if (simulate) {
 }
 
 ## MLE correlation plot (just for sanity check)
-## par(mfrow=c(1,2))
 ## plot(mu.mle~mu, data=true.param.df, xlab=expression(mu), ylab=expression(paste(mu[MLE])), pch=20)
-## plot(tr)
-
-## par(mfrow=c(1,2))
 ## plot(sigmasq.mle~sigmasq, data=true.param.df, xlab=expression(sigma^2), ylab=expression(paste(sigma^2[MLE])), pch=20)
-## plot(tr)
 
 ## writing xmls
 if (write.xmls) {
@@ -149,13 +155,20 @@ if (write.xmls) {
         file.name = basename(gsub(".xml", "", xml.file.name))
 
         template.lines = readLines(template.path)
+
         for (line in template.lines) {
+            line = gsub("\\[InitialOriginValue\\]", format((trs.heights[[successes[sim.idx]]]+1), nsmall=1), line)
+            line = gsub("\\[FBDbirthRatePriorMeanHere\\]", format(1/80, nsmall=1), line)
+            line = gsub("\\[FBDdeathRatePriorMeanHere\\]", format(1/100, nsmall=1), line)
+            line = gsub("\\[FBDsamplingRatePriorMeanHere\\]", format(1/150, nsmall=1), line)
+            line = gsub("\\[FBDoriginPriorMeanHere\\]", mean.trs.h, line)
             line = gsub("\\[RateValuesPriorMeanHere\\]", format(1/sigma.rate, nsmall=1), line)
-            line = gsub("\\[RateAssignmentsHere\\]", rate.assignments[sim.idx], line)
+            line = gsub("\\[RateAssignmentsHere\\]", rate.assignments[successes[sim.idx]], line)
             line = gsub("\\[BMMeanPriorMeanHere\\]", format(x0.mean, nsmall=1), line)
             line = gsub("\\[BMMeanPriorStdDevHere\\]", format(x0.sd, nsmall=1), line)
-            line = gsub("\\[TreeHere\\]", write.tree(trs[[successes[n.sim]]]), line)
-            line = gsub("\\[SpNamesHere\\]", spnames.4.template[successes[n.sim]], line)
+            line = gsub("\\[TreeHere\\]", write.tree(trs[[successes[sim.idx]]]), line)
+            line = gsub("\\[SpNamesHere\\]", spnames.4.template[successes[sim.idx]], line)
+            line = gsub("\\[TaxonSetHere\\]", taxon.strs.4.template[successes[sim.idx]], line)
             line = gsub("\\[TraitValuesHere\\]", traits.4.template[[sim.idx]], line)
             line = gsub("\\[FileNameHere\\]", paste0(res.path, file.name), line)
             write(line, file=paste0(xmlfolder.path, xml.file.name), append=TRUE)
