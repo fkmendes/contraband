@@ -14,8 +14,8 @@ public class GeneralUtils {
 			
 		    for (int j = 0; j < cols; j++) {
 		    	
-		        System.out.print(Mat.getEntry(i, j) + " ");
-		        
+//		        System.out.print(Mat.getEntry(i, j) + " ");
+		        if (i == j && (Mat.getEntry(i, j) == 0.0)) { System.out.println("Printing diagonal element=" + Mat.getEntry(i, j)); }
 		    }
 		    
 		    System.out.println();

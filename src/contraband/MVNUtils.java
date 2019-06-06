@@ -7,8 +7,14 @@ import org.apache.commons.math3.linear.RealVector;
 
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
+import cern.jet.math.Functions;
 
 public class MVNUtils {
+	
+	public static Algebra coltAlgebra = new Algebra();
 	
 	/*
 	 * Recursive function for producing T matrix out of tree
@@ -148,12 +154,23 @@ public class MVNUtils {
 		return likelihood;
 	}
 	
-	public static double getMVNLogLk (int n, RealVector mean, RealVector data, RealMatrix invVcvMat, double detTMat) {
+	public static double getMVNLogLk (int n, RealVector mean, RealVector data, RealMatrix invVcvMat, double detVcvTMat) {
 		
-		double loglikelihood = -0.5 * (Math.log(detTMat) + n * Math.log(2.0 * Math.PI));
+		double loglikelihood = -0.5 * (Math.log(detVcvTMat) + n * Math.log(2.0 * Math.PI));
 		
 		loglikelihood += invVcvMat.preMultiply(data.subtract(mean)).mapMultiply(-0.5)
 				.dotProduct(data.subtract(mean));
+		
+		return loglikelihood;
+	}
+	
+	public static double getMVNLogLkColt (int n, DoubleMatrix1D mean, DoubleMatrix1D data, DoubleMatrix2D invVcvMat, double detTMat) {
+
+		DoubleMatrix1D datMinusMean = data.assign(mean, Functions.minus); // x - mu
+		
+		double loglikelihood = -0.5 * (Math.log(detTMat) + n * Math.log(2.0 * Math.PI));
+		
+		loglikelihood += -0.5 * coltAlgebra.mult(coltAlgebra.mult(invVcvMat, datMinusMean), datMinusMean);
 		
 		return loglikelihood;
 	}

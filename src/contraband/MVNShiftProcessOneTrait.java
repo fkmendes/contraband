@@ -89,8 +89,19 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	// setters
 	protected void setProcessVCVMat(RealMatrix aVCVMat) {
 		vcvMat = aVCVMat;
+		
+		GeneralUtils.displayRealMatrix(vcvMat);
+		
 		vcvMatLUDecomposition = new LUDecomposition(vcvMat);
 		detVCVMat = vcvMatLUDecomposition.getDeterminant();
+		
+		// apache commons did not throw a singular matrix exception,
+		// but we probably got an aggregation of round-off errors
+		// during the computation of this determinant -- which can happen
+		// if the matrix is singular
+		if (Double.isInfinite(detVCVMat)) {
+			matrixWasSingularCantInvertBarf = true; 
+		}
 	};
 	
 	protected void setProcessInvVCVMat(RealMatrix aInvVCVMat) {
