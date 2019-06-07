@@ -1,41 +1,57 @@
 package contraband;
 
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.LUDecomposition;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
+//import org.apache.commons.math3.linear.ArrayRealVector;
+//import org.apache.commons.math3.linear.LUDecomposition;
+//import org.apache.commons.math3.linear.MatrixUtils;
+//import org.apache.commons.math3.linear.RealMatrix;
+//import org.apache.commons.math3.linear.RealVector;
 
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
+import cern.colt.matrix.DoubleFactory1D;
+import cern.colt.matrix.DoubleFactory2D;
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
 
 public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 
 	final public Input<RealParameter> meanInput = new Input<>("mean", "mu, or x_0, the mean of the process (and the values at the root).", Validate.REQUIRED);
 	final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
 	final public Input<ColorManager> rateManagerInput = new Input<>("rateManager", "color manager object that paints branches with their own rates.", Validate.REQUIRED);
-		
+	
 	private boolean dirty;
 	
 	private int nSpp;
 
 	// mean vector
-	private Double bmSingleMeanValue;
-	private RealVector bmMeanVector;
+	// colt
+	DoubleMatrix1D bmMeanVector;
+	// apache
+	// private RealVector bmMeanVector;
 	
 	// VCV matrix
 	private ColorManager rateManager;
-	private double[][] bmVCVMatDouble;
-	private RealMatrix bmVCVMat, bmInvVCVMat;
-	private LUDecomposition bmVCVMatLUD;
+
+	// colt
+	private DoubleMatrix2D bmVCVMat, bmInvVCVMat;
+	// apache
+	//	private RealMatrix bmVCVMat, bmInvVCVMat;
+	//	private LUDecomposition bmVCVMatLUD;
 	
 	// data
 	private OneValueContTraits oneTraitData;
-	private RealVector oneTraitDataVec;
+	
+	// colt
+	private DoubleMatrix1D oneTraitDataVec;
+	// apache
+	// private RealVector oneTraitDataVec;
 	
 	// stored stuff
-	private RealVector storedBMMeanVec;
+	// colt
+	DoubleMatrix1D storedBMMeanVec;
+	// apache
+	// private RealVector storedBMMeanVec;
 	
 	@Override
 	public void initAndValidate() {
@@ -44,16 +60,26 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		
 		nSpp = getNSpp();
 		
-		bmMeanVector = new ArrayRealVector(nSpp);
-		oneTraitDataVec = new ArrayRealVector(nSpp);
+		// colt 
+		bmMeanVector = DoubleFactory1D.dense.make(nSpp);
+		oneTraitDataVec = DoubleFactory1D.dense.make(nSpp);
+		
+		// apache
+		// bmMeanVector = new ArrayRealVector(nSpp);
+		// oneTraitDataVec = new ArrayRealVector(nSpp);
 				
-		bmVCVMatDouble = new double[nSpp][nSpp];
-		bmVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
+		// colt
+		bmVCVMat = DoubleFactory2D.dense.make(nSpp, nSpp);
+		// apache
+		// bmVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		
 		rateManager = rateManagerInput.get();
 		
 		// stored stuff
-		storedBMMeanVec = new ArrayRealVector(nSpp);
+		// colt
+		storedBMMeanVec = DoubleFactory1D.dense.make(nSpp);
+		// apache
+		// storedBMMeanVec = new ArrayRealVector(nSpp);
 		
 		// this instance vars
 		populateInstanceVars(true, true);
@@ -84,31 +110,51 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	
 	@Override
 	protected void populateMeanVector() {
-		bmSingleMeanValue = meanInput.get().getValue();
-		bmMeanVector.set(bmSingleMeanValue);
+		Double bmSingleMeanValue = meanInput.get().getValue();
+		
+		// colt
+		for (int i=0; i<nSpp; ++i) {
+			bmMeanVector.set(i, bmSingleMeanValue); // repeating the same value nSpp times
+		}
+		
+		// apache
+		// bmMeanVector.set(bmSingleMeanValue);
 	}
 	
 	@Override
 	protected void populateVCVMatrix() {
-		bmVCVMatDouble = rateManager.getSpColorValuesMatOneTrait();
-		
+		double[][] bmVCVMatDouble = rateManager.getSpColorValuesMatOneTrait();
+
 		for (int i=0; i<nSpp; ++i) {
 			for (int j=0; j<nSpp; ++j) {
-				bmVCVMat.setEntry(i, j, bmVCVMatDouble[i][j]);
+				// colt
+				bmVCVMat.set(i, j, bmVCVMatDouble[i][j]);
+				
+				// apache
+				// bmVCVMat.setEntry(i, j, bmVCVMatDouble[i][j]);
 			}
 		}
 	}
 	
 	@Override
 	protected void populateInvVCVMatrix() {
-		bmVCVMatLUD = new LUDecomposition(bmVCVMat);
-		
+		// colt
 		try {
-			bmInvVCVMat = bmVCVMatLUD.getSolver().getInverse();
+			bmInvVCVMat = alg.inverse(bmVCVMat);
 			setMatrixIsSingular(false);
-		} catch (org.apache.commons.math3.linear.SingularMatrixException e) {
+		} catch ( IllegalArgumentException e) {
 			setMatrixIsSingular(true);
 		}
+		
+		// apache
+//		bmVCVMatLUD = new LUDecomposition(bmVCVMat);
+//		
+//		try {
+//			bmInvVCVMat = bmVCVMatLUD.getSolver().getInverse();
+//			setMatrixIsSingular(false);
+//		} catch (org.apache.commons.math3.linear.SingularMatrixException e) {
+//			setMatrixIsSingular(true);
+//		}
 	}
 	
 	@Override
@@ -117,7 +163,10 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		
 		int i = 0;
 		for (Double thisTraitValue: oneTraitData.getTraitValues(0, rateManager.getSpNamesInVCVMatOrder())) {
-			oneTraitDataVec.setEntry(i, thisTraitValue);
+			// colt 
+			oneTraitDataVec.set(i, thisTraitValue);
+			// apache
+			// oneTraitDataVec.setEntry(i, thisTraitValue);
 			++i;
 		}
 	}
@@ -141,7 +190,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	@Override
 	public void store() {
 		for (int i=0; i<nSpp; ++i) {
-			storedBMMeanVec.setEntry(i, bmMeanVector.getEntry(i));
+			storedBMMeanVec.set(i, bmMeanVector.get(i));
 		}
 
 		super.store();
@@ -149,7 +198,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	
 	@Override
 	public void restore() {
-		RealVector realVecTmp;
+		DoubleMatrix1D realVecTmp;
 
 		realVecTmp = bmMeanVector;
 		bmMeanVector = storedBMMeanVec;

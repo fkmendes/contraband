@@ -7,9 +7,6 @@ import contraband.BMMVNShiftLikelihoodOneTrait;
 import contraband.ColorManager;
 import contraband.OneValueContTraits;
 
-/*
- * This TestDriver matches BMMVNShiftLikelihoodOneTest5. large tree, shift-rate (3 rates) BM
- */
 public class BMMVNShiftLikelihoodTestDriver6 {
 
 	public static void main(String[] args) {

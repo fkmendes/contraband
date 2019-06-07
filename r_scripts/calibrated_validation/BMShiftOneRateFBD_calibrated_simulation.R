@@ -69,6 +69,7 @@ counter <- 1
 ## add 50 trees just in case some trees have SA at the root (in which case likelihoods cant be computed)
 while (success <= n.sim + 50) {
     if (lambda[counter] > mu[counter]) {
+        if (counter==276) { set.seed(234) }
         tr = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
 
         if (length(tr$tip.label) <= 200) {
@@ -121,7 +122,7 @@ if (simulate) {
             next
         }
         datasets[[success]] = fastBM(trs[[counter]], sig2=sigmas[success], a=x0s[success])
-        cat(paste0("Calling mvBM for sim ",success,"\n"))
+        cat(paste0("Calling mvBM for sim ",success,", tree=",counter,"\n"))
         mle.res = mvBM(trs[[counter]], datasets[[success]], model="BM1")
         mles[success,] = c(mle.res$sigma, mle.res$theta)
         traits.4.template[[success]] = paste(datasets[[success]], collapse=" ")

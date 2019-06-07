@@ -15,9 +15,16 @@ import beast.core.Input.Validate;
 import beast.core.State;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
+import cern.colt.matrix.DoubleFactory1D;
+import cern.colt.matrix.DoubleFactory2D;
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
 
 public class MVNShiftProcessOneTrait extends Distribution {
 	final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
+	
+	protected Algebra alg = new Algebra();
 	
 	private boolean dirty;
 	private boolean matrixWasSingularCantInvertBarf;
@@ -26,20 +33,35 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	private int nSpp;
 	
 	// mean vector
-	private RealVector meanVec;
+	// colt
+	private DoubleMatrix1D meanVec;
+	// apache
+	// private RealVector meanVec;
 		
 	// VCV matrix
-	private RealMatrix vcvMat, invVCVMat;
-	private LUDecomposition vcvMatLUDecomposition;
+	// colt
+	private DoubleMatrix2D vcvMat, invVCVMat;
 	private double detVCVMat;
+	// apache
+	// private RealMatrix vcvMat, invVCVMat;
+	// private LUDecomposition vcvMatLUDecomposition;
+	// private double detVCVMat;
 		
 	// data
-	private RealVector oneTraitDataVec;
+	// colt
+	private DoubleMatrix1D oneTraitDataVec;
+	// apache
+	// private RealVector oneTraitDataVec;
 
 	// stored stuff
-	private RealVector storedMeanVec; // need for integration with JIVE (unsure why...?)
-	private RealMatrix storedInvVCVMat; // (below) needed for morphology parameter operators
+	// colt
+	private DoubleMatrix1D storedMeanVec;
+	private DoubleMatrix2D storedInvVCVMat;
 	private double storedDetVCVMat;
+	
+	// apache
+	// private RealVector storedMeanVec; // need for integration with JIVE (unsure why...?)
+	// private RealMatrix storedInvVCVMat; // (below) needed for morphology parameter operators
 	
 	@Override
 	public void initAndValidate() {
@@ -47,8 +69,12 @@ public class MVNShiftProcessOneTrait extends Distribution {
 		nSpp = tree.getLeafNodeCount();
 
 		// stored stuff
-		storedMeanVec = new ArrayRealVector(nSpp);
-		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
+		// colt
+		storedMeanVec = DoubleFactory1D.dense.make(nSpp);
+		storedInvVCVMat = DoubleFactory2D.dense.make(nSpp, nSpp);
+		// apache
+		// storedMeanVec = new ArrayRealVector(nSpp);
+		// storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 	}
 
 	protected void populateMeanVector() {};
@@ -64,7 +90,10 @@ public class MVNShiftProcessOneTrait extends Distribution {
 			logP = Double.NEGATIVE_INFINITY;
 		}
 		else {
-			logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
+			// colt
+			logP = MVNUtils.getMVNLogLkColt(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
+			// apache
+			// logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
 		}
 	};
 	
@@ -87,32 +116,43 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	}
 	
 	// setters
-	protected void setProcessVCVMat(RealMatrix aVCVMat) {
+	// apache
+	// protected void setProcessVCVMat(RealMatrix aVCVMat) {
+	// colt
+	protected void setProcessVCVMat(DoubleMatrix2D aVCVMat) {
 		vcvMat = aVCVMat;
+		detVCVMat = alg.det(vcvMat);
 		
-		GeneralUtils.displayRealMatrix(vcvMat);
-		
-		vcvMatLUDecomposition = new LUDecomposition(vcvMat);
-		detVCVMat = vcvMatLUDecomposition.getDeterminant();
+		// apache
+		// vcvMatLUDecomposition = new LUDecomposition(vcvMat);
+		// detVCVMat = vcvMatLUDecomposition.getDeterminant();
 		
 		// apache commons did not throw a singular matrix exception,
 		// but we probably got an aggregation of round-off errors
 		// during the computation of this determinant -- which can happen
 		// if the matrix is singular
-		if (Double.isInfinite(detVCVMat)) {
-			matrixWasSingularCantInvertBarf = true; 
-		}
+		// if (Double.isInfinite(detVCVMat)) {
+		//     matrixWasSingularCantInvertBarf = true; 
+		// }
 	};
 	
-	protected void setProcessInvVCVMat(RealMatrix aInvVCVMat) {
+	// apache
+	// protected void setProcessInvVCVMat(RealMatrix aInvVCVMat) {
+	protected void setProcessInvVCVMat(DoubleMatrix2D aInvVCVMat) {
 		invVCVMat = aInvVCVMat;
 	}
 	
-	protected void setProcessMeanVec(RealVector aMeanVector) {
+	// apache
+	// protected void setProcessMeanVec(RealVector aMeanVector) {
+    // colt
+	protected void setProcessMeanVec(DoubleMatrix1D aMeanVector) {
 		meanVec = aMeanVector;
 	};
 	
-	protected void setProcessOneTraitDataVec(RealVector aOneTraitDataVector) {
+	// apache
+	// protected void setProcessOneTraitDataVec(RealVector aOneTraitDataVector) {
+	// colt 
+	protected void setProcessOneTraitDataVec(DoubleMatrix1D aOneTraitDataVector) {
 		oneTraitDataVec = aOneTraitDataVector;
 	}
 	
@@ -135,10 +175,10 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	@Override
 	public void store() {	
 		for (int i=0; i<nSpp; ++i) {
-			storedMeanVec.setEntry(i, meanVec.getEntry(i));
+			storedMeanVec.set(i, meanVec.get(i));
 			
 			for (int j=0; j<nSpp; ++j) {
-				storedInvVCVMat.setEntry(i, j, invVCVMat.getEntry(i, j));
+				storedInvVCVMat.set(i, j, invVCVMat.get(i, j));
 			}
 		}
 		
@@ -147,8 +187,8 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	@Override
 	public void restore() {
-		RealMatrix realMatTmp;
-		RealVector realVecTmp;
+		DoubleMatrix2D realMatTmp;
+		DoubleMatrix1D realVecTmp;
 		
 		realVecTmp = meanVec;
 		meanVec = storedMeanVec;
