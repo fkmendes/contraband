@@ -192,7 +192,8 @@ Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrai
 ## (5) Brownian motion with multiple rates (BMShift) multivariate normal likelihood 
 ## (5.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts
 
-We use the same priors as in 1.1, and do ultrametric and nonultrametric trees like before, but now the trees vary with every simulation and come from a Yule prior.
+We use the same priors as in 1.1, and do nonultrametric trees only using an FBD prior Yule prior.
 
 ```
+Rscript BMMVNShiftOneRateFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra.RData 100 BMMVNShiftOneRateFBD nonultra
 ```

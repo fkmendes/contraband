@@ -16,7 +16,7 @@ cal.validation.folder <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calib
 n.sim <- 100
 n.spp <- 50
 job.prefix <- "BMMVNShiftOneRateFBD"
-time.needed <- "02:00:00"
+time.needed <- "03:00:00"
 template.name <- "BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml"
 tree.type <- "nonultra"
 
@@ -63,6 +63,7 @@ mu <- rexp(1000, rate=100) # mu from exponential (mean = 1/100)
 psi <- rexp(1000, rate=150) # psi from exponential (mean = 1/150)
 trs <- vector("list", n.sim + 50)
 trs.heights <- vector("list", n.sim)
+fossil.entries <- vector("list", n.sim)
 
 success <- 1
 counter <- 1
@@ -72,11 +73,21 @@ while (success <= n.sim + 50) {
         if (counter==276) { set.seed(234) }
         tr = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
 
-        if (length(tr$tip.label) <= 200) {
+        if (length(tr$tip.label) <= 100) {
             cat(paste(c("Simulating tree", success, "with FBD.\n"), sep=" "))
             trs[[success]] = tr
             ## trs[[success]] = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
-            trs.heights[[success]] = max(node.depth.edgelength(trs[[success]]))
+            depths = node.depth.edgelength(trs[[success]])
+            tr.height = max(depths)
+            trs.heights[[success]] = tr.height
+            fossil.idxs = depths[1:length(trs[[success]]$tip.label)] < as.character(tr.height)
+            fossil.labels = trs[[success]]$tip.label[fossil.idxs]
+            fossil.depths.backw = tr.height - depths[1:length(trs[[success]]$tip.label)][fossil.idxs]
+            ## print(fossil.labels)
+            ## print(fossil.depths.backw)
+            print(paste0("tr=", write.tree(trs[[success]]), " , idx=", success))
+            fossil.entries[[success]] = paste(paste(fossil.labels, fossil.depths.backw, sep="="), collapse=",\n")
+            print(fossil.entries[[success]])
             success = success + 1
         }
 
@@ -111,6 +122,7 @@ for (i in 1:(n.sim+50)) {
 traits.4.template <- vector("list", n.sim) 
 
 ## actually simulating and populating strs for template
+set.seed(123)
 counter <- 1
 success <- 1
 successes <- rep(1, 100) # indexes of trees in trs that could have likelihoods computed
@@ -158,7 +170,7 @@ if (write.xmls) {
         template.lines = readLines(template.path)
 
         for (line in template.lines) {
-            line = gsub("\\[InitialOriginValue\\]", format((trs.heights[[successes[sim.idx]]]+1), nsmall=1), line)
+            line = gsub("\\[InitialOriginValue\\]", format((trs.heights[[successes[sim.idx]]]+0.01), nsmall=1), line)
             line = gsub("\\[FBDbirthRatePriorMeanHere\\]", format(1/80, nsmall=1), line)
             line = gsub("\\[FBDdeathRatePriorMeanHere\\]", format(1/100, nsmall=1), line)
             line = gsub("\\[FBDsamplingRatePriorMeanHere\\]", format(1/150, nsmall=1), line)
@@ -169,6 +181,7 @@ if (write.xmls) {
             line = gsub("\\[BMMeanPriorStdDevHere\\]", format(x0.sd, nsmall=1), line)
             line = gsub("\\[TreeHere\\]", write.tree(trs[[successes[sim.idx]]]), line)
             line = gsub("\\[SpNamesHere\\]", spnames.4.template[successes[sim.idx]], line)
+            line = gsub("\\[FossilSetHere\\]", fossil.entries[successes[sim.idx]], line)
             line = gsub("\\[TaxonSetHere\\]", taxon.strs.4.template[successes[sim.idx]], line)
             line = gsub("\\[TraitValuesHere\\]", traits.4.template[[sim.idx]], line)
             line = gsub("\\[FileNameHere\\]", paste0(res.path, file.name), line)

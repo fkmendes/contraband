@@ -18,9 +18,8 @@
       <!-- START prior -->
       <distribution id="prior" spec="util.CompoundDistribution">
 	<distribution id="FBD" spec="beast.evolution.speciation.SABirthDeathModel" conditionOnRhoSampling="true" birthRate="@FBDbirthRate" deathRate="@FBDdeathRate" samplingRate="@FBDsamplingRate" origin="@FBDorigin" tree="@TheTree"> 
-          <parameter id="FBDremovalProb" lower="0.0" name="removalProbability" upper="1.0">0.0</parameter>                                                                                              <parameter id="FBDrho" estimate="false" lower="0.0" name="rho" upper="1.0">1.0</parameter>                                                                                 
+          <parameter id="FBDremovalProb" lower="0.0" name="removalProbability" upper="1.0">0.0</parameter>                                                                                      <parameter id="FBDrho" estimate="false" lower="0.0" name="rho" upper="1.0">1.0</parameter>                                                                                 
         </distribution>                                                                                                                                                                       
-
         <distribution id="FBDbirthRatePrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
 	  <distr id="FBDbirthRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="[FBDbirthRatePriorMeanHere]"/>
         </distribution>
@@ -50,7 +49,10 @@
 	<distribution id="BMMVNShift" spec="contraband.BMMVNShiftLikelihoodOneTrait">
 	  <!-- <tree idref="TheTree"/> -->
 	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="[TreeHere]" offset="0" singlechild="false">
-
+	    <trait id="FossilSet" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
+	      [FossilSetHere]
+	      <taxa idref="TaxonSet"/>
+	    </trait>
 	    <taxonset id="TaxonSet" spec="TaxonSet">
 	      [TaxonSetHere]
 	    </taxonset>
