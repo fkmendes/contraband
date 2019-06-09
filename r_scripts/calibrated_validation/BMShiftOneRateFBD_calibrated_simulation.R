@@ -1,37 +1,37 @@
-library(TreeSim)
+## library(TreeSim)
 library(mvMORPH)
 library(FossilSim)
 library(phytools)
 library(stringr)
 source("calibrated_validation_utils.R")
 
-## args = commandArgs(trailingOnly=TRUE)
+args = commandArgs(trailingOnly=TRUE)
 
 ### SCRIPT FLAGS AND PATH VARIABLES ###
 
-simulate <- TRUE
-write.xmls <- TRUE
-write.shellscripts <- TRUE
-cal.validation.folder <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/"
-n.sim <- 100
-n.spp <- 50
-job.prefix <- "BMMVNShiftOneRateFBD"
-time.needed <- "03:00:00"
-template.name <- "BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml"
-tree.type <- "nonultra"
+## simulate <- TRUE
+## write.xmls <- TRUE
+## write.shellscripts <- TRUE
+## cal.validation.folder <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/"
+## n.sim <- 100
+## n.spp <- 50
+## job.prefix <- "BMMVNShiftOneRateFBD"
+## time.needed <- "03:00:00"
+## template.name <- "BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml"
+## tree.type <- "nonultra"
 
-## simulate <- args[1]
-## write.xmls <- args[2]
-## write.shellscripts <- args[3]
-## cal.validation.folder <- args[4]
-## n.sim <- as.numeric(args[5])
-## n.spp <- as.numeric(args[6])
-## job.prefix <- args[7] # e.g., "BMMVNShiftOneRate" or "BMPruneShiftOneRate"
-## time.needed <- args[8] # e.g., "00:15:00"
-## template.name <- args[9]
-## tree.type <- args[10]
+simulate <- args[1]
+write.xmls <- args[2]
+write.shellscripts <- args[3]
+cal.validation.folder <- args[4]
+n.sim <- as.numeric(args[5])
+n.spp <- as.numeric(args[6])
+job.prefix <- args[7] # e.g., "BMMVNShiftOneRate" or "BMPruneShiftOneRate"
+time.needed <- args[8] # e.g., "00:15:00"
+template.name <- args[9]
+tree.type <- args[10]
 xmlfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
-## xml.file.prefix <- args[11]
+xml.file.prefix <- args[11]
 xml.file.prefix <- paste0("BMMVNShiftLikelihoodOneRateFBDOneTrait_", tree.type, "_")
 shell.scripts.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_shellscripts/")
 template.path <- paste0(cal.validation.folder, template.name)
@@ -39,8 +39,8 @@ rdata.path <- gsub("_template.xml", ".RData", template.path)
 
 # cluster stuff
 ## cluster.validation.folder <- cal.validation.folder
-cluster.validation.folder <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/"
-## cluster.validation.folder <- args[12]
+## cluster.validation.folder <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/"
+cluster.validation.folder <- args[12]
 xml.file.path <- paste0(cluster.validation.folder, "BMMVNShiftOneRateFBDOneTrait_", tree.type, "_xmls/")
 res.path <- paste0(cluster.validation.folder, "BMMVNShiftOneRateFBDOneTrait_", tree.type, "_results/")
 jar.path <- paste0(cluster.validation.folder, "contraband.jar")
@@ -85,9 +85,8 @@ while (success <= n.sim + 50) {
             fossil.depths.backw = tr.height - depths[1:length(trs[[success]]$tip.label)][fossil.idxs]
             ## print(fossil.labels)
             ## print(fossil.depths.backw)
-            print(paste0("tr=", write.tree(trs[[success]]), " , idx=", success))
             fossil.entries[[success]] = paste(paste(fossil.labels, fossil.depths.backw, sep="="), collapse=",\n")
-            print(fossil.entries[[success]])
+            ## print(fossil.entries[[success]])
             success = success + 1
         }
 
@@ -96,7 +95,7 @@ while (success <= n.sim + 50) {
         }
     }
     else {
-        print("Failed simulating FBD tree.")
+        print("lambda < mu.")
     }
     counter = counter + 1
 }
