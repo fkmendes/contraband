@@ -19,7 +19,7 @@ Also, make sure the file calibrated_validation_utils.R is inside the calibrated_
 
 ## Fixed tree calibrated validation
 ## (1) Brownian motion (BM) multivariate normal likelihood
-### (1.1) Simulating one trait under Brownian motion (BM), writing .xmls from template and .sh scripts.
+### (1.1) Simulating one trait under Brownian motion (BMMVN class), writing .xmls from template and .sh scripts.
 
 We use an exponential prior for the evolutionary rate (sigma^2), with rate 5. We use a normal prior for the mean of the process (=root value) with mean=0.0 and stdev=2.0.
 
@@ -48,7 +48,7 @@ Rscript BM_calibrated_postMCMC_plots.R ./ BMMVNLikelihoodOneTrait_fixedtree.RDat
 Rscript BM_calibrated_postMCMC_plots.R ./ BMMVNLikelihoodOneTrait_fixedtree_nonultra.RData 100 BMMVN nonultra
 ```
 
-## (2) Brownian motion with multiple rates (BMShift) multivariate normal likelihood 
+## (2) Brownian motion with potentially multiple rates (BMMVNShift class) multivariate normal likelihood 
 ### (2.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts
 
 We use the same priors as in 1.1, and do ultrametric and nonultrametric trees like before.
@@ -189,13 +189,13 @@ Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrai
 ---
 
 ## Sampling tree validation
-## (5) Brownian motion with multiple rates (BMShift) multivariate normal likelihood 
+## (5) Brownian motion with multiple rates (BMMVNShift class) multivariate normal likelihood 
 ## (5.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts
 
 We use the same priors as in 1.1, and do nonultrametric trees only using an FBD prior. The prior on FBD parameters are exponentials with rates 80, 100 and 150 (for lambda, mu and psi, respectively).
 
 ```
-Rscript BMShiftOneRateFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftOneRateFBD '03:00:00' BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml nonultra "BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+Rscript BMShiftOneRateFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftOneRateFBD '03:30:00' BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml nonultra "BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
 ```
 
 ## (5.2) Plotting the mean posterior of the two BM parameters (rate and mean/ancestral value) against true values
@@ -203,3 +203,11 @@ Rscript BMShiftOneRateFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVN
 ```
 Rscript BMShiftOneRateFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra.RData 100 BMMVNShiftOneRateFBD 2 sigmasq,mu rateValues,BMMean "expression(sigma^2),expression(y[0])" "1/5,0.0" sigmasq.mle,mu.mle
 ```
+
+### (5.3) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts
+
+The same simulations as in 5.1, but with two rates. We pick a random internal node and all its descendants to have the second rate.
+
+```
+Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBD '06:00:00' BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml nonultra "BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
+``` 

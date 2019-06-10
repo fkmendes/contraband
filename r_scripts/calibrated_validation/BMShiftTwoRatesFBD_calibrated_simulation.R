@@ -15,9 +15,9 @@ args = commandArgs(trailingOnly=TRUE)
 ## cal.validation.folder <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/"
 ## n.sim <- 100
 ## n.spp <- 50
-## job.prefix <- "BMMVNShiftOneRateFBD"
-## time.needed <- "03:00:00"
-## template.name <- "BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml"
+## job.prefix <- "BMMVNShiftTwoRatesFBD"
+## time.needed <- "04:00:00"
+## template.name <- "BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml"
 ## tree.type <- "nonultra"
 
 simulate <- args[1]
@@ -26,13 +26,13 @@ write.shellscripts <- args[3]
 cal.validation.folder <- args[4]
 n.sim <- as.numeric(args[5])
 n.spp <- as.numeric(args[6])
-job.prefix <- args[7] # e.g., "BMMVNShiftOneRate" or "BMPruneShiftOneRate"
-time.needed <- args[8] # e.g., "00:15:00"
+job.prefix <- args[7] # e.g., "BMMVNShiftTwoRatesFBD"
+time.needed <- args[8] # e.g., "04:00:00"
 template.name <- args[9]
 tree.type <- args[10]
 xmlfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
-xml.file.prefix <- args[11]
-xml.file.prefix <- paste0("BMMVNShiftLikelihoodOneRateFBDOneTrait_", tree.type, "_")
+## xml.file.prefix <- args[11]
+xml.file.prefix <- paste0("BMMVNShiftLikelihoodTwoRatesFBDOneTrait_", tree.type, "_")
 shell.scripts.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_shellscripts/")
 template.path <- paste0(cal.validation.folder, template.name)
 rdata.path <- gsub("_template.xml", ".RData", template.path)
@@ -41,12 +41,12 @@ rdata.path <- gsub("_template.xml", ".RData", template.path)
 ## cluster.validation.folder <- cal.validation.folder
 ## cluster.validation.folder <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/"
 cluster.validation.folder <- args[12]
-xml.file.path <- paste0(cluster.validation.folder, "BMMVNShiftOneRateFBDOneTrait_", tree.type, "_xmls/")
-res.path <- paste0(cluster.validation.folder, "BMMVNShiftOneRateFBDOneTrait_", tree.type, "_results/")
+xml.file.path <- paste0(cluster.validation.folder, "BMMVNShiftTwoRatesFBDOneTrait_", tree.type, "_xmls/")
+res.path <- paste0(cluster.validation.folder, "BMMVNShiftTwoRatesFBDOneTrait_", tree.type, "_results/")
 jar.path <- paste0(cluster.validation.folder, "contraband.jar")
 ## jar.path <- args[13]
 
-n.param <- 2
+n.param <- 3
 sigma.rate <- 5 # exponential prior
 x0.mean <- 0.0 # normal prior
 x0.sd <- 2.0
@@ -70,17 +70,24 @@ counter <- 1
 ## add 50 trees just in case some trees have SA at the root (in which case likelihoods cant be computed)
 while (success <= n.sim + 50) {
     if (lambda[counter] > mu[counter]) {
-        if (counter==276) { set.seed(234) }
+        ## print(counter)
+        if (counter==279) { set.seed(234) }
         tr = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
 
         if (length(tr$tip.label) <= 100) {
             cat(paste(c("Simulating tree", success, "with FBD.\n"), sep=" "))
-            trs[[success]] = tr
-            ## trs[[success]] = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
+            int.node.idxs = (max(which(node.depth.edgelength(tr)==0))+1):(tr$Nnode + length(tr$tip.label))
+            n.descendants = 1
+            while (n.descendants < (length(tr$tip.label)/10)) {
+                random.int.node = sample(int.node.idxs, 1)
+                n.descendants = length(getDescendants(tr, random.int.node))
+            }
+            ## print(paste0("random node=", random.int.node, " success=", success))
+            trs[[success]] = paintSubTree(tr, node=random.int.node, state=2, stem=FALSE)
             depths = node.depth.edgelength(trs[[success]])
-            tr.height = max(depths)
+            tr.height = as.numeric(as.character(max(depths)))
             trs.heights[[success]] = tr.height
-            fossil.idxs = depths[1:length(trs[[success]]$tip.label)] < as.numeric(as.character(tr.height))
+            fossil.idxs = depths[1:length(trs[[success]]$tip.label)] < tr.height
             fossil.labels = trs[[success]]$tip.label[fossil.idxs]
             fossil.depths.backw = tr.height - depths[1:length(trs[[success]]$tip.label)][fossil.idxs]
             ## print(fossil.labels)
@@ -91,11 +98,11 @@ while (success <= n.sim + 50) {
         }
 
         else {
-            print("Tree was too large")
+            cat("Tree was too large.\n")
         }
     }
     else {
-        print("lambda < mu.")
+        cat("lambda < mu.\n")
     }
     counter = counter + 1
 }
@@ -108,8 +115,16 @@ mean.trs.h <- mean(unlist(trs.heights))
 ## lines(density(rexp(10000, 1/mean.trs.h)), col="red")
 
 ## simulating quant trait data sets
-sigmas <- rexp(n.sim, rate=sigma.rate); # sigmas[1] # 0.02914
-x0s <- rnorm(n.sim, mean=x0.mean, sd=x0.sd); # x0s[1] # 2.219841
+set.seed(123)
+sigmas.tmp1 <- rexp(n.sim+100, rate=sigma.rate) # sigmas.tmp1[1] # 0.1686
+sigmas.tmp2 <- rexp(n.sim+100, rate=sigma.rate) # sigmas.tmp2[1] # 0.2275
+twice.larger.smaller.idx <- which(((sigmas.tmp1/sigmas.tmp2)>=2 | (sigmas.tmp2/sigmas.tmp1)>=2))[1:100]
+sigmas.tmp1 <- sigmas.tmp1[twice.larger.smaller.idx]
+sigmas.tmp2 <- sigmas.tmp2[twice.larger.smaller.idx]
+sigmas.1 <- c(sigmas.tmp1[sigmas.tmp1 < sigmas.tmp2], sigmas.tmp2[!sigmas.tmp1 < sigmas.tmp2])
+sigmas.2 <- c(sigmas.tmp2[sigmas.tmp1 < sigmas.tmp2], sigmas.tmp1[!sigmas.tmp1 < sigmas.tmp2])
+
+x0s <- rnorm(n.sim, mean=x0.mean, sd=x0.sd); # x0s[1] # -0.4015
 datasets <- vector("list", n.sim) # storing sims
 mles <- data.frame(matrix(NA,100,n.param))
 
@@ -132,10 +147,11 @@ if (simulate) {
             counter = counter + 1
             next
         }
-        datasets[[success]] = fastBM(trs[[counter]], sig2=sigmas[success], a=x0s[success])
+        sigmas = list(black=sigmas.1[success], red=sigmas.2[success])
+        datasets[[success]] = mvSIM(trs[[counter]], nsim=1, model="BMM", param=list(sigma=sigmas, theta=x0s[success]))
         cat(paste0("Calling mvBM for sim ",success,", tree=",counter,"\n"))
-        mle.res = mvBM(trs[[counter]], datasets[[success]], model="BM1")
-        mles[success,] = c(mle.res$sigma, mle.res$theta)
+        mle.res = mvBM(trs[[counter]], datasets[[success]], model="BMM")
+        mles[success,] = c(mle.res$sigma[[1]], mle.res$sigma[[2]], mle.res$theta)
         traits.4.template[[success]] = paste(datasets[[success]], collapse=" ")
         successes[success] = counter
         success = success + 1
@@ -143,8 +159,8 @@ if (simulate) {
     }
 
     ## saving true values and MLEs to .RData
-    true.param.df = cbind(data.frame(sigmas, x0s), mles)
-    names(true.param.df) = c("sigmasq", "mu", "sigmasq.mle", "mu.mle")
+    true.param.df = cbind(data.frame(sigmas.1, sigmas.2, x0s), mles)
+    names(true.param.df) = c("sigma1",  "sigma2", "mu", "sigma1.mle", "sigma2.mle", "mu.mle")
     trees.2.save = trs[successes]
     save(trees.2.save, true.param.df, file=rdata.path)
 } else {
@@ -153,7 +169,8 @@ if (simulate) {
 
 ## MLE correlation plot (just for sanity check)
 ## plot(mu.mle~mu, data=true.param.df, xlab=expression(mu), ylab=expression(paste(mu[MLE])), pch=20)
-## plot(sigmasq.mle~sigmasq, data=true.param.df, xlab=expression(sigma^2), ylab=expression(paste(sigma^2[MLE])), pch=20)
+## plot(sigma1.mle~sigma1, data=true.param.df, xlab=expression(sigma[1]^2), ylab=expression(paste(sigma^2[MLE])), pch=20)
+## plot(sigma2.mle~sigma2, data=true.param.df, xlab=expression(sigma[2]^2), ylab=expression(paste(sigma^2[MLE])), pch=20)
 
 ## writing xmls
 if (write.xmls) {
