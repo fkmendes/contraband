@@ -23,7 +23,7 @@
 	</distribution>
 		
 	<distribution id="rateAssignmentsPrior" spec="beast.math.distributions.Prior" x="@rateAssignments">
-	  <distr id="Exp.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
+	  <distr id="Unif.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
 	</distribution>
 
         <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@BMMean">
