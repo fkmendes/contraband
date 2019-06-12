@@ -51,3 +51,17 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
     ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max))
     return(pl)
 }
+
+flip.trace.var <- function(a.df, col1, col2) {
+    a.df.res = a.df
+    for (i in 1:nrow(a.df)) {
+        v1 = a.df[i,col1]
+        v2 = a.df[i,col2]
+        if (v1 > v2) {
+            cat("flipped.")
+            a.df.res[i,col1] = v2
+            a.df.res[i,col2] = v1
+        }
+    }
+    return(a.df.res)
+}

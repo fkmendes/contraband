@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution.speciation" required="BEAST v2.5.0" version="2.5">
  
-  <run id="mcmc" spec="MCMC" chainLength="80000000">
+  <run id="mcmc" spec="MCMC" chainLength="20000000">
     <state id="state" storeEvery="15000">
       <tree idref="TheTree" name="stateNode"/>
       <parameter id="FBDbirthRate" name="stateNode">0.1</parameter>
@@ -69,7 +69,7 @@
 	  <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" nColors="2" coalCorrection="false">
 	    <tree idref="TheTree"/>
 	    
-	    <colorValues id="rateValues" spec="parameter.RealParameter">0.06715078 0.08760846</colorValues>
+	    <colorValues id="rateValues" spec="parameter.RealParameter">0.01 0.02</colorValues>
 	    
 	    <colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">[RateAssignmentsHere]</colorAssignments>
 	  </rateManager>
@@ -96,7 +96,7 @@
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
     <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
 	
-    <logger id="tracelog" fileName="[FileNameHere].log" logEvery="80000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="[FileNameHere].log" logEvery="20000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
@@ -104,14 +104,14 @@
       <log idref="BMMean"/>
     </logger>
 
-    <logger id="screenlog" logEvery="80000">
+    <logger id="screenlog" logEvery="20000">
       <log idref="posterior"/>
       <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="80000" mode="tree">
+    <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="20000" mode="tree">
       <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>

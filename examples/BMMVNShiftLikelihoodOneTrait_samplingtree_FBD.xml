@@ -59,9 +59,9 @@
 	  <distr id="Exp.rateValues" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
 	</distribution>
 		
-	<!-- <distribution id="rateAssignmentsPrior" spec="beast.math.distributions.Prior" x="@rateAssignments"> -->
-	<!--   <distr id="Exp.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/> -->
-	<!-- </distribution> -->
+	<distribution id="rateAssignmentsPrior" spec="beast.math.distributions.Prior" x="@rateAssignments">
+	  <distr id="Exp.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
+	</distribution>
 
         <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@BMMean">
 	      <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
@@ -73,28 +73,34 @@
 	<distribution id="BMMVNShift" spec="contraband.BMMVNShiftLikelihoodOneTrait">
 	  <!-- <tree idref="TheTree"/> -->
 	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,f2:0.10):1.0,(sp2:1.0,f1:0.8):1.0)" offset="0" singlechild="false">
-
-	      <taxonset id="MyTaxa" spec="TaxonSet">
-		<taxon id="f1" spec="Taxon"/>
-		<taxon id="f2" spec="Taxon"/>
-		<taxon id="sp1" spec="Taxon"/>
-		<taxon id="sp2" spec="Taxon"/>
-	      </taxonset>
+		<trait id="FossilSet" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
+			sp1=0.0,
+			sp2=0.0,
+			f2=0.1,
+			f1=0.8
+			<taxa idref="MyTaxa"/>
+		</trait>
+		<taxonset id="MyTaxa" spec="TaxonSet">
+			<taxon id="f1" spec="Taxon"/>
+			<taxon id="f2" spec="Taxon"/>
+			<taxon id="sp1" spec="Taxon"/>
+			<taxon id="sp2" spec="Taxon"/>
+		</taxonset>
 	  </tree>
 
 	  <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" nTraits="1" spNames="sp1,sp2,f1,f2">
-	    <traitValues id="fixedTraitValues" spec="parameter.RealParameter">-5.05744071356103 -1.11052196957346 -0.575427737395457 -0.202953693279079</traitValues>
+	    <traitValues id="fixedTraitValues" spec="parameter.RealParameter">0.3975946 0.2423501 -0.6398611 0.3134564</traitValues>
 	  </oneTraitData>
 
-	  <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" nColors="1" coalCorrection="false">
+	  <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" nColors="2" coalCorrection="false">
 	    <tree idref="TheTree"/>
 	    
-	    <colorValues id="rateValues" spec="parameter.RealParameter">0.06715078</colorValues>
+	    <colorValues id="rateValues" spec="parameter.RealParameter">0.1 0.5</colorValues>
 	    
-	    <colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="0">0 0 0 0 0 0 0</colorAssignments>
+	    <colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0 0 0</colorAssignments>
 	  </rateManager>
 	    
-	  <mean id="BMMean" dimension="1" spec="parameter.RealParameter">-0.4990207</mean>
+	  <mean id="BMMean" dimension="1" spec="parameter.RealParameter">0.0</mean>
 	</distribution> <!-- END BMVN -->
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
@@ -112,7 +118,7 @@
     <operator id="FBDSATreeRootScaler" spec="SAScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@TheTree" weight="1.0"/>
     <operator id="FBDSATreeScaler" spec="SAScaleOperator" scaleFactor="0.95" tree="@TheTree" weight="3.0"/>
 	
-    <!-- <operator id="RateAssignmentWalker" spec="IntRandomWalkOperator" parameter="@rateAssignments" windowSize="1" weight="10.0"/> -->
+    <operator id="RateAssignmentWalker" spec="IntRandomWalkOperator" parameter="@rateAssignments" windowSize="1" weight="10.0"/>
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
     <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
 	

@@ -28,6 +28,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	private boolean dirty;
 	private boolean matrixWasSingularCantInvertBarf;
+	private boolean successiveRatesIncreasing;
 	
 //	private Tree tree;
 	private int nSpp;
@@ -89,6 +90,9 @@ public class MVNShiftProcessOneTrait extends Distribution {
 		if (matrixWasSingularCantInvertBarf) {
 			logP = Double.NEGATIVE_INFINITY;
 		}
+		else if (!successiveRatesIncreasing) {
+			logP = Double.NEGATIVE_INFINITY;
+		}
 		else {
 			// colt
 			logP = MVNUtils.getMVNLogLkColt(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
@@ -112,6 +116,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	}
 	
 	protected double getLogP() {
+		// System.out.println("logP=" + logP);
 		return logP;
 	}
 	
@@ -160,6 +165,9 @@ public class MVNShiftProcessOneTrait extends Distribution {
 		matrixWasSingularCantInvertBarf = matrixIsSingular;
 	}
 	
+	protected void setRatesAreGo(boolean ratesAreGo) {
+		successiveRatesIncreasing = ratesAreGo;
+	}
 	// caching
 	@Override
 	public boolean requiresRecalculation() {

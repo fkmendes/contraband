@@ -103,6 +103,7 @@ public class ColorManager extends CalculationNode {
 	
 	private void checkDimensions() {
 		Tree tree = treeInput.get();
+		
 		int nBranches = tree.getNodeCount();
 		if (nBranches != colorAssignments.length) {
 			throw new RuntimeException("The number of color (rates, or optima) assignments does not match the number of branches in the tree. Every branch must be assigned a color.");
@@ -117,8 +118,29 @@ public class ColorManager extends CalculationNode {
 		}
 	}
 	
+	public boolean getColorValueLargerThanLast() {		
+		colorValues = colorValuesInput.get().getValues();
+		
+		double lastColorValue = Double.NEGATIVE_INFINITY;
+		for (double colorValue: colorValues) {
+			if (colorValue < lastColorValue) {
+				return false;
+			} else {
+				lastColorValue = colorValue;
+			}
+		}
+		
+		return true;
+	}
+	
 	private void populateColorValueMat() {	
 		Tree tree = treeInput.get();
+		
+//		System.out.println(tree.toString());
+//		for (Node n: tree.getNodesAsArray()) {
+//			System.out.println(n.getID() + " idx=" + n.getNr() + " length=" + n.getLength() + " colorIdx=" + colorAssignments[n.getNr()]);
+//		}
+		
 		fillNodeColorValuesOneTrait(tree.getRoot(), spNamesInASCIIBeticalOrTaxonSetOrder);
 		
 		// tree gets taller due to ILS, so it adds some variance to all cells in VCV matrix

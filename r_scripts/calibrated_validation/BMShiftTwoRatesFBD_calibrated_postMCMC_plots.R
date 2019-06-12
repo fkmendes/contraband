@@ -51,7 +51,8 @@ names(log.df) <- as.vector(outer(c("lower", "upper", "mean"), param.names, paste
 cols <- seq(length.out=n.param, by=3) # 3=lower, upper, mean
 cols.2.compare <- c(3, 6)
 for (i in 1:(n.sim-1)) {
-    this.sim.df <- read.delim(res.files[i], comment.char='#')
+    this.sim.df = read.delim(res.files[i], comment.char='#')
+    this.sim.df = flip.trace.var(this.sim.df, 5, 6)
 
     k = 1
     for (j in cols) {
@@ -60,24 +61,24 @@ for (i in 1:(n.sim-1)) {
         k = k+1
     }
 
-    tmp = 0
-    lower1 = log.df[i,(cols.2.compare[1]-2)]
-    upper1 = log.df[i,(cols.2.compare[1]-1)]
-    mean1 = log.df[i,cols.2.compare[1]]
-    lower2 = log.df[i,(cols.2.compare[2]-2)]
-    upper2 = log.df[i,(cols.2.compare[2]-1)]
-    mean2 = log.df[i,cols.2.compare[2]]
-    print(paste0("val1=", mean1, " val2=", mean2))
-    if (!is.na(mean1) & !is.na(mean2) & mean1 > mean2) {
-        print(paste0("mean1=", mean1, " mean2=", mean2))
-        log.df[i,(cols.2.compare[1]-2)] = lower2
-        log.df[i,(cols.2.compare[1]-1)] = upper2
-        log.df[i,cols.2.compare[1]] = mean2
-        log.df[i,(cols.2.compare[2]-2)] = lower1
-        log.df[i,(cols.2.compare[2]-1)] = upper1
-        log.df[i,cols.2.compare[2]] = mean1
-        cat("inverting rateValues")
-    }
+    ## tmp = 0
+    ## lower1 = log.df[i,(cols.2.compare[1]-2)]
+    ## upper1 = log.df[i,(cols.2.compare[1]-1)]
+    ## mean1 = log.df[i,cols.2.compare[1]]
+    ## lower2 = log.df[i,(cols.2.compare[2]-2)]
+    ## upper2 = log.df[i,(cols.2.compare[2]-1)]
+    ## mean2 = log.df[i,cols.2.compare[2]]
+    ## print(paste0("val1=", mean1, " val2=", mean2))
+    ## if (!is.na(mean1) & !is.na(mean2) & mean1 > mean2) {
+    ##     print(paste0("mean1=", mean1, " mean2=", mean2))
+    ##     log.df[i,(cols.2.compare[1]-2)] = lower2
+    ##     log.df[i,(cols.2.compare[1]-1)] = upper2
+    ##     log.df[i,cols.2.compare[1]] = mean2
+    ##     log.df[i,(cols.2.compare[2]-2)] = lower1
+    ##     log.df[i,(cols.2.compare[2]-1)] = upper1
+    ##     log.df[i,cols.2.compare[2]] = mean1
+    ##     cat("inverting rateValues")
+    ## }
 }
 
 # putting true values and estimated ones together
@@ -106,7 +107,7 @@ for (i in 1:n.param) {
     min.y = min(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
     max.y = max(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
     all.plots[[i]] = get.plot(param.names[i], paste0("mean.",param.names[i]),
-                              min.x, max.x, min.x, max.x, x.lab, prior.means[i],
+                              min.x, max.x, min.y, max.y, x.lab, prior.means[i],
                               full.df)
     names(all.plots)[i] = paste0("plot", i)
 }

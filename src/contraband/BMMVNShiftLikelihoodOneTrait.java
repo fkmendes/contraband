@@ -123,38 +123,49 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	
 	@Override
 	protected void populateVCVMatrix() {
-		double[][] bmVCVMatDouble = rateManager.getSpColorValuesMatOneTrait();
+		boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
+		setRatesAreGo(true);
+		
+		if (ratesAreGo) {
+			double[][] bmVCVMatDouble = rateManager.getSpColorValuesMatOneTrait();
 
-		for (int i=0; i<nSpp; ++i) {
-			for (int j=0; j<nSpp; ++j) {
-				// colt
-				bmVCVMat.set(i, j, bmVCVMatDouble[i][j]);
+			for (int i=0; i<nSpp; ++i) {
+				for (int j=0; j<nSpp; ++j) {
+					// colt
+					bmVCVMat.set(i, j, bmVCVMatDouble[i][j]);
 				
-				// apache
-				// bmVCVMat.setEntry(i, j, bmVCVMatDouble[i][j]);
+					// apache
+					// bmVCVMat.setEntry(i, j, bmVCVMatDouble[i][j]);
+				}
 			}
 		}
 	}
 	
 	@Override
 	protected void populateInvVCVMatrix() {
-		// colt
-		try {
-			bmInvVCVMat = alg.inverse(bmVCVMat);
-			setMatrixIsSingular(false);
-		} catch ( IllegalArgumentException e) {
-			setMatrixIsSingular(true);
+		boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
+
+		if (ratesAreGo) {		
+			// colt
+			try {
+				bmInvVCVMat = alg.inverse(bmVCVMat);
+				setMatrixIsSingular(false);
+			} catch (IllegalArgumentException e) {
+				setMatrixIsSingular(true);
+			}
+			//      apache
+			//		bmVCVMatLUD = new LUDecomposition(bmVCVMat);
+			//		
+			//		try {
+			//			bmInvVCVMat = bmVCVMatLUD.getSolver().getInverse();
+			//			setMatrixIsSingular(false);
+			//		} catch (org.apache.commons.math3.linear.SingularMatrixException e) {
+			//			setMatrixIsSingular(true);
+			//		}
 		}
-		
-		// apache
-//		bmVCVMatLUD = new LUDecomposition(bmVCVMat);
-//		
-//		try {
-//			bmInvVCVMat = bmVCVMatLUD.getSolver().getInverse();
-//			setMatrixIsSingular(false);
-//		} catch (org.apache.commons.math3.linear.SingularMatrixException e) {
-//			setMatrixIsSingular(true);
-//		}
+		else {
+			setRatesAreGo(false);
+		}
 	}
 	
 	@Override
