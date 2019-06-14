@@ -52,15 +52,18 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
     return(pl)
 }
 
-flip.trace.var <- function(a.df, col1, col2) {
+flip.trace.var <- function(a.df, cols) {
     a.df.res = a.df
     for (i in 1:nrow(a.df)) {
-        v1 = a.df[i,col1]
-        v2 = a.df[i,col2]
-        if (v1 > v2) {
-            cat("flipped.")
-            a.df.res[i,col1] = v2
-            a.df.res[i,col2] = v1
+        for (col in cols) {
+            tmp = a.df[i,col]
+            ## print(tmp)
+            ## print(a.df[i,col])
+            if (tmp > a.df[i,col+1]) {
+                ## cat("flipped.")
+                a.df.res[i,col] = a.df[i,(col+1)]
+                a.df.res[i,(col+1)] = tmp
+            }
         }
     }
     return(a.df.res)

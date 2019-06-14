@@ -1,8 +1,7 @@
 library(ggplot2)
 library(gtools)
-library(sjPlot)
+library(ggpubr)
 library(ape)
-library(gridExtra)
 source("calibrated_validation_utils.R")
 
 args = commandArgs(trailingOnly=TRUE)
@@ -33,7 +32,7 @@ beast.param.names <- c("rateValues1", "rateValues2", "BMMean")
 ## }
 ## mle.param.names <- strsplit(args[11], ",")[[1]]
 
-param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(mu))
+param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(y[0]))
 mle.param.names <- c("sigma1.mle", "sigma2.mle", "mu.mle")
 prior.means <- c(0.2, 0.2, 0.0)
 
@@ -50,9 +49,8 @@ log.df <- data.frame(matrix(ncol=n.cols, nrow=n.sim))
 names(log.df) <- as.vector(outer(c("lower", "upper", "mean"), param.names, paste, sep="."))
 cols <- seq(length.out=n.param, by=3) # 3=lower, upper, mean
 cols.2.compare <- c(3, 6)
-for (i in 1:(n.sim-1)) {
+for (i in 1:n.sim) {
     this.sim.df = read.delim(res.files[i], comment.char='#')
-    ## this.sim.df = flip.trace.var(this.sim.df, 5, 6)
 
     k = 1
     for (j in cols) {
@@ -83,6 +81,8 @@ for (i in 1:(n.sim-1)) {
 
 # putting true values and estimated ones together
 full.df <- cbind(true.param.df, log.df)
+cols.2.flip <- c(1, 4) # 1 and 2 should flip, 4 and 5 should flip
+full.df <- flip.trace.var(full.df, cols.2.flip)
 
 # coverage
 table((full.df$mu >= full.df$lower.mu) & (full.df$mu <= full.df$upper.mu))
@@ -104,8 +104,10 @@ for (i in 1:n.param) {
     x.lab = param.labs[i]
     min.x = min(full.df[,param.names[i]])
     max.x = max(full.df[,param.names[i]])
-    min.y = min(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
-    max.y = max(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
+    min.y = min(full.df[,paste0("mean.",param.names[i])])
+    print(paste0("mean.",param.names[i]))
+    max.y = max(full.df[,paste0("mean.",param.names[i])])
+    print(max.y)
     all.plots[[i]] = get.plot(param.names[i], paste0("mean.",param.names[i]),
                               min.x, max.x, min.x, max.x, x.lab, prior.means[i],
                               full.df)
@@ -113,6 +115,6 @@ for (i in 1:n.param) {
 }
 list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
 
-png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.png"), height=15, width=10, unit="cm", res=300)
-plot_grid(mget(paste0("plot", 1:2)))
+png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.png"), height=24, width=10, unit="cm", res=300)
+ggarrange(plotlist=all.plots, ncol=1, nrow=3)
 dev.off()
