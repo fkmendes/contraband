@@ -52,7 +52,7 @@ cols <- seq(length.out=n.param, by=3) # 3=lower, upper, mean
 cols.2.compare <- c(3, 6)
 for (i in 1:(n.sim-1)) {
     this.sim.df = read.delim(res.files[i], comment.char='#')
-    this.sim.df = flip.trace.var(this.sim.df, 5, 6)
+    ## this.sim.df = flip.trace.var(this.sim.df, 5, 6)
 
     k = 1
     for (j in cols) {
@@ -107,7 +107,7 @@ for (i in 1:n.param) {
     min.y = min(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
     max.y = max(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
     all.plots[[i]] = get.plot(param.names[i], paste0("mean.",param.names[i]),
-                              min.x, max.x, min.y, max.y, x.lab, prior.means[i],
+                              min.x, max.x, min.x, max.x, x.lab, prior.means[i],
                               full.df)
     names(all.plots)[i] = paste0("plot", i)
 }

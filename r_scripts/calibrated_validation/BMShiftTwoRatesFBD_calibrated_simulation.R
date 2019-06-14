@@ -116,13 +116,13 @@ mean.trs.h <- mean(unlist(trs.heights))
 
 ## simulating quant trait data sets
 set.seed(123)
-sigmas.tmp1 <- rexp(n.sim+100, rate=sigma.rate) # sigmas.tmp1[1] # 0.1686
-sigmas.tmp2 <- rexp(n.sim+100, rate=sigma.rate) # sigmas.tmp2[1] # 0.2275
-twice.larger.smaller.idx <- which(((sigmas.tmp1/sigmas.tmp2)>=2 | (sigmas.tmp2/sigmas.tmp1)>=2))[1:100]
-sigmas.tmp1 <- sigmas.tmp1[twice.larger.smaller.idx]
-sigmas.tmp2 <- sigmas.tmp2[twice.larger.smaller.idx]
-sigmas.1 <- c(sigmas.tmp1[sigmas.tmp1 < sigmas.tmp2], sigmas.tmp2[!sigmas.tmp1 < sigmas.tmp2])
-sigmas.2 <- c(sigmas.tmp2[sigmas.tmp1 < sigmas.tmp2], sigmas.tmp1[!sigmas.tmp1 < sigmas.tmp2])
+sigmas.1 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp1[1] # 0.1686
+sigmas.2 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp2[1] # 0.2275
+## twice.larger.smaller.idx <- which(((sigmas.tmp1/sigmas.tmp2)>=2 | (sigmas.tmp2/sigmas.tmp1)>=2))[1:100]
+## sigmas.tmp1 <- sigmas.tmp1[twice.larger.smaller.idx]
+## sigmas.tmp2 <- sigmas.tmp2[twice.larger.smaller.idx]
+## sigmas.1 <- c(sigmas.tmp1[sigmas.tmp1 < sigmas.tmp2], sigmas.tmp2[!sigmas.tmp1 < sigmas.tmp2])
+## sigmas.2 <- c(sigmas.tmp2[sigmas.tmp1 < sigmas.tmp2], sigmas.tmp1[!sigmas.tmp1 < sigmas.tmp2])
 
 x0s <- rnorm(n.sim, mean=x0.mean, sd=x0.sd); # x0s[1] # -0.4015
 datasets <- vector("list", n.sim) # storing sims

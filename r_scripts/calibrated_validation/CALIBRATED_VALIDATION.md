@@ -209,5 +209,5 @@ Rscript BMShiftOneRateFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOne
 The same simulations as in 5.1, but with two rates. We pick a random internal node and all its descendants to have the second rate.
 
 ```
-Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBD '48:00:00' BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml nonultra BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
+Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBD '10:00:00' BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml nonultra BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
 ``` 
