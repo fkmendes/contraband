@@ -17,7 +17,7 @@ public class BMMVNShiftLikelihoodOneTraitTest4 {
 	final static double EPSILON = 1e-4;
 	
 	/*
-	 * Large tree, with fossils, one-rate BM (on shift-BM class)
+	 * Small tree with no fossils, two rates BM (on shift-BM class)
 	 */
 	@Before
 	public void setUp() throws Exception {
@@ -26,30 +26,30 @@ public class BMMVNShiftLikelihoodOneTraitTest4 {
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 		
 		// VCV Mat
-		RealParameter colorValues = new RealParameter(new Double[] { 0.1160941, 0.01914707 });
-		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 1, 1, 0, 0, 0 });
+		RealParameter colorValues = new RealParameter(new Double[] { 0.05057867, 3.360241 });
+		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 0, 0, 1, 1, 1 });
 		ColorManager colors = new ColorManager();
 		colors.initByName("tree", myTree, "nTraits", 1, "nColors", 2, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 				
 		// initializing data	
-		RealParameter oneTraitValues = new RealParameter(new Double[] { -0.9291812, -0.7312343, -1.6712572 });
+		RealParameter oneTraitValues = new RealParameter(new Double[] { -2.53718502574816, -2.85562629168723, 1.79661600241838 });
 		String spNames = "sp1,sp2,sp3";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
 		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
 		
 		// mean vector
-		Double[] meanVectorInput = new Double[] { -1.125558 };
+		Double[] meanVectorInput = new Double[] { -1.191236 };
 		RealParameter mean = new RealParameter(meanVectorInput);
 		
 		// likelihood
 		BMMVNShiftLikelihoodOneTrait BMLk = new BMMVNShiftLikelihoodOneTrait();
 		BMLk.initByName("tree", myTree, "rateManager", colors, "mean", mean, "oneTraitData", oneTraitData);
 		lnLk = BMLk.calculateLogP();
-		System.out.println(lnLk); // -0.8583677116744495
+		System.out.println(lnLk); // -4.673609  
 	}
 
 	@Test
 	public void testLnLk() {
-		Assert.assertEquals(-0.8583676, lnLk, EPSILON); 
+		Assert.assertEquals(-4.673609  , lnLk, EPSILON); 
 	}
 }

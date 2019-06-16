@@ -195,7 +195,7 @@ Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrai
 We use the same priors as in 1.1, and do nonultrametric trees only using an FBD prior. The prior on FBD parameters are exponentials with rates 80, 100 and 150 (for lambda, mu and psi, respectively).
 
 ```
-Rscript BMShiftOneRateFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftOneRateFBD '03:30:00' BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml nonultra "BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
+Rscript BMShiftOneRateFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftOneRateFBD '03:30:00' BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml nonultra BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
 ```
 
 ## (5.2) Plotting the mean posterior of the two BM parameters (rate and mean/ancestral value) against true values
@@ -211,3 +211,9 @@ The same simulations as in 5.1, but with two rates. We pick a random internal no
 ```
 Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBD '10:00:00' BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml nonultra BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
 ``` 
+
+## (5.4) Plotting the mean posterior of the three BM parameters (rate and mean/ancestral value) against true values
+
+```
+Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra.RData 100 BMMVNShiftOneRateFBD 3 sigma1,sigma2,mu rateValues1,rateValues2,BMMean "expression(sigma[1]^2),expression(sigma[2]^2,expression(y[0])" "1/5,1/5,0.0" sigma1.mle,sigma2.mle,mu.mle
+```

@@ -17,7 +17,7 @@ public class BMMVNShiftLikelihoodOneTraitTest5 {
 	final static double EPSILON = 1e-4;
 	
 	/*
-	 * Large tree, with fossils, one-rate BM (on shift-BM class)
+	 * Large tree, with fossils, three rates BM
 	 */
 	@Before
 	public void setUp() throws Exception {
@@ -26,7 +26,7 @@ public class BMMVNShiftLikelihoodOneTraitTest5 {
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 		
 		// VCV Mat
-		RealParameter colorValues = new RealParameter(new Double[] { 0.006827732, 0.08324919, 0.02754859 });
+		RealParameter colorValues = new RealParameter(new Double[] { 0.006850499, 0.08316839, 0.2736696 });
 		
 		// first 5 rows are tips
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] {
@@ -46,24 +46,24 @@ public class BMMVNShiftLikelihoodOneTraitTest5 {
 		colors.initByName("tree", myTree, "nTraits", 1, "nColors", 3, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 				
 		// initializing data	
-		RealParameter oneTraitValues = new RealParameter(new Double[] { -1.35423895939605, 0.33827577951559, -1.93240920860189, 3.02404085267233, 0.0465746524280288, -1.73976183419385, 0.484378951244012, 0.65517622307796, 0.75261492151074, -0.24100390220557, 0.947382859472838, 1.98034063758403, 0.933626899580614, -2.03408692528889, -1.09922156803622, -0.0680504653426602, -0.0740826111309686, 1.43932043471363, 1.77514951830302, 0.919758489504323, 1.09574482869026, 0.782136300731067, 0.0962378659531526, -5.33631896191408, 1.4905959236315, -0.0744248296375519, -0.177479586475342, -4.26961572362966, -2.86137408169925, -0.974994208280936, 1.41858116564816, -0.187048179444733, 0.282668872536788, -0.244597214204735, -1.19517123879371, -1.10037443643529, -0.261483237873604, -0.207560694831451, 0.348278374786552, -0.168277479250151, -0.406155392866917, -0.3594972601634, -0.0234868583801822, 1.00637046502527, -0.000469931947963076, -0.329563226090097, 0.043226745691999, 0.739816593725853, -0.238002140615943, -0.214951085346446 });
+		RealParameter oneTraitValues = new RealParameter(new Double[] { -4.24865266388791, 1.12694466883781, -6.02979129548445, 9.62359673885322, 0.17990827089315, -5.46776437171474, 0.486983190714245, 2.08585804088066, 0.753683973121965, -0.242019913226091, 0.946577159488485, 6.22141276151274, 2.91113662785022, -2.0374126462967, -1.10293312619706, -0.179708562978063, -0.198701248227853, 4.58084601841762, 5.64277550994041, 0.919256884182315, 1.09524719371436, 0.782136300731067, 0.0962378659531526, -5.33631896191408, 1.4905959236315, -0.0744248296375519, -0.177479586475342, -4.26961572362966, -2.86137408169925, -0.974994208280936, 1.41858116564816, -0.187048179444733, 0.282668872536788, -0.244597214204735, -1.19517123879371, -1.10037443643529, -0.261483237873604, -0.207560694831451, 0.348278374786552, -0.168277479250151, -0.406155392866917, -0.3594972601634, -0.0234868583801822, 1.00637046502527, -0.000469931947963076, -0.329563226090097, 0.043226745691999, 0.739816593725853, -0.238002140615943, -0.214951085346446 });
 		String spNames = "t37,t42,t24,t19,t12,t5,t18,t25,t10,t47,t9,t20,t14,t43,t38,t13,t41,t50,t8,t35,t32,t34,t6,t48,t39,t17,t15,t40,t46,t29,t22,t16,t28,t31,t45,t23,t7,t4,t36,t11,t49,t3,t27,t26,t33,t21,t2,t44,t30,t1";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
 		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
 		
 		// mean vector
-		Double[] meanVectorInput = new Double[] { -0.03060231 };
+		Double[] meanVectorInput = new Double[] { -0.05011816 };
 		RealParameter mean = new RealParameter(meanVectorInput);
 		
 		// likelihood
 		BMMVNShiftLikelihoodOneTrait BMLk = new BMMVNShiftLikelihoodOneTrait();
 		BMLk.initByName("tree", myTree, "rateManager", colors, "mean", mean, "oneTraitData", oneTraitData);
 		lnLk = BMLk.calculateLogP();
-		System.out.println(lnLk); // -0.8583677116744495
+		System.out.println(lnLk); // -0.6431717
 	}
 
 	@Test
 	public void testLnLk() {
-		Assert.assertEquals(-65.26436, lnLk, EPSILON); 
+		Assert.assertEquals(-80.18669, lnLk, EPSILON); 
 	}
 }

@@ -17,7 +17,7 @@ public class BMMVNShiftLikelihoodOneTraitTest3 {
 	final static double EPSILON = 1e-4;
 	
 	/*
-	 * Large tree, with fossils, one-rate BM (on shift-BM class)
+	 * Large tree, half being fossils, one-rate BM (on shift-BM class)
 	 */
 	@Before
 	public void setUp() throws Exception {

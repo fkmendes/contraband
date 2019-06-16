@@ -26,6 +26,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	private boolean dirty;
 	private boolean matrixWasSingularCantInvertBarf;
+	private boolean successiveThetasIncreasing;
 	
 	// for phylo T matrix
 	private Tree tree;
@@ -101,6 +102,9 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		if (matrixWasSingularCantInvertBarf) {
 			logP = Double.NEGATIVE_INFINITY;
 		}
+		else if (!successiveThetasIncreasing) {
+			logP = Double.NEGATIVE_INFINITY;
+		}
 		else {
 			logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVector, invVCVMat, detVCVMat);
 		}
@@ -156,6 +160,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	protected void setMatrixIsSingular(boolean matrixIsSingular) {
 		matrixWasSingularCantInvertBarf = matrixIsSingular;
+	}
+	
+	protected void setThetasAreGo(boolean thetasAreGo) {
+		successiveThetasIncreasing = thetasAreGo;
 	}
 	
 	// caching

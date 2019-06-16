@@ -83,10 +83,7 @@ while (success <= n.sim + 50) {
             fossil.idxs = depths[1:length(trs[[success]]$tip.label)] < as.numeric(as.character(tr.height))
             fossil.labels = trs[[success]]$tip.label[fossil.idxs]
             fossil.depths.backw = tr.height - depths[1:length(trs[[success]]$tip.label)][fossil.idxs]
-            ## print(fossil.labels)
-            ## print(fossil.depths.backw)
             fossil.entries[[success]] = paste(paste(fossil.labels, fossil.depths.backw, sep="="), collapse=",\n")
-            ## print(fossil.entries[[success]])
             success = success + 1
         }
 

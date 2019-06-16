@@ -11,6 +11,11 @@ import contraband.ColorManager;
 import contraband.OUMVNLikelihoodOneTrait;
 import contraband.OneValueContTraits;
 
+/*
+ * Small tree, three optima, with and without stationary distr for root value; having root value as a separate
+ * parameter or setting it to be optimum with index 0 (the index 0, and the optima have to be in increasing order,
+ * this can have effects when comparing mvMORPH's results and ours, so make sure they match)
+ */
 public class OUMVNLikelihoodOneTraitTest {
 
 	double lnLk1, lnLk2, lnLk3, lnLk4;
@@ -19,76 +24,84 @@ public class OUMVNLikelihoodOneTraitTest {
 	@Before
 	public void setUp() throws Exception {
 		// tree
-		String treeStr = "(((sp1[&Regime=1]:1.0,sp2[&Regime=1]:1.0)[&Regime=1]:1.0,sp3[&Regime=2]:2.0)[&Regime=0]:1.0,sp4[&Regime=0]:3.0)[&Regime=0];";
+		// String treeStr = "(((sp1[&Regime=1]:1.0,sp2[&Regime=1]:1.0)[&Regime=1]:1.0,sp3[&Regime=2]:2.0)[&Regime=0]:1.0,sp4[&Regime=0]:3.0)[&Regime=0];";
+		String treeStr = "(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):1.0,sp4:3.0);";
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 		
 		// initializing data		
-		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
+		// RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
+		RealParameter oneTraitValues = new RealParameter(new Double[] { 0.237649365136715, 0.295018750722361, 0.881225138279161, 0.206222932069516 });
 		String spNames = "sp1,sp2,sp3,sp4";
 		OneValueContTraits oneTraitData = new OneValueContTraits();
 		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues, "spNames", spNames);
 		
-		RealParameter colorValues1 = new RealParameter(new Double[] { -4.047373e-16, 4.3, 5.9 }); // thetas
-		RealParameter colorValues2 = new RealParameter(new Double[] { 8.128044e-27, 4.3, 5.9 });
-		RealParameter colorValues3 = new RealParameter(new Double[] { -1.903330e-16, 4.3, 5.9 });
-		RealParameter colorValues4 = new RealParameter(new Double[] { 2.297268e-37, 4.3, 5.9 }); 
-		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 1, 1, 2, 0, 1, 0, 0 });
+		// thetas
+		RealParameter colorValues1 = new RealParameter(new Double[] { 0.206222932117995, 0.26633408087427, 0.88122539543514 });
+		RealParameter colorValues2 = new RealParameter(new Double[] { 0.206222932069516, 0.266334080825641, 0.881225395384966 });
+		RealParameter colorValues3 = new RealParameter(new Double[] { 0.206222932069532, 0.266334058036916, 0.881225139484772 });
+		RealParameter colorValues4 = new RealParameter(new Double[] { 0.206222932069532, 0.266334058036916, 0.881225139484772 }); 
+		IntegerParameter colorAssignments1 = new IntegerParameter(new Integer[] { 1, 1, 2, 0, 1, 0, 0 });
 							
 		ColorManager optima1 = new ColorManager();
-		optima1.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues1, "colorAssignments", colorAssignments, "coalCorrection", false);
+		optima1.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues1, "colorAssignments", colorAssignments1, "coalCorrection", false);
 		ColorManager optima2 = new ColorManager();
-		optima2.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues2, "colorAssignments", colorAssignments, "coalCorrection", false);
+		optima2.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues2, "colorAssignments", colorAssignments1, "coalCorrection", false);
 		ColorManager optima3 = new ColorManager();
-		optima3.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues3, "colorAssignments", colorAssignments, "coalCorrection", false);
+		optima3.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues3, "colorAssignments", colorAssignments1, "coalCorrection", false);
 		ColorManager optima4 = new ColorManager();
-		optima4.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues4, "colorAssignments", colorAssignments, "coalCorrection", false);
+		optima4.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues4, "colorAssignments", colorAssignments1, "coalCorrection", false);
 		
 		// sigmasq
-		Double[] sigmasqInput = new Double[] { 1.248328 };
-		RealParameter sigmasq = new RealParameter(sigmasqInput);
-		sigmasqInput = new Double[] { 1.734117 };
+		// Double[] sigmasqInput = new Double[] { 1.248328 };
+		Double[] sigmasqInput = new Double[] { 0.006082604 };
+		RealParameter sigmasq1 = new RealParameter(sigmasqInput);
+		sigmasqInput = new Double[] { 0.008287661 };
 		RealParameter sigmasq2 = new RealParameter(sigmasqInput);
 		
 		// alpha
-		Double[] alphaInput = new Double[] { 31.20814 };
+		// Double[] alphaInput = new Double[] { 31.20814 };
+		Double[] alphaInput = new Double[] { 7.390366 };
 		RealParameter alpha1 = new RealParameter(alphaInput);
-		alphaInput = new Double[] { 43.35287 };
+		alphaInput = new Double[] { 10.07163 };
 		RealParameter alpha2 = new RealParameter(alphaInput);	
 		
 		// root value
-		Double[] rootValueInput = new Double[] { 2.228585e-40 };
-		RealParameter rootValue = new RealParameter(rootValueInput);
+		// Double[] rootValueInput = new Double[] { 2.228585e-40 };
+		Double[] rootValueInput = new Double[] { 3.182460e-10 };
+		RealParameter rootValue1 = new RealParameter(rootValueInput);
+		rootValueInput = new Double[] { 1.021864e-13 };
+		RealParameter rootValue2 = new RealParameter(rootValueInput);
 		
 		// likelihood 1 (condition on rootValue, theta_0 as parameter)
 		OUMVNLikelihoodOneTrait OULk1 = new OUMVNLikelihoodOneTrait();
-		OULk1.initByName("tree", myTree, "sigmasq", sigmasq, "alpha", alpha1, "optimumManager", optima1,
-				"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue, "eqDist", false);
+		OULk1.initByName("tree", myTree, "sigmasq", sigmasq1, "alpha", alpha1, "optimumManager", optima1,
+				"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue1, "eqDist", false);
 		lnLk1 = OULk1.calculateLogP();
 		
 		// likelihood 2 (condition on rootValue, theta_0 = first theta)
 		OUMVNLikelihoodOneTrait OULk2 = new OUMVNLikelihoodOneTrait();
-				OULk2.initByName("tree", myTree, "sigmasq", sigmasq, "alpha", alpha1, "optimumManager", optima2,
-						"useRootMetaData", false, "oneTraitData", oneTraitData, "rootValue", rootValue, "eqDist", false);
+				OULk2.initByName("tree", myTree, "sigmasq", sigmasq1, "alpha", alpha1, "optimumManager", optima2,
+						"useRootMetaData", false, "oneTraitData", oneTraitData, "rootValue", rootValue1, "eqDist", false);
 		lnLk2 = OULk2.calculateLogP();
 		
 		// likelihood 3 (rootValue as r.v., theta_0 as parameter)
 		OUMVNLikelihoodOneTrait OULk3 = new OUMVNLikelihoodOneTrait();
 				OULk3.initByName("tree", myTree, "sigmasq", sigmasq2, "alpha", alpha2, "optimumManager", optima3,
-						"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue, "eqDist", true);
+						"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue2, "eqDist", true);
 		lnLk3 = OULk3.calculateLogP();
 		
 		// likelihood 4 (rootValue as r.v., theta_0 = first theta)
 		OUMVNLikelihoodOneTrait OULk4 = new OUMVNLikelihoodOneTrait();
 				OULk4.initByName("tree", myTree, "sigmasq", sigmasq2, "alpha", alpha2, "optimumManager", optima4,
-						"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue, "eqDist", true);
+						"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue2, "eqDist", true);
 		lnLk4 = OULk4.calculateLogP();
 	}
 
 	@Test
 	public void testLnLk() {
-		Assert.assertEquals(2.148292, lnLk1, EPSILON); 
-		Assert.assertEquals(2.148292, lnLk2, EPSILON);
-		Assert.assertEquals(2.148292, lnLk3, EPSILON);
-		Assert.assertEquals(2.148292, lnLk4, EPSILON); 
+		Assert.assertEquals(9.916106, lnLk1, EPSILON); 
+		Assert.assertEquals(9.916106, lnLk2, EPSILON);
+		Assert.assertEquals(9.916107, lnLk3, EPSILON);
+		Assert.assertEquals(9.916107, lnLk4, EPSILON); 
 	}
 }

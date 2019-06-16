@@ -8,33 +8,33 @@ args = commandArgs(trailingOnly=TRUE)
 
 ### SCRIPT FLAGS AND PATH VARIABLES ###
 
-## cal.validation.folder <- args[1]
-cal.validation.folder <- "./"
-## rdata.path <- args[2]
-rdata.path <- "BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData"
-## n.sim <- as.numeric(args[3])
-n.sim <- 100
-## job.prefix <- args[4]
-job.prefix <- "BMMVNShiftTwoRatesFBD"
-## n.param <- as.numeric(args[5])
-n.param <- 3
+cal.validation.folder <- args[1]
+## cal.validation.folder <- "./"
+rdata.path <- args[2]
+## rdata.path <- "BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData"
+n.sim <- as.numeric(args[3])
+## n.sim <- 100
+job.prefix <- args[4]
+## job.prefix <- "BMMVNShiftTwoRatesFBD"
+n.param <- as.numeric(args[5])
+## n.param <- 3
 
-## param.names <- strsplit(args[6], ",")[[1]]
-param.names <- c("sigma1", "sigma2", "mu")
-## beast.param.names <- strsplit(args[7], ",")[[1]]
-beast.param.names <- c("rateValues1", "rateValues2", "BMMean")
-## param.labs.preparse <- strsplit(args[8], ",")[[1]]
-## prior.means.preparse <- strsplit(args[9], ",")[[1]]
-## param.labs <- prior.means <- c()
-## for (i in 1:n.param) {
-##     param.labs[i] = eval(parse(text=param.labs.preparse[i]))
-##     prior.means[i] = eval(parse(text=prior.means.preparse[i]))
-## }
-## mle.param.names <- strsplit(args[11], ",")[[1]]
+param.names <- strsplit(args[6], ",")[[1]]
+## param.names <- c("sigma1", "sigma2", "mu")
+beast.param.names <- strsplit(args[7], ",")[[1]]
+## beast.param.names <- c("rateValues1", "rateValues2", "BMMean")
+param.labs.preparse <- strsplit(args[8], ",")[[1]]
+prior.means.preparse <- strsplit(args[9], ",")[[1]]
+param.labs <- prior.means <- c()
+for (i in 1:n.param) {
+    param.labs[i] = eval(parse(text=param.labs.preparse[i]))
+    prior.means[i] = eval(parse(text=prior.means.preparse[i]))
+}
+mle.param.names <- strsplit(args[11], ",")[[1]]
 
-param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(y[0]))
-mle.param.names <- c("sigma1.mle", "sigma2.mle", "mu.mle")
-prior.means <- c(0.2, 0.2, 0.0)
+## param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(y[0]))
+## mle.param.names <- c("sigma1.mle", "sigma2.mle", "mu.mle")
+## prior.means <- c(0.2, 0.2, 0.0)
 
 tree.type <- "nonultra"
 
@@ -58,25 +58,6 @@ for (i in 1:n.sim) {
         log.df[i,j:(j+2)] = get.95(this.sim.df[102:1001,beast.param.name])
         k = k+1
     }
-
-    ## tmp = 0
-    ## lower1 = log.df[i,(cols.2.compare[1]-2)]
-    ## upper1 = log.df[i,(cols.2.compare[1]-1)]
-    ## mean1 = log.df[i,cols.2.compare[1]]
-    ## lower2 = log.df[i,(cols.2.compare[2]-2)]
-    ## upper2 = log.df[i,(cols.2.compare[2]-1)]
-    ## mean2 = log.df[i,cols.2.compare[2]]
-    ## print(paste0("val1=", mean1, " val2=", mean2))
-    ## if (!is.na(mean1) & !is.na(mean2) & mean1 > mean2) {
-    ##     print(paste0("mean1=", mean1, " mean2=", mean2))
-    ##     log.df[i,(cols.2.compare[1]-2)] = lower2
-    ##     log.df[i,(cols.2.compare[1]-1)] = upper2
-    ##     log.df[i,cols.2.compare[1]] = mean2
-    ##     log.df[i,(cols.2.compare[2]-2)] = lower1
-    ##     log.df[i,(cols.2.compare[2]-1)] = upper1
-    ##     log.df[i,cols.2.compare[2]] = mean1
-    ##     cat("inverting rateValues")
-    ## }
 }
 
 # putting true values and estimated ones together
@@ -92,10 +73,13 @@ table((full.df$sigma2 >= full.df$lower.sigma2) & (full.df$sigma2 <= full.df$uppe
 ## nonultrametric
 ## mu
 ##   FALSE  TRUE
-##       6    94
-## sigma
+##       6    92
+## sigma1
 ##   FALSE  TRUE
-##      6    94
+##      6    92
+## sigma2
+##   FALSE  TRUE
+##      12    88
 
 ### PLOTS ###
 
@@ -105,9 +89,7 @@ for (i in 1:n.param) {
     min.x = min(full.df[,param.names[i]])
     max.x = max(full.df[,param.names[i]])
     min.y = min(full.df[,paste0("mean.",param.names[i])])
-    print(paste0("mean.",param.names[i]))
     max.y = max(full.df[,paste0("mean.",param.names[i])])
-    print(max.y)
     all.plots[[i]] = get.plot(param.names[i], paste0("mean.",param.names[i]),
                               min.x, max.x, min.x, max.x, x.lab, prior.means[i],
                               full.df)

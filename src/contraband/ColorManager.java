@@ -159,7 +159,7 @@ public class ColorManager extends CalculationNode {
 		int nodeIdx = aNode.getNr(); 
 		
 		if (aNode.isLeaf()) {		
-//			System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // uncomment to see index of all leaves 
+			// System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // uncomment to see index of all leaves 
 			spColorValuesMat[nodeIdx][nodeIdx] = nodeWeightedColorValues[nodeIdx]; // populating diagonal entries
 			spOrderInTMat[nodeIdx] = aNode.getID();
 			return;
@@ -227,7 +227,6 @@ public class ColorManager extends CalculationNode {
 	}
 	
 	public Double[] getColorValues() {
-		// readInputBeforeGetters();
 		colorValues = colorValuesInput.get().getValues();
 		
 		return colorValues;
@@ -252,6 +251,8 @@ public class ColorManager extends CalculationNode {
 	}
 	
 	public String[] getSpNamesInVCVMatOrder() {
+		populateColorValueMat();
+		
 		return spNamesInASCIIBeticalOrTaxonSetOrder;
 	}
 	
@@ -278,7 +279,6 @@ public class ColorManager extends CalculationNode {
 	public void restore() {
 		Integer[] vecTmpInt;
 		Double[] vecTmpDouble;
-//		double[][] doubleMatTmp;
 		
 		vecTmpDouble = colorValues;
 		colorValues = storedColorValues;
@@ -287,10 +287,6 @@ public class ColorManager extends CalculationNode {
 		vecTmpInt = colorAssignments;
 		colorAssignments = storedColorAssignments;
 		storedColorAssignments = vecTmpInt;
-		
-//		doubleMatTmp = spColorValuesMat;
-//		spColorValuesMat = storedSpColorValuesMat;
-//		storedSpColorValuesMat = doubleMatTmp;
 		
 		super.restore();
 	}

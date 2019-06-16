@@ -165,7 +165,7 @@ public class MVNUtils {
 	}
 	
 	public static double getMVNLogLkColt (int n, DoubleMatrix1D mean, DoubleMatrix1D data, DoubleMatrix2D invVcvMat, double detVcvMat) {
-
+		
 		DoubleMatrix1D datMinusMean = data.assign(mean, Functions.minus); // x - mu
 		
 		double loglikelihood = -0.5 * (Math.log(detVcvMat) + n * Math.log(2.0 * Math.PI));

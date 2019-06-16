@@ -16,19 +16,53 @@ tr <- paintSubTree(tr, node=3, state=3, stem=TRUE)
 plotSimmap(tr) # to see
 
 ## so we have a 4-taxon tree, with 3 optima
-
-dat <- data.frame(c(4.1,4.5,5.9,0.0))
+set.seed(123)
+dat <- mvSIM(tr, model="OUM", param=list(sigma=0.1, theta=c(0, 0.2, 0.4, 0.6), alpha=1, root=TRUE))
 row.names(dat) <- c("sp1","sp2","sp3","sp4")
 
+### lnLk1
 res <- mvOU(tr, dat, model="OUM", param=list(vcv="fixedRoot", root=TRUE))
-res$sigma # 1.248328
-res$alpha # 31.20814
-res$theta # theta_0  2.228585e-40 --> this is the root value! (first element in theta vector, despite not being an optimum!!!)
-          # 1       -4.047373e-16
-          # 2        4.3
-          # 3        5.9
+res$sigma # 0.006082604
+res$alpha # 7.390366
+res$theta # 3.182460e-10 --> this is the root value! (first element in theta vector, despite not being an optimum!!!)
+          # 1        2.062229e-01
+          # 2        2.663341e-01
+          # 3        8.812254e-01 note that they have to be in increasing order in Java
 
-res$LogLik # 2.148292
+res$LogLik # 9.916106
+
+### lnLk2
+res <- mvOU(tr, dat, model="OUM", param=list(vcv="fixedRoot", root=FALSE))
+res$sigma # 0.006082499
+res$alpha # 7.39037
+res$theta # root value is assumed to be = optimum1
+          # 1        0.2062229
+          # 2        0.2663341
+          # 3        0.8812254 note that they have to be in increasing order in Java
+
+res$LogLik # 15.52115
+
+### lnLk3
+res <- mvOU(tr, dat, model="OUM", param=list(vcv="randomRoot", root=TRUE))
+res$sigma # 0.008287661
+res$alpha # 10.07163
+res$theta # root value is assumed to be = optimum1
+          # 1        2.062229e-01
+          # 2        2.663341e-01
+          # 3        8.812251e-01 note that they have to be in increasing order in Java
+
+res$LogLik # 9.916107
+
+### lnLk4
+res <- mvOU(tr, dat, model="OUM", param=list(vcv="randomRoot", root=FALSE))
+res$sigma # 0.008287661
+res$alpha # 10.07163
+res$theta # root value is assumed to be = optimum1
+          # 1        2.062229e-01
+          # 2        2.663341e-01
+          # 3        8.812251e-01 note that they have to be in increasing order in Java
+
+res$LogLik # 9.916107
 
 ## (2) 'OUMVNLikelihoodOneTraitTest2'
 

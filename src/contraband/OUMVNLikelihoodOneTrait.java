@@ -42,8 +42,6 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	// mean vector
 	private ColorManager optimumManager;
 	private RealMatrix wMat;
-	private Double[] theta;
-	private Integer[] thetaAssignments;
 	
 	// VCV matrix
 	private RealVector thetaVector, ouMeanVector;
@@ -127,23 +125,37 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	protected void populateMeanVector() {
 		rootValue = rootValueInput.get().getValue();		
-		theta = optimumManager.getColorValues();
-		thetaAssignments = optimumManager.getColorAssignments();
+		Integer[] thetaAssignments = optimumManager.getColorAssignments();
+		Double[] thetas = optimumManager.getColorValues();
 		
-		int i = 0;
-		if (useRootMetaData) {
-			thetaVector.setEntry(0, rootValue);
-			i++;
+		boolean thetasAreGo = true;
+		double lastThetaValue = Double.NEGATIVE_INFINITY;
+		for (double thetaValue: thetas) {
+			if (thetaValue < lastThetaValue) {
+				thetasAreGo = false;
+			} else {
+				lastThetaValue = thetaValue;
+			}
 		}
-		for (Double aTheta: theta) {
-			thetaVector.setEntry(i, aTheta);
-			i++;
-		} 
+		
+		setThetasAreGo(thetasAreGo); // updating parent class
+		
+		if (thetasAreGo) {
+			int i = 0;
+			if (useRootMetaData) {
+				thetaVector.setEntry(0, rootValue);
+				i++;
+			}
+			for (Double aTheta: thetas) {
+				thetaVector.setEntry(i, aTheta);
+				i++;
+			} 
 
-		resetRealMatrix(wMat);
-		OUUtils.computeWMatOneTrait(thetaAssignments, getRootNode(), allLeafNodes, nSpp, nOptima, alpha, wMat, useRootMetaData);
+			resetRealMatrix(wMat);
+			OUUtils.computeWMatOneTrait(thetaAssignments, getRootNode(), allLeafNodes, nSpp, nOptima, alpha, wMat, useRootMetaData);
 
-		ouMeanVector = wMat.operate(thetaVector);
+			ouMeanVector = wMat.operate(thetaVector);
+		}
 	}
 	
 	@Override
