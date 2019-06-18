@@ -71,10 +71,10 @@ table((full.df$sigmasq >= full.df$lower.sigmasq) & (full.df$sigmasq <= full.df$u
 ## nonultrametric
 ## mu
 ##   FALSE  TRUE
-##       6    94
+##       3    97
 ## sigma
 ##   FALSE  TRUE
-##      6    94
+##      8    92
 
 ### PLOTS ###
 

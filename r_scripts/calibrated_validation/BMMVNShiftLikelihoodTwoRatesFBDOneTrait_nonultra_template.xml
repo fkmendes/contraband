@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution.speciation" required="BEAST v2.5.0" version="2.5">
  
-  <run id="mcmc" spec="MCMC" chainLength="20000000">
-    <state id="state" storeEvery="15000">
+  <run id="mcmc" spec="MCMC" chainLength="30000000">
+    <state id="state" storeEvery="30000">
       <tree idref="TheTree" name="stateNode"/>
       <parameter id="FBDbirthRate" name="stateNode">0.1</parameter>
       <parameter id="FBDdeathRate" name="stateNode">0.05</parameter>
@@ -19,7 +19,8 @@
       <distribution id="prior" spec="util.CompoundDistribution">
 	<distribution id="FBD" spec="beast.evolution.speciation.SABirthDeathModel" conditionOnRhoSampling="true" birthRate="@FBDbirthRate" deathRate="@FBDdeathRate" samplingRate="@FBDsamplingRate" origin="@FBDorigin" tree="@TheTree"> 
           <parameter id="FBDremovalProb" lower="0.0" name="removalProbability" upper="1.0">0.0</parameter>                                                                                      <parameter id="FBDrho" estimate="false" lower="0.0" name="rho" upper="1.0">1.0</parameter>                                                                                 
-        </distribution>                                                                                                                                                                       
+        </distribution>
+	
         <distribution id="FBDbirthRatePrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
 	  <distr id="FBDbirthRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="[FBDbirthRatePriorMeanHere]"/>
         </distribution>
@@ -31,7 +32,7 @@
 	  <distr id="FBDsamplingRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="[FBDsamplingRatePriorMeanHere]"/>
         </distribution>
 
-	<distribution id="FBDoriginPrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
+	<distribution id="FBDoriginPrior" spec="beast.math.distributions.Prior" x="@FBDorigin">
 	  <distr id="FBDoriginExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="[FBDoriginPriorMeanHere]"/>
         </distribution>
         
@@ -96,7 +97,7 @@
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
     <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
 	
-    <logger id="tracelog" fileName="[FileNameHere].log" logEvery="20000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="[FileNameHere].log" logEvery="30000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
@@ -104,14 +105,14 @@
       <log idref="BMMean"/>
     </logger>
 
-    <logger id="screenlog" logEvery="20000">
+    <logger id="screenlog" logEvery="30000">
       <log idref="posterior"/>
       <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="20000" mode="tree">
+    <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="30000" mode="tree">
       <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>

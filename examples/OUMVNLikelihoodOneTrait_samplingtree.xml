@@ -37,7 +37,7 @@
         </distribution>
 
 	<distribution id="ThetaAssignmentsPrior" spec="beast.math.distributions.Prior" x="@OUThetaAssignments">
-	  <distr id="Unif.thetaAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="3.0"/>
+	  <distr id="Unif.thetaAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
 	</distribution>
       </distribution>
       <!-- END prior -->
@@ -83,7 +83,7 @@
     <operator id="SigmaSqScaler" spec="ScaleOperator" parameter="@OUSigmaSq" scaleFactor="0.75" weight="3.0"/>
     <operator id="RootValueScaler" spec="RealRandomWalkOperator" parameter="@OURootValue" windowSize="10.0" weight="3.0"/>
     <operator id="AlphaSqScaler" spec="ScaleOperator" parameter="@OUAlpha" scaleFactor="0.75" weight="3.0"/>
-    <operator id="ThetaAssignmentWalker" spec="IntRandomWalkOperator" parameter="@OUThetaAssignments" windowSize="1" weight="10.0"/>
+    <!-- <operator id="ThetaAssignmentWalker" spec="IntRandomWalkOperator" parameter="@OUThetaAssignments" windowSize="1" weight="10.0"/> -->
     <operator id="ThetaValueScaler" spec="RealRandomWalkOperator" parameter="@OUTheta" windowSize="10.0" weight="3.0"/>
 	
     <logger id="tracelog" fileName="OUMVN_samplingtree.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">

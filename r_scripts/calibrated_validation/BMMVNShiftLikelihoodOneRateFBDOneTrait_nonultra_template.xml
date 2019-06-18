@@ -31,7 +31,7 @@
 	  <distr id="FBDsamplingRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="[FBDsamplingRatePriorMeanHere]"/>
         </distribution>
 
-	<distribution id="FBDoriginPrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
+	<distribution id="FBDoriginPrior" spec="beast.math.distributions.Prior" x="@FBDorigin">
 	  <distr id="FBDoriginExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="[FBDoriginPriorMeanHere]"/>
         </distribution>
         

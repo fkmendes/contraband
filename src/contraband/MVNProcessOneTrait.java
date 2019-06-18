@@ -1,9 +1,9 @@
 package contraband;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -37,7 +37,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
 	private String[] spNamesInPhyloTMatOrder;
-	private double[][] phyloTMatDouble;
+	private double[][] phyloTMatDouble; // at some point I should get rid of this and use PhyloTMat straight away
 	private RealMatrix phyloTMat;
 		
 	// mean vector
@@ -51,9 +51,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	// data
 	private RealVector oneTraitDataVector;
 
-	// stored stuff
+	// stored stuff	
 	private RealVector storedMeanVec; // need for integration with JIVE (unsure why...?)
 	private RealMatrix storedPhyloTMat; // needed for tree operators
+	private double[][] storedPhyloTMatDouble; // needed for FBD operators
 	private RealMatrix storedInvVCVMat; // (below) needed for morphology parameter operators
 	private double storedDetVCVMat;
 	
@@ -66,15 +67,16 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		rightLeaves = new ArrayList<Node>();
 		spNamesInPhyloTMatOrder = new String[nSpp];
 		phyloTMatDouble = new double[nSpp][nSpp];
-		phyloTMat = new Array2DRowRealMatrix(phyloTMatDouble);
+		phyloTMat = MatrixUtils.createRealMatrix(phyloTMatDouble);
 
-		// stored stuff		
+		// stored stuff
 		storedMeanVec = new ArrayRealVector(nSpp);
 		storedPhyloTMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
+		storedPhyloTMatDouble = new double[nSpp][nSpp];
 	}
 	
-	protected void populatePhyloTMatrix() {
+	protected void populatePhyloTMatrix() {		
 		MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatDouble, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder); // updates last 3 args
 		
 		for (int i=0; i<nSpp; ++i) {
@@ -121,6 +123,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	protected Node getRootNode() {
 		return tree.getRoot();
+	}
+	
+	protected List<Node> getAllLeafNodes() {
+		return treeInput.get().getRoot().getAllLeafNodes();
 	}
 	
 	protected String[] getSpNamesInPhyloTMatOrder() {
@@ -183,6 +189,9 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		for (int i=0; i<nSpp; ++i) {	
 			storedMeanVec.setEntry(i, meanVec.getEntry(i));
 			
+			// necessary for FBD prior
+			System.arraycopy(phyloTMatDouble[i], 0, storedPhyloTMatDouble[i], 0, phyloTMatDouble[i].length);
+			
 			for (int j=0; j<nSpp; ++j) {
 				storedPhyloTMat.setEntry(i, j, phyloTMat.getEntry(i, j));
 				storedInvVCVMat.setEntry(i, j, invVCVMat.getEntry(i, j));
@@ -196,6 +205,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	public void restore() {
 		RealMatrix realMatTmp;
 		RealVector realVecTmp;
+		double[][] double2DArrTmp;
 		
 		realVecTmp = meanVec;
 		meanVec = storedMeanVec;
@@ -208,6 +218,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		realMatTmp = invVCVMat;
 		invVCVMat = storedInvVCVMat;
 		storedInvVCVMat = realMatTmp;
+				
+		double2DArrTmp = phyloTMatDouble;
+		phyloTMatDouble = storedPhyloTMatDouble;
+		storedPhyloTMatDouble = double2DArrTmp;
 		
 		detVCVMat = storedDetVCVMat;
 	}

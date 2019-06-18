@@ -122,7 +122,7 @@
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
     <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
 	
-    <logger id="tracelog" fileName="BMMVNShift_samplingtree.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="BMMVNShift_samplingtree_FBD.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
@@ -138,7 +138,7 @@
         <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:firsthalf" fileName="BMMVNShift_samplingtree.trees" logEvery="5000" mode="tree">
+    <logger id="treelog.t:firsthalf" fileName="BMMVNShift_samplingtree_FBD.trees" logEvery="5000" mode="tree">
         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>

@@ -233,6 +233,8 @@ public class ColorManager extends CalculationNode {
 	}
 	
 	public Integer[] getColorAssignments() {
+		readInputBeforeGetters();
+		
 		return colorAssignments;
 	}
 	

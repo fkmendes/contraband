@@ -10,6 +10,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import java.lang.Double;
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
+import cern.colt.Arrays;
 
 /*
  * Notes about Hansen model (=OU on a tree with multiple regimes)
@@ -138,35 +139,35 @@ public class OUUtils {
 	 * (one of the optima). We should use this with ultrametric trees.
 	 */
 	 public static void computeWMatOneTrait(Integer[] allNodeRegimes, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
-			int rootIndexOffset;
-			int rootRegimeIdx;	// Specified in colorAssignment (last position)
+		 int rootIndexOffset;
+		 int rootRegimeIdx;	// Specified in colorAssignment (last position)
 			
-			if (useRootMetaData) {
-				rootIndexOffset = 1; // column dimension of WMat must be r + 1
-				rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue(); // getting meta data!
-			}
-			else {
-				rootIndexOffset = 0; // column dimension of WMat must be r	
-				rootRegimeIdx = 0; // not getting metadata, and using the color that has index 0
-			}
-			
-			for (Node sp: allLeafNodes) {	
-				int spNr = sp.getNr();	// Will specify the row index 
-					
-				// Adding the root chunk in the column of the eldest regime
-				double currentSpHeight = sp.getHeight();
-				double cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight));	
-				wMat.addToEntry(spNr, rootRegimeIdx, cellValue);
+		 if (useRootMetaData) {
+			 rootIndexOffset = 1; // column dimension of WMat must be r + 1
+			 rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue(); // getting meta data!
+		 }
+		 else {
+			 rootIndexOffset = 0; // column dimension of WMat must be r	
+			 rootRegimeIdx = 0; // not getting metadata, and using the color that has index 0
+		 }
+		 
+		 for (Node sp: allLeafNodes) {	
+			 int spNr = sp.getNr();	// Will specify the row index 
+
+			 // Adding the root chunk in the column of the eldest regime
+			 double currentSpHeight = sp.getHeight();
+			 double cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight));	
+			 wMat.addToEntry(spNr, rootRegimeIdx, cellValue);
 				
-				while(!sp.isRoot()) {
-					int regimeIdx = allNodeRegimes[sp.getNr()].intValue() + rootIndexOffset;	// Will specify the column index
-					cellValue = Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight));
-					wMat.addToEntry(spNr, regimeIdx, cellValue);
-						
-					sp = sp.getParent();
-				}
-			}		
-		}
+			 while(!sp.isRoot()) {
+				 int regimeIdx = allNodeRegimes[sp.getNr()].intValue() + rootIndexOffset; // Will specify the column index
+				 cellValue = Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight));
+				 wMat.addToEntry(spNr, regimeIdx, cellValue);
+
+				 sp = sp.getParent();
+			 }
+		 }	
+	 }
 	 
 	 /*
 	  * DEPRECATED: uses tree meta data, cannot operate on it

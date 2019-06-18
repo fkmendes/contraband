@@ -1,6 +1,7 @@
 package contraband;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
@@ -155,7 +156,7 @@ public class MVNUtils {
 	}
 	
 	public static double getMVNLogLk (int n, RealVector mean, RealVector data, RealMatrix invVcvMat, double detVcvTMat) {
-		
+				
 		double loglikelihood = -0.5 * (Math.log(detVcvTMat) + n * Math.log(2.0 * Math.PI));
 		
 		loglikelihood += invVcvMat.preMultiply(data.subtract(mean)).mapMultiply(-0.5)
