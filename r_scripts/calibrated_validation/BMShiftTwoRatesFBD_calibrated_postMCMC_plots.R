@@ -73,13 +73,13 @@ table((full.df$sigma2 >= full.df$lower.sigma2) & (full.df$sigma2 <= full.df$uppe
 ## nonultrametric
 ## mu
 ##   FALSE  TRUE
-##       6    92
+##       6    91
 ## sigma1
 ##   FALSE  TRUE
 ##      6    92
 ## sigma2
 ##   FALSE  TRUE
-##      12    88
+##      12    90
 
 ### PLOTS ###
 

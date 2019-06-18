@@ -215,5 +215,5 @@ Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMV
 ## (5.4) Plotting the mean posterior of the three BM parameters (rate and mean/ancestral value) against true values
 
 ```
-Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra.RData 100 BMMVNShiftOneRateFBD 3 sigma1,sigma2,mu rateValues1,rateValues2,BMMean "expression(sigma[1]^2),expression(sigma[2]^2,expression(y[0])" "1/5,1/5,0.0" sigma1.mle,sigma2.mle,mu.mle
+Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBD 3 sigma1,sigma2,mu rateValues1,rateValues2,BMMean "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1/5,1/5,0.0" sigma1.mle,sigma2.mle,mu.mle
 ```
