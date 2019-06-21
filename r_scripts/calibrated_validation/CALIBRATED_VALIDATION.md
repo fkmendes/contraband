@@ -217,3 +217,13 @@ Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMV
 ```
 Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBD 3 sigma1,sigma2,mu rateValues1,rateValues2,BMMean "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1/5,1/5,0.0" sigma1.mle,sigma2.mle,mu.mle
 ```
+
+## (6) OU with multiple optima (OUMVN class) multivariate normal likelihood
+## (6.1) Simulating one trait, with two optima on tree, writing .xmls from template and .sh scripts
+
+The FBD priors are the same as in 5.1, and we use a normal distribution with mean 1.0 and standard deviation 2.0 for the thetas, and with mean 0.0 and standard deviation 2.0 for the root value.
+The prior for alpha is a lognormal with both mean and standard deviation 1.0.
+
+```
+Rscript OUTwoOptFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNTwoOptFBD '10:00:00' OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_template.xml nonultra OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
+```

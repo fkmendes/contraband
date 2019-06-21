@@ -101,11 +101,11 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	protected void populateOneTraitDataVector() {};
 	
 	protected void populateLogP() {
-		if (matrixWasSingularCantInvertBarf) {
+		if (matrixWasSingularCantInvertBarf || !successiveThetasIncreasing || detVCVMat==0.0) {
 			logP = Double.NEGATIVE_INFINITY;
-		}
-		else if (!successiveThetasIncreasing) {
-			logP = Double.NEGATIVE_INFINITY;
+//		}
+//		else if (!successiveThetasIncreasing) {
+//			logP = Double.NEGATIVE_INFINITY;
 		}
 		else {
 			logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVector, invVCVMat, detVCVMat);
