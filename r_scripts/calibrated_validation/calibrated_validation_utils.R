@@ -2,6 +2,7 @@ library(HDInterval)
 
 get.95 <- function(a.vector) {
     res = hdi(a.vector, cresMass=.95)
+
     return(c(res[[1]], res[[2]], mean(a.vector)))
 }
 
@@ -29,8 +30,12 @@ write.shell.script <- function(shell.scripts.path, sim.idx, time.needed, job.pre
         )
 }
 
-get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.mean, data.df) {
+get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.mean, data.df, plot.hdi) {
+    lower = data.df[,paste0("lower.",x.name)]
+    upper = data.df[,paste0("upper.",x.name)]
     x = data.df[,x.name]; y = data.df[,y.name]
+    reg.df = data.frame(cbind(x,y,lower,upper,plot.hdi))
+    
     pl = ggplot() + geom_point(mapping=aes(x=x, y=y), shape=20) +
     coord_cartesian(ylim=c(y.min, y.max)) +
     xlab(x.lab) + ylab("Posterior mean") +
@@ -48,7 +53,8 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
         axis.text.y = element_text(color="black", size=10),
         axis.title.x = element_text(size=12),
         axis.title.y = element_text(size=12)
-    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max))
+    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max)) + geom_linerange(data=reg.df[plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="red", alpha=.4, size=2) +
+        scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max)) + geom_linerange(data=reg.df[!plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="lightgray", alpha=.4)
     return(pl)
 }
 

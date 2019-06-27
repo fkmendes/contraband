@@ -225,5 +225,5 @@ The FBD priors are the same as in 5.1, and we use a normal distribution with mea
 The prior for alpha is a lognormal with both mean and standard deviation 1.0.
 
 ```
-Rscript OUTwoOptFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNTwoOptFBD '10:00:00' OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_template.xml nonultra OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
+Rscript OUTwoOptFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNTwoOptFBD '48:00:00' OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_template.xml nonultra OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
 ```

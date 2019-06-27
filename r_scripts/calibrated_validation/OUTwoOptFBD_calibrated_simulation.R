@@ -46,20 +46,29 @@ jar.path <- paste0(cluster.validation.folder, "contraband.jar")
 jar.path <- args[13] 
 
 n.param <- 5
-## hpd <- c(0.001, 0.5)
-## optim(c(0, 1), function(x) sum(qlnorm(p=c(0.025,0.975),meanlog=x[1], sdlog=x[2])-hpd)^2)
-## hpd <- c(0.5, 2.0)
-## optim(c(0, 1), function(x) sum(qlnorm(p=c(0.025,0.975),meanlog=x[1], sdlog=x[2])-hpd)^2)
+
+## bm-like
+## hpd <- c(0.5, 5.0) # sigsq
+## optim(c(0, 1), function(x) sum(qlnorm(p=c(0.025,0.975),meanlog=x[1], sdlog=x[2])-hpd)^2) # 0.0932 0.8005
+## hpd <- c(0.001, 0.01) # alpha
+## optim(c(0, 1), function(x) sum(qlnorm(p=c(0.025,0.975),meanlog=x[1], sdlog=x[2])-hpd)^2) # -5.9691 0.7171
+
+## ou-like
+## sigsq: -5.9691 0.7171
+## alpha: 0.0932 0.8005
+
+## for both alpha and sigma
+## hpd <- c(0.001, 4.0)
 ## sigma.rate <- 5 # exponential prior
 ## sigma.rate <- 5 # exponential prior
-sigma.mean <- -1.5
-sigma.sd <- 0.3
+sigma.mean <- -5.9691
+sigma.sd <- 0.7171
 rv.mean <- 0.0 # root value (theta0 in mvMORPH, the first element in the theta vector result)
 rv.sd <- 2.0 #
 th.mean <- 1.0 # thetas
 th.sd <- 2.0 #
-alpha.mean <- 0.1248
-alpha.sd <- 0.2297
+alpha.mean <- 0.0932
+alpha.sd <- 0.8005
 ## alpha.mean <- alpha.sd <- 1.0
 
 ############# DOING STUFF #############
