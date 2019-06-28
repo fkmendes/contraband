@@ -19,23 +19,23 @@ public class JiveLikelihoodTest {
 		ManyValuesOneContTrait oneTrait = new ManyValuesOneContTrait();
 		oneTrait.initByName("traitValues", oneTraitValues);
 		
-		// log-sigmasq
-		Double[] logSigmasqsInput = new Double[] { 0.1, 0.15 };
-		RealParameter logSigmasqs = new RealParameter(logSigmasqsInput);
+		// sigmasq
+		Double[] sigmaSqsInput = new Double[] { 0.1, 0.15 };
+		RealParameter sigmaSqs = new RealParameter(sigmaSqsInput);
 				
 		// mean vector
 		Double[] meansInput = new Double[] { 0.1, 1.1 };
 		RealParameter mus = new RealParameter(meansInput);
 		
 		JiveLikelihood jive = new JiveLikelihood();
-		jive.initByName("sampleData", oneTrait, "logSigmasqs", logSigmasqs, "mus", mus);
+		jive.initByName("sampleData", oneTrait, "sigmaSqs", sigmaSqs, "mus", mus);
 		
 		logLik = jive.calculateLogP();
 	}
 
 	@Test
 	public void test() {
-		assertEquals(-13.13222, logLik, 1E-5);
+		assertEquals(-31.86435, logLik, 1E-5);
 	}
 
 }

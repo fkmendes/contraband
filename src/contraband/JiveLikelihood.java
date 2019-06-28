@@ -12,7 +12,7 @@ import beast.core.parameter.RealParameter;
 public class JiveLikelihood extends Distribution {
 
 	final public Input<ManyValuesOneContTrait> oneTraitInput = new Input<>("sampleData", "TWO OR MORE continuous data values for ONE trait, from many species.", Validate.REQUIRED);
-	final public Input<RealParameter> logSigmasqsInput = new Input<>("logSigmasqs", "log(Sigma^2), the log-variances of the normal densities, one per species.", Validate.REQUIRED);
+	final public Input<RealParameter> sigmasqsInput = new Input<>("sigmaSqs", "sigma^2s, the variances of the normal densities, one per species.", Validate.REQUIRED);
 	final public Input<RealParameter> meansInput = new Input<>("mus", "mus, the means of the normal densities, one per species.", Validate.REQUIRED);
 	
 	private ManyValuesOneContTrait sampleData;
@@ -32,14 +32,15 @@ public class JiveLikelihood extends Distribution {
 	
 	@Override
 	public double calculateLogP() {	
-		Double[] logSigmasqs = logSigmasqsInput.get().getValues();
+		Double[] sigmaSqs = sigmasqsInput.get().getValues();
 		Double[] mus = meansInput.get().getValues();
 		
 		logP = 0.0;
 		
 		int i = 0;
 		for (String spName: spNames) {
-			double thisSpLogLik = MVNUtils.getSampleNormalLogLk(sampleData.getSample(spName), mus[i], logSigmasqs[i]);
+			double thisSpLogLik = MVNUtils.getSampleNormalLogLk(sampleData.getSample(spName), mus[i], sigmaSqs[i]);
+			System.out.println(thisSpLogLik);
 			logP += thisSpLogLik;
 			i++;
 		}

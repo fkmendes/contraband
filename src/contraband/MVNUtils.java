@@ -186,7 +186,7 @@ public class MVNUtils {
 	/*
 	 * One-dimensional, simple normal density for n samples (same normal density!), in log space
 	 */
-	public static double getSampleNormalLogLk(double[] samples, Double mu, Double logSigma2) {		
+	public static double getSampleNormalLogLk(double[] samples, Double mu, Double sigmaSq) {		
 		double n = samples.length;
 		
 		double sumToSubtract = 0.0;
@@ -195,8 +195,8 @@ public class MVNUtils {
 		}
 		
 		return (-((n/2.0) * Math.log(2.0 * Math.PI)) +
-			   -((n/2.0) * logSigma2) +
-			   -(1.0/(2.0 * Math.exp(logSigma2))) * sumToSubtract);
+			   -((n/2.0) * Math.log(sigmaSq)) +
+			   -(1.0/(2.0 * sigmaSq)) * sumToSubtract);
 	}
 	
 	/*
