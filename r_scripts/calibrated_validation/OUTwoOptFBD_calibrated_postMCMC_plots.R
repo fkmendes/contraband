@@ -79,16 +79,39 @@ table((full.df$theta1 >= full.df$lower.theta1) & (full.df$theta1 <= full.df$uppe
 table((full.df$theta2 >= full.df$lower.theta2) & (full.df$theta2 <= full.df$upper.theta2))
 table((full.df$alpha >= full.df$lower.alpha) & (full.df$alpha <= full.df$upper.alpha))
 
-## nonultrametric
-## mu
-##   FALSE  TRUE
-##       6    91
-## sigma1
-##   FALSE  TRUE
-##      6    92
-## sigma2
-##   FALSE  TRUE
-##      12    90
+## ou like
+## sigmasq
+## FALSE  TRUE
+##    24    76
+## rv
+## FALSE  TRUE
+##    10    90
+## theta1
+## FALSE  TRUE 
+##    10    90 
+## theta3
+## FALSE  TRUE 
+##     7    93 
+## alpha
+## FALSE  TRUE 
+##    26    74 
+
+## bm like
+## sigmasq
+## FALSE  TRUE
+##    24    76
+## rv
+## FALSE  TRUE
+##    10    90
+## theta1
+## FALSE  TRUE 
+##    10    90 
+## theta3
+## FALSE  TRUE 
+##     7    93 
+## alpha
+## FALSE  TRUE 
+##    26    74 
 
 ### PLOTS ###
 

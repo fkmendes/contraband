@@ -53,7 +53,7 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
         axis.text.y = element_text(color="black", size=10),
         axis.title.x = element_text(size=12),
         axis.title.y = element_text(size=12)
-    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max)) + geom_linerange(data=reg.df[plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="red", alpha=.4, size=2) +
+    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max)) + geom_linerange(data=reg.df[plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="red", alpha=.4, size=1.5) +
         scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max)) + geom_linerange(data=reg.df[!plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="lightgray", alpha=.4)
     return(pl)
 }
