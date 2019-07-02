@@ -34,7 +34,8 @@ beast.param.names <- c("OUSigmaSq", "OURootValue", "OUTheta1", "OUTheta2", "OUAl
 
 param.labs <- c(expression(sigma^2), expression(y[0]), expression(theta[1]), expression(theta[2]), expression(alpha))
 mle.param.names <- c("sigmasq.mle", "rv.mle", "theta1.mle", "theta2.mle", "alpha.mle")
-prior.means <- c(0.233, 0.0, 1.0, 1.0, 1.1633)
+## prior.means <- c(0.003297929, 0.0, 1.0, 1.0, 1.504103)
+prior.means <- c(1.504103, 0.0, 1.0, 1.0, 0.003297929)
 
 tree.type <- "nonultra"
 
@@ -87,31 +88,31 @@ table((full.df$alpha >= full.df$lower.alpha) & (full.df$alpha <= full.df$upper.a
 ## FALSE  TRUE
 ##    10    90
 ## theta1
-## FALSE  TRUE 
-##    10    90 
-## theta3
-## FALSE  TRUE 
-##     7    93 
+## FALSE  TRUE
+##    10    90
+## theta2
+## FALSE  TRUE
+##     7    93
 ## alpha
-## FALSE  TRUE 
-##    26    74 
+## FALSE  TRUE
+##    26    74
 
 ## bm like
 ## sigmasq
 ## FALSE  TRUE
-##    24    76
+##    2     98
 ## rv
 ## FALSE  TRUE
-##    10    90
+##     5    95
 ## theta1
-## FALSE  TRUE 
-##    10    90 
-## theta3
-## FALSE  TRUE 
-##     7    93 
+## FALSE  TRUE
+##    10    90
+## theta2
+## FALSE  TRUE
+##     5    95
 ## alpha
-## FALSE  TRUE 
-##    26    74 
+## FALSE  TRUE
+##     5    95
 
 ### PLOTS ###
 
@@ -122,16 +123,111 @@ for (i in 1:n.param) {
     max.x = max(full.df[,param.names[i]])
     min.y = min(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
     max.y = max(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
+    all.plots.mle[[i]] = get.plot.no.hdi(param.names[i], paste0(param.names[i],".mle"),
+                              min.x, max.x, min.x, max.x, x.lab, prior.means[i],
+                              full.df)
+
+    names(all.plots.mle)[i] = paste0("plot.mle", i)
+
     all.plots[[i]] = get.plot(param.names[i], paste0("mean.",param.names[i]),
                               min.x, max.x, min.x, max.x, x.lab, prior.means[i],
                               full.df, plot.hdi[[i]])
-    ## all.plots[[i]] = get.plot(param.names[i], paste0(param.names[i],".mle"),
-    ##                           min.x, max.x, min.x, max.x, x.lab, prior.means[i],
-    ##                           full.df)
+
     names(all.plots)[i] = paste0("plot", i)
 }
+list2env(all.plots.mle, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
 list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
 
-png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.png"), height=24, width=10, unit="cm", res=300)
-ggarrange(plotlist=all.plots, ncol=1, nrow=3)
+## png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.png"), height=24, width=10, unit="cm", res=300)
+## ggarrange(plotlist=all.plots, ncol=1, nrow=3)
+## dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq_mle.pdf"), height=3, width=4)
+plot1.mle
 dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq_hdis.pdf"), height=3, width=4)
+plot1
+dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_y0_mle.pdf"), height=3, width=4)
+plot2.mle
+dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_y0_hdis.pdf"), height=3, width=4)
+plot2
+dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th1_mle.pdf"), height=3, width=4)
+plot3.mle
+dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th1_hdis.pdf"), height=3, width=4)
+plot3
+dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th2_mle.pdf"), height=3, width=4)
+plot4.mle
+dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th2_hdis.pdf"), height=3, width=4)
+plot4
+dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_alpha_mle.pdf"), height=3, width=4)
+plot5.mle
+dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_alpha_hdis.pdf"), height=3, width=4)
+plot5
+dev.off()
+
+## ou-like
+## sigsq: -5.9691 0.7171
+## alpha: 0.0932 0.8005
+
+## prior.df <- data.frame(x=c(rlnorm(100000, mean=0.0932, sd=0.8005), rlnorm(100000, mean=-5.9691, sd=0.7171)), y=c(rep("a",100000), rep("s",100000)))
+prior.df <- data.frame(x=c(rlnorm(100000, mean=0.0932, sd=0.8005), rlnorm(100000, mean=-5.9691, sd=0.7171)), y=c(rep("s",100000), rep("a",100000)))
+
+## plot.prior.s <- ggplot(subset(prior.df, y=="s"), aes(x=x)) + geom_density(fill="red", alpha=0.5) + xlim(0,.03) + ylab("Density") + xlab(expression(sigma^2)) +
+plot.prior.s <- ggplot(subset(prior.df, y=="s"), aes(x=x)) + geom_density(fill="red", alpha=0.5) + xlim(0,20) + ylab("Density") + xlab(expression(sigma^2)) +
+    theme(
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        plot.background = element_blank(),
+        plot.title = element_text(hjust=0.5),
+        axis.line = element_line(),
+        axis.ticks = element_line(color="black"),
+        axis.text.x = element_text(color="black", size=10),
+        axis.text.y = element_text(color="black", size=10),
+        axis.title.x = element_text(size=12),
+        axis.title.y = element_text(size=12)
+    )
+
+## plot.prior.a <- ggplot(subset(prior.df, y=="a"), aes(x=x)) + geom_density(fill="green", alpha=0.5) + xlim(0,20) + ylab("Density") + xlab(expression(alpha)) +
+plot.prior.a <- ggplot(subset(prior.df, y=="a"), aes(x=x)) + geom_density(fill="green", alpha=0.5) + xlim(0,.03) + ylab("Density") + xlab(expression(alpha)) +
+    theme(
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        plot.background = element_blank(),
+        plot.title = element_text(hjust=0.5),
+        axis.line = element_line(),
+        axis.ticks = element_line(color="black"),
+        axis.text.x = element_text(color="black", size=10),
+        axis.text.y = element_text(color="black", size=10),
+        axis.title.x = element_text(size=12),
+        axis.title.y = element_text(size=12)
+    )
+
+## pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_priors_alphahigh.pdf"), height=3, width=6)
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_priors_alphalow.pdf"), height=3, width=6)
+ggarrange(plot.prior.s, plot.prior.a, ncol=2, nrow=1)
+dev.off()
+
+## pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigmabyalpha_alphahigh.pdf"), height=4, width=8)
+## par(mfrow=c(1,2))
+## plot(sigmasq.mle~alpha.mle, data=full.df, xlim=c(0,6), ylim=c(0,.015), bty="l", pch=20, xlab=expression(paste("MLE ", alpha)), ylab=expression(paste("MLE ", sigma^2)))
+## plot(mean.sigmasq~mean.alpha, data=full.df, bty="l", pch=20, xlab=expression(paste("Mean posterior ", alpha)), ylab=expression(paste("Mean posterior ", sigma^2)))
+## dev.off()

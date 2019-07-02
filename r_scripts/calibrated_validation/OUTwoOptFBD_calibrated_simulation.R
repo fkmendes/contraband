@@ -43,7 +43,7 @@ cluster.validation.folder <- args[12]
 xml.file.path <- paste0(cluster.validation.folder, "OUMVNTwoOptFBDOneTrait_", tree.type, "_xmls/")
 res.path <- paste0(cluster.validation.folder, "OUMVNTwoOptFBDOneTrait_", tree.type, "_results/")
 jar.path <- paste0(cluster.validation.folder, "contraband.jar")
-jar.path <- args[13] 
+jar.path <- args[13]
 
 n.param <- 5
 
@@ -57,16 +57,17 @@ n.param <- 5
 ## sigsq: -5.9691 0.7171
 ## alpha: 0.0932 0.8005
 
-## for both alpha and sigma
-## hpd <- c(0.001, 4.0)
-## sigma.rate <- 5 # exponential prior
 ## sigma.rate <- 5 # exponential prior
 sigma.mean <- -5.9691
 sigma.sd <- 0.7171
+## sigma.mean <- 0.0932
+## sigma.sd <- 0.8005
 rv.mean <- 0.0 # root value (theta0 in mvMORPH, the first element in the theta vector result)
 rv.sd <- 2.0 #
 th.mean <- 1.0 # thetas
 th.sd <- 2.0 #
+## alpha.mean <- -5.9691
+## alpha.sd <- 0.7171
 alpha.mean <- 0.0932
 alpha.sd <- 0.8005
 ## alpha.mean <- alpha.sd <- 1.0
@@ -150,7 +151,7 @@ taxon.strs.4.template <- vector("list", n.sim + 50)
 for (i in 1:(n.sim+50)) {
     taxon.strs.4.template[[i]] = paste(paste0("<taxon id=\"", trs[[i]]$tip.label, "\" spec=\"Taxon\"/>"), collapse="\n                  ")
 }
-traits.4.template <- vector("list", n.sim) 
+traits.4.template <- vector("list", n.sim)
 
 ## actually simulating and populating strs for template
 set.seed(123)

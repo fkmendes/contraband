@@ -35,7 +35,7 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
     upper = data.df[,paste0("upper.",x.name)]
     x = data.df[,x.name]; y = data.df[,y.name]
     reg.df = data.frame(cbind(x,y,lower,upper,plot.hdi))
-    
+
     pl = ggplot() + geom_point(mapping=aes(x=x, y=y), shape=20) +
     coord_cartesian(ylim=c(y.min, y.max)) +
     xlab(x.lab) + ylab("Posterior mean") +
@@ -55,6 +55,33 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
         axis.title.y = element_text(size=12)
     ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max)) + geom_linerange(data=reg.df[plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="red", alpha=.4, size=1.5) +
         scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max)) + geom_linerange(data=reg.df[!plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="lightgray", alpha=.4)
+    return(pl)
+}
+
+get.plot.no.hdi <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.mean, data.df) {
+    lower = data.df[,paste0("lower.",x.name)]
+    upper = data.df[,paste0("upper.",x.name)]
+    x = data.df[,x.name]; y = data.df[,y.name]
+    reg.df = data.frame(cbind(x,y,lower,upper,plot.hdi))
+
+    pl = ggplot() + geom_point(mapping=aes(x=x, y=y), shape=20) +
+    coord_cartesian(ylim=c(y.min, y.max)) +
+    xlab(x.lab) + ylab("MLE") +
+    geom_abline(slope=1, linetype="dotted") +
+    geom_abline(slope=0, intercept=prior.mean, color="blue") +
+    theme(
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        plot.background = element_blank(),
+        plot.title = element_text(hjust=0.5),
+        axis.line = element_line(),
+        axis.ticks = element_line(color="black"),
+        axis.text.x = element_text(color="black", size=10),
+        axis.text.y = element_text(color="black", size=10),
+        axis.title.x = element_text(size=12),
+        axis.title.y = element_text(size=12)
+    )
     return(pl)
 }
 
