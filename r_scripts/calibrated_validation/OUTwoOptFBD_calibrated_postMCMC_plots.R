@@ -186,10 +186,12 @@ dev.off()
 ## sigsq: -5.9691 0.7171
 ## alpha: 0.0932 0.8005
 
-## prior.df <- data.frame(x=c(rlnorm(100000, mean=0.0932, sd=0.8005), rlnorm(100000, mean=-5.9691, sd=0.7171)), y=c(rep("a",100000), rep("s",100000)))
-prior.df <- data.frame(x=c(rlnorm(100000, mean=0.0932, sd=0.8005), rlnorm(100000, mean=-5.9691, sd=0.7171)), y=c(rep("s",100000), rep("a",100000)))
+## prior.df <- data.frame(x=c(rlnorm(100000, mean=0.0932, sd=0.8005), rlnorm(100000, mean=-5.9691, sd=0.7171)), y=c(rep("a",100000), rep("s",100000))) ## bm-like
+prior.df <- data.frame(x=c(rlnorm(100000, mean=0.0932, sd=0.8005), rlnorm(100000, mean=-5.9691, sd=0.7171)), y=c(rep("s",100000), rep("a",100000))) ## ou-like
 
+## ou-like
 ## plot.prior.s <- ggplot(subset(prior.df, y=="s"), aes(x=x)) + geom_density(fill="red", alpha=0.5) + xlim(0,.03) + ylab("Density") + xlab(expression(sigma^2)) +
+## bm-like
 plot.prior.s <- ggplot(subset(prior.df, y=="s"), aes(x=x)) + geom_density(fill="red", alpha=0.5) + xlim(0,20) + ylab("Density") + xlab(expression(sigma^2)) +
     theme(
         panel.grid.minor = element_blank(),
@@ -205,7 +207,9 @@ plot.prior.s <- ggplot(subset(prior.df, y=="s"), aes(x=x)) + geom_density(fill="
         axis.title.y = element_text(size=12)
     )
 
+## ou-like
 ## plot.prior.a <- ggplot(subset(prior.df, y=="a"), aes(x=x)) + geom_density(fill="green", alpha=0.5) + xlim(0,20) + ylab("Density") + xlab(expression(alpha)) +
+## bm-like
 plot.prior.a <- ggplot(subset(prior.df, y=="a"), aes(x=x)) + geom_density(fill="green", alpha=0.5) + xlim(0,.03) + ylab("Density") + xlab(expression(alpha)) +
     theme(
         panel.grid.minor = element_blank(),
@@ -221,8 +225,8 @@ plot.prior.a <- ggplot(subset(prior.df, y=="a"), aes(x=x)) + geom_density(fill="
         axis.title.y = element_text(size=12)
     )
 
-## pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_priors_alphahigh.pdf"), height=3, width=6)
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_priors_alphalow.pdf"), height=3, width=6)
+## pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_priors_alphahigh.pdf"), height=3, width=6) ## ou-like
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_priors_alphalow.pdf"), height=3, width=6) ## bm-like
 ggarrange(plot.prior.s, plot.prior.a, ncol=2, nrow=1)
 dev.off()
 
