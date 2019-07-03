@@ -1,11 +1,16 @@
 package contraband;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
+import beast.evolution.tree.TreeUtils;
 import beast.util.TreeParser;
 import cern.colt.Arrays;
 
@@ -29,6 +34,9 @@ public class CoalCorrection extends CalculationNode {
 		correctedPhyloTMat = new double[nSpp][nSpp];
 	}
 
+	/*
+	 * Does not assume tree is ultrametric
+	 */
 	private int fillNLineageDistInPlace(Node aNode, Double[] allPopSizes) {
 		int maxNLineages = 0;
 		int nodeIdx = aNode.getNr();
@@ -84,6 +92,9 @@ public class CoalCorrection extends CalculationNode {
 		return maxNLineages; 
 	}
 	
+	/*
+	 *  Assumes tree is ultrametric  
+	 */
 	private double getExpGenealogyHeight(Double[] allPopSizes) {
 		Node root = tree.getRoot();
 		int rootIdx = root.getNr();
@@ -99,6 +110,53 @@ public class CoalCorrection extends CalculationNode {
 		return expGenealHeight + root.getHeight();
 	}
 	
+	// TODO: should write a method that gets the total tip-root path from any tip to root, regardless of ultrametricity
+	// Such a method would still use expGenealHeight from method above, but recursively add species tree branch lengths
+	// for each leaf path separately
+	
+	private double getExpCoalTimePair(Node node1, Node node2, Double[] allPopSizes) {
+		Set<String> pairOfSpNames = new HashSet<String>();
+		pairOfSpNames.add(node1.getID());
+		pairOfSpNames.add(node2.getID());
+		
+		Node mrcaInSpTree = TreeUtils.getCommonAncestorNode(tree, pairOfSpNames); // mrca of two nodes in species tree
+		double mrcaHeightSpTree = mrcaInSpTree.getHeight();
+		
+		double expCoalTimePair = 0.0;
+		double probCurr = 1.0;
+		
+		while(true) {
+			double branchLength = mrcaInSpTree.getLength();
+			double popSize = allPopSizes[mrcaInSpTree.getNr()];
+			double invPopSize = 1.0 / popSize;
+			
+			double e = 0.0;
+			double probNoCoal = 0.0;
+			
+			if (mrcaInSpTree.isRoot()) {
+				e = popSize;
+				probNoCoal = 0.0;
+			}
+			
+			else {
+				e = (1 - (branchLength * invPopSize + 1) * Math.exp(-branchLength * invPopSize)) / invPopSize;
+				probNoCoal = CoalUtils.getHeledGij(2, 2, branchLength, popSize);
+			}
+			
+			expCoalTimePair += (mrcaHeightSpTree + e) * probCurr * (1-probNoCoal);
+			
+			if (mrcaInSpTree.isRoot()) {
+				break;
+			}
+			
+			probCurr *= probNoCoal;
+			mrcaHeightSpTree += branchLength;
+			mrcaInSpTree = mrcaInSpTree.getParent();
+		}
+		
+		return expCoalTimePair;
+	}
+	
 	private void fillPhyloTMatInPlace() {
 		if (treeInput.isDirty()) {
 			tree = treeInput.get();
@@ -110,16 +168,28 @@ public class CoalCorrection extends CalculationNode {
 		System.out.println("Total genealogical height=" + expGenealHeight);
 		
 		// TODO: then get expected times
-		
-		// TODO: finally, populate correctedPhyloTMAT and return it
+		List<Node> allNodes = tree.getRoot().getAllLeafNodes();
+		for (int i=0; i<nSpp; ++i) {
+			for (int j=0; j<nSpp; ++j) {
+				if (i == j) {
+					correctedPhyloTMat[i][j] = expGenealHeight; // all variances (diag elements) are the same, so assuming ultrametricity
+				}
+				
+				else {
+					// we subtract the expected coalescent times from the total genealogical height
+					correctedPhyloTMat[i][j] = expGenealHeight - getExpCoalTimePair(allNodes.get(i), allNodes.get(j), popSizes);
+					correctedPhyloTMat[j][i] = correctedPhyloTMat[i][j]; // assume matrix is symmetric
+				}
+			}
+		}
 	}
 	
 	// getters
-	public void getCorrectedPhyloTMat() {
+	public double[][] getCorrectedPhyloTMat() {
 		fillPhyloTMatInPlace();
 		
-//		for (double[] nodeDist: nLineageDistAtEnd) {
-//			System.out.println(Arrays.toString(nodeDist));
-//		}
+		GeneralUtils.display2DArray(correctedPhyloTMat);
+		
+		return correctedPhyloTMat;
 	}
 }
