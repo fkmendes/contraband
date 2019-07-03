@@ -93,9 +93,10 @@ public class CoalCorrection extends CalculationNode {
 	}
 	
 	/*
-	 *  Assumes tree is ultrametric  
+	 *  Note that this is the expected genealogy height where the "tips" start at the root population
+	 *  so this is NOT the TOTAL genealogy height (as in, the total gene tree height)
 	 */
-	private double getExpGenealogyHeight(Double[] allPopSizes) {
+	private double getExpGenealHeightAtRoot(Double[] allPopSizes) {
 		Node root = tree.getRoot();
 		int rootIdx = root.getNr();
 		
@@ -107,13 +108,15 @@ public class CoalCorrection extends CalculationNode {
 			expGenealHeight += probOfKLineages * CoalUtils.getMeanRootHeight(kLineages, allPopSizes[rootIdx]);
 		}
 		
-		return expGenealHeight + root.getHeight();
+		return expGenealHeight;
 	}
 	
-	// TODO: should write a method that gets the total tip-root path from any tip to root, regardless of ultrametricity
-	// Such a method would still use expGenealHeight from method above, but recursively add species tree branch lengths
-	// for each leaf path separately
-	
+	/*
+	 * This works for non-ultrametric trees as well, the only thing that matters
+	 * is the height of the MRCA of the two pairs of species, and expected times
+	 * are all relative to the most recent leaf in the tree, which is what we end
+	 * up using in the calculation of variances later
+	 */
 	private double getExpCoalTimePair(Node node1, Node node2, Double[] allPopSizes) {
 		Set<String> pairOfSpNames = new HashSet<String>();
 		pairOfSpNames.add(node1.getID());
@@ -162,22 +165,25 @@ public class CoalCorrection extends CalculationNode {
 			tree = treeInput.get();
 		}
 		
+		double treeHeight = tree.getRoot().getHeight();
+		List<Node> allLeaves = tree.getRoot().getAllLeafNodes();
 		Double[] popSizes = popSizesInput.get().getValues();
 		
-		double expGenealHeight = getExpGenealogyHeight(popSizes);
-		System.out.println("Total genealogical height=" + expGenealHeight);
+		double expGenealHeightAtRoot = getExpGenealHeightAtRoot(popSizes);
+		
+		System.out.println("Total genealogical height=" + treeHeight+expGenealHeightAtRoot);
 		
 		// TODO: then get expected times
 		List<Node> allNodes = tree.getRoot().getAllLeafNodes();
 		for (int i=0; i<nSpp; ++i) {
 			for (int j=0; j<nSpp; ++j) {
 				if (i == j) {
-					correctedPhyloTMat[i][j] = expGenealHeight; // all variances (diag elements) are the same, so assuming ultrametricity
+					correctedPhyloTMat[i][j] = expGenealHeightAtRoot + (treeHeight - allLeaves.get(i).getHeight()); // all variances (diag elements) don't have to be the same
 				}
 				
 				else {
-					// we subtract the expected coalescent times from the total genealogical height
-					correctedPhyloTMat[i][j] = expGenealHeight - getExpCoalTimePair(allNodes.get(i), allNodes.get(j), popSizes);
+					// we subtract the expected coalescent times from the total genealogical height (= root height + expGenealHeightAtRoot)
+					correctedPhyloTMat[i][j] = tree.getRoot().getHeight() + expGenealHeightAtRoot - getExpCoalTimePair(allNodes.get(i), allNodes.get(j), popSizes);
 					correctedPhyloTMat[j][i] = correctedPhyloTMat[i][j]; // assume matrix is symmetric
 				}
 			}
