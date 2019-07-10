@@ -2,12 +2,16 @@ package contraband;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
+import beast.evolution.tree.TreeUtils;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
@@ -81,7 +85,46 @@ public class MVNUtils {
 	public static void populateTMatrix(Tree aTree, double[] nodeToRootPaths, double[][] tMat, List<Node> leftLeaves, List<Node> rightLeaves, String[] spOrderInTMat) {
 		fillNodeLeftRightLeaves(aTree.getRoot(), nodeToRootPaths, tMat, leftLeaves, rightLeaves, spOrderInTMat);
 	}
+	
+	/*
+	 * For ASR under univariate BM with single rate
+	 * Function populates (in place) the T matrix from the tree for leaves and ancestral nodes
+	 */
+	public static void populateAncNodePhyloTMatrix(Tree aTree, RealMatrix aPhyloWTMat) {
+		double rootHeight = aTree.getRoot().getHeight();
+		int nSpp = aTree.getLeafNodeCount();
+		
+		for (Node leafNode: aTree.getRoot().getAllLeafNodes()) {
+			for (Node ancNode: aTree.getInternalNodes()) {
+				if (!ancNode.isRoot()) {
+					int leafIdx = leafNode.getNr();
+					int ancNodeIdx = ancNode.getNr();
 
+					// if ancestral node is immediate parent of leaf, easy, just put in the subtending branch length
+					if (ancNode.getAllLeafNodes().contains(leafNode)) {
+						aPhyloWTMat.setEntry(ancNodeIdx-nSpp, leafIdx, rootHeight-ancNode.getHeight());
+					}
+					
+					// if ancestral node is NOT immediate parent of leaf, it could still have some covariance with it!
+					// we need to recur to the root and see if any node in the anc node's path to the root is a parent
+					// of both the anc node and the leaf -- if so, we need to record that subtending branch length
+					else {
+						Node parentNode = ancNode.getParent();
+						
+						while (!parentNode.isRoot()) {
+							if (parentNode.getAllLeafNodes().contains(leafNode) && parentNode.getChildren().contains(ancNode)) {
+								aPhyloWTMat.setEntry(ancNodeIdx-nSpp, leafIdx, rootHeight-parentNode.getHeight());
+								break;
+							}
+							
+							parentNode = parentNode.getParent();
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	public static void populateNodeRateMatrix(Node node, Double[] nodeRates, RealMatrix rateMatrix) {
 		int nodeIdx = node.getNr();
 		double nodeRate = nodeRates[nodeIdx];
@@ -162,6 +205,8 @@ public class MVNUtils {
 		loglikelihood += invVcvMat.preMultiply(data.subtract(mean)).mapMultiply(-0.5)
 				.dotProduct(data.subtract(mean));
 		
+		// System.out.println("BM log-likelihood=" + loglikelihood);
+		
 		return loglikelihood;
 	}
 	
@@ -185,6 +230,8 @@ public class MVNUtils {
 	
 	/*
 	 * One-dimensional, simple normal density for n samples (same normal density!), in log space
+	 * 
+	 * Used in JIVE likelihood
 	 */
 	public static double getSampleNormalLogLk(double[] samples, Double mu, Double logSigmaSq) {		
 		double n = samples.length;
@@ -193,6 +240,11 @@ public class MVNUtils {
 		for (int i=0; i<n; ++i) {
 			sumToSubtract += Math.pow(samples[i]-mu, 2);
 		}
+		
+//		System.out.println("Jive log-likelihood=" +
+//				((-((n/2.0) * Math.log(2.0 * Math.PI)) +
+//				-((n/2.0) * logSigmaSq) +
+//				-(1.0/(2.0 * Math.exp(logSigmaSq))) * sumToSubtract)));
 		
 		return (-((n/2.0) * Math.log(2.0 * Math.PI)) +
 			   -((n/2.0) * logSigmaSq) +
@@ -216,6 +268,18 @@ public class MVNUtils {
 			sumToSubtract += (1.0/(2*sigmaSqs[i])) * Math.pow(samples[i]-mus[i], 2);
 		}
 		
-		return -firstTerm - secondTerm - sumToSubtract;
+		double loglikelihood = -firstTerm - secondTerm - sumToSubtract;
+		// System.out.println("WN log-likelihood=" + loglikelihood);
+		
+		return loglikelihood;
+	}
+	
+	/*
+	 * Estimates ancestral state under GLS framework
+	 */
+	public static double getOneTraitAncState(RealMatrix vcvMat, RealMatrix ancVCVMat, RealVector data, Double[] mu) {
+		double estimate = 0.0;
+		
+		return estimate;
 	}
 }

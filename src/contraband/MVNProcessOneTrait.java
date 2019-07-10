@@ -38,7 +38,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private List<Node> rightLeaves;
 	private String[] spNamesInPhyloTMatOrder;
 	private double[][] phyloTMatDouble; // at some point I should get rid of this and use PhyloTMat straight away
-	private RealMatrix phyloTMat;
+	private RealMatrix phyloTMat, phyloWTMat;
 		
 	// mean vector
 	private RealVector meanVec;
@@ -47,6 +47,11 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private RealMatrix vcvMat, invVCVMat;
 	private LUDecomposition vcvMatLUDecomposition;
 	private double detVCVMat;
+	
+	// ASR stuff 
+	private RealVector wVec; // Weight (design) vector for ASR (with multiple traits, it would be a matrix)
+	// never changes, so no need to worry about storing
+	private RealMatrix ancNodeVCVMat;
 	
 	// data
 	private RealVector oneTraitDataVector;
@@ -68,6 +73,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		spNamesInPhyloTMatOrder = new String[nSpp];
 		phyloTMatDouble = new double[nSpp][nSpp];
 		phyloTMat = MatrixUtils.createRealMatrix(phyloTMatDouble);
+		phyloWTMat = MatrixUtils.createRealMatrix(tree.getInternalNodeCount(), nSpp);
 
 		// stored stuff
 		storedMeanVec = new ArrayRealVector(nSpp);
@@ -81,7 +87,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		
 		for (int i=0; i<nSpp; ++i) {
 			for (int j=0; j<nSpp; ++j) {
-			phyloTMat.setEntry(i, j, phyloTMatDouble[i][j]);
+				phyloTMat.setEntry(i, j, phyloTMatDouble[i][j]);
 			}
 		}
 
@@ -92,6 +98,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		}
 	};
 	
+	protected void populateAncNodePhyloTMatrix() {
+		MVNUtils.populateAncNodePhyloTMatrix(tree, phyloWTMat);
+	}
+	
 	protected void populateMeanVector() {};
 	
 	protected void populateVCVMatrix() {};
@@ -100,15 +110,16 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	protected void populateOneTraitDataVector() {};
 	
+	protected void populateWMatrix() {}; // design matrix used in ASR
+	
+	protected void populateAncNodeVCVMatrix() {}; // needed for ASR
+	
 	protected void populateLogP() {
 		if (matrixWasSingularCantInvertBarf || !successiveThetasIncreasing || detVCVMat==0.0) {
-			logP = Double.NEGATIVE_INFINITY;
-//		}
-//		else if (!successiveThetasIncreasing) {
-//			logP = Double.NEGATIVE_INFINITY;
+			myLogP = Double.NEGATIVE_INFINITY;
 		}
 		else {
-			logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVector, invVCVMat, detVCVMat);
+			myLogP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVector, invVCVMat, detVCVMat);
 		}
 	};
 	
@@ -142,7 +153,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	}
 	
 	protected double getLogP() {
-		return logP;
+		return myLogP;
 	}
 	
 	// setters
@@ -162,6 +173,14 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	protected void setProcessOneTraitDataVec(RealVector aOneTraitDataVector) {
 		oneTraitDataVector = aOneTraitDataVector;
+	}
+	
+	protected void setProcessWMat(RealVector aWVec) {
+		wVec = aWVec;
+	}
+	
+	protected void setProcessAncNodeVCVMatrix(RealMatrix aAncNodeVCVMat) {
+		ancNodeVCVMat = aAncNodeVCVMat;
 	}
 	
 	protected void setMatrixIsSingular(boolean matrixIsSingular) {

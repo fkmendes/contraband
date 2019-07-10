@@ -23,8 +23,8 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	private int nSpp;
 
 	private Double bmSingleMeanValue;
-	private RealVector bmMeanVector;
-	private RealMatrix bmVCVMat, bmInvVCVMat;
+	private RealVector bmMeanVector, bmWVector;
+	private RealMatrix bmVCVMat, bmInvVCVMat, bmAncNodeVCVMat;
 	private LUDecomposition bmVCVMatLUD;
 	
 	private OneValueContTraits oneTraitData;
@@ -40,17 +40,22 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		
 		nSpp = getNSpp();
 		bmMeanVector = new ArrayRealVector(nSpp);
+		bmWVector = new ArrayRealVector(nSpp);
 		oneTraitDataVector = new ArrayRealVector(nSpp);
 		storedBMMeanVector = new ArrayRealVector(nSpp);
 		
 		// this instance vars
-		populateInstanceVars(true, true, true);
+		populateInstanceVars(true, true, true, false);
 		
 		// setting parent class instance vars
-		populateParentInstanceVars(true, true);
+		populateParentInstanceVars(true, true, false);
+		
+		// (ASR) just done once as it does not change for BM
+		populateWMatrix();
+		setProcessWMat(bmWVector);
 	}
 	
-	protected void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean) {
+	protected void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean, boolean updateAncNodeVCVMat) {
 		if (updatePhyloTMat) { super.populatePhyloTMatrix(); }
 		if (updateMean) { populateMeanVector(); }
 		if (updateVCVMat) {
@@ -58,17 +63,28 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 			populateInvVCVMatrix();
 		}
 		populateOneTraitDataVector();
+		
+		// ASR stuff
+		if (updateAncNodeVCVMat) {
+			super.populateAncNodePhyloTMatrix();
+			populateAncNodeVCVMatrix();
+		}
 	}
 	
-	protected void populateParentInstanceVars(boolean updateVCVMat, boolean updateMean) {
+	protected void populateParentInstanceVars(boolean updateVCVMat, boolean updateMean, boolean updateAncNodeVCVMat) {
 		// setting parent members
 		if (updateMean) { setProcessMeanVec(bmMeanVector); }
 		if (updateVCVMat) {
 			setProcessVCVMat(bmVCVMat);
 			setProcessInvVCVMat(bmInvVCVMat);
-		}
+		}	
 		setProcessOneTraitDataVec(oneTraitDataVector); // also has to come AFTER setting phyloTMat
         											   // (as this sets the order of species names in T matrix)
+		
+		// ASR stuff
+		if (updateAncNodeVCVMat) {
+			setProcessAncNodeVCVMatrix(bmAncNodeVCVMat);
+		}
 	}
 	
 	@Override
@@ -100,18 +116,31 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		}
 	}
 	
+	// ASR stuff
+	@Override
+	protected void populateWMatrix() {
+		bmWVector.set(1.0);
+	}
+	
+	@Override
+	protected void populateAncNodeVCVMatrix() {
+		// TODO Auto-generated method stub
+		;
+	}
+	
 	@Override
 	public double calculateLogP() {
 		boolean updatePhyloTMat = false;
 		boolean updateVCVMat = false;
 		boolean updateMean = false;
-
+		boolean updateAncNodeVCVMat = false; // always false, only tree logger uses this as true
+		
 		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
 		if (sigmasqInput.isDirty()) { updateVCVMat = true; }
 		if (meanInput.isDirty()) { updateMean = true; }
 		
-		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean);
-		populateParentInstanceVars(updateVCVMat, updateMean);
+		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean, updateAncNodeVCVMat);
+		populateParentInstanceVars(updateVCVMat, updateMean, updateAncNodeVCVMat);
 		
 		super.populateLogP();
 		
