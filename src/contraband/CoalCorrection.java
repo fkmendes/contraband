@@ -146,7 +146,8 @@ public class CoalCorrection extends CalculationNode {
 				probNoCoal = CoalUtils.getHeledGij(2, 2, branchLength, popSize);
 			}
 			
-			expCoalTimePair += (mrcaHeightSpTree + e) * probCurr * (1-probNoCoal);
+			// expCoalTimePair += (mrcaHeightSpTree + e) * probCurr * (1-probNoCoal); // original was bugged
+			expCoalTimePair += (mrcaHeightSpTree + e/(1-probNoCoal)) * (1-probNoCoal) * probCurr;
 			
 			if (mrcaInSpTree.isRoot()) {
 				break;
@@ -171,7 +172,7 @@ public class CoalCorrection extends CalculationNode {
 		
 		double expGenealHeightAtRoot = getExpGenealHeightAtRoot(popSizes);
 		
-		System.out.println("Total genealogical height=" + treeHeight+expGenealHeightAtRoot);
+		System.out.println("Expected total genealogical height = " + (treeHeight+expGenealHeightAtRoot));
 		
 		// TODO: then get expected times
 		List<Node> allNodes = tree.getRoot().getAllLeafNodes();

@@ -58,6 +58,22 @@ public class WNLikelihood extends Distribution {
 	}
 	
 	@Override
+	public boolean requiresRecalculation() {
+		boolean dirty = true;
+		return dirty;
+	}
+	
+	@Override
+	public void store() {
+		super.store();
+	}
+	
+	@Override
+	public void restore() {		
+		super.restore();
+	}
+	
+	@Override
 	public List<String> getArguments() {
 		// TODO Auto-generated method stub
 		return null;

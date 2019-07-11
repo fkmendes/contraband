@@ -12,7 +12,7 @@ public class CoalCorrectionTestDriver {
 		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
 
 		// pop sizes
-		Double[] popSizesInput = new Double[] { 0.5, 0.5, 0.5, 5.0, 5.0 };
+		Double[] popSizesInput = new Double[] { 0.5, 0.5, 0.5, 1.0, 1.0 };
 		RealParameter popSizes = new RealParameter(popSizesInput);
 		
 		CoalCorrection coal = new CoalCorrection();
