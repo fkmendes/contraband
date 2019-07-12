@@ -57,6 +57,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private RealVector oneTraitDataVector;
 
 	// stored stuff	
+	private RealVector storedOneTraitDataVector = new ArrayRealVector(nSpp);
 	private RealVector storedMeanVec; // need for integration with JIVE (unsure why...?)
 	private RealMatrix storedPhyloTMat; // needed for tree operators
 	private double[][] storedPhyloTMatDouble; // needed for FBD operators
@@ -76,6 +77,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		phyloWTMat = MatrixUtils.createRealMatrix(tree.getInternalNodeCount(), nSpp);
 
 		// stored stuff
+		storedOneTraitDataVector = new ArrayRealVector(nSpp);
 		storedMeanVec = new ArrayRealVector(nSpp);
 		storedPhyloTMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
@@ -206,6 +208,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	@Override
 	public void store() {	
 		for (int i=0; i<nSpp; ++i) {	
+			storedOneTraitDataVector.setEntry(i, oneTraitDataVector.getEntry(i)); // for JIVE
 			storedMeanVec.setEntry(i, meanVec.getEntry(i));
 			
 			// necessary for FBD prior
@@ -226,6 +229,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		RealVector realVecTmp;
 		double[][] double2DArrTmp;
 		
+		realVecTmp = oneTraitDataVector;
+		oneTraitDataVector = storedOneTraitDataVector;
+		storedOneTraitDataVector = realVecTmp;
+
 		realVecTmp = meanVec;
 		meanVec = storedMeanVec;
 		storedMeanVec = realVecTmp;

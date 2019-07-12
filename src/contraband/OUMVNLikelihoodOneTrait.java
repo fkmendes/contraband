@@ -55,7 +55,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	// stored stuff
 	private RealMatrix storedVCVMat;
 	private RealVector storedOUMeanVector;
-//	private RealVector storedThetaVector;
+	private RealVector storedOneTraitDataVector;
 	
 	@Override
 	public void initAndValidate() {	
@@ -63,46 +63,39 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		super.initAndValidate();
 		
 		// reading in stuff
-//		allLeafNodes = getRootNode().getAllLeafNodes();
 		nSpp = getNSpp();	
 		eqDistAtRoot = eqDistInput.get();
 		useRootMetaData = useRootMetaDataInput.get();
 		optimumManager = optimumManagerInput.get();
 		nOptima = optimumManager.getNColors();
-//		alpha = alphaInput.get().getValue();
 		
 		// initializing stuff whose size won't change for now
 		if (useRootMetaData) {
 			thetaVector = new ArrayRealVector(nOptima+1);
-//			storedThetaVector = new ArrayRealVector(nOptima+1);
 			wMat = new Array2DRowRealMatrix(nSpp, (nOptima+1));
 		}
 		else {
 			thetaVector = new ArrayRealVector(nOptima);
-//			storedThetaVector = new ArrayRealVector(nOptima);
 			wMat = new Array2DRowRealMatrix(nSpp, nOptima);
 		}
 		 
+		oneTraitDataVector = new ArrayRealVector(nSpp);
 		ouMeanVector = new ArrayRealVector(nSpp);
 		ouTMat = new Array2DRowRealMatrix(nSpp, nSpp);
 		
 		// store	
+		storedOneTraitDataVector = new ArrayRealVector(nSpp);
 		storedVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
-//		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedOUMeanVector = new ArrayRealVector(nSpp);
 		
 		// this instance vars
-		populateInstanceVars(true, true, true);
-		populateOneTraitDataVector(); // won't change, so outside populateInstanceVars
-		                              // also has to come AFTER setting phyloTMat
-		                              // (as this sets the order of species names in T matrix)
-		
+		populateInstanceVars(true, true, true, true);
+	
 		// setting parent class instance vars
-		populateParentInstanceVars(true, true);
-		setProcessOneTraitDataVec(oneTraitDataVector);
+		populateParentInstanceVars(true, true, true);
 	}
 	
-	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean) {
+	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean, boolean updateData) {
 //		alpha = alphaInput.get().getValue(); // needs to be done here because populateMeanVector and populateOUTMatrix use it
 		
 		if (updateMean) { populateMeanVector(); }
@@ -111,14 +104,20 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 			populateVCVMatrix();
 			populateInvVCVMatrix();
 		}
+		if (updateData) {
+			populateOneTraitDataVector();
+		}
 	}
 	
-	private void populateParentInstanceVars(boolean updateVCVMat, boolean updateMean) {
+	private void populateParentInstanceVars(boolean updateVCVMat, boolean updateMean,  boolean updateData) {
 		// setting parent members
 		if (updateMean) { setProcessMeanVec(ouMeanVector); }
 		if (updateVCVMat) {
 			setProcessVCVMat(ouVCVMat);
 			setProcessInvVCVMat(ouInvVCVMat);
+		}
+		if (updateData) {
+			setProcessOneTraitDataVec(oneTraitDataVector);
 		}
 	}
 	
@@ -188,7 +187,12 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	protected void populateOneTraitDataVector() {
 		oneTraitData = oneTraitInput.get();
-		oneTraitDataVector = new ArrayRealVector(oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder()));
+		
+		int i = 0;
+		for (Double traitValue: oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder())) {
+			oneTraitDataVector.setEntry(i, traitValue);
+			++i;
+		}
 	}
 	
 	@Override
@@ -196,14 +200,16 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		boolean updatePhyloTMat = false;
 		boolean updateVCVMat = false;
 		boolean updateMean = false;
+		boolean updateData = false; // for Jive!
 		
 		if (alphaInput.isDirty()) { updateVCVMat = true; updateMean = true; }
 		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
 		if (sigmasqInput.isDirty() || alphaInput.isDirty()) { updateVCVMat = true; }
 		if (rootValueInput.isDirty() || alphaInput.isDirty() || optimumManagerInput.isDirty()) { updateMean = true; }
+		if (oneTraitInput.isDirty()) { updateData = true; }
 		
-		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean);
-		populateParentInstanceVars(updateVCVMat, updateMean);
+		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean, updateData);
+		populateParentInstanceVars(updateVCVMat, updateMean, updateData);
 		
 		super.populateLogP();
 		
@@ -227,19 +233,10 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	}
 	
 	@Override
-	public void store() {			
-//		for (int i=0; i<thetaVector.getDimension(); ++i) {
-//			storedThetaVector.setEntry(i, thetaVector.getEntry(i));
-//		}
-//		
-////		for (int i=0; i<wMat.getRowDimension(); ++i) {
-////			for (int j=0; j<wMat.getColumnDimension(); ++j) {
-////				storedWMat.setEntry(i, j, wMat.getEntry(i, j));
-////			}
-////		}
-		
+	public void store() {				
 		for (int i=0; i<nSpp; ++i) {
-			storedOUMeanVector.setEntry(i, ouMeanVector.getEntry(i));
+			storedOUMeanVector.setEntry(i, ouMeanVector.getEntry(i)); // for JIVE
+			storedOneTraitDataVector.setEntry(i, oneTraitDataVector.getEntry(i));
 
 			for (int j=0; j<nSpp; ++j) {
 				storedVCVMat.setEntry(i, j, ouVCVMat.getEntry(i, j));
@@ -262,9 +259,9 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		ouMeanVector = storedOUMeanVector;
 		storedOUMeanVector = realVecTmp;
 		
-//		realVecTmp = thetaVector;
-//		thetaVector = storedThetaVector;
-//		storedThetaVector = realVecTmp;
+		realVecTmp = oneTraitDataVector;
+		oneTraitDataVector = storedOneTraitDataVector;
+		storedOneTraitDataVector = realVecTmp;
 
 		super.restore();
 	}
