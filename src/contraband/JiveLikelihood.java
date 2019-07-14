@@ -35,16 +35,16 @@ public class JiveLikelihood extends Distribution {
 		Double[] logSigmaSqs = logSigmaSqsInput.get().getValues();
 		Double[] mus = meansInput.get().getValues();
 		
-		myLogP = 0.0;
+		logP = 0.0;
 		
 		int i = 0;
 		for (String spName: spNames) {
 			double thisSpLogLik = MVNUtils.getSampleNormalLogLk(sampleData.getSample(spName), mus[i], logSigmaSqs[i]);
-			myLogP += thisSpLogLik;
+			logP += thisSpLogLik;
 			i++;
 		}
 
-		return myLogP;
+		return logP;
 	}
 	
 	@Override

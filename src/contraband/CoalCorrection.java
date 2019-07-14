@@ -80,7 +80,8 @@ public class CoalCorrection extends CalculationNode {
 				// these nLineages might coalesce to kLineages according to Tavare's coefficients
 				else {
 					for (int kLineages=1; kLineages <= nLineages; ++kLineages) {
-						nLineageDistAtEnd[nodeIdx][kLineages-1] = probOfNLineages * 
+						
+						nLineageDistAtEnd[nodeIdx][kLineages-1] += probOfNLineages * 
 								CoalUtils.getHeledGij(nLineages, kLineages, aNode.getLength(), thisNodePopSize);
 					}
 				}

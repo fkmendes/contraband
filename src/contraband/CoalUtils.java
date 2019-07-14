@@ -173,6 +173,9 @@ public class CoalUtils {
 			prob += (cis[i] * Math.exp((-rates[i]/pop) * t));
 		}
 		
+//		System.out.println("Printing from n to k lineages: n=" + nFrom + " k=" + nTo + " d=" + pop + " over all interval, t=" + t);
+//		System.out.println("n to k lineages result=" + prob);
+				
 		return prob;
 	}
 }

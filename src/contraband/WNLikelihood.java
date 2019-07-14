@@ -27,7 +27,10 @@ public class WNLikelihood extends Distribution {
 	
 	private OneValueContTraits sampleData;
 	private String[] spNames;
-	private Double[] mus, sigmaSqs;
+	private Double[] mus, sigmaSqs, samples;
+	
+	// stored stuff
+	private Double[] storedSamples;
 	
 	@Override
 	public void initAndValidate() {
@@ -35,14 +38,19 @@ public class WNLikelihood extends Distribution {
 
 		sampleData = oneTraitInput.get();
 		spNames = sampleData.getSpNames();
+		samples = sampleData.getTraitValues(0, spNames);
 		
 		mus = new Double[sampleData.getNSpp()];
 		sigmaSqs = new Double[sampleData.getNSpp()];
+		
+		// stored stuff
+		storedSamples = new Double[spNames.length]; 
 	}
 	
 	@Override
 	public double calculateLogP() {
-		Double[] samples = sampleData.getTraitValues(0, spNames);
+		populateSampleData();
+		
 		Integer[] normalAssignments = normalAssignmentsInput.get().getValues();
 		Double[] allSigmaSqsValues = sigmaSqsInput.get().getValues();
 		Double[] allMusValues = meansInput.get().getValues();
@@ -54,7 +62,16 @@ public class WNLikelihood extends Distribution {
 			i++;
 		}
 		
-		return MVNUtils.getSampleMultipleNormalLogLk(samples, mus, sigmaSqs);
+		logP = MVNUtils.getSampleMultipleNormalLogLk(samples, mus, sigmaSqs);
+		
+		return logP;
+	}
+	
+	private void populateSampleData() {
+		if (oneTraitInput.isDirty()) {
+			sampleData = oneTraitInput.get();
+			samples = sampleData.getTraitValues(0, spNames);
+		}
 	}
 	
 	@Override
@@ -65,12 +82,16 @@ public class WNLikelihood extends Distribution {
 	
 	@Override
 	public void store() {
-		super.store();
+		System.arraycopy(samples, 0, storedSamples, 0, samples.length);
 	}
 	
 	@Override
 	public void restore() {		
-		super.restore();
+		Double[] arrTmp;
+		
+		arrTmp = samples;
+		samples = storedSamples;
+		storedSamples = arrTmp;
 	}
 	
 	@Override

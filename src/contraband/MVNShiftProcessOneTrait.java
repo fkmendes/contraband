@@ -85,16 +85,16 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	protected void populateLogP() {
 		if (matrixWasSingularCantInvertBarf) {
-			myLogP = Double.NEGATIVE_INFINITY;
+			logP = Double.NEGATIVE_INFINITY;
 		}
 		else if (!successiveRatesIncreasing) {
-			myLogP = Double.NEGATIVE_INFINITY;
+			logP = Double.NEGATIVE_INFINITY;
 		}
 		else {
 			// colt
 			// logP = MVNUtils.getMVNLogLkColt(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
 			// apache
-			myLogP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
+			logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
 		}
 	};
 	
@@ -114,7 +114,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	protected double getLogP() {
 		// System.out.println("logP=" + logP);
-		return myLogP;
+		return logP;
 	}
 	
 	// setters
