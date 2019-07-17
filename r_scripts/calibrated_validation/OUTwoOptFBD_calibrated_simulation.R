@@ -54,8 +54,8 @@ n.param <- 5
 ## optim(c(0, 1), function(x) sum(qlnorm(p=c(0.025,0.975),meanlog=x[1], sdlog=x[2])-hpd)^2) # -5.9691 0.7171
 
 ## ou-like
-## sigsq: -5.9691 0.7171
-## alpha: 0.0932 0.8005
+## sigsq: -5.9691 0.7171 # mean will be 0.003319
+## alpha: 0.0932 0.8005 # mean will be 1.511
 
 ## sigma.rate <- 5 # exponential prior
 sigma.mean <- -5.9691

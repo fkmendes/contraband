@@ -34,8 +34,8 @@ beast.param.names <- c("OUSigmaSq", "OURootValue", "OUTheta1", "OUTheta2", "OUAl
 
 param.labs <- c(expression(sigma^2), expression(y[0]), expression(theta[1]), expression(theta[2]), expression(alpha))
 mle.param.names <- c("sigmasq.mle", "rv.mle", "theta1.mle", "theta2.mle", "alpha.mle")
-## prior.means <- c(0.003297929, 0.0, 1.0, 1.0, 1.504103)
-prior.means <- c(1.504103, 0.0, 1.0, 1.0, 0.003297929)
+prior.means <- c(0.003297929, 0.0, 1.0, 1.0, 1.504103) ## ou-like (alpha high)
+## prior.means <- c(1.504103, 0.0, 1.0, 1.0, 0.003297929) ## bm-like (alpha low)
 
 tree.type <- "nonultra"
 
@@ -117,6 +117,7 @@ table((full.df$alpha >= full.df$lower.alpha) & (full.df$alpha <= full.df$upper.a
 ### PLOTS ###
 
 all.plots <- vector("list", n.param)
+all.plots.mle <- vector("list", n.param)
 for (i in 1:n.param) {
     x.lab = param.labs[i]
     min.x = min(full.df[,param.names[i]])
@@ -135,50 +136,53 @@ for (i in 1:n.param) {
 
     names(all.plots)[i] = paste0("plot", i)
 }
-list2env(all.plots.mle, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
+list2env(all.plots.mle, .GlobalEnv) # sending plots in list into environment so I can use plot_grid
 list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
 
 ## png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.png"), height=24, width=10, unit="cm", res=300)
 ## ggarrange(plotlist=all.plots, ncol=1, nrow=3)
 ## dev.off()
 
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq_mle.pdf"), height=3, width=4)
-plot1.mle
+## suffix <- "_alphahigh.pdf" # ou-like
+suffix <- "_alphalow.pdf" # bm-like
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq_mle", suffix), height=2, width=2.5)
+plot.mle1
 dev.off()
 
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq_hdis.pdf"), height=3, width=4)
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq_hdis", suffix), height=2, width=2.5)
 plot1
 dev.off()
 
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_y0_mle.pdf"), height=3, width=4)
-plot2.mle
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_y0_mle", suffix), height=2, width=2.5)
+plot.mle2
 dev.off()
 
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_y0_hdis.pdf"), height=3, width=4)
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_y0_hdis", suffix), height=2, width=2.5)
 plot2
 dev.off()
 
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th1_mle.pdf"), height=3, width=4)
-plot3.mle
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th1_mle", suffix), height=2, width=2.5)
+plot.mle3
 dev.off()
 
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th1_hdis.pdf"), height=3, width=4)
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th1_hdis", suffix), height=2, width=2.5)
 plot3
 dev.off()
 
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th2_mle.pdf"), height=3, width=4)
-plot4.mle
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th2_mle", suffix), height=2, width=2.5)
+plot.mle4
 dev.off()
 
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th2_hdis.pdf"), height=3, width=4)
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_th2_hdis", suffix), height=2, width=2.5)
 plot4
 dev.off()
 
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_alpha_mle.pdf"), height=3, width=4)
-plot5.mle
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_alpha_mle", suffix), height=2, width=2.5)
+plot.mle5
 dev.off()
 
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_alpha_hdis.pdf"), height=3, width=4)
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_alpha_hdis", suffix), height=2, width=2.5)
 plot5
 dev.off()
 
@@ -186,48 +190,53 @@ dev.off()
 ## sigsq: -5.9691 0.7171
 ## alpha: 0.0932 0.8005
 
-## prior.df <- data.frame(x=c(rlnorm(100000, mean=0.0932, sd=0.8005), rlnorm(100000, mean=-5.9691, sd=0.7171)), y=c(rep("a",100000), rep("s",100000))) ## bm-like
-prior.df <- data.frame(x=c(rlnorm(100000, mean=0.0932, sd=0.8005), rlnorm(100000, mean=-5.9691, sd=0.7171)), y=c(rep("s",100000), rep("a",100000))) ## ou-like
+prior.df <- data.frame(x=c(rlnorm(100000, mean=0.0932, sd=0.8005), rlnorm(100000, mean=-5.9691, sd=0.7171)), y=c(rep("a",100000), rep("s",100000))) ## ou-like
+## prior.df <- data.frame(x=c(rlnorm(100000, mean=0.0932, sd=0.8005), rlnorm(100000, mean=-5.9691, sd=0.7171)), y=c(rep("s",100000), rep("a",100000))) ## bm-like
 
 ## ou-like
-## plot.prior.s <- ggplot(subset(prior.df, y=="s"), aes(x=x)) + geom_density(fill="red", alpha=0.5) + xlim(0,.03) + ylab("Density") + xlab(expression(sigma^2)) +
+plot.prior.s <- ggplot(subset(prior.df, y=="s"), aes(x=x)) + geom_density(fill="#63ace5") + xlim(0,.03) + ylab("Density") + xlab(expression(sigma^2)) + theme_classic()
 ## bm-like
-plot.prior.s <- ggplot(subset(prior.df, y=="s"), aes(x=x)) + geom_density(fill="red", alpha=0.5) + xlim(0,20) + ylab("Density") + xlab(expression(sigma^2)) +
-    theme(
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        plot.background = element_blank(),
-        plot.title = element_text(hjust=0.5),
-        axis.line = element_line(),
-        axis.ticks = element_line(color="black"),
-        axis.text.x = element_text(color="black", size=10),
-        axis.text.y = element_text(color="black", size=10),
-        axis.title.x = element_text(size=12),
-        axis.title.y = element_text(size=12)
-    )
+## plot.prior.s <- ggplot(subset(prior.df, y=="s"), aes(x=x)) + geom_density(fill="#63ace5") + xlim(0,20) + ylab("Density") + xlab(expression(sigma^2)) + theme_classic()
+    ## theme(
+    ##     panel.grid.minor = element_blank(),
+    ##     panel.border = element_blank(),
+    ##     panel.background = element_blank(),
+    ##     plot.background = element_blank(),
+    ##     plot.title = element_text(hjust=0.5),
+    ##     axis.line = element_line(),
+    ##     axis.ticks = element_line(color="black"),
+    ##     axis.text.x = element_text(color="black", size=10),
+    ##     axis.text.y = element_text(color="black", size=10),
+    ##     axis.title.x = element_text(size=12),
+    ##     axis.title.y = element_text(size=12)
+    ## )
 
 ## ou-like
-## plot.prior.a <- ggplot(subset(prior.df, y=="a"), aes(x=x)) + geom_density(fill="green", alpha=0.5) + xlim(0,20) + ylab("Density") + xlab(expression(alpha)) +
+plot.prior.a <- ggplot(subset(prior.df, y=="a"), aes(x=x)) + geom_density(fill="#f6cd61") + xlim(0,20) + ylab("Density") + xlab(expression(alpha)) + theme_classic()
 ## bm-like
-plot.prior.a <- ggplot(subset(prior.df, y=="a"), aes(x=x)) + geom_density(fill="green", alpha=0.5) + xlim(0,.03) + ylab("Density") + xlab(expression(alpha)) +
-    theme(
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        plot.background = element_blank(),
-        plot.title = element_text(hjust=0.5),
-        axis.line = element_line(),
-        axis.ticks = element_line(color="black"),
-        axis.text.x = element_text(color="black", size=10),
-        axis.text.y = element_text(color="black", size=10),
-        axis.title.x = element_text(size=12),
-        axis.title.y = element_text(size=12)
-    )
+## plot.prior.a <- ggplot(subset(prior.df, y=="a"), aes(x=x)) + geom_density(fill="#f6cd61") + xlim(0,.03) + ylab("Density") + xlab(expression(alpha)) + theme_classic()
+    ## theme(
+    ##     panel.grid.minor = element_blank(),
+    ##     panel.border = element_blank(),
+    ##     panel.background = element_blank(),
+    ##     plot.background = element_blank(),
+    ##     plot.title = element_text(hjust=0.5),
+    ##     axis.line = element_line(),
+    ##     axis.ticks = element_line(color="black"),
+    ##     axis.text.x = element_text(color="black", size=10),
+    ##     axis.text.y = element_text(color="black", size=10),
+    ##     axis.title.x = element_text(size=12),
+    ##     axis.title.y = element_text(size=12)
+    ## )
 
-## pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_priors_alphahigh.pdf"), height=3, width=6) ## ou-like
-pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_priors_alphalow.pdf"), height=3, width=6) ## bm-like
-ggarrange(plot.prior.s, plot.prior.a, ncol=2, nrow=1)
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_alpha_priors_alphahigh.pdf"), height=2, width=2.5) ## ou-like
+## pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_alpha_priors_alphalow.pdf"), height=2, width=2.5) ## bm-like
+plot.prior.a
+dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigmasq_priors_alphahigh.pdf"), height=2, width=2.5) ## ou-like
+## pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigmasq_priors_alphalow.pdf"), height=2, width=2.5) ## bm-like
+plot.prior.s
 dev.off()
 
 ## pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigmabyalpha_alphahigh.pdf"), height=4, width=8)

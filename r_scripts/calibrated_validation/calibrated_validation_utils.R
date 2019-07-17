@@ -36,6 +36,9 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
     x = data.df[,x.name]; y = data.df[,y.name]
     reg.df = data.frame(cbind(x,y,lower,upper,plot.hdi))
 
+
+    print((x.max+x.min)/2)
+
     pl = ggplot() + geom_point(mapping=aes(x=x, y=y), shape=20) +
     coord_cartesian(ylim=c(y.min, y.max)) +
     xlab(x.lab) + ylab("Posterior mean") +
@@ -53,8 +56,10 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
         axis.text.y = element_text(color="black", size=10),
         axis.title.x = element_text(size=12),
         axis.title.y = element_text(size=12)
-    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max)) + geom_linerange(data=reg.df[plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="red", alpha=.4, size=1.5) +
-        scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), limits=c(x.min,x.max)) + geom_linerange(data=reg.df[!plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="lightgray", alpha=.4)
+    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), breaks=c(x.min,((x.max+x.min)/2),x.max), limits=c(x.min,x.max)) +
+        scale_y_continuous(labels = function(x) round(as.numeric(x), digits=3), breaks=c(y.min,((y.max+y.min)/2),y.max), limits=c(y.min,y.max)) +
+        geom_linerange(data=reg.df[plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="red", alpha=.4, size=1.5) +
+        geom_linerange(data=reg.df[!plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="lightgray", alpha=.4)
     return(pl)
 }
 
@@ -81,7 +86,8 @@ get.plot.no.hdi <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, p
         axis.text.y = element_text(color="black", size=10),
         axis.title.x = element_text(size=12),
         axis.title.y = element_text(size=12)
-    )
+    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), breaks=c(x.min,(x.max+x.min)/2,x.max), limits=c(x.min,x.max)) +
+    scale_y_continuous(labels = function(x) round(as.numeric(x), digits=3), breaks=c(y.min,(y.max+y.min)/2,y.max), limits=c(y.min,y.max))
     return(pl)
 }
 
