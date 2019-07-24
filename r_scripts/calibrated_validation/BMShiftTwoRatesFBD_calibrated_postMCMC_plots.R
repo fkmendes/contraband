@@ -64,6 +64,12 @@ for (i in 1:n.sim) {
 full.df <- cbind(true.param.df, log.df)
 cols.2.flip <- c(1, 4) # 1 and 2 should flip, 4 and 5 should flip
 full.df <- flip.trace.var(full.df, cols.2.flip)
+plot.hdi <- vector("list", n.param)
+for (i in 1:n.param) {
+    upper = paste0("upper.", param.names[i])
+    lower = paste0("lower.", param.names[i])
+    plot.hdi[[i]] = (full.df[,upper] < full.df[,param.names[i]] | full.df[,lower] > full.df[,param.names[i]])
+}
 
 # coverage
 table((full.df$mu >= full.df$lower.mu) & (full.df$mu <= full.df$upper.mu))
@@ -92,11 +98,23 @@ for (i in 1:n.param) {
     max.y = max(full.df[,paste0("mean.",param.names[i])])
     all.plots[[i]] = get.plot(param.names[i], paste0("mean.",param.names[i]),
                               min.x, max.x, min.x, max.x, x.lab, prior.means[i],
-                              full.df)
+                              full.df, plot.hdi[[i]])
     names(all.plots)[i] = paste0("plot", i)
 }
 list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
 
-png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.png"), height=24, width=10, unit="cm", res=300)
-ggarrange(plotlist=all.plots, ncol=1, nrow=3)
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq1.pdf"), height=2, width=2.5)
+plot1
 dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq2.pdf"), height=2, width=2.5)
+plot2
+dev.off()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_y0.pdf"), height=2, width=2.5)
+plot3
+dev.off()
+
+## png(paste0(paste0(cal.validation.folder, "figs/"), job.prefix, "_", tree.type, "_graphs.png"), height=24, width=10, unit="cm", res=300)
+## ggarrange(plotlist=all.plots, ncol=1, nrow=3)
+## dev.off()

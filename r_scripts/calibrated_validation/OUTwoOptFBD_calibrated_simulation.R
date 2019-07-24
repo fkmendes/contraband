@@ -58,17 +58,17 @@ n.param <- 5
 ## alpha: 0.0932 0.8005 # mean will be 1.511
 
 ## sigma.rate <- 5 # exponential prior
-sigma.mean <- -5.9691
+sigma.mean <- -5.9691 # ou-like
 sigma.sd <- 0.7171
-## sigma.mean <- 0.0932
+## sigma.mean <- 0.0932 # bm-like
 ## sigma.sd <- 0.8005
 rv.mean <- 0.0 # root value (theta0 in mvMORPH, the first element in the theta vector result)
 rv.sd <- 2.0 #
 th.mean <- 1.0 # thetas
 th.sd <- 2.0 #
-## alpha.mean <- -5.9691
+## alpha.mean <- -5.9691 # bm-like
 ## alpha.sd <- 0.7171
-alpha.mean <- 0.0932
+alpha.mean <- 0.0932 # ou-like
 alpha.sd <- 0.8005
 ## alpha.mean <- alpha.sd <- 1.0
 

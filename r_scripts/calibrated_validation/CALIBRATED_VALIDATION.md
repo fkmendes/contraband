@@ -212,7 +212,7 @@ The same simulations as in 5.1, but with two rates. We pick a random internal no
 Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBD '10:00:00' BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml nonultra BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
 ``` 
 
-## (5.4) Plotting the mean posterior of the three BM parameters (rate and mean/ancestral value) against true values
+## (5.4) Plotting the mean posterior of the three BM parameters (two rates and mean/ancestral value) against true values
 
 ```
 Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBD 3 sigma1,sigma2,mu rateValues1,rateValues2,BMMean "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1/5,1/5,0.0" sigma1.mle,sigma2.mle,mu.mle
@@ -222,8 +222,19 @@ Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTw
 ## (6.1) Simulating one trait, with two optima on tree, writing .xmls from template and .sh scripts
 
 The FBD priors are the same as in 5.1, and we use a normal distribution with mean 1.0 and standard deviation 2.0 for the thetas, and with mean 0.0 and standard deviation 2.0 for the root value.
-The prior for alpha is a lognormal with both mean and standard deviation 1.0.
+We simulate two scenarios, one with high alpha and low sigma^2, and the other with high sigma^2 and low alpha. 
+Priors for sigma^2 and alpha are log-normals (harcoded in the .R script).
 
 ```
 Rscript OUTwoOptFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNTwoOptFBD '48:00:00' OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_template.xml nonultra OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
 ```
+
+We name the result files with "_alphahigh" and "_alphalow" suffixes to distinguish between the two simulated settings.
+
+## (6.2) Plotting the mean posterior of the five OU parameters (rate, ancestral value, alpha and two optima) against true values
+
+```
+Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData 100 OUMVNTwoOptFBD 5 sigmasq,rv,theta1,theta2,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(alpha)" "0.003297929,0.0,1.0,1.0,1.504103" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,alpha.mle
+```
+
+To switch between simulated settings, comment and uncomment the hardcoded relevant steps inside the .R script, and remove the suffixes mentioned in 6.1 from file names of corresponding setting.

@@ -4,37 +4,39 @@ library(ggpubr)
 library(ape)
 source("calibrated_validation_utils.R")
 
-## args = commandArgs(trailingOnly=TRUE)
+args = commandArgs(trailingOnly=TRUE)
 
 ### SCRIPT FLAGS AND PATH VARIABLES ###
 
-## cal.validation.folder <- args[1]
-cal.validation.folder <- "./"
-## rdata.path <- args[2]
-rdata.path <- "OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData"
-## n.sim <- as.numeric(args[3])
-n.sim <- 100
-## job.prefix <- args[4]
-job.prefix <- "OUMVNTwoOptFBD"
-## n.param <- as.numeric(args[5])
-n.param <- 5
+## cal.validation.folder <- "./"
+## rdata.path <- "OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData"
+## n.sim <- 100
+## job.prefix <- "OUMVNTwoOptFBD"
+## n.param <- 5
 
-## param.names <- strsplit(args[6], ",")[[1]]
-param.names <- c("sigmasq", "rv", "theta1", "theta2", "alpha")
-## beast.param.names <- strsplit(args[7], ",")[[1]]
-beast.param.names <- c("OUSigmaSq", "OURootValue", "OUTheta1", "OUTheta2", "OUAlpha")
-## param.labs.preparse <- strsplit(args[8], ",")[[1]]
-## prior.means.preparse <- strsplit(args[9], ",")[[1]]
-## param.labs <- prior.means <- c()
-## for (i in 1:n.param) {
-##     param.labs[i] = eval(parse(text=param.labs.preparse[i]))
-##     prior.means[i] = eval(parse(text=prior.means.preparse[i]))
-## }
-## mle.param.names <- strsplit(args[11], ",")[[1]]
+cal.validation.folder <- args[1]
+rdata.path <- args[2]
+n.sim <- as.numeric(args[3])
+job.prefix <- args[4]
+n.param <- as.numeric(args[5])
 
-param.labs <- c(expression(sigma^2), expression(y[0]), expression(theta[1]), expression(theta[2]), expression(alpha))
-mle.param.names <- c("sigmasq.mle", "rv.mle", "theta1.mle", "theta2.mle", "alpha.mle")
-prior.means <- c(0.003297929, 0.0, 1.0, 1.0, 1.504103) ## ou-like (alpha high)
+## param.names <- c("sigmasq", "rv", "theta1", "theta2", "alpha")
+## beast.param.names <- c("OUSigmaSq", "OURootValue", "OUTheta1", "OUTheta2", "OUAlpha")
+
+param.names <- strsplit(args[6], ",")[[1]]
+beast.param.names <- strsplit(args[7], ",")[[1]]
+param.labs.preparse <- strsplit(args[8], ",")[[1]]
+prior.means.preparse <- strsplit(args[9], ",")[[1]]
+param.labs <- prior.means <- c()
+for (i in 1:n.param) {
+    param.labs[i] = eval(parse(text=param.labs.preparse[i]))
+    prior.means[i] = eval(parse(text=prior.means.preparse[i]))
+}
+mle.param.names <- strsplit(args[11], ",")[[1]]
+
+## param.labs <- c(expression(sigma^2), expression(y[0]), expression(theta[1]), expression(theta[2]), expression(alpha))
+## mle.param.names <- c("sigmasq.mle", "rv.mle", "theta1.mle", "theta2.mle", "alpha.mle")
+## prior.means <- c(0.003297929, 0.0, 1.0, 1.0, 1.504103) ## ou-like (alpha high)
 ## prior.means <- c(1.504103, 0.0, 1.0, 1.0, 0.003297929) ## bm-like (alpha low)
 
 tree.type <- "nonultra"
@@ -143,8 +145,8 @@ list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I cn
 ## ggarrange(plotlist=all.plots, ncol=1, nrow=3)
 ## dev.off()
 
-## suffix <- "_alphahigh.pdf" # ou-like
-suffix <- "_alphalow.pdf" # bm-like
+suffix <- "_alphahigh.pdf" # ou-like
+## suffix <- "_alphalow.pdf" # bm-like
 
 pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq_mle", suffix), height=2, width=2.5)
 plot.mle1
@@ -239,8 +241,8 @@ pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigmasq
 plot.prior.s
 dev.off()
 
-## pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigmabyalpha_alphahigh.pdf"), height=4, width=8)
-## par(mfrow=c(1,2))
-## plot(sigmasq.mle~alpha.mle, data=full.df, xlim=c(0,6), ylim=c(0,.015), bty="l", pch=20, xlab=expression(paste("MLE ", alpha)), ylab=expression(paste("MLE ", sigma^2)))
-## plot(mean.sigmasq~mean.alpha, data=full.df, bty="l", pch=20, xlab=expression(paste("Mean posterior ", alpha)), ylab=expression(paste("Mean posterior ", sigma^2)))
-## dev.off()
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigmabyalpha_alphahigh.pdf"), height=2.5, width=6)
+sig.by.alpha.ml <- ggplot(data=full.df, aes(x=alpha.mle, sigmasq.mle)) + geom_point() + theme_classic() + xlim(0,6) + ylim(0,.015) + xlab(expression(paste("MLE ", alpha))) + ylab(expression(paste("MLE ", sigma^2)))
+sig.by.alpha.p <- ggplot(data=full.df, aes(x=mean.alpha, mean.sigmasq)) + geom_point() + theme_classic() + xlab(expression(paste("Mean posterior ", alpha))) + ylab(expression(paste("Mean posterior ", sigma^2)))
+ggarrange(sig.by.alpha.p, sig.by.alpha.ml, ncol=2)
+dev.off()
