@@ -62,6 +62,7 @@ public class TreeToVCVMat extends CalculationNode {
 		Tree tree = treeInput.get();
 		
 		rccm = (RateCategoryClockModel) branchRateModelInput.get();
+		
 		//colorValues = colorValuesInput.get().getValues();
 		//colorAssignments = colorAssignmentInput.get().getValues();
 

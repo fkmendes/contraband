@@ -54,12 +54,12 @@
 	      <distr id="Normal.OURootValue" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
 
-	<distribution id="AlphaPrior" spec="beast.math.distributions.Prior" x="@OUAlpha">
-	  <distr id="LogNormal.OUAlpha" spec="beast.math.distributions.LogNormalDistributionModel" S="1.0" M="1.0"/>
-	</distribution>
+		<distribution id="AlphaPrior" spec="beast.math.distributions.Prior" x="@OUAlpha">
+	  	  <distr id="LogNormal.OUAlpha" spec="beast.math.distributions.LogNormalDistributionModel" S="1.0" M="1.0"/>
+		</distribution>
 	
-	<distribution id="ThetaValuePrior" spec="beast.math.distributions.Prior" x="@OUTheta">
-	  <distr id="Normal.OUTheta" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+		<distribution id="ThetaValuePrior" spec="beast.math.distributions.Prior" x="@OUTheta">
+	  	  <distr id="Normal.OUTheta" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
 
 	<distribution id="ThetaAssignmentsPrior" spec="beast.math.distributions.Prior" x="@OUThetaAssignments">
@@ -93,7 +93,7 @@
 
 	      <optimumManager id="optimumManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
 	        <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="3">
-	   	  	  <rates id="OUTheta" spec="parameter.RealParameter">0.01 0.05</rates>
+	   	  	  <rates id="OUTheta" spec="parameter.RealParameter" lower="-Infinity" upper="Infinity">0.01 0.05</rates>
 	      	  <rateCatAssign id="OUThetaAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0 0 0</rateCatAssign>
 	      	  <tree idref="TheTree"/>
 	        </branchRateModel>

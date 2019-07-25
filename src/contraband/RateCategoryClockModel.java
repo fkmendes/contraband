@@ -43,16 +43,19 @@ public class RateCategoryClockModel extends BranchRateModel.Base {
 
         RealParameter rates = rateValuesInput.get();
 
-/*
- * Note that this clock will be used with OU optima, which do not have to be >= 0.0
- * So I'm taking these checks out         
- */
-//        if (rates.lowerValueInput.get() == null || rates.lowerValueInput.get() < 0.0) {
-//            rates.setLower(0.0);
-//        }
-//        if (rates.upperValueInput.get() == null || rates.upperValueInput.get() < 0.0) {
-//            rates.setUpper(Double.MAX_VALUE);
-//        }
+        /*
+         * Note that this makes it necessary to set lower and upper to -Infinity and Infinity if
+         * you expect that whatever "rate" represents can be a negative value.
+         *
+         * Otherwise, the lower will default to 0.0, and the logP of the prior of that parameter will
+         * be -Infinity...
+         */
+        if (rates.lowerValueInput.get() == null || rates.lowerValueInput.get() < 0.0) {
+            rates.setLower(0.0);
+        }
+        if (rates.upperValueInput.get() == null || rates.upperValueInput.get() < 0.0) {
+            rates.setUpper(Double.MAX_VALUE);
+        }
         if (rates.getDimension() != nCat) {
         	Log.warning.println("RandomLocalClockModel::Setting dimension of rates to " + nCat);
             rates.setDimension(nCat);
