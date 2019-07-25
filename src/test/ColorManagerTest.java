@@ -9,7 +9,9 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
-import contraband.ColorManager;
+// import contraband.ColorManager;
+import contraband.RateCategoryClockModel;
+import contraband.TreeToVCVMat;
 
 public class ColorManagerTest {
 
@@ -26,10 +28,14 @@ public class ColorManagerTest {
 		// initializing data
 		RealParameter colorValues = new RealParameter(new Double[] { 0.2, 0.4, 0.6, 0.8, 1.0 });
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 3, 4, 0, 0, 0, 2, 1, 4, 0 });
+		RateCategoryClockModel lsc = new RateCategoryClockModel();
+		lsc.initByName("nCat", 5, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
 						
-		ColorManager colors = new ColorManager();
-		colors.initByName("nTraits", 1, "nColors", 5, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
-				
+		// ColorManager colors = new ColorManager();
+		// colors.initByName("nTraits", 1, "nColors", 5, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		TreeToVCVMat colors = new TreeToVCVMat();
+		colors.initByName("branchRateModel", lsc, "tree", myTree, "coalCorrection", false);	
+		
 		colorValuesMat = colors.getSpColorValuesMatOneTrait();
 		
 		expected1row = new double[] {

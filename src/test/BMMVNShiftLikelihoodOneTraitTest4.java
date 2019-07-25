@@ -9,7 +9,9 @@ import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.BMMVNShiftLikelihoodOneTrait;
 import contraband.ColorManager;
+import contraband.RateCategoryClockModel;
 import contraband.OneValueContTraits;
+import contraband.TreeToVCVMat;
 
 public class BMMVNShiftLikelihoodOneTraitTest4 {
 
@@ -28,8 +30,13 @@ public class BMMVNShiftLikelihoodOneTraitTest4 {
 		// VCV Mat
 		RealParameter colorValues = new RealParameter(new Double[] { 0.05057867, 3.360241 });
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 0, 0, 1, 1, 1 });
-		ColorManager colors = new ColorManager();
-		colors.initByName("tree", myTree, "nTraits", 1, "nColors", 2, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		RateCategoryClockModel lsc = new RateCategoryClockModel();
+		lsc.initByName("nCat", 2, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
+		
+		TreeToVCVMat colors = new TreeToVCVMat();
+		colors.initByName("branchRateModel", lsc, "tree", myTree, "coalCorrection", false);		
+		// ColorManager colors = new ColorManager();
+		// colors.initByName("tree", myTree, "nTraits", 1, "nColors", 2, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 				
 		// initializing data	
 		RealParameter oneTraitValues = new RealParameter(new Double[] { -2.53718502574816, -2.85562629168723, 1.79661600241838 });

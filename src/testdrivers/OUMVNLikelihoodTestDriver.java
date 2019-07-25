@@ -6,6 +6,8 @@ import beast.util.TreeParser;
 import contraband.ColorManager;
 import contraband.OUMVNLikelihoodOneTrait;
 import contraband.OneValueContTraits;
+import contraband.RateCategoryClockModel;
+import contraband.TreeToVCVMat;
 
 public class OUMVNLikelihoodTestDriver {
 
@@ -19,9 +21,13 @@ public class OUMVNLikelihoodTestDriver {
 				
 		RealParameter colorValues = new RealParameter(new Double[] { -4.047373e-16, 4.3, 5.9 }); // thetas
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 1, 1, 2, 0, 1, 0, 0 });
-							
-		ColorManager optima = new ColorManager();
-		optima.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		RateCategoryClockModel rcc = new RateCategoryClockModel();
+		rcc.initByName("nCat", 3, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
+		
+		TreeToVCVMat optima = new TreeToVCVMat();
+		optima.initByName("branchRateModel", rcc, "tree", myTree, "coalCorrection", false);
+		// ColorManager optima = new ColorManager();
+		// optima.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 		
 		// initializing data		
 		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });

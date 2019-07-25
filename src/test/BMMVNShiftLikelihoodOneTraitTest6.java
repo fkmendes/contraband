@@ -8,8 +8,10 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.BMMVNShiftLikelihoodOneTrait;
-import contraband.ColorManager;
+// import contraband.ColorManager;
+import contraband.RateCategoryClockModel;
 import contraband.OneValueContTraits;
+import contraband.TreeToVCVMat;
 
 /*
  * One rate, one trait, on tree with sampled ancestors and fossils (10 extant tips)
@@ -33,8 +35,13 @@ public class BMMVNShiftLikelihoodOneTraitTest6 {
 		
 		// first 5 rows are tips
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-		ColorManager colors = new ColorManager();
-		colors.initByName("tree", myTree, "nTraits", 1, "nColors", 1, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		RateCategoryClockModel lsc = new RateCategoryClockModel();
+		lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
+		
+		TreeToVCVMat colors = new TreeToVCVMat();
+		colors.initByName("branchRateModel", lsc, "tree", myTree, "coalCorrection", false);
+		// ColorManager colors = new ColorManager();
+		// colors.initByName("tree", myTree, "nTraits", 1, "nColors", 1, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 				
 		// initializing data	
 		RealParameter oneTraitValues = new RealParameter(new Double[] { -5.05744071356103, -1.11052196957346, -0.575427737395457, -0.202953693279079, 1.14969399531796, -1.64202406456342, 1.79417473949251, 0.073438714146757, 0.726726641446067, 3.93444954633643, -0.491682932895839, -1.74464882096195, -0.0780925842656348, 4.81261164374873, 4.49854934867917, 3.04106820281915, -0.803750712288891, 0.523401664662935, -0.456279043339767, 1.2741332640877, 2.87956906600202, 3.91356152320114, 3.59597823070803, -0.389239530235073, -0.63498836297618, -0.789764345711418, -1.20679458892863, -1.48400428008497 });

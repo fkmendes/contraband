@@ -91,10 +91,14 @@
 	        <traitValues id="fixedTraitValues" spec="parameter.RealParameter">0.3975946 0.2423501 -0.6398611 0.3134564</traitValues>
 	      </oneTraitData>
 
-	      <optimumManager id="optimumManager" spec="contraband.ColorManager" nTraits="1" nColors="2" coalCorrection="false">
+	      <optimumManager id="optimumManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
+	        <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="3">
+	   	  	  <rates id="OUTheta" spec="parameter.RealParameter">0.01 0.05</rates>
+	      	  <rateCatAssign id="OUThetaAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0 0 0</rateCatAssign>
+	      	  <tree idref="TheTree"/>
+	        </branchRateModel>
+	      	
 	      	<tree idref="TheTree"/>
-	      	<colorValues id="OUTheta" spec="parameter.RealParameter">0.01 0.05</colorValues>
-	      	<colorAssignments id="OUThetaAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0 0 0</colorAssignments>
 	      </optimumManager>
 	    
 	      <sigmasq id="OUSigmaSq" dimension="1" spec="parameter.RealParameter">0.1</sigmasq>

@@ -4,13 +4,15 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.BMMVNShiftLikelihoodOneTrait;
-import contraband.ColorManager;
+// import contraband.ColorManager;
+import contraband.RateCategoryClockModel;
 import contraband.OneValueContTraits;
+import contraband.TreeToVCVMat;
 
 /*
  * This testdriver runs the BMMVNShift class with a single rate for the whole tree (matches/reduces to BMMVNLikelihoodTestDriver)
  */
-public class BMMVNShiftLikelihoodTestDriver {
+public class BMMVNShiftLikelihoodTestDriver1 {
 
 	public static void main(String[] args) {
 		// tree
@@ -20,8 +22,13 @@ public class BMMVNShiftLikelihoodTestDriver {
 		// VCV Mat
 		RealParameter colorValues = new RealParameter(new Double[] { 1.4822794118 });
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 0, 0, 0, 0, 0, 0, 0 });
-		ColorManager colors = new ColorManager();
-		colors.initByName("tree", myTree, "nTraits", 1, "nColors", 1, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		RateCategoryClockModel lsc = new RateCategoryClockModel();
+		lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
+		
+		TreeToVCVMat colors = new TreeToVCVMat();
+		colors.initByName("branchRateModel", lsc, "tree", myTree, "coalCorrection", false);
+		// ColorManager colors = new ColorManager();
+		// colors.initByName("tree", myTree, "nTraits", 1, "nColors", 1, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 		
 		// initializing data
 		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
@@ -36,6 +43,6 @@ public class BMMVNShiftLikelihoodTestDriver {
 		// likelihood
 		BMMVNShiftLikelihoodOneTrait BMLk = new BMMVNShiftLikelihoodOneTrait();
 		BMLk.initByName("tree", myTree, "rateManager", colors, "mean", mean, "oneTraitData", oneTraitData);
-		System.out.println(BMLk.calculateLogP());
+		System.out.println(BMLk.calculateLogP()); // -8.29469706
 	}	
 }

@@ -1,4 +1,5 @@
 package contraband;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -22,7 +23,8 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	final public Input<Boolean> eqDistInput = new Input<>("eqDist", "Whether or not to assume equilibrium (stationary) distribution at the root. The mean of that distribution will rootValue", Validate.REQUIRED);
 	final public Input<Boolean> useRootMetaDataInput = new Input<>("useRootMetaData", "Whether or not to use root meta data (specified optimum). If set to 'false', root optimum is set to eldest regime (regimes are numbered from the root toward the tips).", Validate.REQUIRED);
 	final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
-	final public Input<ColorManager> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
+	final public Input<TreeToVCVMat> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
+	// final public Input<ColorManager> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
 	final public Input<RealParameter> alphaInput = new Input<>("alpha", "Pull toward optimum or optima.", Validate.REQUIRED);
 	
 	private boolean dirty;
@@ -40,7 +42,8 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	                          // the value we condition y_0 on is often theta_0 (root optimum), which is a very liberal assumption!
 	
 	// mean vector
-	private ColorManager optimumManager;
+	private TreeToVCVMat optimumManager;
+	// private ColorManager optimumManager;
 	private RealMatrix wMat;
 	
 	// VCV matrix
@@ -133,14 +136,14 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		Double[] thetas = optimumManager.getColorValues();
 		
 		boolean thetasAreGo = true;
-		double lastThetaValue = Double.NEGATIVE_INFINITY;
-		for (double thetaValue: thetas) {
-			if (thetaValue < lastThetaValue) {
-				thetasAreGo = false;
-			} else {
-				lastThetaValue = thetaValue;
-			}
-		}
+//		double lastThetaValue = Double.NEGATIVE_INFINITY;
+//		for (double thetaValue: thetas) {
+//			if (thetaValue < lastThetaValue) {
+//				thetasAreGo = false;
+//			} else {
+//				lastThetaValue = thetaValue;
+//			}
+//		}
 		
 		setThetasAreGo(thetasAreGo); // updating parent class
 		
@@ -212,7 +215,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		populateParentInstanceVars(updateVCVMat, updateMean, updateData);
 		
 		super.populateLogP();
-		
+
 		return getLogP();
 	}
 	

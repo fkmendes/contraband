@@ -47,15 +47,22 @@
 	      	<traitValues id="fixedTraitValues" spec="parameter.RealParameter">4.1 4.5 5.2</traitValues>
 	      </oneTraitData>
 
-		  <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" nColors="2" coalCorrection="false">
+		  <rateManager id="rateManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
+		  	<branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="2">
+	          <rates id="rateValues" spec="parameter.RealParameter">0.1 0.1</rates>
+	          <rateCatAssign id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0</rateCatAssign>
+	          <tree idref="TheTree"/>
+	        </branchRateModel>
+		    
 		    <tree idref="TheTree"/>
-		    <colorValues id="rateValues" spec="parameter.RealParameter">0.1 0.1</colorValues>
-		    <colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0</colorAssignments>
 		  </rateManager>
 	    
 	      <mean id="BMMean" dimension="1" spec="parameter.RealParameter">0.0</mean>
 	    </distribution> <!-- END BMVN -->
 	    
+	    <distribution id="rejectionSampling" spec="contraband.RateCategoryIdentifiability">
+	      <rates idref="rateValues"/>
+	    </distribution>
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
 
@@ -80,14 +87,14 @@
       <log idref="BMMean"/>
     </logger>
 
-    <logger id="screenlog" logEvery="1">
+    <logger id="screenlog" logEvery="10000">
         <log idref="posterior"/>
         <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
         <log idref="likelihood"/>
         <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:firsthalf" fileName="BMMVNShift_samplingtree.trees" logEvery="5000" mode="tree">
+    <logger id="treelog.t:firsthalf" fileName="BMMVNShift_samplingtree.trees" logEvery="5000000" mode="tree">
         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>

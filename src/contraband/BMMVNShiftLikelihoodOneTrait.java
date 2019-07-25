@@ -14,7 +14,8 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 
 	final public Input<RealParameter> meanInput = new Input<>("mean", "mu, or x_0, the mean of the process (and the values at the root).", Validate.REQUIRED);
 	final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
-	final public Input<ColorManager> rateManagerInput = new Input<>("rateManager", "color manager object that paints branches with their own rates.", Validate.REQUIRED);
+	// final public Input<ColorManager> rateManagerInput = new Input<>("rateManager", "color manager object that paints branches with their own rates.", Validate.REQUIRED);
+	final public Input<TreeToVCVMat> rateManagerInput = new Input<>("rateManager", "color manager object that paints branches with their own rates.", Validate.REQUIRED);
 	
 	private boolean dirty;
 	
@@ -27,7 +28,8 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	private RealVector bmMeanVector;
 	
 	// VCV matrix
-	private ColorManager rateManager;
+	// private ColorManager rateManager;
+	private TreeToVCVMat rateManager;
 
 	// colt
 	// private DoubleMatrix2D bmVCVMat, bmInvVCVMat;
@@ -118,7 +120,8 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	
 	@Override
 	protected void populateVCVMatrix() {
-		boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
+		// boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
+		boolean ratesAreGo = true;
 		setRatesAreGo(true); // updating parent class
 		
 		if (ratesAreGo) {
@@ -138,7 +141,8 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	
 	@Override
 	protected void populateInvVCVMatrix() {
-		boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
+		// boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
+		boolean ratesAreGo = true;
 
 		if (ratesAreGo) {		
 			// colt

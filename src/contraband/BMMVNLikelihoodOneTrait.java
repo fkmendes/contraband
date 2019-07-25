@@ -51,8 +51,8 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		populateParentInstanceVars(true, true, false);
 		
 		// (ASR) just done once as it does not change for BM
-		populateWMatrix();
-		setProcessWMat(bmWVector);
+		// populateWMatrix();
+		// setProcessWMat(bmWVector);
 	}
 	
 	protected void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean, boolean updateAncNodeVCVMat) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
+<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.branchratemodel:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
 
   <run id="mcmc" spec="MCMC" chainLength="5000000">
     <state id="state" storeEvery="5000">
@@ -40,10 +40,14 @@
 	      	<traitValues id="fixedTraitValues" spec="parameter.RealParameter">4.1 4.5</traitValues>
 	      </oneTraitData>
 
-	      <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" nColors="2" coalCorrection="false">
+	      <rateManager id="rateManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
+	        <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="2">
+	          <rates id="rateValues" spec="parameter.RealParameter">0.1 0.1</rates>
+	          <rateCatAssign id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0</rateCatAssign>
+	          <tree idref="FixedTree"/>
+	        </branchRateModel>
+	        
 			<tree idref="FixedTree"/>
-			<colorValues id="rateValues" spec="parameter.RealParameter">0.1 0.1</colorValues>
-			<colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0</colorAssignments>
 	      </rateManager>
 	    
 	      <mean id="BMMean" dimension="1" spec="parameter.RealParameter">0.0</mean>

@@ -117,7 +117,8 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	protected void populateAncNodeVCVMatrix() {}; // needed for ASR
 	
 	protected void populateLogP() {
-		if (matrixWasSingularCantInvertBarf || !successiveThetasIncreasing || detVCVMat==0.0) {
+		// if (matrixWasSingularCantInvertBarf || !successiveThetasIncreasing || detVCVMat==0.0) {
+		if (matrixWasSingularCantInvertBarf || detVCVMat==0.0) {
 			logP = Double.NEGATIVE_INFINITY;
 		}
 		else {

@@ -8,8 +8,10 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.BMMVNShiftLikelihoodOneTrait;
-import contraband.ColorManager;
+import contraband.RateCategoryClockModel;
+// import contraband.ColorManager;
 import contraband.OneValueContTraits;
+import contraband.TreeToVCVMat;
 
 public class BMMVNShiftLikelihoodOneTraitTest5 {
 
@@ -42,8 +44,13 @@ public class BMMVNShiftLikelihoodOneTraitTest5 {
 				1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0, 0
 		});
-		ColorManager colors = new ColorManager();
-		colors.initByName("tree", myTree, "nTraits", 1, "nColors", 3, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		RateCategoryClockModel lsc = new RateCategoryClockModel();
+		lsc.initByName("nCat", 3, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
+		
+		TreeToVCVMat colors = new TreeToVCVMat();
+		colors.initByName("branchRateModel", lsc, "tree", myTree, "coalCorrection", false);
+		// ColorManager colors = new ColorManager();
+		// colors.initByName("tree", myTree, "nTraits", 1, "nColors", 3, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 				
 		// initializing data	
 		RealParameter oneTraitValues = new RealParameter(new Double[] { -4.24865266388791, 1.12694466883781, -6.02979129548445, 9.62359673885322, 0.17990827089315, -5.46776437171474, 0.486983190714245, 2.08585804088066, 0.753683973121965, -0.242019913226091, 0.946577159488485, 6.22141276151274, 2.91113662785022, -2.0374126462967, -1.10293312619706, -0.179708562978063, -0.198701248227853, 4.58084601841762, 5.64277550994041, 0.919256884182315, 1.09524719371436, 0.782136300731067, 0.0962378659531526, -5.33631896191408, 1.4905959236315, -0.0744248296375519, -0.177479586475342, -4.26961572362966, -2.86137408169925, -0.974994208280936, 1.41858116564816, -0.187048179444733, 0.282668872536788, -0.244597214204735, -1.19517123879371, -1.10037443643529, -0.261483237873604, -0.207560694831451, 0.348278374786552, -0.168277479250151, -0.406155392866917, -0.3594972601634, -0.0234868583801822, 1.00637046502527, -0.000469931947963076, -0.329563226090097, 0.043226745691999, 0.739816593725853, -0.238002140615943, -0.214951085346446 });

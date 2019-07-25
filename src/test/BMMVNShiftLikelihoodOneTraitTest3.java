@@ -8,8 +8,10 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.BMMVNShiftLikelihoodOneTrait;
-import contraband.ColorManager;
+// import contraband.ColorManager;
+import contraband.RateCategoryClockModel;
 import contraband.OneValueContTraits;
+import contraband.TreeToVCVMat;
 
 public class BMMVNShiftLikelihoodOneTraitTest3 {
 
@@ -28,8 +30,13 @@ public class BMMVNShiftLikelihoodOneTraitTest3 {
 		// VCV Mat
 		RealParameter colorValues = new RealParameter(new Double[] { 10.37545 });
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-		ColorManager colors = new ColorManager();
-		colors.initByName("nTraits", 1, "nColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		RateCategoryClockModel lsc = new RateCategoryClockModel();
+		lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
+		
+		TreeToVCVMat colors = new TreeToVCVMat();
+		colors.initByName("branchRateModel", lsc, "tree", myTree, "coalCorrection", false);
+		// ColorManager colors = new ColorManager();
+		// colors.initByName("nTraits", 1, "nColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 				
 		// initializing data	
 		RealParameter oneTraitValues = new RealParameter(new Double[] { -1.98102089083783,0.368221479864884,-2.88206789097561,4.1584950949635,-0.00844451532825974,-2.53652645094459,1.49253360790008,0.860345193251339,2.34223152425472,-0.799642041763574,2.95604288792148,2.77398773288718,1.29414159577677,-6.45163527858711,-3.4910947199795,-0.134187705609486,-0.142843938373703,1.96381042760098,2.43882757691384,2.88182895484916,3.43830441895749,2.47333215100859,0.304330853565934,-6.07220493234317,0.257366287252572,-0.646689981206873,-0.969408565879601,-5.64312827761184,-4.45283272974081,-2.57622923519127,-0.154025403982667,-1.05882534303589,-1.2255223679612,-1.83844113541221,-4.80014501272491,-2.65348584683595,-0.889683582858697,-0.7191201409195,1.03859041594185,-1.54742048206181,-2.30228393056959,-1.58539047472242,-0.522727237241902,-0.531092662298977,-1.53710013936109,-1.86653599613174,-1.50415600947128,-0.806534414120411,-1.20121412215974,-1.12832020868563 });
@@ -45,7 +52,7 @@ public class BMMVNShiftLikelihoodOneTraitTest3 {
 		BMMVNShiftLikelihoodOneTrait BMLk = new BMMVNShiftLikelihoodOneTrait();
 		BMLk.initByName("tree", myTree, "rateManager", colors, "mean", mean, "oneTraitData", oneTraitData);
 		lnLk = BMLk.calculateLogP();
-		System.out.println(lnLk);
+		System.out.println(lnLk); // -168.0481
 	}
 
 	@Test
