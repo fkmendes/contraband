@@ -78,7 +78,8 @@ while (success <= n.sim + 50) {
             cat(paste(c("Simulating tree", success, "with FBD.\n"), sep=" "))
             int.node.idxs = (max(which(node.depth.edgelength(tr)==0))+1):(tr$Nnode + length(tr$tip.label))
             n.descendants = 1
-            while (n.descendants < (length(tr$tip.label)/10)) {
+            while ((n.descendants < (length(tr$tip.label) * 0.2)) | (n.descendants > (length(tr$tip.label) * 0.8))) {
+            # while (n.descendants < (length(tr$tip.label)/10)) {
                 random.int.node = sample(int.node.idxs, 1)
                 n.descendants = length(getDescendants(tr, random.int.node))
             }
@@ -133,7 +134,7 @@ taxon.strs.4.template <- vector("list", n.sim + 50)
 for (i in 1:(n.sim+50)) {
     taxon.strs.4.template[[i]] = paste(paste0("<taxon id=\"", trs[[i]]$tip.label, "\" spec=\"Taxon\"/>"), collapse="\n                  ")
 }
-traits.4.template <- vector("list", n.sim) 
+traits.4.template <- vector("list", n.sim)
 
 ## actually simulating and populating strs for template
 set.seed(123)
