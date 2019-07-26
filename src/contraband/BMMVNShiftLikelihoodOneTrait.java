@@ -14,8 +14,12 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 
 	final public Input<RealParameter> meanInput = new Input<>("mean", "mu, or x_0, the mean of the process (and the values at the root).", Validate.REQUIRED);
 	final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
-	// final public Input<ColorManager> rateManagerInput = new Input<>("rateManager", "color manager object that paints branches with their own rates.", Validate.REQUIRED);
 	final public Input<TreeToVCVMat> rateManagerInput = new Input<>("rateManager", "color manager object that paints branches with their own rates.", Validate.REQUIRED);
+	
+	/*
+	 * Deprecated rate class
+	 */
+	// final public Input<ColorManager> rateManagerInput = new Input<>("rateManager", "color manager object that paints branches with their own rates.", Validate.REQUIRED);
 	
 	private boolean dirty;
 	
@@ -28,7 +32,6 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	private RealVector bmMeanVector;
 	
 	// VCV matrix
-	// private ColorManager rateManager;
 	private TreeToVCVMat rateManager;
 
 	// colt
@@ -110,63 +113,47 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		Double bmSingleMeanValue = meanInput.get().getValue();
 		
 		// colt
-//		for (int i=0; i<nSpp; ++i) {
-//			bmMeanVector.set(i, bmSingleMeanValue); // repeating the same value nSpp times
-//		}
+		// for (int i=0; i<nSpp; ++i) {
+		//	  bmMeanVector.set(i, bmSingleMeanValue); // repeating the same value nSpp times
+		// }
 		
 		// apache
-		 bmMeanVector.set(bmSingleMeanValue);
+		bmMeanVector.set(bmSingleMeanValue);
 	}
 	
 	@Override
 	protected void populateVCVMatrix() {
-		// boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
-//		boolean ratesAreGo = true;
-//		setRatesAreGo(true); // updating parent class
-		
-//		if (ratesAreGo) {
-			double[][] bmVCVMatDouble = rateManager.getSpColorValuesMatOneTrait();
+		double[][] bmVCVMatDouble = rateManager.getSpColorValuesMatOneTrait();
 
-			for (int i=0; i<nSpp; ++i) {
-				for (int j=0; j<nSpp; ++j) {
-					// colt
-					// bmVCVMat.set(i, j, bmVCVMatDouble[i][j]);
+		for (int i=0; i<nSpp; ++i) {
+			for (int j=0; j<nSpp; ++j) {
+				// colt
+				// bmVCVMat.set(i, j, bmVCVMatDouble[i][j]);
 				
-					// apache
-					bmVCVMat.setEntry(i, j, bmVCVMatDouble[i][j]);
-				}
+				// apache
+				bmVCVMat.setEntry(i, j, bmVCVMatDouble[i][j]);
 			}
-//		}
+		}
 	}
 	
 	@Override
-	protected void populateInvVCVMatrix() {
-		// boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
-//		rateManager = rateManagerInput.get();
-//		boolean ratesAreGo = true;
-
-//		if (ratesAreGo) {		
-			
+	protected void populateInvVCVMatrix() {			
 		// colt
-			// try {
-			// 	  bmInvVCVMat = alg.inverse(bmVCVMat);
-			//	  setMatrixIsSingular(false);
-			// } catch (IllegalArgumentException e) {
-			//	  setMatrixIsSingular(true);
-			// }
-			// apache
-			bmVCVMatLUD = new LUDecomposition(bmVCVMat);
+		// try {
+		// 	  bmInvVCVMat = alg.inverse(bmVCVMat);
+		//	  setMatrixIsSingular(false);
+		// } catch (IllegalArgumentException e) {
+		//	  setMatrixIsSingular(true);
+		// }
+		// apache
+		bmVCVMatLUD = new LUDecomposition(bmVCVMat);
 					
-			try {
-				bmInvVCVMat = bmVCVMatLUD.getSolver().getInverse();
-				setMatrixIsSingular(false);
-			} catch (org.apache.commons.math3.linear.SingularMatrixException e) {
-				setMatrixIsSingular(true);
-			}
-//		}
-//		else {
-//			setRatesAreGo(false);
-//		}
+		try {
+			bmInvVCVMat = bmVCVMatLUD.getSolver().getInverse();
+			setMatrixIsSingular(false);
+		} catch (org.apache.commons.math3.linear.SingularMatrixException e) {
+			setMatrixIsSingular(true);
+		}
 	}
 	
 	@Override
@@ -214,7 +201,6 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	
 	@Override
 	public void restore() {
-		// DoubleMatrix1D realVecTmp;
 		RealVector realVecTmp;
 
 		realVecTmp = bmMeanVector;

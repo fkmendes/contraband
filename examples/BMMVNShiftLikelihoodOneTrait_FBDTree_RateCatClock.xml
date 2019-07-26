@@ -92,7 +92,7 @@
 
       	  <rateManager id="rateManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
 	    <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="2">
-	      <rates id="rateValues" spec="parameter.RealParameter">0.1 0.5</rates>
+	      <rates id="rateValues" spec="parameter.RealParameter" lower="-Infinity" upper="Infinity">0.1 0.5</rates>
 	      <rateCatAssign id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0 0 0</rateCatAssign>
 	      <tree idref="TheTree"/>
 	    </branchRateModel>
