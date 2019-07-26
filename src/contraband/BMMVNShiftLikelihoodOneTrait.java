@@ -142,6 +142,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	@Override
 	protected void populateInvVCVMatrix() {
 		// boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
+		rateManager = rateManagerInput.get();
 		boolean ratesAreGo = true;
 
 		if (ratesAreGo) {		
@@ -170,6 +171,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	@Override
 	protected void populateOneTraitDataVector() {
 		oneTraitData = oneTraitInput.get();
+		rateManager = rateManagerInput.get();
 		
 		int i = 0;
 		for (Double thisTraitValue: oneTraitData.getTraitValues(0, rateManager.getSpNamesInVCVMatOrder())) {

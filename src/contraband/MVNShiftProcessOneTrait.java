@@ -87,9 +87,9 @@ public class MVNShiftProcessOneTrait extends Distribution {
 		if (matrixWasSingularCantInvertBarf) {
 			logP = Double.NEGATIVE_INFINITY;
 		}
-		else if (!successiveRatesIncreasing) {
-			logP = Double.NEGATIVE_INFINITY;
-		}
+//		else if (!successiveRatesIncreasing) {
+//			logP = Double.NEGATIVE_INFINITY;
+//		}
 		else {
 			// colt
 			// logP = MVNUtils.getMVNLogLkColt(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
