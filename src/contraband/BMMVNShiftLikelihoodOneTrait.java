@@ -121,10 +121,10 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	@Override
 	protected void populateVCVMatrix() {
 		// boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
-		boolean ratesAreGo = true;
-		setRatesAreGo(true); // updating parent class
+//		boolean ratesAreGo = true;
+//		setRatesAreGo(true); // updating parent class
 		
-		if (ratesAreGo) {
+//		if (ratesAreGo) {
 			double[][] bmVCVMatDouble = rateManager.getSpColorValuesMatOneTrait();
 
 			for (int i=0; i<nSpp; ++i) {
@@ -136,17 +136,18 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 					bmVCVMat.setEntry(i, j, bmVCVMatDouble[i][j]);
 				}
 			}
-		}
+//		}
 	}
 	
 	@Override
 	protected void populateInvVCVMatrix() {
 		// boolean ratesAreGo = rateManager.getColorValueLargerThanLast();
-		rateManager = rateManagerInput.get();
-		boolean ratesAreGo = true;
+//		rateManager = rateManagerInput.get();
+//		boolean ratesAreGo = true;
 
-		if (ratesAreGo) {		
-			// colt
+//		if (ratesAreGo) {		
+			
+		// colt
 			// try {
 			// 	  bmInvVCVMat = alg.inverse(bmVCVMat);
 			//	  setMatrixIsSingular(false);
@@ -162,10 +163,10 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 			} catch (org.apache.commons.math3.linear.SingularMatrixException e) {
 				setMatrixIsSingular(true);
 			}
-		}
-		else {
-			setRatesAreGo(false);
-		}
+//		}
+//		else {
+//			setRatesAreGo(false);
+//		}
 	}
 	
 	@Override

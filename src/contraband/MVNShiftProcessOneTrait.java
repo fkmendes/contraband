@@ -25,7 +25,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	private boolean dirty;
 	private boolean matrixWasSingularCantInvertBarf;
-	private boolean successiveRatesIncreasing;
+	// private boolean successiveRatesIncreasing;
 	
 //	private Tree tree;
 	private int nSpp;
@@ -162,9 +162,9 @@ public class MVNShiftProcessOneTrait extends Distribution {
 		matrixWasSingularCantInvertBarf = matrixIsSingular;
 	}
 	
-	protected void setRatesAreGo(boolean ratesAreGo) {
-		successiveRatesIncreasing = ratesAreGo;
-	}
+//	protected void setRatesAreGo(boolean ratesAreGo) {
+//		successiveRatesIncreasing = ratesAreGo;
+//	}
 	
 	// caching
 	@Override
