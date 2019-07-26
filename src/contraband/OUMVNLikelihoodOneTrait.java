@@ -1,5 +1,4 @@
 package contraband;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -13,28 +12,28 @@ import org.apache.commons.math3.linear.RealVector;
 import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.RealParameter;
-import beast.evolution.tree.Node;
+import beast.evolution.branchratemodel.BranchRateModel;
 import beast.core.Input.Validate;
 
 public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 
 	final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Sigma^2, the variance of the process.", Validate.REQUIRED);
-	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "Root trait value, or theta_0, also the mean of the stationary distribution at the root if one is assumed.", Validate.REQUIRED);
+	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "Root trait value, or y_0, also the mean of the stationary distribution at the root if one is assumed.", Validate.REQUIRED);
 	final public Input<Boolean> eqDistInput = new Input<>("eqDist", "Whether or not to assume equilibrium (stationary) distribution at the root. The mean of that distribution will rootValue", Validate.REQUIRED);
 	final public Input<Boolean> useRootMetaDataInput = new Input<>("useRootMetaData", "Whether or not to use root meta data (specified optimum). If set to 'false', root optimum is set to eldest regime (regimes are numbered from the root toward the tips).", Validate.REQUIRED);
 	final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
 	final public Input<TreeToVCVMat> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
-	// final public Input<ColorManager> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
 	final public Input<RealParameter> alphaInput = new Input<>("alpha", "Pull toward optimum or optima.", Validate.REQUIRED);
+	//final public Input<ColorManager> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
 	
 	private boolean dirty;
 	private boolean eqDistAtRoot;
 	private boolean useRootMetaData;
 		
 	// basic info
-//	private List<Node> allLeafNodes;
+    // private List<Node> allLeafNodes;
 	private int nSpp; // takes some time to compute, so part of state!
-	private int nOptima; // could remove from state technically, but am calling it a few times, so will stay here!
+	//private int nOptima; // used in old W mat parameterization (could remove from state technically, but am calling it a few times, so will stay here!)
 	
 	/* parameters below */
 	// private Double alpha; // could remove from state technically, but am calling it a few times, so will stay here!
@@ -43,11 +42,13 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	// mean vector
 	private TreeToVCVMat optimumManager;
+	private BranchRateModel cm; // clock model
 	// private ColorManager optimumManager;
-	private RealMatrix wMat;
+	// private RealMatrix wMat; // needed only for old parameterization with W matrix
 	
 	// VCV matrix
-	private RealVector thetaVector, ouMeanVector;
+	// private RealVector thetaVector; // needed only for old parameterization with W matrix
+	private RealVector ouMeanVector;
 	private RealMatrix ouTMat, ouVCVMat, ouInvVCVMat;
 	private LUDecomposition ouVCVMatLUD;
 	
@@ -70,17 +71,19 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		eqDistAtRoot = eqDistInput.get();
 		useRootMetaData = useRootMetaDataInput.get();
 		optimumManager = optimumManagerInput.get();
-		nOptima = optimumManager.getNColors();
+		cm = optimumManager.getClockModel();
 		
+		// old parameterization using W mat
 		// initializing stuff whose size won't change for now
-		if (useRootMetaData) {
-			thetaVector = new ArrayRealVector(nOptima+1);
-			wMat = new Array2DRowRealMatrix(nSpp, (nOptima+1));
-		}
-		else {
-			thetaVector = new ArrayRealVector(nOptima);
-			wMat = new Array2DRowRealMatrix(nSpp, nOptima);
-		}
+		// nOptima = optimumManager.getNColors();
+		// if (useRootMetaData) {
+		//	 thetaVector = new ArrayRealVector(nOptima+1);
+		//	 wMat = new Array2DRowRealMatrix(nSpp, (nOptima+1));
+		// }
+		// else {
+		//	 thetaVector = new ArrayRealVector(nOptima);
+		//	 wMat = new Array2DRowRealMatrix(nSpp, nOptima);
+		// }
 		 
 		oneTraitDataVector = new ArrayRealVector(nSpp);
 		ouMeanVector = new ArrayRealVector(nSpp);
@@ -99,8 +102,6 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	}
 	
 	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean, boolean updateData) {
-//		alpha = alphaInput.get().getValue(); // needs to be done here because populateMeanVector and populateOUTMatrix use it
-		
 		if (updateMean) { populateMeanVector(); }
 		if (updatePhyloTMat) { super.populatePhyloTMatrix(); }
 		if (updateVCVMat) {
@@ -132,39 +133,40 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	protected void populateMeanVector() {
 		Double rootValue = rootValueInput.get().getValue();		
-		Integer[] thetaAssignments = optimumManager.getColorAssignments();
-		Double[] thetas = optimumManager.getColorValues();
+		// Integer[] thetaAssignments = optimumManager.getColorAssignments();
+		// Double[] thetas = optimumManager.getColorValues();
 		
-		boolean thetasAreGo = true;
-//		double lastThetaValue = Double.NEGATIVE_INFINITY;
-//		for (double thetaValue: thetas) {
-//			if (thetaValue < lastThetaValue) {
-//				thetasAreGo = false;
-//			} else {
-//				lastThetaValue = thetaValue;
+		double alpha = alphaInput.get().getValue().doubleValue();
+		
+		OUUtils.populateOUMeanVector(alpha, rootValue, getRootNode(), getRootNode(), getAllLeafNodes(), cm, ouMeanVector, useRootMetaData);
+		// System.out.println("Mean vector:");
+		// GeneralUtils.displayRealVector(ouMeanVector);	
+
+		/*
+		 * Old implementation with W matrix
+		 */
+//			int i = 0;
+//			if (useRootMetaData) {
+//				thetaVector.setEntry(0, rootValue);
+//				i++;
 //			}
-//		}
-		
-		setThetasAreGo(thetasAreGo); // updating parent class
-		
-		if (thetasAreGo) {
-			int i = 0;
-			if (useRootMetaData) {
-				thetaVector.setEntry(0, rootValue);
-				i++;
-			}
-			for (Double aTheta: thetas) {
-				thetaVector.setEntry(i, aTheta);
-				i++;
-			} 
-
-			resetRealMatrix(wMat);
-
-			double alpha = alphaInput.get().getValue().doubleValue();
-			OUUtils.computeWMatOneTrait(thetaAssignments, getRootNode(), getAllLeafNodes(), nSpp, nOptima, alpha, wMat, useRootMetaData);
-						
-			ouMeanVector = wMat.operate(thetaVector);
-		}
+//			for (Double aTheta: thetas) {
+//				thetaVector.setEntry(i, aTheta);
+//				i++;
+//			} 
+//
+//			resetRealMatrix(wMat);
+//			OUUtils.computeWMatOneTrait(thetaAssignments, getRootNode(), getAllLeafNodes(), nSpp, nOptima, alpha, wMat, useRootMetaData);
+//			
+//			System.out.println("W matrix:");
+//			GeneralUtils.displayRealMatrix(wMat);
+//			System.out.println("Theta vector:");
+//			GeneralUtils.displayRealVector(thetaVector);
+//			System.out.println("Mean vector:");
+//			GeneralUtils.displayRealVector(wMat.operate(thetaVector));
+//			
+//			ouMeanVector = wMat.operate(thetaVector);	
+	
 	}
 	
 	@Override

@@ -6,6 +6,8 @@ import java.util.List;
 import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
+import beast.core.parameter.IntegerParameter;
+import beast.core.parameter.RealParameter;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
@@ -17,21 +19,22 @@ import beast.evolution.tree.Tree;
 public class TreeToVCVMat extends CalculationNode {
 
 	final public Input<BranchRateModel.Base> branchRateModelInput = new Input<>("branchRateModel", "the rate or optimum on each branch", Validate.REQUIRED);
-	final public Input<BranchRateModel.Base> branchOptimaModelInput = new Input<>("branchOptimaModel", "the rate or optimum on each branch", Validate.OPTIONAL);
+	// final public Input<BranchRateModel.Base> branchOptimaModelInput = new Input<>("branchOptimaModel", "the rate or optimum on each branch", Validate.OPTIONAL);
 	final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
-
-	//final public Input<Integer> nTraitsInput = new Input<>("nTraits", "Number of traits.", Validate.REQUIRED);
-	//final public Input<Integer> nColorsInput = new Input<>("nColors", "Maximum number of colors.", Validate.REQUIRED);
-
-	//final public Input<RealParameter> colorValuesInput = new Input<>("colorValues", "Real values (e.g., rates, optima, whatever colors represent) associated to each color (all values for 1st trait, then all values for 2nd trait, and so on).", Validate.REQUIRED);
-	//final public Input<IntegerParameter> colorAssignmentInput = new Input<>("colorAssignments", "Integers representing colors, one per branch.", Validate.REQUIRED);
-
-	//final public Input<IntegerParameter> rootEdgeColorAssignmentInput = new Input<>("rootEdgeColorAssignment", "Integer representing color of root edge.");
-
 	final public Input<Boolean> coalCorrectionInput = new Input<>("coalCorrection", "Whether or not to do coalescent correction.", Validate.REQUIRED);
 	final public Input<Double> rootEdgeLengthInput = new Input<>("rootEdgeLength", "root edge length.", 0.0);
 	
+	/*
+	 * Old (less general) parameterization... now all of these are taken care by clock model
+	 */
+	// final public Input<Integer> nTraitsInput = new Input<>("nTraits", "Number of traits.", Validate.REQUIRED);
+	// final public Input<Integer> nColorsInput = new Input<>("nColors", "Maximum number of colors.", Validate.REQUIRED);
+	// final public Input<RealParameter> colorValuesInput = new Input<>("colorValues", "Real values (e.g., rates, optima, whatever colors represent) associated to each color (all values for 1st trait, then all values for 2nd trait, and so on).", Validate.REQUIRED);
+	// final public Input<IntegerParameter> colorAssignmentInput = new Input<>("colorAssignments", "Integers representing colors, one per branch.", Validate.REQUIRED);
+	// final public Input<IntegerParameter> rootEdgeColorAssignmentInput = new Input<>("rootEdgeColorAssignment", "Integer representing color of root edge.");
 	private boolean doCoalCorrection;
+	
+	BranchRateModel rccm;
 	
 	private int nSpp, nNodes; // why part of state? because requires traversing tree
 	private double[][] spColorValuesMat;
@@ -39,8 +42,7 @@ public class TreeToVCVMat extends CalculationNode {
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
 	private String[] spNamesInASCIIBeticalOrTaxonSetOrder;
-	
-	RateCategoryClockModel rccm;
+
 	// private TreeParser tree;
 	//private Double[] colorValues;
 	//private Integer[] colorAssignments;
@@ -60,8 +62,6 @@ public class TreeToVCVMat extends CalculationNode {
 	@Override
 	public void initAndValidate() {
 		Tree tree = treeInput.get();
-		
-		rccm = (RateCategoryClockModel) branchRateModelInput.get();
 		
 		//colorValues = colorValuesInput.get().getValues();
 		//colorAssignments = colorAssignmentInput.get().getValues();
@@ -215,39 +215,30 @@ public class TreeToVCVMat extends CalculationNode {
 	/*
 	 * Getters
 	 */
+	
 	//public Integer getNTraits() {
 	//	return nTraitsInput.get();
 	//}
 	
-	public Integer getNColors() {
-		if (branchRateModelInput.isDirty()) {
-			rccm = (RateCategoryClockModel) branchRateModelInput.get();
-		}
-		
-		return rccm.getNCat();
+	public BranchRateModel getClockModel() {
+		return branchRateModelInput.get();
 	}
-	
-	public int getNNodes() {
-		return nNodes;
-	}
-	
-	public Double[] getColorValues() {
-		// colorValues = colorValuesInput.get().getValues();
-		if (branchRateModelInput.isDirty()) {
-			rccm = (RateCategoryClockModel) branchRateModelInput.get();
-		}
-		
-		return rccm.getColorValues();
-	}
-	
-	public Integer[] getColorAssignments() {
-		// readInputBeforeGetters();
-		if (branchRateModelInput.isDirty()) {
-			rccm = (RateCategoryClockModel) branchRateModelInput.get();
-		}
 
-		return rccm.getColorAssignments();
-	}
+//	public int getNNodes() {
+//		return nNodes;
+//	}
+	
+//	public Integer getNColors() {
+//		return nColorsInput.get();
+//	}
+//	
+//	public Double[] getColorValues() {
+//		return colorValuesInput.get().getValues();
+//	}
+//
+//	public Integer[] getColorAssignments() {
+//		return colorAssignmentInput.get().getValues();
+//	}
 	
 	public double[][] getSpColorValuesMatOneTrait() {
 		readInputBeforeGetters();

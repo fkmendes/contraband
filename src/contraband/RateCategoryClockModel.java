@@ -61,21 +61,6 @@ public class RateCategoryClockModel extends BranchRateModel.Base {
             rates.setDimension(nCat);
         }
     }
-
-	/*
-	 * Getters
-	 */
-    public int getNCat() {
-    	return nCatInput.get();
-    }
-    
-	public Double[] getColorValues() {
-		return rateValuesInput.get().getValues();
-	}
-	
-	public Integer[] getColorAssignments() {
-		return rateCatAssignInput.get().getValues();
-	}
 	
     @Override
     public double getRateForBranch(Node node) {

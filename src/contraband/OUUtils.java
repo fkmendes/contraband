@@ -6,8 +6,11 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.CholeskyDecomposition;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 
 import java.lang.Double;
+
+import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
 import cern.colt.Arrays;
@@ -170,45 +173,116 @@ public class OUUtils {
 	 }
 	 
 	 /*
+	  * Populates OU mean vector by traversing tree only, without pre-computing W matrix
+	  * 
+	  * Precludes needing to get the number of optima from clock model (since some clock models
+	  * do not have discrete rate categories)
+	  */
+	 public static void populateOUMeanVector(double alpha, double rootValue, Node aNode, Node rootNode, List<Node> allLeafNodes, BranchRateModel clock, RealVector ouMeanVector, boolean useRootMetaData) {		 		 
+		 /*
+		  * This is a faster, recursive solution, but it only works for ultrametric trees
+		  * 
+		  * It's tricky to generalize this to any tree because the height of a node in BEAST is 
+		  * always relative to the longest path descending from it
+		  * 
+		  * If a tree is non-ultrametric, some of the terms below will be larger than they should be for
+		  * extinct tips; e.g., rootNode.getHeight() is a constant, but for extinct tip paths, this
+		  * height should actually be smaller (it should be the length going from the root down to that tip
+		  * but you can't know that ahead of time during the recursion...)
+		  * 
+		  * Add double avgSoFar to parameter list if you want to see it working
+		  * 
+		  */
+//		 double runningAvg = avgSoFar;
+//		 if (!aNode.isRoot()) {
+//			 runningAvg += (Math.exp(-alpha * aNode.getHeight()) - Math.exp(-alpha * aNode.getParent().getHeight())) * clock.getRateForBranch(aNode);
+//		 }
+//		
+//		 for (Node descNode: aNode.getChildren()) {
+//			 populateOUMeanVector(alpha, rootValue, descNode, rootNode, clock, runningAvg, ouMeanVector, useRootMetaData);
+//		 }
+//			 
+//		 if (aNode.isLeaf()) {
+//			 if (useRootMetaData) {
+//				 runningAvg += (Math.exp(-alpha * (rootNode.getHeight() - aNode.getHeight()))) * rootValue;
+//			 }
+//				 
+//			 ouMeanVector.setEntry(aNode.getNr(), runningAvg);	 
+//		 }
+		
+		 /*
+		  * This implementation below follows exactly
+		  * the explanation in Butler and King's paper.
+		  * 
+		  * But note that it traverses the tree n times, where
+		  * n is the number of species. It is slower than the
+		  * recursive solution above, but works for both ultrametric
+		  * and non-ultrametric trees
+		  * 
+		  */
+		for (Node sp: allLeafNodes) {	
+			 double cellValue = 0.0;
+			 int spNr = sp.getNr();	// Will specify the row index to set in the mean vector
+
+			 // Adding the root chunk in the column of the eldest regime
+			 double currentSpHeight = sp.getHeight();
+			 if (useRootMetaData) {
+				 cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight)) * rootValue; // use y_0
+			 }
+			 else {
+				 cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight)) * clock.getRateForBranch(rootNode); // use theta_0
+			 }
+				
+			 // Now going from tip to root, for all tips
+			 while(!sp.isRoot()) {
+				 cellValue += (Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight))) * clock.getRateForBranch(sp);
+				 sp = sp.getParent();
+			 }
+			 
+			 ouMeanVector.setEntry(spNr, cellValue);
+		 }
+	 }
+	 
+	 /*
 	  * DEPRECATED: uses tree meta data, cannot operate on it
 	  */
-	 public static void computeWMatOneTrait2(TreeParser tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
-			Double[] allNodeRegimes = new Double[rootNode.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
-			int rootIndexOffset;
-			int rootRegimeIdx;	// Eldest regime index
-
-			/* 
-			 * The regimes array is the computational equivalent of 
-			 * Beta_{i}^{\gamma} in equation A6 of Butler & King's Appendix 1
-			*/
-			tree.getMetaData(rootNode, allNodeRegimes, "Regime"); // writes on regimes array
-			
-			if (!useRootMetaData) { 		// column dimension of WMat must be r			
-				rootIndexOffset = 0;
-				rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue();
-				
-			} else { 		// column dimension of WMat must be r + 1
-				rootIndexOffset = 1;
-				rootRegimeIdx = 0;	
-			}
-			
-			for (Node sp: allLeafNodes) {	
-				int spNr = sp.getNr();	// Will specify the row index 
-					
-				// Adding the root chunk in the column of the eldest regime
-				double currentSpHeight = sp.getHeight();
-				double cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight));	
-				wMat.addToEntry(spNr, rootRegimeIdx, cellValue);
-				
-				while(!sp.isRoot()) {
-					int regimeIdx = allNodeRegimes[sp.getNr()].intValue() + rootIndexOffset;	// Will specify the column index
-					cellValue = Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight));
-					wMat.addToEntry(spNr, regimeIdx, cellValue);
-						
-					sp = sp.getParent();
-				}
-			}		
-		}
+//	 public static void computeWMatOneTrait2(TreeParser tree, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
+//			Double[] allNodeRegimes = new Double[rootNode.getNr() + 1]; // Will keep the vector with the regimes of the branches subtending each node
+//			int rootIndexOffset;
+//			int rootRegimeIdx;	// Eldest regime index
+//
+//			/* 
+//			 * The regimes array is the computational equivalent of 
+//			 * Beta_{i}^{\gamma} in equation A6 of Butler & King's Appendix 1
+//			*/
+//			tree.getMetaData(rootNode, allNodeRegimes, "Regime"); // writes on regimes array
+//			
+//			if (!useRootMetaData) { 		// column dimension of WMat must be r			
+//				rootIndexOffset = 0;
+//				rootRegimeIdx = allNodeRegimes[rootNode.getNr()].intValue();
+//				
+//			} else { 		// column dimension of WMat must be r + 1
+//				rootIndexOffset = 1;
+//				rootRegimeIdx = 0;	
+//			}
+//			
+//			for (Node sp: allLeafNodes) {	
+//				int spNr = sp.getNr();	// Will specify the row index 
+//					
+//				// Adding the root chunk in the column of the eldest regime
+//				double currentSpHeight = sp.getHeight();
+//				double cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight));	
+//				wMat.addToEntry(spNr, rootRegimeIdx, cellValue);
+//				
+//				while(!sp.isRoot()) {
+//					int regimeIdx = allNodeRegimes[sp.getNr()].intValue() + rootIndexOffset;	// Will specify the column index
+//					cellValue = Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight));
+//					wMat.addToEntry(spNr, regimeIdx, cellValue);
+//						
+//					sp = sp.getParent();
+//				}
+//			}		
+//		}
 	 
 	// MultiTrait Covariance matrix functions
 	
