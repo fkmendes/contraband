@@ -63,6 +63,10 @@
       <!-- END prior -->
 
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+	<distribution id="rejectionSampling" spec="contraband.RateCategoryIdentifiability">
+	  <rates idref="rateValues"/>
+	</distribution>
+	
 	<distribution id="BMMVNShift" spec="contraband.BMMVNShiftLikelihoodOneTrait">
 	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,f2:0.10):1.0,(sp2:1.0,f1:0.8):1.0)" offset="0" singlechild="false">
 		
@@ -97,11 +101,7 @@
 	  </rateManager>
 	    
 	  <mean id="BMMean" spec="parameter.RealParameter">0.0</mean>
-	</distribution> <!-- END BMVN -->
-	    
-	<distribution id="rejectionSampling" spec="contraband.RateCategoryIdentifiability">
-	  <rates idref="rateValues"/>
-	</distribution>
+	</distribution> <!-- END BMVN -->	    
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
 

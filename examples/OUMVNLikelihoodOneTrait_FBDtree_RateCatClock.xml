@@ -69,6 +69,10 @@
       <!-- END prior -->
 
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+	<distribution id="rejectionSampling" spec="contraband.RateCategoryIdentifiability">
+	  <rates idref="OUTheta"/>
+	</distribution>
+
  	    <distribution id="OUMVN" spec="contraband.OUMVNLikelihoodOneTrait" eqDist="false" useRootMetaData="true">
 	      <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,f2:0.10):1.0,(sp2:1.0,f1:0.8):1.0)" offset="0" singlechild="false">
 		    <trait id="FossilSet" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
@@ -92,8 +96,8 @@
 	      </oneTraitData>
 
 	      <optimumManager id="optimumManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
-	        <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="3">
-	   	  	  <rates id="OUTheta" spec="parameter.RealParameter" lower="-Infinity" upper="Infinity">0.01 0.05</rates>
+	        <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="2">
+	   	  <rates id="OUTheta" spec="parameter.RealParameter" lower="-Infinity" upper="Infinity">0.01 0.05</rates>
 	      	  <rateCatAssign id="OUThetaAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0 0 0</rateCatAssign>
 	      	  <tree idref="TheTree"/>
 	        </branchRateModel>
@@ -137,6 +141,7 @@
       <log idref="OURootValue"/>
       <log idref="OUAlpha"/>
       <log idref="OUTheta"/>
+      <log idref="OUThetaAssignments"/>
     </logger>
 
     <logger id="screenlog" logEvery="5000">
