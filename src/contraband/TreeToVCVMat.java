@@ -44,19 +44,19 @@ public class TreeToVCVMat extends CalculationNode {
 	private String[] spNamesInASCIIBeticalOrTaxonSetOrder;
 
 	// private TreeParser tree;
-	//private Double[] colorValues;
-	//private Integer[] colorAssignments;
+	// private Double[] colorValues;
+	// private Integer[] colorAssignments;
 	
-	//private Double rootEdgeColorValue;
-	//private Integer rootEdgeColorAssignment;
+	// private Double rootEdgeColorValue;
+	// private Integer rootEdgeColorAssignment;
 
 	private double rootEdgeVar;
 
 	private double rootEdgeLength;
 
 	// stored stuff
-	//Double[] storedColorValues;
-	//Integer[] storedColorAssignments;
+	// Double[] storedColorValues;
+	// Integer[] storedColorAssignments;
 	double[][] storedSpColorValuesMat;
 	
 	@Override
@@ -155,7 +155,7 @@ public class TreeToVCVMat extends CalculationNode {
 			}
 		}
 		
-//		System.out.println("Just populated color matrix. Species order in VCV Mat is:" + Arrays.toString(spNamesInASCIIBeticalOrTaxonSetOrder));
+		// System.out.println("Just populated color matrix. Species order in VCV Mat is:" + Arrays.toString(spNamesInASCIIBeticalOrTaxonSetOrder));
 	}
 	
 	private void fillNodeColorValuesOneTrait(Node aNode, String[] spOrderInTMat) {
@@ -214,20 +214,19 @@ public class TreeToVCVMat extends CalculationNode {
 	
 	/*
 	 * Getters
-	 */
-	
-	//public Integer getNTraits() {
-	//	return nTraitsInput.get();
-	//}
-	
+	 */	
 	public BranchRateModel getClockModel() {
 		return branchRateModelInput.get();
 	}
-
+	
+//	public Integer getNTraits() {
+//		return nTraitsInput.get();
+//	}
+//
 //	public int getNNodes() {
 //		return nNodes;
 //	}
-	
+//	
 //	public Integer getNColors() {
 //		return nColorsInput.get();
 //	}
