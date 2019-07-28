@@ -8,9 +8,10 @@
       <parameter id="FBDdeathRate" name="stateNode">0.05</parameter>
       <parameter id="FBDsamplingRate" name="stateNode">0.01</parameter>
       <parameter id="FBDorigin" name="stateNode">[InitialOriginValue]</parameter>
-      <stateNode idref="rateValues"/>
-      <stateNode idref="rateAssignments"/>
       <stateNode idref="BMMean"/>
+      <!-- <stateNode idref="shiftIndicators"/> -->
+      <stateNode idref="rateAssignments"/>
+      <stateNode idref="rateValues"/>
     </state>
 	    
     <distribution id="posterior" spec="util.CompoundDistribution">
@@ -40,10 +41,11 @@
 	  <distr id="Exp.rateValues" spec="beast.math.distributions.Exponential" offset="0.0" mean="[RateValuesPriorMeanHere]"/>
 	</distribution>
 
-	<distribution id="rateAssignmentsPrior" spec="beast.math.distributions.Prior" x="@rateAssignments">
-	  <distr id="Unif.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
-        </distribution>
-	
+	<!-- <distribution id="shiftIndicatorPrior" spec="beast.math.distributions.Prior"> -->
+	<!--   <x spec="beast.core.util.Sum" id="indicatorSum" arg="@shiftIndicators"/> -->
+	<!--   <distr id="Pois.indicator" spec="beast.math.distributions.Poisson" lambda="1"/> -->
+	<!-- </distribution> -->
+		
         <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@BMMean">
 	  <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="[BMMeanPriorMeanHere]" sigma="[BMMeanPriorStdDevHere]"/>
         </distribution>
@@ -67,16 +69,27 @@
 	    <traitValues id="fixedTraitValues" spec="parameter.RealParameter">[TraitValuesHere]</traitValues>
 	  </oneTraitData>
 
-	  <rateManager id="rateManager" spec="contraband.ColorManager" nTraits="1" nColors="2" coalCorrection="false">
+	  <rateManager id="rateManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
+	    <!-- <branchRateModel id="rateRandomLocalClock" spec="beast.evolution.branchratemodel.RandomLocalClockModel"> -->
+	    <!--   <indicators id="shiftIndicators" spec="parameter.BooleanParameter" value="false"/> -->
+	    <!--   <rates id="rateValues" spec="parameter.RealParameter" value="0.01"/> -->
+	    <!--   <tree idref="TheTree"/> -->
+	    <!-- </branchRateModel> -->
+
+	    <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="2">
+	      <rates id="rateValues" spec="parameter.RealParameter">0.1 0.2</rates>
+	      <rateCatAssign id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">[RateAssignmentsHere]</rateCatAssign>
+	      <tree idref="TheTree"/>
+	    </branchRateModel>
+	    
 	    <tree idref="TheTree"/>
-	    
-	    <colorValues id="rateValues" spec="parameter.RealParameter">0.01 0.02</colorValues>
-	    
-	    <colorAssignments id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">[RateAssignmentsHere]</colorAssignments>
 	  </rateManager>
-	    
 	  <mean id="BMMean" dimension="1" spec="parameter.RealParameter">0.0</mean>
 	</distribution> <!-- END BMVN -->
+
+	<distribution id="rejectionSampling" spec="contraband.RateCategoryIdentifiability">
+	  <rates idref="rateValues"/>
+	</distribution>
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
 
@@ -92,10 +105,11 @@
     <operator id="FBDSAUniformOperator" spec="SAUniform" tree="@TheTree" weight="20.0"/>
     <operator id="FBDSATreeRootScaler" spec="SAScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@TheTree" weight="1.0"/>
     <operator id="FBDSATreeScaler" spec="SAScaleOperator" scaleFactor="0.95" tree="@TheTree" weight="3.0"/>
-	
+    <!-- <operator id="ShiftIndicatorOperator" spec="BitMoveOperator" parameter="@shiftIndicators"/> -->
+    <!-- <operator id="ShiftIndicatorOperator" spec="BitFlipOperator" parameter="@shiftIndicators" uniform="false" weight="10.0"/> -->
     <operator id="RateAssignmentWalker" spec="IntRandomWalkOperator" parameter="@rateAssignments" windowSize="1" weight="10.0"/>
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
-    <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
+    <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="1.0" weight="3.0"/>
 	
     <logger id="tracelog" fileName="[FileNameHere].log" logEvery="30000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
@@ -112,7 +126,7 @@
       <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="30000" mode="tree">
+    <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="30000000" mode="tree">
       <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>

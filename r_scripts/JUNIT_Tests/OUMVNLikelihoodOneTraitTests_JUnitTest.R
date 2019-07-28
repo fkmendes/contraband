@@ -1,6 +1,6 @@
 # author: Fabio K. Mendes
 # This R script gives us the expected values for JUnit tests
-# (1) 'OUMVNLikelihoodOneTraitTest'
+# (1) 'OUMVNLikelihoodOneTraitTest1'
 # (2) 'OUMVNLikelihoodOneTraitTest2'
 # (3) 'OUMVNLikelihoodOneTraitTest3'
 
@@ -8,7 +8,7 @@ library(mvMORPH)
 library(TreeSim)
 library(FossilSim)
 
-## (1) 'OUMVNLikelihoodOneTraitTest'
+## (1) 'OUMVNLikelihoodOneTraitTest1'
 
 ## tr <- read.tree(text="(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):1.0,sp4:3.0);")
 ## plotTree(tr, node.numbers=T) # to see node numbers
@@ -70,30 +70,30 @@ res$LogLik # 9.916107
 tr <- read.tree(text="(((sp1:2.0,sp2:1.0):1.0,sp3:4.0):1.0,sp4:3.0);")
 
 res <- mvOU(tr, dat, model="OU1", param=list(vcv="randomRoot", root=TRUE))
-res$sigma # 4.601164
-res$alpha # 0.8609833
-res$theta # theta_0 -46.965464
-          # theta_1   6.201598
-res$LogLik # -7.63854
+res$sigma # 0.02879764
+res$alpha # 0.4316411
+res$theta # theta_0 -1.924925
+          # theta_1   1.035041
+res$LogLik # 1.171086
 
 res <- mvOU(tr, dat, model="OU1", param=list(vcv="randomRoot", root=FALSE))
-res$sigma # 6.841867
-res$alpha # 0.7085376
-res$theta # theta_0 3.586504
-res$LogLik # -8.817273
+res$sigma # 0.09143114
+res$alpha # 0.599265
+res$theta # theta_0 0.4152632
+res$LogLik # -0.5143806
 
 res <- mvOU(tr, dat, model="OU1", param=list(vcv="fixedRoot", root=TRUE))
-res$sigma # 4.003551
-res$alpha #  0.7465763
-res$theta # theta_0 -33.591241
-          # theta_1   6.449917
-res$LogLik # -7.630117
+res$sigma # 0.009103832
+res$alpha # 1.818089e-11
+res$theta # theta_0 -3.726855e-01
+          # theta_1 1.142785e+10
+res$LogLik # 1.367972
 
 res <- mvOU(tr, dat, model="OU1", param=list(vcv="fixedRoot", root=FALSE))
-res$sigma # 1.237864
-res$alpha # 1.40338e-08
-res$theta # theta_0 2.792045
-res$LogLik # -8.457486
+res$sigma # 0.01940518
+res$alpha # 2.707329e-11
+res$theta # theta_0 0.3497826
+res$LogLik # -0.1459122
 
 ## (3) OUMVNLikelihoodOneTraitTest4
 

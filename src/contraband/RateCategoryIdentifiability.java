@@ -11,6 +11,8 @@ public class RateCategoryIdentifiability extends Distribution {
 
 	final public Input<RealParameter> rateValuesInput = new Input<>("rates", "the rate parameters associated with each category.", Input.Validate.REQUIRED);
 	
+	Double[] rates;
+	
 	@Override
 	public void initAndValidate() {
 		super.initAndValidate();
@@ -18,7 +20,7 @@ public class RateCategoryIdentifiability extends Distribution {
 	
 	@Override
 	public double calculateLogP() {	
-		Double[] rates = rateValuesInput.get().getValues();
+		rates = rateValuesInput.get().getValues();
 		
 		boolean ratesAreGo = true; // can be optima
 		
@@ -31,8 +33,9 @@ public class RateCategoryIdentifiability extends Distribution {
 			}
 		}	
 		
-		if (ratesAreGo) { return 0.0; }
-		else { return Double.NEGATIVE_INFINITY; }
+		if (ratesAreGo) { logP = 0.0; }
+		else { logP = Double.NEGATIVE_INFINITY; }
+		return logP;
 	}
 
 	@Override

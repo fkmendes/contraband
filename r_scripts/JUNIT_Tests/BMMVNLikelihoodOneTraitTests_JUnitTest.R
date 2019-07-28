@@ -1,8 +1,9 @@
 # author: Fabio K. Mendes
 # This R script gives us the expected values for JUnit tests
-# (1) 'BMMVNLikelihoodOneTraitTest'
+# (1) 'BMMVNLikelihoodOneTraitTest1'
 # (2) 'BMMVNLikelihoodOneTraitTest2'
 # (3) 'BMMVNLikelihoodOneTraitTest3'
+# (4) 'BMMVNLikelihoodOneTraitTest4'
 
 library(mvMORPH)
 library(TreeSim)
@@ -11,7 +12,7 @@ library(Rcpp)
 sourceCpp(file="./bm_direct_new.cpp")
 source("coalBM_lib.R")
 
-## (1) 'BMMVNLikelihoodOneTraitTest'
+## (1) 'BMMVNLikelihoodOneTraitTest1'
 
 tr <- read.tree(text="((sp1:1.0,sp2:1.0):1.0,sp3:2.0);")
 
@@ -80,3 +81,28 @@ res <- mvBM(tr, dat, model="BM1")
 res$sigma # 0.01925192
 res$theta # 2.182659
 res$LogLik # -10.8084
+
+## (4) 'BMMVNLikelihoodOneTraitTest4'
+
+set.seed(123)
+
+dat <- fastBM(tr, sig2=0.01, a=0.0)
+vcvmat1 <- matrix(c(3.5240821837801635, 2.0240821837801635, 1.024082183780163, 0.02408218378016347,
+                   2.0240821837801635, 3.5240821837801635, 1.024082183780163, 0.02408218378016347,
+                   1.024082183780163, 1.024082183780163, 3.5240821837801635, 0.02408218378016347,
+                   0.02408218378016347, 0.02408218378016347, 0.02408218378016347, 3.5240821837801635), nrow=4)
+
+res <- mle.analytical(obs.data=dat, sigma.mat=vcvmat1)
+res[1] # mean = 0.1
+res[2] # sigsq = 0.006319092
+res[3] # lnl = -2.19029
+
+vcvmat2 <- matrix(c(4.145182360929916, 2.1451823609299163, 1.1451823609299163, 0.14518236092991632,
+                    2.1451823609299163, 4.145182360929916, 1.1451823609299163, 0.14518236092991632,
+                    1.1451823609299163, 1.1451823609299163, 4.145182360929916, 0.14518236092991632,
+                    0.14518236092991632, 0.14518236092991632, 0.14518236092991632, 4.145182360929916), nrow=4)
+
+res2 <- mle.analytical(obs.data=dat, sigma.mat=vcvmat2)
+res2[1] # mean = 0.09658954
+res2[2] # sigsq = 0.005358022
+res2[3] # lnl = -2.148631

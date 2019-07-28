@@ -25,9 +25,9 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	private boolean dirty;
 	private boolean matrixWasSingularCantInvertBarf;
-	private boolean successiveRatesIncreasing;
+	// private boolean successiveRatesIncreasing;
 	
-//	private Tree tree;
+	// private Tree tree;
 	private int nSpp;
 	
 	// mean vector
@@ -70,6 +70,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 		// colt
 		// storedMeanVec = DoubleFactory1D.dense.make(nSpp);
 		// storedInvVCVMat = DoubleFactory2D.dense.make(nSpp, nSpp);
+		
 		// apache
 		storedMeanVec = new ArrayRealVector(nSpp);
 		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
@@ -87,12 +88,10 @@ public class MVNShiftProcessOneTrait extends Distribution {
 		if (matrixWasSingularCantInvertBarf) {
 			logP = Double.NEGATIVE_INFINITY;
 		}
-		else if (!successiveRatesIncreasing) {
-			logP = Double.NEGATIVE_INFINITY;
-		}
 		else {
 			// colt
 			// logP = MVNUtils.getMVNLogLkColt(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
+			
 			// apache
 			logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
 		}
@@ -138,32 +137,32 @@ public class MVNShiftProcessOneTrait extends Distribution {
 		}	
 	};
 	
+	// colt
+	// protected void setProcessInvVCVMat(DoubleMatrix2D aInvVCVMat) {
+	
 	// apache
 	protected void setProcessInvVCVMat(RealMatrix aInvVCVMat) {
-//	protected void setProcessInvVCVMat(DoubleMatrix2D aInvVCVMat) {
 		invVCVMat = aInvVCVMat;
 	}
 	
+	// colt
+	// protected void setProcessMeanVec(DoubleMatrix1D aMeanVector) {
+	
 	// apache
 	protected void setProcessMeanVec(RealVector aMeanVector) {
-    // colt
-	// protected void setProcessMeanVec(DoubleMatrix1D aMeanVector) {
 		meanVec = aMeanVector;
 	};
 	
-	// apache
-	protected void setProcessOneTraitDataVec(RealVector aOneTraitDataVector) {
 	// colt 
 	// protected void setProcessOneTraitDataVec(DoubleMatrix1D aOneTraitDataVector) {
+	
+	// apache
+	protected void setProcessOneTraitDataVec(RealVector aOneTraitDataVector) {
 		oneTraitDataVec = aOneTraitDataVector;
 	}
 	
 	protected void setMatrixIsSingular(boolean matrixIsSingular) {
 		matrixWasSingularCantInvertBarf = matrixIsSingular;
-	}
-	
-	protected void setRatesAreGo(boolean ratesAreGo) {
-		successiveRatesIncreasing = ratesAreGo;
 	}
 	
 	// caching

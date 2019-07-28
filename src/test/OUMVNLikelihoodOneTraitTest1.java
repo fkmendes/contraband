@@ -10,13 +10,15 @@ import beast.util.TreeParser;
 import contraband.ColorManager;
 import contraband.OUMVNLikelihoodOneTrait;
 import contraband.OneValueContTraits;
+import contraband.RateCategoryClockModel;
+import contraband.TreeToVCVMat;
 
 /*
  * Small tree, three optima, with and without stationary distr for root value; having root value as a separate
  * parameter or setting it to be optimum with index 0 (the index 0, and the optima have to be in increasing order,
  * this can have effects when comparing mvMORPH's results and ours, so make sure they match)
  */
-public class OUMVNLikelihoodOneTraitTest {
+public class OUMVNLikelihoodOneTraitTest1 {
 
 	double lnLk1, lnLk2, lnLk3, lnLk4;
 	final static double EPSILON = 1e-6;
@@ -39,17 +41,35 @@ public class OUMVNLikelihoodOneTraitTest {
 		RealParameter colorValues1 = new RealParameter(new Double[] { 0.206222932117995, 0.26633408087427, 0.88122539543514 });
 		RealParameter colorValues2 = new RealParameter(new Double[] { 0.206222932069516, 0.266334080825641, 0.881225395384966 });
 		RealParameter colorValues3 = new RealParameter(new Double[] { 0.206222932069532, 0.266334058036916, 0.881225139484772 });
-		RealParameter colorValues4 = new RealParameter(new Double[] { 0.206222932069532, 0.266334058036916, 0.881225139484772 }); 
-		IntegerParameter colorAssignments1 = new IntegerParameter(new Integer[] { 1, 1, 2, 0, 1, 0, 0 });
-							
-		ColorManager optima1 = new ColorManager();
-		optima1.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues1, "colorAssignments", colorAssignments1, "coalCorrection", false);
-		ColorManager optima2 = new ColorManager();
-		optima2.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues2, "colorAssignments", colorAssignments1, "coalCorrection", false);
-		ColorManager optima3 = new ColorManager();
-		optima3.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues3, "colorAssignments", colorAssignments1, "coalCorrection", false);
-		ColorManager optima4 = new ColorManager();
-		optima4.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues4, "colorAssignments", colorAssignments1, "coalCorrection", false);
+		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 1, 1, 2, 0, 1, 0, 0 });
+				
+		RateCategoryClockModel rcc1 = new RateCategoryClockModel();
+		rcc1.initByName("nCat", 3, "rateCatAssign", colorAssignments, "rates", colorValues1, "tree", myTree);
+		RateCategoryClockModel rcc2 = new RateCategoryClockModel();
+		rcc2.initByName("nCat", 3, "rateCatAssign", colorAssignments, "rates", colorValues2, "tree", myTree);
+		RateCategoryClockModel rcc3 = new RateCategoryClockModel();
+		rcc3.initByName("nCat", 3, "rateCatAssign", colorAssignments, "rates", colorValues3, "tree", myTree);
+		
+		TreeToVCVMat optima1 = new TreeToVCVMat();
+		optima1.initByName("branchRateModel", rcc1, "tree", myTree, "coalCorrection", false);
+		TreeToVCVMat optima2 = new TreeToVCVMat();
+		optima2.initByName("branchRateModel", rcc2, "tree", myTree, "coalCorrection", false);
+		TreeToVCVMat optima3 = new TreeToVCVMat();
+		optima3.initByName("branchRateModel", rcc3, "tree", myTree, "coalCorrection", false);
+		TreeToVCVMat optima4 = new TreeToVCVMat();
+		optima4.initByName("branchRateModel", rcc3, "tree", myTree, "coalCorrection", false);
+		
+		/*
+		 * Old parameterization using W matrix and ColorManager
+		 */
+//		ColorManager optima1 = new ColorManager();
+//		optima1.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues1, "colorAssignments", colorAssignments1, "coalCorrection", false);
+//		ColorManager optima2 = new ColorManager();
+//		optima2.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues2, "colorAssignments", colorAssignments1, "coalCorrection", false);
+//		ColorManager optima3 = new ColorManager();
+//		optima3.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues3, "colorAssignments", colorAssignments1, "coalCorrection", false);
+//		ColorManager optima4 = new ColorManager();
+//		optima4.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues3, "colorAssignments", colorAssignments1, "coalCorrection", false);
 		
 		// sigmasq
 		// Double[] sigmasqInput = new Double[] { 1.248328 };

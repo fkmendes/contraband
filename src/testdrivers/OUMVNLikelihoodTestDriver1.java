@@ -3,13 +3,15 @@ package testdrivers;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
-import contraband.ColorManager;
 import contraband.OUMVNLikelihoodOneTrait;
 import contraband.OneValueContTraits;
 import contraband.RateCategoryClockModel;
 import contraband.TreeToVCVMat;
 
-public class OUMVNLikelihoodTestDriver {
+/*
+ * Equivalent to first likelihood test inside OUMVNLikelihoodOneTraitTest2.java
+ */
+public class OUMVNLikelihoodTestDriver1 {
 
 	private static double lnLk;
 	
@@ -25,7 +27,7 @@ public class OUMVNLikelihoodTestDriver {
 		rcc.initByName("nCat", 3, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
 		
 		TreeToVCVMat optima = new TreeToVCVMat();
-		optima.initByName("branchRateModel", rcc, "tree", myTree, "coalCorrection", false);
+		optima.initByName("branchRateModel", rcc, "tree", myTree, "coalCorrection", false, "nColors", 3, "colorValues", colorValues, "colorAssignments", colorAssignments);
 		// ColorManager optima = new ColorManager();
 		// optima.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 		

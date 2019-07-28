@@ -12,7 +12,6 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeUtils;
 import beast.util.TreeParser;
-import cern.colt.Arrays;
 
 public class CoalCorrection extends CalculationNode {
 
@@ -37,7 +36,7 @@ public class CoalCorrection extends CalculationNode {
 	/*
 	 * Does not assume tree is ultrametric
 	 */
-	private int fillNLineageDistInPlace(Node aNode, Double[] allPopSizes) {
+	private int fillNLineageDistInPlace(Node aNode, Double[] allPopSizes, String[] spOrderInTMat) {
 		int maxNLineages = 0;
 		int nodeIdx = aNode.getNr();
 		Double thisNodePopSize = allPopSizes[nodeIdx];
@@ -45,17 +44,18 @@ public class CoalCorrection extends CalculationNode {
 		if (aNode.isLeaf()) {
 			nLineageDistAtEnd[nodeIdx] = new double[] { 1.0 }; // always start with 1 lineage per species
 			maxNLineages = 1;
+			spOrderInTMat[nodeIdx] = aNode.getID();
 		}
 		
 		// if internal node or root
 		else {
 			Node leftChild = aNode.getChild(0);
 			int leftIdx = leftChild.getNr();
-			int maxNLineagesLeft = fillNLineageDistInPlace(leftChild, allPopSizes); // recursion
+			int maxNLineagesLeft = fillNLineageDistInPlace(leftChild, allPopSizes, spOrderInTMat); // recursion
 		
 			Node rightChild = aNode.getChild(1);
 			int rightIdx = rightChild.getNr();
-			int maxNLineagesRight = fillNLineageDistInPlace(rightChild, allPopSizes); // recursion
+			int maxNLineagesRight = fillNLineageDistInPlace(rightChild, allPopSizes, spOrderInTMat); // recursion
 			
 			maxNLineages = maxNLineagesLeft + maxNLineagesRight;
 			nLineageDistAtEnd[nodeIdx] = new double[maxNLineages];
@@ -89,7 +89,7 @@ public class CoalCorrection extends CalculationNode {
 			
 		}
 		
-		System.out.println(Arrays.toString(nLineageDistAtEnd[nodeIdx]));
+		// System.out.println(Arrays.toString(nLineageDistAtEnd[nodeIdx]));
 		return maxNLineages; 
 	}
 	
@@ -97,12 +97,12 @@ public class CoalCorrection extends CalculationNode {
 	 *  Note that this is the expected genealogy height where the "tips" start at the root population
 	 *  so this is NOT the TOTAL genealogy height (as in, the total gene tree height)
 	 */
-	private double getExpGenealHeightAtRoot(Double[] allPopSizes) {
+	private double getExpGenealHeightAtRoot(Double[] allPopSizes, String[] spOrderInTMat) {
 		Node root = tree.getRoot();
 		int rootIdx = root.getNr();
 		
 		double expGenealHeight = 0.0;
-		double maxNLineages = fillNLineageDistInPlace(root, allPopSizes);
+		double maxNLineages = fillNLineageDistInPlace(root, allPopSizes, spOrderInTMat);
 		
 		for (int kLineages=1; kLineages <= maxNLineages; ++kLineages) {
 			double probOfKLineages = nLineageDistAtEnd[rootIdx][kLineages-1];
@@ -162,7 +162,7 @@ public class CoalCorrection extends CalculationNode {
 		return expCoalTimePair;
 	}
 	
-	private void fillPhyloTMatInPlace() {
+	private void fillPhyloTMatInPlace(String[] spOrderInTMat) {
 		if (treeInput.isDirty()) {
 			tree = treeInput.get();
 		}
@@ -171,9 +171,9 @@ public class CoalCorrection extends CalculationNode {
 		List<Node> allLeaves = tree.getRoot().getAllLeafNodes();
 		Double[] popSizes = popSizesInput.get().getValues();
 		
-		double expGenealHeightAtRoot = getExpGenealHeightAtRoot(popSizes);
+		double expGenealHeightAtRoot = getExpGenealHeightAtRoot(popSizes, spOrderInTMat);
 		
-		System.out.println("Expected total genealogical height = " + (treeHeight+expGenealHeightAtRoot));
+		// System.out.println("Expected total genealogical height = " + (treeHeight+expGenealHeightAtRoot));
 		
 		// TODO: then get expected times
 		List<Node> allNodes = tree.getRoot().getAllLeafNodes();
@@ -192,11 +192,11 @@ public class CoalCorrection extends CalculationNode {
 		}
 	}
 	
-	// getters
-	public double[][] getCorrectedPhyloTMat() {
-		fillPhyloTMatInPlace();
-		
-		GeneralUtils.display2DArray(correctedPhyloTMat);
+	/*
+	 * Getters
+	 */
+	public double[][] getCorrectedPhyloTMat(String[] spOrderInTMat) {
+		fillPhyloTMatInPlace(spOrderInTMat);
 		
 		return correctedPhyloTMat;
 	}

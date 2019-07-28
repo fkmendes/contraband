@@ -69,44 +69,48 @@
       <!-- END prior -->
 
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
- 	    <distribution id="OUMVN" spec="contraband.OUMVNLikelihoodOneTrait" eqDist="false" useRootMetaData="true">
-	      <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,f2:0.10):1.0,(sp2:1.0,f1:0.8):1.0)" offset="0" singlechild="false">
-		    <trait id="FossilSet" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
-		      sp1=0.0,
-			  sp2=0.0,
-			  f2=0.1,
-			  f1=0.8
-		    <taxa idref="MyTaxa"/>
-		    </trait>
+	<distribution id="rejectionSampling" spec="contraband.RateCategoryIdentifiability">
+	  <rates idref="OUTheta"/>
+	</distribution>
+
+ 	<distribution id="OUMVN" spec="contraband.OUMVNLikelihoodOneTrait" eqDist="false" useRootMetaData="true">
+	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,f2:0.10):1.0,(sp2:1.0,f1:0.8):1.0)" offset="0" singlechild="false">
+	    <trait id="FossilSet" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
+	      sp1=0.0,
+	      sp2=0.0,
+	      f2=0.1,
+	      f1=0.8
+	      <taxa idref="MyTaxa"/>
+	    </trait>
 		  
-		    <taxonset id="MyTaxa" spec="TaxonSet">
-			  <taxon id="f1" spec="Taxon"/>
-			  <taxon id="f2" spec="Taxon"/>
-			  <taxon id="sp1" spec="Taxon"/>
-			  <taxon id="sp2" spec="Taxon"/>
-		  	</taxonset>
-	      </tree>
+	    <taxonset id="MyTaxa" spec="TaxonSet">
+	      <taxon id="f1" spec="Taxon"/>
+	      <taxon id="f2" spec="Taxon"/>
+	      <taxon id="sp1" spec="Taxon"/>
+	      <taxon id="sp2" spec="Taxon"/>
+	    </taxonset>
+	  </tree>
 
-	      <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" nTraits="1" spNames="sp1,sp2,f1,f2">
-	        <traitValues id="fixedTraitValues" spec="parameter.RealParameter">0.3975946 0.2423501 -0.6398611 0.3134564</traitValues>
-	      </oneTraitData>
+	  <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" nTraits="1" spNames="sp1,sp2,f1,f2">
+	    <traitValues id="fixedTraitValues" spec="parameter.RealParameter">0.3975946 0.2423501 -0.6398611 0.3134564</traitValues>
+	  </oneTraitData>
 
-	      <optimumManager id="optimumManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
-	        <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="3">
-	   	  	  <rates id="OUTheta" spec="parameter.RealParameter" lower="-Infinity" upper="Infinity">0.01 0.05</rates>
-	      	  <rateCatAssign id="OUThetaAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0 0 0</rateCatAssign>
-	      	  <tree idref="TheTree"/>
-	        </branchRateModel>
+	  <optimumManager id="optimumManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
+	    <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="2">
+	      <rates id="OUTheta" spec="parameter.RealParameter" lower="-Infinity" upper="Infinity">0.01 0.05</rates>
+	      <rateCatAssign id="OUThetaAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0 0 0</rateCatAssign>
+	      <tree idref="TheTree"/>
+	    </branchRateModel>
 	      	
-	      	<tree idref="TheTree"/>
-	      </optimumManager>
+	    <tree idref="TheTree"/>
+	  </optimumManager>
 	    
-	      <sigmasq id="OUSigmaSq" dimension="1" spec="parameter.RealParameter">0.1</sigmasq>
+	  <sigmasq id="OUSigmaSq" dimension="1" spec="parameter.RealParameter">0.1</sigmasq>
 
-	      <alpha id="OUAlpha" dimension="1" spec="parameter.RealParameter">1.0</alpha>
+	  <alpha id="OUAlpha" dimension="1" spec="parameter.RealParameter">1.0</alpha>
 	      
-	      <rootValue id="OURootValue" dimension="1" spec="parameter.RealParameter">0.001</rootValue>
-	    </distribution> <!-- END BMVN -->
+	  <rootValue id="OURootValue" dimension="1" spec="parameter.RealParameter">0.001</rootValue>
+	</distribution> <!-- END BMVN -->
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
 
@@ -137,6 +141,7 @@
       <log idref="OURootValue"/>
       <log idref="OUAlpha"/>
       <log idref="OUTheta"/>
+      <log idref="OUThetaAssignments"/>
     </logger>
 
     <logger id="screenlog" logEvery="5000">

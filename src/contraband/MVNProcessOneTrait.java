@@ -9,6 +9,7 @@ import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import org.hamcrest.core.IsNull;
 
 import beast.core.Distribution;
 import beast.core.Input;
@@ -20,17 +21,19 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
 	final public Input<Double> rootEdgeLengthInput = new Input<>("rootEdgeLength", "root edge length.", 0.0, Validate.OPTIONAL);
+	final public Input<CoalCorrection> coalCorrectionInput = new Input<>("coalCorrector", "Calculation node that produces a phylogenetic T matrix from tree and (constant) population sizes of its branches.", Validate.OPTIONAL);
 	
 	// TODO: rootEdgeLength is not a parameter, so in the future after I implement the coalescent correction, this should be figured out
 	// from the tree (in StarBeast2)
 	
 	private boolean dirty;
 	private boolean matrixWasSingularCantInvertBarf;
-	private boolean successiveThetasIncreasing;
+	private boolean doCoalCorrection = false;
 	
 	// for phylo T matrix
 	private Tree tree;
 	private int nSpp; // tree has to be traversed, so part of state!
+	private CoalCorrection coal;
 	
 	// things below are part of state because I do not want to call new on them every time I compute likelihood
 	private double[] nodeToRootPaths;
@@ -75,6 +78,11 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		phyloTMatDouble = new double[nSpp][nSpp];
 		phyloTMat = MatrixUtils.createRealMatrix(phyloTMatDouble);
 		phyloWTMat = MatrixUtils.createRealMatrix(tree.getInternalNodeCount(), nSpp);
+		
+		if (coalCorrectionInput.get() != null) {
+			coal = coalCorrectionInput.get();
+			doCoalCorrection = true;
+		}
 
 		// stored stuff
 		storedOneTraitDataVector = new ArrayRealVector(nSpp);
@@ -84,21 +92,30 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		storedPhyloTMatDouble = new double[nSpp][nSpp];
 	}
 	
-	protected void populatePhyloTMatrix() {		
-		MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatDouble, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder); // updates last 3 args
+	protected void populatePhyloTMatrix() {
+		if (doCoalCorrection) {
+			phyloTMatDouble = coal.getCorrectedPhyloTMat(spNamesInPhyloTMatOrder);
+		}
 		
+		else {
+			MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatDouble, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder); // updates last 3 args
+
+			// setting root edge rows/cols in phyloTMat
+			Double rootEdgeLength = rootEdgeLengthInput.get();
+			if (rootEdgeLength != 0.0) {
+				phyloTMat = phyloTMat.scalarAdd(rootEdgeLength);
+			}
+		}
+		
+		// now populating RealMatrix using double[][]
 		for (int i=0; i<nSpp; ++i) {
 			for (int j=0; j<nSpp; ++j) {
 				phyloTMat.setEntry(i, j, phyloTMatDouble[i][j]);
 			}
 		}
-
-		// setting root edge rows/cols in phyloTMat
-		Double rootEdgeLength = rootEdgeLengthInput.get();
-		if (rootEdgeLength != 0.0) {
-			phyloTMat = phyloTMat.scalarAdd(rootEdgeLength);
-		}
-	};
+		
+		GeneralUtils.displayRealMatrix(phyloTMat);
+	}
 	
 	protected void populateAncNodePhyloTMatrix() {
 		MVNUtils.populateAncNodePhyloTMatrix(tree, phyloWTMat);
@@ -188,10 +205,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	protected void setMatrixIsSingular(boolean matrixIsSingular) {
 		matrixWasSingularCantInvertBarf = matrixIsSingular;
-	}
-	
-	protected void setThetasAreGo(boolean thetasAreGo) {
-		successiveThetasIncreasing = thetasAreGo;
 	}
 	
 	// caching

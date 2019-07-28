@@ -31,16 +31,16 @@ public class BMMVNShiftLikelihoodOneTraitTest1 {
 		RealParameter colorValues = new RealParameter(new Double[] { 0.2704762 });
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 0, 0, 0, 0, 0 });
 		// IntegerParameter rootEdgeColorAssignment = new IntegerParameter(new Integer[] { 0 });
-		RateCategoryClockModel lsc = new RateCategoryClockModel();
-		lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
+		RateCategoryClockModel rcc = new RateCategoryClockModel();
+		rcc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
 		
 		TreeToVCVMat colors = new TreeToVCVMat();
-		colors.initByName("branchRateModel", lsc, "tree", myTree, "coalCorrection", false);
+		colors.initByName("branchRateModel", rcc, "tree", myTree, "coalCorrection", false);
 		// ColorManager colors = new ColorManager();
 		// colors.initByName("nTraits", 1, "nColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 		
 		TreeToVCVMat colors2 = new TreeToVCVMat();
-		colors2.initByName("branchRateModel", lsc, "tree", myTree, "coalCorrection", true, "rootEdgeLength", 1.0);
+		colors2.initByName("branchRateModel", rcc, "tree", myTree, "coalCorrection", true, "rootEdgeLength", 1.0);
 		// ColorManager colors2 = new ColorManager();
 		// colors2.initByName("nTraits", 1, "nColors", 1, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", true, "rootEdgeLength", 1.0, "rootEdgeColorAssignment", rootEdgeColorAssignment);
 				
