@@ -42,7 +42,6 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	// mean vector
 	private TreeToVCVMat optimumManager;
-	private BranchRateModel cm; // clock model
 	// private ColorManager optimumManager;
 	// private RealMatrix wMat; // needed only for old parameterization with W matrix
 	
@@ -71,7 +70,6 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		eqDistAtRoot = eqDistInput.get();
 		useRootMetaData = useRootMetaDataInput.get();
 		optimumManager = optimumManagerInput.get();
-		cm = optimumManager.getClockModel();
 		
 		// old parameterization using W mat
 		// initializing stuff whose size won't change for now
@@ -138,7 +136,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		
 		double alpha = alphaInput.get().getValue().doubleValue();
 		
-		OUUtils.populateOUMeanVector(alpha, rootValue, getRootNode(), getRootNode(), getAllLeafNodes(), cm, ouMeanVector, useRootMetaData);
+		OUUtils.populateOUMeanVector(alpha, rootValue, getRootNode(), getRootNode(), getAllLeafNodes(), optimumManager.getClockModel(), ouMeanVector, useRootMetaData);
 		// System.out.println("Mean vector:");
 		// GeneralUtils.displayRealVector(ouMeanVector);	
 
