@@ -1,7 +1,7 @@
 <beast version='2.0'
        namespace='beast.core:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.branchratemodel:beast.evolution.likelihood:beast.core.parameter'>
 
-    <parameter spec='BooleanParameter' name='indicators' id='indicators' dimension="5" value="true true false false false"/>
+    <parameter spec='BooleanParameter' name='indicators' id='indicators' value="false"/>
 
     <run spec="MCMC" id="mcmc" chainLength="100000"> <!--autoOptimize="true"-->
         <state>
@@ -10,7 +10,7 @@
 	
 	<distribution spec="CompoundDistribution" id="posterior"/>
 
-        <operator id="bitmove" spec="BitMoveOperator" weight="1">
+        <operator id="bitmove" spec="contraband.BitMoveOperator" weight="1" k="2">
             <input name="parameter" idref="indicators"/>
         </operator>
 

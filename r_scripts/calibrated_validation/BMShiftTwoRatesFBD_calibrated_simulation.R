@@ -107,7 +107,10 @@ while (success <= n.sim + 50) {
     }
     counter = counter + 1
 }
-rate.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep(0, 2*length(x$tip.label)-1), collapse=" ")))))
+## rate.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep(0, 2*length(x$tip.label)-1), collapse=" ")))))
+shift.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep("false", 2*length(x$tip.label)-3), collapse=" ")))))
+shift.assignments <- paste0("true ", shift.assignments)
+print(shift.assignments)
 spnames.4.template <- unlist(as.vector((lapply(trs, function(x) paste(x$tip.label, collapse=",")))))
 mean.trs.h <- mean(unlist(trs.heights))
 
@@ -193,7 +196,8 @@ if (write.xmls) {
             line = gsub("\\[FBDsamplingRatePriorMeanHere\\]", format(1/150, nsmall=1), line)
             line = gsub("\\[FBDoriginPriorMeanHere\\]", mean.trs.h, line)
             line = gsub("\\[RateValuesPriorMeanHere\\]", format(1/sigma.rate, nsmall=1), line)
-            line = gsub("\\[RateAssignmentsHere\\]", rate.assignments[successes[sim.idx]], line)
+            ## line = gsub("\\[RateAssignmentsHere\\]", rate.assignments[successes[sim.idx]], line)
+            line = gsub("\\[ShiftIndicatorsHere\\]", shift.assignments[successes[sim.idx]], line)
             line = gsub("\\[BMMeanPriorMeanHere\\]", format(x0.mean, nsmall=1), line)
             line = gsub("\\[BMMeanPriorStdDevHere\\]", format(x0.sd, nsmall=1), line)
             line = gsub("\\[TreeHere\\]", write.tree(trs[[successes[sim.idx]]]), line)

@@ -9,8 +9,8 @@
       <parameter id="FBDsamplingRate" name="stateNode">0.01</parameter>
       <parameter id="FBDorigin" name="stateNode">[InitialOriginValue]</parameter>
       <stateNode idref="BMMean"/>
-      <!-- <stateNode idref="shiftIndicators"/> -->
-      <stateNode idref="rateAssignments"/>
+      <stateNode idref="shiftIndicators"/>
+      <!-- <stateNode idref="rateAssignments"/> -->
       <stateNode idref="rateValues"/>
     </state>
 	    
@@ -70,18 +70,18 @@
 	  </oneTraitData>
 
 	  <rateManager id="rateManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
-	    <!-- <branchRateModel id="rateRandomLocalClock" spec="beast.evolution.branchratemodel.RandomLocalClockModel"> -->
-	    <!--   <indicators id="shiftIndicators" spec="parameter.BooleanParameter" value="false"/> -->
-	    <!--   <rates id="rateValues" spec="parameter.RealParameter" value="0.01"/> -->
-	    <!--   <tree idref="TheTree"/> -->
-	    <!-- </branchRateModel> -->
-
-	    <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="2">
-	      <rates id="rateValues" spec="parameter.RealParameter">0.1 0.2</rates>
-	      <rateCatAssign id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">[RateAssignmentsHere]</rateCatAssign>
+	    <branchRateModel id="rateRandomLocalClock" spec="beast.evolution.branchratemodel.RandomLocalClockModel">
+	      <indicators id="shiftIndicators" spec="parameter.BooleanParameter" value="[ShiftIndicatorsHere]"/>
+	      <rates id="rateValues" spec="parameter.RealParameter" value="0.01"/>
 	      <tree idref="TheTree"/>
 	    </branchRateModel>
-	    
+
+	    <!-- <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="2"> -->
+	    <!--   <rates id="rateValues" spec="parameter.RealParameter">0.1 0.2</rates> -->
+	    <!--   <rateCatAssign id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">[RateAssignmentsHere]</rateCatAssign> -->
+	    <!--   <tree idref="TheTree"/> -->
+	    <!-- </branchRateModel> -->
+		      
 	    <tree idref="TheTree"/>
 	  </rateManager>
 	  <mean id="BMMean" dimension="1" spec="parameter.RealParameter">0.0</mean>
@@ -105,11 +105,11 @@
     <operator id="FBDSAUniformOperator" spec="SAUniform" tree="@TheTree" weight="20.0"/>
     <operator id="FBDSATreeRootScaler" spec="SAScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@TheTree" weight="1.0"/>
     <operator id="FBDSATreeScaler" spec="SAScaleOperator" scaleFactor="0.95" tree="@TheTree" weight="3.0"/>
-    <!-- <operator id="ShiftIndicatorOperator" spec="BitMoveOperator" parameter="@shiftIndicators"/> -->
     <!-- <operator id="ShiftIndicatorOperator" spec="BitFlipOperator" parameter="@shiftIndicators" uniform="false" weight="10.0"/> -->
-    <operator id="RateAssignmentWalker" spec="IntRandomWalkOperator" parameter="@rateAssignments" windowSize="1" weight="10.0"/>
+    <!-- <operator id="RateAssignmentWalker" spec="IntRandomWalkOperator" parameter="@rateAssignments" windowSize="1" weight="10.0"/> -->
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
     <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="1.0" weight="3.0"/>
+    <operator id="ShiftIndicatorMove" spec="contraband.BitMoveOperator" weight="10.0" parameter="@shiftIndicators" k="1"/>
 	
     <logger id="tracelog" fileName="[FileNameHere].log" logEvery="30000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
@@ -126,8 +126,12 @@
       <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="30000000" mode="tree">
-      <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
+    <!-- <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="30000000" mode="tree"> -->
+    <!--   <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/> -->
+    <!-- </logger> -->
+
+    <logger id="treelog1" fileName="BMMVNShift_fixedtree.trees" logEvery="30000" mode="tree">
+      <log id="TreeWithMetaDataLogger" spec="contraband.RateAndShiftLogger" metadata="@shiftIndicators" branchratemodel="@rateRandomLocalClock" tree="@TheTree"/>
     </logger>
   </run>
 </beast>

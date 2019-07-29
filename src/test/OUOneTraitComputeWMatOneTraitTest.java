@@ -15,6 +15,9 @@ import beast.util.TreeParser;
 import contraband.ColorManager;
 import contraband.OUUtils;
 
+/*
+ * This test is deprecated because color manager now does handle rate (color) values anymore
+ */
 public class OUOneTraitComputeWMatOneTraitTest {
 
 	final static double EPSILON = 1e-4;
@@ -60,10 +63,10 @@ public class OUOneTraitComputeWMatOneTraitTest {
 		ouWeight1RI = new Array2DRowRealMatrix(n, 4);
 		ouWeight1RM = new Array2DRowRealMatrix(n, 3);
 
-	    OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 3, alphaFI, ouWeight1FI, true);
-	    OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 3, alphaFM, ouWeight1FM, false);
-	    OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 3, alphaRI, ouWeight1RI, true);
-	    OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 3, alphaRM, ouWeight1RM, false);
+//	    OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 3, alphaFI, ouWeight1FI, true);
+//	    OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 3, alphaFM, ouWeight1FM, false);
+//	    OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 3, alphaRI, ouWeight1RI, true);
+//	    OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 3, alphaRM, ouWeight1RM, false);
 	}
 	
 	// Test 2: Non-ultrametric tree (1 regimes)
@@ -93,10 +96,10 @@ public class OUOneTraitComputeWMatOneTraitTest {
 		ouWeight2RI = new Array2DRowRealMatrix(n, 2);
 		ouWeight2RM = new Array2DRowRealMatrix(n, 1);
 
-		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 1, alphaFI, ouWeight2FI, true);
-		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 1, alphaFM, ouWeight2FM, false);
-		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 1, alphaRI, ouWeight2RI, true);
-		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 1, alphaRM, ouWeight2RM, false);
+//		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 1, alphaFI, ouWeight2FI, true);
+//		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 1, alphaFM, ouWeight2FM, false);
+//		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 1, alphaRI, ouWeight2RI, true);
+//		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 1, alphaRM, ouWeight2RM, false);
 	}
 	
 	// Test 3: Non-ultrametric tree (5 regimes)
@@ -126,10 +129,10 @@ public class OUOneTraitComputeWMatOneTraitTest {
 		ouWeight3RI = new Array2DRowRealMatrix(n, 6);
 		ouWeight3RM = new Array2DRowRealMatrix(n, 5);
 		
-		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 5, alphaFI, ouWeight3FI, true);
-		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 5, alphaFM, ouWeight3FM, false);
-		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 5, alphaRI, ouWeight3RI, true);
-		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 5, alphaRM, ouWeight3RM, false);
+//		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 5, alphaFI, ouWeight3FI, true);
+//		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 5, alphaFM, ouWeight3FM, false);
+//		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 5, alphaRI, ouWeight3RI, true);
+//		OUUtils.computeWMatOneTrait(colors.getColorAssignments(), myTree.getRoot(), allLeafNodes, n, 5, alphaRM, ouWeight3RM, false);
 	}
 		
 	// Test 1
