@@ -138,7 +138,7 @@ public class RateAndShiftLogger extends BEASTObject implements Loggable {
 						RealParameter rp = (RealParameter) metadata;
 						appendDouble(buf, rp.getArrayValue(node.getNr()));
 					} else {
-						if (node.isRoot()) {
+						if (node.getNr() == treeInput.get().getNodeCount()-1) {
 							buf.append(0.0);
 						}
 						else {

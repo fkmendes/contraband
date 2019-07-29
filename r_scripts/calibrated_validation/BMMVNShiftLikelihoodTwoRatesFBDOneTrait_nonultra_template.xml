@@ -130,7 +130,7 @@
     <!--   <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/> -->
     <!-- </logger> -->
 
-    <logger id="treelog1" fileName="BMMVNShift_fixedtree.trees" logEvery="30000" mode="tree">
+    <logger id="treelog" fileName="[FileNameHere].trees" logEvery="30000" mode="tree">
       <log id="TreeWithMetaDataLogger" spec="contraband.RateAndShiftLogger" metadata="@shiftIndicators" branchratemodel="@rateRandomLocalClock" tree="@TheTree"/>
     </logger>
   </run>
