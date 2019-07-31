@@ -17,9 +17,10 @@ write.shellscripts <- TRUE
 cal.validation.folder <- "/Users/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/"
 n.sim <- 100
 n.spp <- 50
-job.prefix <- "BMMVNShiftTwoRatesFBD"
-time.needed <- "04:00:00"
-template.name <- "BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml"
+## job.prefix <- "BMMVNShiftTwoRatesFBD"
+job.prefix <- "BMMVNShiftTwoRatesFBDfixed"
+time.needed <- "15:00:00"
+template.name <- "BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra_template.xml"
 tree.type <- "nonultra"
 
 ## simulate <- args[1]
@@ -33,22 +34,20 @@ tree.type <- "nonultra"
 ## template.name <- args[9]
 ## tree.type <- args[10]
 xmlfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
-seqfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_seqs/")
 ## xml.file.prefix <- args[11]
 
-xml.file.prefix <- paste0("BMMVNShiftLikelihoodTwoRatesFBDOneTrait_", tree.type, "_")
+xml.file.prefix <- paste0(job.prefix, "OneTrait_", tree.type, "_")
 shell.scripts.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_shellscripts/")
 template.path <- paste0(cal.validation.folder, template.name)
 rdata.path <- gsub("_template.xml", ".RData", template.path)
 
 # cluster stuff
-cluster.validation.folder <- cal.validation.folder
-
-## cluster.validation.folder <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/"
+## cluster.validation.folder <- cal.validation.folder
+cluster.validation.folder <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/"
 ## cluster.validation.folder <- args[12]
 
-xml.file.path <- paste0(cluster.validation.folder, "BMMVNShiftTwoRatesFBDOneTrait_", tree.type, "_xmls/")
-res.path <- paste0(cluster.validation.folder, "BMMVNShiftTwoRatesFBDOneTrait_", tree.type, "_results/")
+xml.file.path <- paste0(cluster.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
+res.path <- paste0(cluster.validation.folder, job.prefix, "OneTrait_", tree.type, "_results/")
 jar.path <- paste0(cluster.validation.folder, "contraband.jar")
 ## jar.path <- args[13]
 
@@ -176,9 +175,6 @@ if (simulate) {
         traits.4.template[[success]] = paste(datasets[[success]], collapse=" ")
 
         seq.datasets[[success]] = phyDat2alignment(simSeq(trs[[counter]], l=2000, type="DNA", rate=nuc.rate))
-        seq.file.name = paste0(seqfolder.path, success, ".nex")
-        # write.phyDat(seq.datasets[[success]], file=seq.file.name, format="nexus")
-
         seq.string = ""
         sp.count = 1
         for (sp.name in trs[[counter]]$tip.label) {
@@ -213,7 +209,8 @@ if (simulate) {
 ## writing xmls
 if (write.xmls) {
     for (sim.idx in 1:n.sim) {
-        xml.file.name = basename(gsub("template.xml", paste0(sim.idx, ".xml"), template.path))
+        ## xml.file.name = basename(gsub("template.xml", paste0(sim.idx, ".xml"), template.path))
+        xml.file.name = paste0(xml.file.prefix, sim.idx, ".xml")
         print (xml.file.name)
         if (file.exists(paste0(xmlfolder.path, xml.file.name))) {
             file.remove(paste0(xmlfolder.path, xml.file.name))
