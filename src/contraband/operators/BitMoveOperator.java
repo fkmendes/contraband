@@ -22,7 +22,7 @@
 * Boston, MA  02110-1301  USA
 */
 
-package contraband;
+package contraband.operators;
 
 import beast.core.Description;
 import beast.core.Input;

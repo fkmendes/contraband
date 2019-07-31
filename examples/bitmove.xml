@@ -10,7 +10,7 @@
 	
 	<distribution spec="CompoundDistribution" id="posterior"/>
 
-        <operator id="bitmove" spec="contraband.BitMoveOperator" weight="1" k="2">
+        <operator id="bitmove" spec="contraband.operators.BitMoveOperator" weight="1" k="2">
             <input name="parameter" idref="indicators"/>
         </operator>
 

@@ -109,7 +109,7 @@
     <!-- <operator id="RateAssignmentWalker" spec="IntRandomWalkOperator" parameter="@rateAssignments" windowSize="1" weight="10.0"/> -->
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
     <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="1.0" weight="3.0"/>
-    <operator id="ShiftIndicatorMove" spec="contraband.BitMoveOperator" weight="10.0" parameter="@shiftIndicators" k="1"/>
+    <operator id="ShiftIndicatorMove" spec="contraband.operators.BitMoveOperator" weight="10.0" parameter="@shiftIndicators" k="1"/>
 	
     <logger id="tracelog" fileName="[FileNameHere].log" logEvery="30000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
