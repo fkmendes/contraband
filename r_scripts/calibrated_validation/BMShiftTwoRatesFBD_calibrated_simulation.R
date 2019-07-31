@@ -4,6 +4,7 @@ library(FossilSim)
 library(phytools)
 library(stringr)
 library(phangorn)
+library(cgwtools) # for resave
 
 source("calibrated_validation_utils.R")
 
@@ -22,6 +23,7 @@ job.prefix <- "BMMVNShiftTwoRatesFBDfixed"
 time.needed <- "15:00:00"
 template.name <- "BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra_template.xml"
 tree.type <- "nonultra"
+xmlfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
 
 ## simulate <- args[1]
 ## write.xmls <- args[2]
@@ -33,7 +35,6 @@ tree.type <- "nonultra"
 ## time.needed <- args[8] # e.g., "04:00:00"
 ## template.name <- args[9]
 ## tree.type <- args[10]
-xmlfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
 ## xml.file.prefix <- args[11]
 
 xml.file.prefix <- paste0(job.prefix, "OneTrait_", tree.type, "_")
@@ -44,6 +45,7 @@ rdata.path <- gsub("_template.xml", ".RData", template.path)
 # cluster stuff
 ## cluster.validation.folder <- cal.validation.folder
 cluster.validation.folder <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/"
+
 ## cluster.validation.folder <- args[12]
 
 xml.file.path <- paste0(cluster.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
@@ -69,8 +71,11 @@ lambda <- rexp(1000, rate=80) # lambda from exponential (mean = 1/80)
 mu <- rexp(1000, rate=100) # mu from exponential (mean = 1/100)
 psi <- rexp(1000, rate=150) # psi from exponential (mean = 1/150)
 trs <- vector("list", n.sim + 50)
-trs.heights <- vector("list", n.sim)
-trs.edge.mean.lengths <- vector("list", n.sim)
+trs.heights <- vector("list", n.sim + 50)
+trs.edge.mean.lengths <- rep(0, (n.sim + 50))
+trs.color.ns <- rep(0, (n.sim + 50))
+trs.ntips <- rep(0, (n.sim + 50))
+trs.nedges <- rep(0, (n.sim + 50))
 fossil.entries <- vector("list", n.sim)
 
 success <- 1
@@ -93,10 +98,14 @@ while (success <= n.sim + 50) {
             ## }
 
             trs[[success]] = paintSubTree(tr, node=random.int.node, state=2, stem=FALSE)
+            trs.ntips[success] = length(tr$tip.label)
+            trs.nedges[success] = nrow(tr$edge)
             depths = node.depth.edgelength(trs[[success]])
             tr.height = as.numeric(as.character(max(depths)))
             trs.heights[[success]] = tr.height
-            trs.edge.mean.lengths[[success]] = mean(tr$edge.length[tr$edge.length!=0.0])
+            trs.edge.mean.lengths[success] = mean(tr$edge.length[tr$edge.length!=0.0])
+            trs.colors.ns[[success]] = as.integer(table(names(unlist(trs[[success]]$maps)))[2]) ## count is for edges with state=2
+
             fossil.idxs = depths[1:length(trs[[success]]$tip.label)] < tr.height
             fossil.labels = trs[[success]]$tip.label[fossil.idxs]
             fossil.depths.backw = tr.height - depths[1:length(trs[[success]]$tip.label)][fossil.idxs]
@@ -116,14 +125,13 @@ while (success <= n.sim + 50) {
     }
     counter = counter + 1
 }
-## rate.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep(0, 2*length(x$tip.label)-1), collapse=" ")))))
+
+trs.colors.ns <- as.vector(trs.colors.ns)
+
+rate.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep(0, 2*length(x$tip.label)-1), collapse=" ")))))
 shift.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep("false", 2*length(x$tip.label)-3), collapse=" ")))))
 shift.assignments <- paste0("true ", shift.assignments)
 spnames.4.template <- unlist(as.vector((lapply(trs, function(x) paste(x$tip.label, collapse=",")))))
-mean.trs.h <- mean(unlist(trs.heights))
-mean.trs.edge.length <- mean(unlist(trs.edge.mean.lengths)) # we want a 1% genetic distance d (=rt), where t is the mean edge length,
-                                        # so the nuc evol rate should be 0.01/mean.trs.edge.length
-nuc.rate <- 0.01/mean.trs.edge.length
 
 ## having a look at tree heights
 ## hist(unlist(trs.heights), prob=T)
@@ -174,16 +182,6 @@ if (simulate) {
         mles[success,] = c(mle.res$sigma[[1]], mle.res$sigma[[2]], mle.res$theta)
         traits.4.template[[success]] = paste(datasets[[success]], collapse=" ")
 
-        seq.datasets[[success]] = phyDat2alignment(simSeq(trs[[counter]], l=2000, type="DNA", rate=nuc.rate))
-        seq.string = ""
-        sp.count = 1
-        for (sp.name in trs[[counter]]$tip.label) {
-            seq.string = paste(seq.string, paste0("<sequence id=\"", sp.count, "\" taxon=\"", sp.name, "\" totalcount=\"4\"\nvalue=\"", seq.datasets[[success]]$seq[seq.datasets[[success]]$nam==sp.name], "\"/>\n", sep="\n"))
-            sp.count = sp.count + 1
-        }
-        seqs.4.template[[success]] = seq.string
-        ## print(seqs.4.template[[success]])
-
         ## recording success indexes
         successes[success] = counter
         success = success + 1
@@ -192,11 +190,12 @@ if (simulate) {
 
     ## saving true values and MLEs to .RData
     true.param.df = cbind(data.frame(sigmas.1, sigmas.2, x0s), mles)
+    trs.ntips.2.save = trs.ntips[successes]
     trs.heights.2.save = trs.heights[successes]
     trs.edge.mean.lengths.2.save = trs.edge.mean.lengths[successes]
     names(true.param.df) = c("sigma1",  "sigma2", "mu", "sigma1.mle", "sigma2.mle", "mu.mle")
     trees.2.save = trs[successes]
-    save(trees.2.save, true.param.df, trs.heights.2.save, trs.edge.mean.lengths.2.save, datasets, seq.datasets, file=rdata.path)
+    save(trees.2.save, true.param.df, trs.heights.2.save, trs.edge.mean.lengths.2.save, datasets, file=rdata.path)
 } else {
     load(rdata.path) # don't simulate, just load saved simulation
 }
@@ -205,6 +204,27 @@ if (simulate) {
 ## plot(mu.mle~mu, data=true.param.df, xlab=expression(mu), ylab=expression(paste(mu[MLE])), pch=20)
 ## plot(sigma1.mle~sigma1, data=true.param.df, xlab=expression(sigma[1]^2), ylab=expression(paste(sigma^2[MLE])), pch=20)
 ## plot(sigma2.mle~sigma2, data=true.param.df, xlab=expression(sigma[2]^2), ylab=expression(paste(sigma^2[MLE])), pch=20)
+
+mean.trs.h <- mean(unlist(trs.heights)[successes])
+mean.trs.edge.length <- mean(unlist(trs.edge.mean.lengths)[successes]) # we want a 1% genetic distance d (=rt), where t is the mean edge length,
+# so the nuc evol rate should be 0.01/mean.trs.edge.length
+
+## simulating seqs
+nuc.rate <- 0.01/mean.trs.edge.length
+for (i in 1:n.sim) {
+    idx = successes[i]
+    seq.datasets[[success]] = phyDat2alignment(simSeq(trs[[idx]], l=2000, type="DNA", rate=nuc.rate))
+
+    seq.string = ""
+        sp.count = 1
+        for (sp.name in trs[[counter]]$tip.label) {
+            seq.string = paste(seq.string, paste0("<sequence id=\"", sp.count, "\" taxon=\"", sp.name, "\" totalcount=\"4\"\nvalue=\"", seq.datasets[[success]]$seq[seq.datasets[[success]]$nam==sp.name], "\"/>\n", sep="\n"))
+            sp.count = sp.count + 1
+        }
+    seqs.4.template[[success]] = seq.string
+}
+
+resave(seq.datasets, file=rdata.path)
 
 ## writing xmls
 if (write.xmls) {
