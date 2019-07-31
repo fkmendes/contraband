@@ -31,6 +31,10 @@ public class CoalCorrection extends CalculationNode {
 		int nNodes = tree.getNodeCount();
 		nLineageDistAtEnd = new double[nNodes][];
 		correctedPhyloTMat = new double[nSpp][nSpp];
+		
+		if (nNodes != popSizesInput.get().getValues().length) {
+			throw new RuntimeException("The number of population sizes in popSizes is different from the number of nodes in the tree.");
+		}
 	}
 
 	/*

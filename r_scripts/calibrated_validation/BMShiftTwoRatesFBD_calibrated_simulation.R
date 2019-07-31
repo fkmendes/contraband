@@ -3,51 +3,59 @@ library(mvMORPH)
 library(FossilSim)
 library(phytools)
 library(stringr)
+library(phangorn)
+
 source("calibrated_validation_utils.R")
 
 args = commandArgs(trailingOnly=TRUE)
 
 ### SCRIPT FLAGS AND PATH VARIABLES ###
 
-## simulate <- TRUE
-## write.xmls <- TRUE
-## write.shellscripts <- TRUE
-## cal.validation.folder <- "/home/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/"
-## n.sim <- 100
-## n.spp <- 50
-## job.prefix <- "BMMVNShiftTwoRatesFBD"
-## time.needed <- "04:00:00"
-## template.name <- "BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml"
-## tree.type <- "nonultra"
+simulate <- TRUE
+write.xmls <- TRUE
+write.shellscripts <- TRUE
+cal.validation.folder <- "/Users/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/"
+n.sim <- 100
+n.spp <- 50
+job.prefix <- "BMMVNShiftTwoRatesFBD"
+time.needed <- "04:00:00"
+template.name <- "BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml"
+tree.type <- "nonultra"
 
-simulate <- args[1]
-write.xmls <- args[2]
-write.shellscripts <- args[3]
-cal.validation.folder <- args[4]
-n.sim <- as.numeric(args[5])
-n.spp <- as.numeric(args[6])
-job.prefix <- args[7] # e.g., "BMMVNShiftTwoRatesFBD"
-time.needed <- args[8] # e.g., "04:00:00"
-template.name <- args[9]
-tree.type <- args[10]
+## simulate <- args[1]
+## write.xmls <- args[2]
+## write.shellscripts <- args[3]
+## cal.validation.folder <- args[4]
+## n.sim <- as.numeric(args[5])
+## n.spp <- as.numeric(args[6])
+## job.prefix <- args[7] # e.g., "BMMVNShiftTwoRatesFBD"
+## time.needed <- args[8] # e.g., "04:00:00"
+## template.name <- args[9]
+## tree.type <- args[10]
 xmlfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
+seqfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_seqs/")
 ## xml.file.prefix <- args[11]
+
 xml.file.prefix <- paste0("BMMVNShiftLikelihoodTwoRatesFBDOneTrait_", tree.type, "_")
 shell.scripts.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_shellscripts/")
 template.path <- paste0(cal.validation.folder, template.name)
 rdata.path <- gsub("_template.xml", ".RData", template.path)
 
 # cluster stuff
-## cluster.validation.folder <- cal.validation.folder
+cluster.validation.folder <- cal.validation.folder
+
 ## cluster.validation.folder <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/"
-cluster.validation.folder <- args[12]
+## cluster.validation.folder <- args[12]
+
 xml.file.path <- paste0(cluster.validation.folder, "BMMVNShiftTwoRatesFBDOneTrait_", tree.type, "_xmls/")
 res.path <- paste0(cluster.validation.folder, "BMMVNShiftTwoRatesFBDOneTrait_", tree.type, "_results/")
 jar.path <- paste0(cluster.validation.folder, "contraband.jar")
 ## jar.path <- args[13]
 
 n.param <- 3
-sigma.rate <- 5 # exponential prior
+## sigma.rate <- 5 # exponential prior
+sigma.mean <- 0.0932 # log-normal prior
+sigma.sd <- 0.8005
 x0.mean <- 0.0 # normal prior
 x0.sd <- 2.0
 
@@ -63,6 +71,7 @@ mu <- rexp(1000, rate=100) # mu from exponential (mean = 1/100)
 psi <- rexp(1000, rate=150) # psi from exponential (mean = 1/150)
 trs <- vector("list", n.sim + 50)
 trs.heights <- vector("list", n.sim)
+trs.edge.mean.lengths <- vector("list", n.sim)
 fossil.entries <- vector("list", n.sim)
 
 success <- 1
@@ -70,24 +79,25 @@ counter <- 1
 ## add 50 trees just in case some trees have SA at the root (in which case likelihoods cant be computed)
 while (success <= n.sim + 50) {
     if (lambda[counter] > mu[counter]) {
-        ## print(counter)
         if (counter==279) { set.seed(234) }
         tr = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
 
         if (length(tr$tip.label) <= 100) {
             cat(paste(c("Simulating tree", success, "with FBD.\n"), sep=" "))
             int.node.idxs = (max(which(node.depth.edgelength(tr)==0))+1):(tr$Nnode + length(tr$tip.label))
-            n.descendants = 1
-            while ((n.descendants < (length(tr$tip.label) * 0.2)) | (n.descendants > (length(tr$tip.label) * 0.8))) {
-            # while (n.descendants < (length(tr$tip.label)/10)) {
+
+            # uncomment these lines if you want larger painted clades (careful because this changes model)
+            ## n.descendants = 1
+            ## while ((n.descendants < (length(tr$tip.label) * 0.2)) | (n.descendants > (length(tr$tip.label) * 0.8))) {
                 random.int.node = sample(int.node.idxs, 1)
-                n.descendants = length(getDescendants(tr, random.int.node))
-            }
-            ## print(paste0("random node=", random.int.node, " success=", success))
+            ##     n.descendants = length(getDescendants(tr, random.int.node))
+            ## }
+
             trs[[success]] = paintSubTree(tr, node=random.int.node, state=2, stem=FALSE)
             depths = node.depth.edgelength(trs[[success]])
             tr.height = as.numeric(as.character(max(depths)))
             trs.heights[[success]] = tr.height
+            trs.edge.mean.lengths[[success]] = mean(tr$edge.length[tr$edge.length!=0.0])
             fossil.idxs = depths[1:length(trs[[success]]$tip.label)] < tr.height
             fossil.labels = trs[[success]]$tip.label[fossil.idxs]
             fossil.depths.backw = tr.height - depths[1:length(trs[[success]]$tip.label)][fossil.idxs]
@@ -110,18 +120,22 @@ while (success <= n.sim + 50) {
 ## rate.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep(0, 2*length(x$tip.label)-1), collapse=" ")))))
 shift.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep("false", 2*length(x$tip.label)-3), collapse=" ")))))
 shift.assignments <- paste0("true ", shift.assignments)
-print(shift.assignments)
 spnames.4.template <- unlist(as.vector((lapply(trs, function(x) paste(x$tip.label, collapse=",")))))
 mean.trs.h <- mean(unlist(trs.heights))
+mean.trs.edge.length <- mean(unlist(trs.edge.mean.lengths)) # we want a 1% genetic distance d (=rt), where t is the mean edge length,
+                                        # so the nuc evol rate should be 0.01/mean.trs.edge.length
+nuc.rate <- 0.01/mean.trs.edge.length
 
 ## having a look at tree heights
 ## hist(unlist(trs.heights), prob=T)
 ## lines(density(rexp(10000, 1/mean.trs.h)), col="red")
 
-## simulating quant trait data sets
+## simulating quant trait data sets and nuc seqs
 set.seed(123)
-sigmas.1 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp1[1] # 0.1686
-sigmas.2 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp2[1] # 0.2275
+## sigmas.1 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp1[1] # 0.1686
+## sigmas.2 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp2[1] # 0.2275
+sigmas.1 <- rlnorm(n.sim, mean=sigma.mean, sd=sigma.sd)
+sigmas.2 <- rlnorm(n.sim, mean=sigma.mean, sd=sigma.sd)
 ## twice.larger.smaller.idx <- which(((sigmas.tmp1/sigmas.tmp2)>=2 | (sigmas.tmp2/sigmas.tmp1)>=2))[1:100]
 ## sigmas.tmp1 <- sigmas.tmp1[twice.larger.smaller.idx]
 ## sigmas.tmp2 <- sigmas.tmp2[twice.larger.smaller.idx]
@@ -129,7 +143,8 @@ sigmas.2 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp2[1] # 0.2275
 ## sigmas.2 <- c(sigmas.tmp2[sigmas.tmp1 < sigmas.tmp2], sigmas.tmp1[!sigmas.tmp1 < sigmas.tmp2])
 
 x0s <- rnorm(n.sim, mean=x0.mean, sd=x0.sd); # x0s[1] # -0.4015
-datasets <- vector("list", n.sim) # storing sims
+datasets <- vector("list", n.sim) # storing trait sims
+seq.datasets <- vector("list", n.sim) # storing nuc sims
 mles <- data.frame(matrix(NA,100,n.param))
 
 ## for putting on template
@@ -138,6 +153,8 @@ for (i in 1:(n.sim+50)) {
     taxon.strs.4.template[[i]] = paste(paste0("<taxon id=\"", trs[[i]]$tip.label, "\" spec=\"Taxon\"/>"), collapse="\n                  ")
 }
 traits.4.template <- vector("list", n.sim)
+
+seqs.4.template <- vector("list", n.sim)
 
 ## actually simulating and populating strs for template
 set.seed(123)
@@ -152,11 +169,26 @@ if (simulate) {
             next
         }
         sigmas = list(black=sigmas.1[success], red=sigmas.2[success])
-        datasets[[success]] = mvSIM(trs[[counter]], nsim=1, model="BMM", param=list(sigma=sigmas, theta=x0s[success]))
+        datasets[[success]] = mvSIM(trs[[counter]], nsim=1, model="BMM", param=list(sigma=sigmas, theta=x0s[success])) # simulating trait data
         cat(paste0("Calling mvBM for sim ",success,", tree=",counter,"\n"))
         mle.res = mvBM(trs[[counter]], datasets[[success]], model="BMM")
         mles[success,] = c(mle.res$sigma[[1]], mle.res$sigma[[2]], mle.res$theta)
         traits.4.template[[success]] = paste(datasets[[success]], collapse=" ")
+
+        seq.datasets[[success]] = phyDat2alignment(simSeq(trs[[counter]], l=2000, type="DNA", rate=nuc.rate))
+        seq.file.name = paste0(seqfolder.path, success, ".nex")
+        # write.phyDat(seq.datasets[[success]], file=seq.file.name, format="nexus")
+
+        seq.string = ""
+        sp.count = 1
+        for (sp.name in trs[[counter]]$tip.label) {
+            seq.string = paste(seq.string, paste0("<sequence id=\"", sp.count, "\" taxon=\"", sp.name, "\" totalcount=\"4\"\nvalue=\"", seq.datasets[[success]]$seq[seq.datasets[[success]]$nam==sp.name], "\"/>\n", sep="\n"))
+            sp.count = sp.count + 1
+        }
+        seqs.4.template[[success]] = seq.string
+        ## print(seqs.4.template[[success]])
+
+        ## recording success indexes
         successes[success] = counter
         success = success + 1
         counter = counter + 1
@@ -164,9 +196,11 @@ if (simulate) {
 
     ## saving true values and MLEs to .RData
     true.param.df = cbind(data.frame(sigmas.1, sigmas.2, x0s), mles)
+    trs.heights.2.save = trs.heights[successes]
+    trs.edge.mean.lengths.2.save = trs.edge.mean.lengths[successes]
     names(true.param.df) = c("sigma1",  "sigma2", "mu", "sigma1.mle", "sigma2.mle", "mu.mle")
     trees.2.save = trs[successes]
-    save(trees.2.save, true.param.df, file=rdata.path)
+    save(trees.2.save, true.param.df, trs.heights.2.save, trs.edge.mean.lengths.2.save, datasets, seq.datasets, file=rdata.path)
 } else {
     load(rdata.path) # don't simulate, just load saved simulation
 }
@@ -195,7 +229,9 @@ if (write.xmls) {
             line = gsub("\\[FBDdeathRatePriorMeanHere\\]", format(1/100, nsmall=1), line)
             line = gsub("\\[FBDsamplingRatePriorMeanHere\\]", format(1/150, nsmall=1), line)
             line = gsub("\\[FBDoriginPriorMeanHere\\]", mean.trs.h, line)
-            line = gsub("\\[RateValuesPriorMeanHere\\]", format(1/sigma.rate, nsmall=1), line)
+            ## line = gsub("\\[RateValuesPriorMeanHere\\]", format(1/sigma.rate, nsmall=1), line)
+            line = gsub("\\[RateValuesPriorMeanHere\\]", format(sigma.mean, nsmall=1), line)
+            line = gsub("\\[RateValuesPriorStdDevHere\\]", format(sigma.sd, nsmall=1), line)
             ## line = gsub("\\[RateAssignmentsHere\\]", rate.assignments[successes[sim.idx]], line)
             line = gsub("\\[ShiftIndicatorsHere\\]", shift.assignments[successes[sim.idx]], line)
             line = gsub("\\[BMMeanPriorMeanHere\\]", format(x0.mean, nsmall=1), line)
@@ -206,6 +242,8 @@ if (write.xmls) {
             line = gsub("\\[TaxonSetHere\\]", taxon.strs.4.template[successes[sim.idx]], line)
             line = gsub("\\[TraitValuesHere\\]", traits.4.template[[sim.idx]], line)
             line = gsub("\\[FileNameHere\\]", paste0(res.path, file.name), line)
+            line = gsub("\\[SeqsHere\\]", seqs.4.template[sim.idx], line)
+            line = gsub("\\[MutRateHere\\]", nuc.rate, line)
             write(line, file=paste0(xmlfolder.path, xml.file.name), append=TRUE)
         }
     }

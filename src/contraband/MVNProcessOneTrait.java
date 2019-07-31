@@ -20,7 +20,8 @@ import beast.evolution.tree.Tree;
 public abstract class MVNProcessOneTrait extends Distribution {
 	
 	final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
-	final public Input<Double> rootEdgeLengthInput = new Input<>("rootEdgeLength", "root edge length.", 0.0, Validate.OPTIONAL);
+	final public Input<Double> rootEdgeLengthInput = new Input<>("rootEdgeLength", "Root edge length.", 0.0, Validate.OPTIONAL);
+	final public Input<Boolean> doCoalCorrectionInput = new Input<>("doCoalCorrection", "Whether or not to perform coalescent correction.", false, Validate.REQUIRED);
 	final public Input<CoalCorrection> coalCorrectionInput = new Input<>("coalCorrector", "Calculation node that produces a phylogenetic T matrix from tree and (constant) population sizes of its branches.", Validate.OPTIONAL);
 	
 	// TODO: rootEdgeLength is not a parameter, so in the future after I implement the coalescent correction, this should be figured out
@@ -28,7 +29,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	
 	private boolean dirty;
 	private boolean matrixWasSingularCantInvertBarf;
-	private boolean doCoalCorrection = false;
 	
 	// for phylo T matrix
 	private Tree tree;
@@ -52,7 +52,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private double detVCVMat;
 	
 	// ASR stuff 
-	private RealVector wVec; // Weight (design) vector for ASR (with multiple traits, it would be a matrix)
+	// private RealVector wVec; // Weight (design) vector for ASR (with multiple traits, it would be a matrix)
 	// never changes, so no need to worry about storing
 	private RealMatrix ancNodeVCVMat;
 	
@@ -79,9 +79,9 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		phyloTMat = MatrixUtils.createRealMatrix(phyloTMatDouble);
 		phyloWTMat = MatrixUtils.createRealMatrix(tree.getInternalNodeCount(), nSpp);
 		
-		if (coalCorrectionInput.get() != null) {
+		coal = null;
+		if (doCoalCorrectionInput.get()) {
 			coal = coalCorrectionInput.get();
-			doCoalCorrection = true;
 		}
 
 		// stored stuff
@@ -93,7 +93,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	}
 	
 	protected void populatePhyloTMatrix() {
-		if (doCoalCorrection) {
+		if (doCoalCorrectionInput.get()) {
 			phyloTMatDouble = coal.getCorrectedPhyloTMat(spNamesInPhyloTMatOrder);
 		}
 		
@@ -195,9 +195,12 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		oneTraitDataVector = aOneTraitDataVector;
 	}
 	
-	protected void setProcessWMat(RealVector aWVec) {
-		wVec = aWVec;
-	}
+	/*
+	 * Used in previous parameterization using W matrix for OU
+	 */
+//	protected void setProcessWMat(RealVector aWVec) {
+//		wVec = aWVec;
+//	}
 	
 	protected void setProcessAncNodeVCVMatrix(RealMatrix aAncNodeVCVMat) {
 		ancNodeVCVMat = aAncNodeVCVMat;

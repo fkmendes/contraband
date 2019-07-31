@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution.speciation" required="BEAST v2.5.0" version="2.5">
- 
-  <run id="mcmc" spec="MCMC" chainLength="30000000">
-    <state id="state" storeEvery="30000">
+
+  <data id="seqs" name="alignment">
+      [SeqsHere]
+  </data>
+  
+  <run id="mcmc" spec="MCMC" chainLength="50000000">
+    <state id="state" storeEvery="50000">
       <tree idref="TheTree" name="stateNode"/>
       <parameter id="FBDbirthRate" name="stateNode">0.1</parameter>
       <parameter id="FBDdeathRate" name="stateNode">0.05</parameter>
@@ -13,7 +17,7 @@
       <!-- <stateNode idref="rateAssignments"/> -->
       <stateNode idref="rateValues"/>
     </state>
-	    
+    
     <distribution id="posterior" spec="util.CompoundDistribution">
 
       <!-- START prior -->
@@ -38,7 +42,8 @@
         </distribution>
         
 	<distribution id="rateValuesPrior" spec="beast.math.distributions.Prior" x="@rateValues">
-	  <distr id="Exp.rateValues" spec="beast.math.distributions.Exponential" offset="0.0" mean="[RateValuesPriorMeanHere]"/>
+	  <distr id="LogNormal.rateValues" spec="beast.math.distributions.LogNormalDistributionModel" S="[RateValuesPriorStdDevHere]" M="[RateValuesPriorMeanHere]"/>
+	  <!-- <distr id="Exp.rateValues" spec="beast.math.distributions.Exponential" offset="0.0" mean="[RateValuesPriorMeanHere]"/> -->
 	</distribution>
 
 	<!-- <distribution id="shiftIndicatorPrior" spec="beast.math.distributions.Prior"> -->
@@ -53,6 +58,18 @@
       <!-- END prior -->
 
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+	<distribution id="GeneTree" spec="ThreadedTreeLikelihood" data="@seqs" tree="@TheTree">
+          <siteModel id="JC69" spec="SiteModel">
+            <parameter id="mutationRate" estimate="false" name="mutationRate">[MutRateHere]</parameter>
+            <parameter id="proportionInvariant" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+            <substModel id="JukesCantor69" spec="JukesCantor"/>
+	  </siteModel>
+	  
+          <branchRateModel id="StrictClock" spec="beast.evolution.branchratemodel.StrictClockModel">
+            <parameter id="clockRate" estimate="false" name="clock.rate">[MutRateHere]</parameter>
+          </branchRateModel>
+        </distribution>
+
 	<distribution id="BMMVNShift" spec="contraband.BMMVNShiftLikelihoodOneTrait">
 	  <!-- <tree idref="TheTree"/> -->
 	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="[TreeHere]" offset="0" singlechild="false">
@@ -70,7 +87,7 @@
 	  </oneTraitData>
 
 	  <rateManager id="rateManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
-	    <branchRateModel id="rateRandomLocalClock" spec="beast.evolution.branchratemodel.RandomLocalClockModel">
+	    <branchRateModel id="rateRandomLocalClock" spec="beast.evolution.branchratemodel.RandomLocalClockModel" scaling="false" includeRoot="true">
 	      <indicators id="shiftIndicators" spec="parameter.BooleanParameter" value="[ShiftIndicatorsHere]"/>
 	      <rates id="rateValues" spec="parameter.RealParameter" value="0.01"/>
 	      <tree idref="TheTree"/>
@@ -107,11 +124,15 @@
     <operator id="FBDSATreeScaler" spec="SAScaleOperator" scaleFactor="0.95" tree="@TheTree" weight="3.0"/>
     <!-- <operator id="ShiftIndicatorOperator" spec="BitFlipOperator" parameter="@shiftIndicators" uniform="false" weight="10.0"/> -->
     <!-- <operator id="RateAssignmentWalker" spec="IntRandomWalkOperator" parameter="@rateAssignments" windowSize="1" weight="10.0"/> -->
-    <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
+    <!-- <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="5.0"/> -->
+    <!-- <operator id="RateValueWalker" spec="contraband.RandomLocalTraitOperator" parameter="@rateValues" windowSize="1.0" weight="10.0" p="0.5"/> -->
+    <operator id="RateValueWalker" spec="contraband.operators.RandomLocalTraitOperator" shiftIndicators="@shiftIndicators" traits="@rateValues" windowSize="1.0" weight="10.0" p="0.25">
+      <randomClockModel idref="rateRandomLocalClock"/>
+    </operator>
     <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="1.0" weight="3.0"/>
-    <operator id="ShiftIndicatorMove" spec="contraband.operators.BitMoveOperator" weight="10.0" parameter="@shiftIndicators" k="1"/>
+    <operator id="ShiftIndicatorMove" spec="contraband.operators.BitMoveOperator" weight="5.0" parameter="@shiftIndicators" k="1"/>
 	
-    <logger id="tracelog" fileName="[FileNameHere].log" logEvery="30000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="[FileNameHere].log" logEvery="50000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
@@ -119,18 +140,18 @@
       <log idref="BMMean"/>
     </logger>
 
-    <logger id="screenlog" logEvery="30000">
+    <logger id="screenlog" logEvery="20000">
       <log idref="posterior"/>
       <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
     </logger>
 
-    <!-- <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="30000000" mode="tree"> -->
+    <!-- <logger id="treelog.t:firsthalf" fileName="[FileNameHere].trees" logEvery="50000000" mode="tree"> -->
     <!--   <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/> -->
     <!-- </logger> -->
 
-    <logger id="treelog" fileName="[FileNameHere].trees" logEvery="30000" mode="tree">
+    <logger id="treelog" fileName="[FileNameHere].trees" logEvery="50000" mode="tree">
       <log id="TreeWithMetaDataLogger" spec="contraband.RateAndShiftLogger" metadata="@shiftIndicators" branchratemodel="@rateRandomLocalClock" tree="@TheTree"/>
     </logger>
   </run>

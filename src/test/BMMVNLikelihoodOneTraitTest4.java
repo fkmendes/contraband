@@ -55,9 +55,9 @@ public class BMMVNLikelihoodOneTraitTest4 {
 		
 		// likelihood
 		BMMVNLikelihoodOneTrait BMLk1 = new BMMVNLikelihoodOneTrait();
-		BMLk1.initByName("tree", myTree, "sigmasq", sigmasq1, "mean", mean1, "oneTraitData", oneTraitData, "coalCorrector", coal1);
+		BMLk1.initByName("tree", myTree, "sigmasq", sigmasq1, "mean", mean1, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal1);
 		BMMVNLikelihoodOneTrait BMLk2 = new BMMVNLikelihoodOneTrait();
-		BMLk2.initByName("tree", myTree, "sigmasq", sigmasq2, "mean", mean2, "oneTraitData", oneTraitData, "coalCorrector", coal2);
+		BMLk2.initByName("tree", myTree, "sigmasq", sigmasq2, "mean", mean2, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal2);
 		
 		lnLk1 = BMLk1.calculateLogP();
 		lnLk2 = BMLk2.calculateLogP();

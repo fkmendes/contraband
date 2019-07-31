@@ -46,6 +46,10 @@ import java.util.List;
         "with an indicator of 1, otherwise it will choose a trait associated with an indicator of 0.")
 public class RandomLocalTraitOperator extends Operator {
 
+	final public Input<BooleanParameter> shiftIndicatorsInput = new Input<>("shiftIndicators", "the boolean indicator parameter, with one boolean per node (without root).", Validate.REQUIRED);
+	
+	final public Input<RealParameter> traitsInput = new Input<>("traits", "the trait (rate, optimum, etc.) associated with each tree node (including root).", Validate.REQUIRED);
+			
     final public Input<RandomLocalClockModel> randomClockModelInput =
             new Input<>("randomClockModel",
                     "the random clock model on whose parameters to operate.",
@@ -55,6 +59,7 @@ public class RandomLocalTraitOperator extends Operator {
 
     final public Input<Double> windowSizeInput =
             new Input<>("windowSize", "the size of the window both up and down.", Input.Validate.REQUIRED);
+    
 
     List<Integer> onPositions = new ArrayList<>();
     List<Integer> offPositions = new ArrayList<>();
@@ -67,8 +72,12 @@ public class RandomLocalTraitOperator extends Operator {
     @Override
 	public void initAndValidate() {
         rlcModel = randomClockModelInput.get();
-        indicatorParam = rlcModel.indicatorParamInput.get();
-        traitParam = rlcModel.rateParamInput.get();
+        // indicatorParam = rlcModel.indicatorParamInput.get();
+        // traitParam = rlcModel.rateParamInput.get();
+    	
+    	indicatorParam = shiftIndicatorsInput.get();
+    	traitParam = traitsInput.get();
+    	
         windowSize = windowSizeInput.get();
     }
 

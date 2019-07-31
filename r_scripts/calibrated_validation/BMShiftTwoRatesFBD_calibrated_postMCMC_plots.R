@@ -8,38 +8,38 @@ args = commandArgs(trailingOnly=TRUE)
 
 ### SCRIPT FLAGS AND PATH VARIABLES ###
 
-cal.validation.folder <- args[1]
-## cal.validation.folder <- "./"
-rdata.path <- args[2]
-## rdata.path <- "BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData"
-n.sim <- as.numeric(args[3])
-## n.sim <- 100
-job.prefix <- args[4]
-## job.prefix <- "BMMVNShiftTwoRatesFBD"
-n.param <- as.numeric(args[5])
-## n.param <- 3
-
-param.names <- strsplit(args[6], ",")[[1]]
-## param.names <- c("sigma1", "sigma2", "mu")
-beast.param.names <- strsplit(args[7], ",")[[1]]
-## beast.param.names <- c("rateValues1", "rateValues2", "BMMean")
-param.labs.preparse <- strsplit(args[8], ",")[[1]]
-prior.means.preparse <- strsplit(args[9], ",")[[1]]
-param.labs <- prior.means <- c()
-for (i in 1:n.param) {
-    param.labs[i] = eval(parse(text=param.labs.preparse[i]))
-    prior.means[i] = eval(parse(text=prior.means.preparse[i]))
-}
-mle.param.names <- strsplit(args[11], ",")[[1]]
-
-## param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(y[0]))
-## mle.param.names <- c("sigma1.mle", "sigma2.mle", "mu.mle")
-## prior.means <- c(0.2, 0.2, 0.0)
-
 tree.type <- "nonultra"
 
+cal.validation.folder <- "./"
+rdata.path <- "BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData"
+n.sim <- 100
+job.prefix <- "BMMVNShiftTwoRatesFBD"
+n.param <- 3
+param.names <- c("sigma1", "sigma2", "mu")
+beast.param.names <- c("rateValues1", "rateValues2", "BMMean")
+param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(y[0]))
+mle.param.names <- c("sigma1.mle", "sigma2.mle", "mu.mle")
+prior.means <- c(0.2, 0.2, 0.0)
+
+## cal.validation.folder <- args[1]
+## rdata.path <- args[2]
+## n.sim <- as.numeric(args[3])
+## job.prefix <- args[4]
+## n.param <- as.numeric(args[5])
+## param.names <- strsplit(args[6], ",")[[1]]
+## beast.param.names <- strsplit(args[7], ",")[[1]]
+## param.labs.preparse <- strsplit(args[8], ",")[[1]]
+## prior.means.preparse <- strsplit(args[9], ",")[[1]]
+## param.labs <- prior.means <- c()
+## for (i in 1:n.param) {
+##     param.labs[i] = eval(parse(text=param.labs.preparse[i]))
+##     prior.means[i] = eval(parse(text=prior.means.preparse[i]))
+## }
+## mle.param.names <- strsplit(args[11], ",")[[1]]
+
 res.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_results/")
-res.files <- mixedsort(paste0(res.path,list.files(res.path)))
+res.files <- mixedsort(paste0(res.path,list.files(res.path, pattern = "[0-9]\\.log$")))
+rate.files <- mixedsort(paste0(res.path,list.files(res.path, pattern = "\\.trees\\.log$")))
 load(rdata.path)
 
 ############# DOING STUFF #############
@@ -50,7 +50,10 @@ names(log.df) <- as.vector(outer(c("lower", "upper", "mean"), param.names, paste
 cols <- seq(length.out=n.param, by=3) # 3=lower, upper, mean
 cols.2.compare <- c(3, 6)
 for (i in 1:n.sim) {
+    this.sim.rate.df = read.table(rate.files[i], header=TRUE, row.names=1, sep="\t")
+    names(this.sim.rate.df) = beast.param.names[1:2]
     this.sim.df = read.delim(res.files[i], comment.char='#')
+    this.sim.df = rbind(this.sim.rate.df, this.sim.df)
 
     k = 1
     for (j in cols) {
