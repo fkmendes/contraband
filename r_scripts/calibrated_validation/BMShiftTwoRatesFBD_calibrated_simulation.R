@@ -193,14 +193,19 @@ if (simulate) {
     trs.ntips.2.save = trs.ntips[successes]
     trs.heights.2.save = trs.heights[successes]
     trs.edge.mean.lengths.2.save = trs.edge.mean.lengths[successes]
+    trs.colors.ns.2.save = trs.colors.ns[successes]
+    trs.nedges.2.save = trs.nedges[successes]
     names(true.param.df) = c("sigma1",  "sigma2", "mu", "sigma1.mle", "sigma2.mle", "mu.mle")
     trees.2.save = trs[successes]
-    save(trees.2.save, true.param.df, trs.heights.2.save, trs.edge.mean.lengths.2.save, datasets, file=rdata.path)
+    save(trees.2.save, true.param.df, trs.heights.2.save, trs.edge.mean.lengths.2.save, trs.colors.ns.2.save, trs.nedges.2.save, datasets, file=rdata.path)
 } else {
     load(rdata.path) # don't simulate, just load saved simulation
 }
 
-## MLE correlation plot (just for sanity check)
+## plotting how much of the tree is red
+## ggplot(data=tmp.df, aes(x="", y=pctg)) + geom_boxplot(notch=TRUE) + theme_classic() + ylab("% of edges with derived regime") + xlab("") + theme(axis.ticks.y=element_blank()) + coord_flip()
+
+## mle correlation plot (just for sanity check)
 ## plot(mu.mle~mu, data=true.param.df, xlab=expression(mu), ylab=expression(paste(mu[MLE])), pch=20)
 ## plot(sigma1.mle~sigma1, data=true.param.df, xlab=expression(sigma[1]^2), ylab=expression(paste(sigma^2[MLE])), pch=20)
 ## plot(sigma2.mle~sigma2, data=true.param.df, xlab=expression(sigma[2]^2), ylab=expression(paste(sigma^2[MLE])), pch=20)
@@ -224,7 +229,7 @@ for (i in 1:n.sim) {
     seqs.4.template[[success]] = seq.string
 }
 
-resave(seq.datasets, file=rdata.path)
+resave(seq.datasets, trsfile=rdata.path)
 
 ## writing xmls
 if (write.xmls) {
