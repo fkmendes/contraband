@@ -47,7 +47,7 @@
 	      
 	      <sigmasq id="rateValue" dimension="1" spec="parameter.RealParameter">1.4822794118</sigmasq>
 	    
-	      <mean id="rootValue" dimension="1" spec="parameter.RealParameter">3.079142</mean>
+	      <rootValue id="rootValue" dimension="1" spec="parameter.RealParameter">3.079142</rootValue>
 	    </distribution> <!-- END BMVN -->
 	    
       </distribution> <!-- END Likelihood -->
