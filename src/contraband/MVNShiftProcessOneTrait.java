@@ -85,7 +85,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	protected void populateOneTraitDataVector() {};
 	
 	protected void populateLogP() {
-		if (matrixWasSingularCantInvertBarf) {
+		if (matrixWasSingularCantInvertBarf || detVCVMat == 0.0) {
 			logP = Double.NEGATIVE_INFINITY;
 		}
 		else {

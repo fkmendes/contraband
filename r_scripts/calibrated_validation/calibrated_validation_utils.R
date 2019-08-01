@@ -107,3 +107,20 @@ flip.trace.var <- function(a.df, cols) {
     }
     return(a.df.res)
 }
+
+flip.w.bool <- function(a.df, bool.vec, col1, col2) {
+    a.df.res = a.df
+    for (i in 1:nrow(a.df.res)) {
+        if (bool.vec[i]) {
+            print(paste0("col 1 before = ", a.df.res[i,col1]))
+            print(paste0("col 2 before = ", a.df.res[i,col2]))
+            tmp = a.df[i,col2]
+            a.df.res[i,col2] = a.df[i,col1]
+            a.df.res[i,col1] = tmp
+            print(paste0("col 1 after = ", a.df.res[i,col1]))
+            print(paste0("col 2 after = ", a.df.res[i,col2]))
+        }
+    }
+    return(a.df.res)
+}
+
