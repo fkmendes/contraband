@@ -43,8 +43,8 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private double[][] phyloTMatDouble; // at some point I should get rid of this and use PhyloTMat straight away
 	private RealMatrix phyloTMat, phyloWTMat;
 		
-	// mean vector
-	private RealVector meanVec;
+	// expectation at tip vector
+	private RealVector expAtTipVec;
 	
 	// VCV matrix
 	private RealMatrix vcvMat, invVCVMat;
@@ -61,7 +61,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 
 	// stored stuff	
 	private RealVector storedOneTraitDataVector = new ArrayRealVector(nSpp);
-	private RealVector storedMeanVec; // need for integration with JIVE (unsure why...?)
+	private RealVector storedExpAtTipVec; // need for integration with JIVE (unsure why...?)
 	private RealMatrix storedPhyloTMat; // needed for tree operators
 	private double[][] storedPhyloTMatDouble; // needed for FBD operators
 	private RealMatrix storedInvVCVMat; // (below) needed for morphology parameter operators
@@ -86,42 +86,39 @@ public abstract class MVNProcessOneTrait extends Distribution {
 
 		// stored stuff
 		storedOneTraitDataVector = new ArrayRealVector(nSpp);
-		storedMeanVec = new ArrayRealVector(nSpp);
+		storedExpAtTipVec = new ArrayRealVector(nSpp);
 		storedPhyloTMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedPhyloTMatDouble = new double[nSpp][nSpp];
 	}
 	
 	protected void populatePhyloTMatrix() {
+		Double rootEdgeLength = rootEdgeLengthInput.get();
+		
 		if (doCoalCorrectionInput.get()) {
 			phyloTMatDouble = coal.getCorrectedPhyloTMat(spNamesInPhyloTMatOrder);
 		}
-		
 		else {
 			MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatDouble, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder); // updates last 3 args
-
-			// setting root edge rows/cols in phyloTMat
-			Double rootEdgeLength = rootEdgeLengthInput.get();
-			if (rootEdgeLength != 0.0) {
-				phyloTMat = phyloTMat.scalarAdd(rootEdgeLength);
-			}
 		}
 		
 		// now populating RealMatrix using double[][]
 		for (int i=0; i<nSpp; ++i) {
 			for (int j=0; j<nSpp; ++j) {
 				phyloTMat.setEntry(i, j, phyloTMatDouble[i][j]);
+				
+				if (rootEdgeLength != 0.0) {
+					phyloTMat.addToEntry(i, j, rootEdgeLength);
+				}
 			}
 		}
-		
-		GeneralUtils.displayRealMatrix(phyloTMat);
 	}
 	
 	protected void populateAncNodePhyloTMatrix() {
 		MVNUtils.populateAncNodePhyloTMatrix(tree, phyloWTMat);
 	}
 	
-	protected void populateMeanVector() {};
+	protected void populateExpAtTipVector() {};
 	
 	protected void populateVCVMatrix() {};
 	
@@ -139,7 +136,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 			logP = Double.NEGATIVE_INFINITY;
 		}
 		else {
-			logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVector, invVCVMat, detVCVMat);
+			logP = MVNUtils.getMVNLogLk(nSpp, expAtTipVec, oneTraitDataVector, invVCVMat, detVCVMat);
 		}
 	};
 	
@@ -188,7 +185,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	}
 	
 	protected void setProcessMeanVec(RealVector aMeanVector) {
-		meanVec = aMeanVector;
+		expAtTipVec = aMeanVector;
 	};
 	
 	protected void setProcessOneTraitDataVec(RealVector aOneTraitDataVector) {
@@ -226,7 +223,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	public void store() {	
 		for (int i=0; i<nSpp; ++i) {	
 			storedOneTraitDataVector.setEntry(i, oneTraitDataVector.getEntry(i)); // for JIVE
-			storedMeanVec.setEntry(i, meanVec.getEntry(i));
+			storedExpAtTipVec.setEntry(i, expAtTipVec.getEntry(i));
 			
 			// necessary for FBD prior
 			System.arraycopy(phyloTMatDouble[i], 0, storedPhyloTMatDouble[i], 0, phyloTMatDouble[i].length);
@@ -250,9 +247,9 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		oneTraitDataVector = storedOneTraitDataVector;
 		storedOneTraitDataVector = realVecTmp;
 
-		realVecTmp = meanVec;
-		meanVec = storedMeanVec;
-		storedMeanVec = realVecTmp;
+		realVecTmp = expAtTipVec;
+		expAtTipVec = storedExpAtTipVec;
+		storedExpAtTipVec = realVecTmp;
 		
 		realMatTmp = phyloTMat;
 		phyloTMat = storedPhyloTMat;

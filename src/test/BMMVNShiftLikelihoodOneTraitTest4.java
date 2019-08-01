@@ -44,13 +44,13 @@ public class BMMVNShiftLikelihoodOneTraitTest4 {
 		OneValueContTraits oneTraitData = new OneValueContTraits();
 		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
 		
-		// mean vector
-		Double[] meanVectorInput = new Double[] { -1.191236 };
-		RealParameter mean = new RealParameter(meanVectorInput);
+		// root value vector
+		Double[] rootValueVectorInput = new Double[] { -1.191236 };
+		RealParameter rootValue = new RealParameter(rootValueVectorInput);
 		
 		// likelihood
 		BMMVNShiftLikelihoodOneTrait BMLk = new BMMVNShiftLikelihoodOneTrait();
-		BMLk.initByName("tree", myTree, "rateManager", colors, "mean", mean, "oneTraitData", oneTraitData);
+		BMLk.initByName("tree", myTree, "rateManager", colors, "rootValue", rootValue, "oneTraitData", oneTraitData);
 		lnLk = BMLk.calculateLogP();
 		System.out.println(lnLk); // -4.673609  
 	}

@@ -100,7 +100,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	}
 	
 	private void populateInstanceVars(boolean updatePhyloTMat, boolean updateVCVMat, boolean updateMean, boolean updateData) {
-		if (updateMean) { populateMeanVector(); }
+		if (updateMean) { populateExpAtTipVector(); }
 		if (updatePhyloTMat) { super.populatePhyloTMatrix(); }
 		if (updateVCVMat) {
 			populateVCVMatrix();
@@ -129,7 +129,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	}
 	
 	@Override
-	protected void populateMeanVector() {
+	protected void populateExpAtTipVector() {
 		Double rootValue = rootValueInput.get().getValue();		
 		// Integer[] thetaAssignments = optimumManager.getColorAssignments();
 		// Double[] thetas = optimumManager.getColorValues();

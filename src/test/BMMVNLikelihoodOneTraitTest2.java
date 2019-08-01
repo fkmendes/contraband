@@ -34,13 +34,13 @@ public class BMMVNLikelihoodOneTraitTest2 {
 		Double[] sigmasqInput = new Double[] { 0.02813127 };
 		RealParameter sigmasq = new RealParameter(sigmasqInput);
 		
-		// mean vector
-		Double[] meanVectorInput = new Double[] { 2.405835 };
-		RealParameter mean = new RealParameter(meanVectorInput);
+		// root value vector vector
+		Double[] rootValueVectorInput = new Double[] { 2.405835 };
+		RealParameter rootValue = new RealParameter(rootValueVectorInput);
 		
 		// likelihood
 		BMMVNLikelihoodOneTrait BMLk = new BMMVNLikelihoodOneTrait();
-		BMLk.initByName("tree", myTree, "sigmasq", sigmasq, "mean", mean, "oneTraitData", oneTraitData);
+		BMLk.initByName("tree", myTree, "sigmasq", sigmasq, "rootValue", rootValue, "oneTraitData", oneTraitData);
 		lnLk = BMLk.calculateLogP();
 		System.out.println(lnLk);
 	}

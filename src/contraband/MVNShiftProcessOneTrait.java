@@ -30,7 +30,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	// private Tree tree;
 	private int nSpp;
 	
-	// mean vector
+	// expectation at tip vector
 	// colt
 	// private DoubleMatrix1D expAtTipVec;
 	// apache

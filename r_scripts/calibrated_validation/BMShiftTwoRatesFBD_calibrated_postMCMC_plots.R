@@ -67,12 +67,13 @@ for (i in 1:n.sim) {
 # putting true values and estimated ones together
 full.df <- cbind(true.param.df, log.df)
 bool.vec <- full.df[,1] > full.df[,2]
-cols <- c((2*n.param+1) : (2*n.param+3))
+cols <- c((2*n.param+1):(2*n.param+3))
 for (i in cols) {
     full.df <- flip.w.bool(full.df, bool.vec, i, i+3)
 }
 ## cols.2.flip <- c(1, 4) # 1 and 2 should flip, 4 and 5 should flip
 ## full.df <- flip.trace.var(full.df, cols.2.flip)
+
 plot.hdi <- vector("list", n.param)
 for (i in 1:n.param) {
     upper = paste0("upper.", param.names[i])

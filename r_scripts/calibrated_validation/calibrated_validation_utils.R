@@ -36,9 +36,6 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
     x = data.df[,x.name]; y = data.df[,y.name]
     reg.df = data.frame(cbind(x,y,lower,upper,plot.hdi))
 
-
-    print((x.max+x.min)/2)
-
     pl = ggplot() + geom_point(mapping=aes(x=x, y=y), shape=20) +
     coord_cartesian(ylim=c(y.min, y.max)) +
     xlab(x.lab) + ylab("Posterior mean") +

@@ -49,7 +49,7 @@ public class BMMVNShiftLikelihoodOneTraitTest6 {
 		OneValueContTraits oneTraitData = new OneValueContTraits();
 		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
 		
-		// mean vector
+		// root value vector
 		Double[] rootValueVectorInput = new Double[] { -0.4990207 };
 		RealParameter rootValue = new RealParameter(rootValueVectorInput);
 		
