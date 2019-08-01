@@ -14,7 +14,7 @@
       <parameter id="FBDorigin" name="stateNode">200.0</parameter>
       <stateNode idref="rateValues"/>
       <stateNode idref="rateAssignments"/>
-      <stateNode idref="BMMean"/>
+      <stateNode idref="rootValue"/>
     </state>
 
     <!-- <init id="RandomTree" spec="beast.evolution.tree.RandomTree" estimate="false" initial="@TheTree" taxa="@DummySeq"> -->
@@ -55,8 +55,8 @@
 	  <distr id="Exp.rateAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
 	</distribution>
 
-        <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@BMMean">
-	  <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+        <distribution id="rootValuePrior" spec="beast.math.distributions.Prior" x="@rootValue">
+	  <distr id="Normal.rootValue" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
       </distribution>
       
@@ -100,7 +100,7 @@
 	    <tree idref="TheTree"/>
 	  </rateManager>
 	    
-	  <mean id="BMMean" spec="parameter.RealParameter">0.0</mean>
+	  <rootValue id="rootValue" spec="parameter.RealParameter">0.0</rootValue>
 	</distribution> <!-- END BMVN -->	    
       </distribution> <!-- END Likelihood -->
     </distribution> <!-- END Posterior -->
@@ -120,7 +120,7 @@
 
     <operator id="RateAssignmentWalker" spec="IntRandomWalkOperator" parameter="@rateAssignments" windowSize="1" weight="10.0"/>
     <operator id="RateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="3.0"/>
-    <operator id="MeanRandomWalker" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="10.0" weight="3.0"/>
+    <operator id="RootValueRandomWalker" spec="RealRandomWalkOperator" parameter="@rootValue" windowSize="10.0" weight="3.0"/>
     
     <logger id="tracelog" fileName="BMMVNShift_samplingtree_FBD.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
@@ -128,7 +128,7 @@
       <log idref="prior"/>
       <log idref="rateValues"/>
       <log idref="rateAssignments"/>
-      <log idref="BMMean"/>
+      <log idref="rootValue"/>
     </logger>
 
     <logger id="screenlog" logEvery="10000">

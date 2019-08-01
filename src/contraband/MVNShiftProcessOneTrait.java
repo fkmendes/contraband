@@ -32,9 +32,9 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	// mean vector
 	// colt
-	// private DoubleMatrix1D meanVec;
+	// private DoubleMatrix1D expAtTipVec;
 	// apache
-	private RealVector meanVec;
+	private RealVector expAtTipVec;
 		
 	// VCV matrix
 	// colt
@@ -53,10 +53,10 @@ public class MVNShiftProcessOneTrait extends Distribution {
 
 	// stored stuff
 	// colt
-	// private DoubleMatrix1D storedMeanVec;
+	// private DoubleMatrix1D storedExpAtTipVec;
 	// private DoubleMatrix2D storedInvVCVMat;
 	// apache
-	private RealVector storedMeanVec; // need for integration with JIVE (unsure why...?)
+	private RealVector storedExpAtTipVec; // need for integration with JIVE (unsure why...?)
 	private RealMatrix storedInvVCVMat; // (below) needed for morphology parameter operators
 	 
 	private double storedDetVCVMat;
@@ -72,11 +72,11 @@ public class MVNShiftProcessOneTrait extends Distribution {
 		// storedInvVCVMat = DoubleFactory2D.dense.make(nSpp, nSpp);
 		
 		// apache
-		storedMeanVec = new ArrayRealVector(nSpp);
+		storedExpAtTipVec = new ArrayRealVector(nSpp);
 		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 	}
 
-	protected void populateMeanVector() {};
+	protected void populateExpAtTipVector() {};
 	
 	protected void populateVCVMatrix() {};
 	
@@ -90,10 +90,10 @@ public class MVNShiftProcessOneTrait extends Distribution {
 		}
 		else {
 			// colt
-			// logP = MVNUtils.getMVNLogLkColt(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
+			// logP = MVNUtils.getMVNLogLkColt(nSpp, expAtTipVec, oneTraitDataVec, invVCVMat, detVCVMat);
 			
 			// apache
-			logP = MVNUtils.getMVNLogLk(nSpp, meanVec, oneTraitDataVec, invVCVMat, detVCVMat);
+			logP = MVNUtils.getMVNLogLk(nSpp, expAtTipVec, oneTraitDataVec, invVCVMat, detVCVMat);
 		}
 	};
 	
@@ -112,7 +112,6 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	}
 	
 	protected double getLogP() {
-		// System.out.println("logP=" + logP);
 		return logP;
 	}
 	
@@ -149,8 +148,8 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	// protected void setProcessMeanVec(DoubleMatrix1D aMeanVector) {
 	
 	// apache
-	protected void setProcessMeanVec(RealVector aMeanVector) {
-		meanVec = aMeanVector;
+	protected void setProcessMeanVec(RealVector aExpAtTipVector) {
+		expAtTipVec = aExpAtTipVector;
 	};
 	
 	// colt 
@@ -181,9 +180,9 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	public void store() {	
 		for (int i=0; i<nSpp; ++i) {
 			// colt
-			// storedMeanVec.set(i, meanVec.get(i));
+			// storedMeanVec.set(i, expAtTipVec.get(i));
 			// apache
-			storedMeanVec.setEntry(i, meanVec.getEntry(i));
+			storedExpAtTipVec.setEntry(i, expAtTipVec.getEntry(i));
 			
 			for (int j=0; j<nSpp; ++j) {
 				// colt
@@ -198,14 +197,17 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	
 	@Override
 	public void restore() {
+		// colt
 		// DoubleMatrix2D realMatTmp;
 		// DoubleMatrix1D realVecTmp;
+		
+		// apache
 		RealMatrix realMatTmp;
 		RealVector realVecTmp;
 		
-		realVecTmp = meanVec;
-		meanVec = storedMeanVec;
-		storedMeanVec = realVecTmp;
+		realVecTmp = expAtTipVec;
+		expAtTipVec = storedExpAtTipVec;
+		storedExpAtTipVec = realVecTmp;
 		
 		realMatTmp = invVCVMat;
 		invVCVMat = storedInvVCVMat;

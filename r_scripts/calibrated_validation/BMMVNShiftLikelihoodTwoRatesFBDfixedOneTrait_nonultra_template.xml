@@ -12,7 +12,7 @@
       <!-- <parameter id="FBDdeathRate" name="stateNode">0.05</parameter> -->
       <!-- <parameter id="FBDsamplingRate" name="stateNode">0.01</parameter> -->
       <!-- <parameter id="FBDorigin" name="stateNode">[InitialOriginValue]</parameter> -->
-      <stateNode idref="BMMean"/>
+      <stateNode idref="rootValue"/>
       <!-- <stateNode idref="rateAssignments"/> -->
       <stateNode idref="shiftIndicators"/>
       <stateNode idref="rateValues"/>
@@ -51,8 +51,8 @@
 	<!--   <distr id="Pois.indicator" spec="beast.math.distributions.Poisson" lambda="1"/> -->
 	<!-- </distribution> -->
 		
-        <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@BMMean">
-	  <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="[BMMeanPriorMeanHere]" sigma="[BMMeanPriorStdDevHere]"/>
+        <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@rootValue">
+	  <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="[rootValuePriorMeanHere]" sigma="[rootValuePriorStdDevHere]"/>
         </distribution>
       </distribution>
       <!-- END prior -->
@@ -101,7 +101,7 @@
 		      
 	    <tree idref="TheTree"/>
 	  </rateManager>
-	  <mean id="BMMean" dimension="1" spec="parameter.RealParameter">0.0</mean>
+	  <mean id="rootValue" dimension="1" spec="parameter.RealParameter">0.0</mean>
 	</distribution> <!-- END BMVN -->
 
 	<!-- <distribution id="rejectionSampling" spec="contraband.RateCategoryIdentifiability"> -->
@@ -130,7 +130,7 @@
     </operator>
     <operator id="ShiftIndicatorMove" spec="contraband.operators.BitMoveOperator" weight="5.0" parameter="@shiftIndicators" k="1"/>
 
-    <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@BMMean" windowSize="1.0" weight="3.0"/>
+    <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@rootValue" windowSize="1.0" weight="3.0"/>
 	
     <logger id="tracelog" fileName="[FileNameHere].log" logEvery="50000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
@@ -139,7 +139,7 @@
       <log idref="shiftIndicators"/>
       <!-- <log idref="rateAssignments"/> -->
       <log idref="rateValues"/>
-      <log idref="BMMean"/>
+      <log idref="rootValue"/>
     </logger>
 
     <logger id="screenlog" logEvery="20000">

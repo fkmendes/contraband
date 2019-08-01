@@ -12,7 +12,7 @@ import beast.core.parameter.RealParameter;
 
 public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 
-	final public Input<RealParameter> meanInput = new Input<>("mean", "mu, or x_0, the mean of the process (and the values at the root).", Validate.REQUIRED);
+	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "rootValue, or y_0, the root value and the expected value at the tips.", Validate.REQUIRED);
 	final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
 	final public Input<TreeToVCVMat> rateManagerInput = new Input<>("rateManager", "color manager object that paints branches with their own rates.", Validate.REQUIRED);
 	
@@ -27,9 +27,9 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 
 	// mean vector
 	// colt
-	// DoubleMatrix1D bmMeanVector;
+	// DoubleMatrix1D bmExpAtTipVector;
 	// apache
-	private RealVector bmMeanVector;
+	private RealVector bmExpAtTipVector;
 	
 	// VCV matrix
 	private TreeToVCVMat rateManager;
@@ -50,9 +50,9 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	
 	// stored stuff
 	// colt
-	// DoubleMatrix1D storedBMMeanVec;
+	// DoubleMatrix1D storedExpAtTipVec;
 	// apache
-	private RealVector storedBMMeanVec;
+	private RealVector storedExpAtTipVec;
 	
 	@Override
 	public void initAndValidate() {
@@ -62,10 +62,10 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		nSpp = getNSpp();
 		
 		// colt 
-		// bmMeanVector = DoubleFactory1D.dense.make(nSpp);
+		// bmExpAtTipVector = DoubleFactory1D.dense.make(nSpp);
 		// oneTraitDataVec = DoubleFactory1D.dense.make(nSpp);
 		// apache
-		bmMeanVector = new ArrayRealVector(nSpp);
+		bmExpAtTipVector = new ArrayRealVector(nSpp);
 		oneTraitDataVec = new ArrayRealVector(nSpp);
 				
 		// colt
@@ -77,9 +77,9 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		
 		// stored stuff
 		// colt
-		// storedBMMeanVec = DoubleFactory1D.dense.make(nSpp);
+		// storedExpAtTipVec = DoubleFactory1D.dense.make(nSpp);
 		// apache
-		storedBMMeanVec = new ArrayRealVector(nSpp);
+		storedExpAtTipVec = new ArrayRealVector(nSpp);
 		
 		// this instance vars
 		populateInstanceVars(true, true);
@@ -89,7 +89,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	}
 	
 	protected void populateInstanceVars(boolean updateVCVMat, boolean updateMean) {
-		if (updateMean) { populateMeanVector(); }
+		if (updateMean) { populateExpAtTipVector(); }
 		if (updateVCVMat) {
 			populateVCVMatrix();
 			populateInvVCVMatrix();
@@ -97,9 +97,9 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		populateOneTraitDataVector();
 	}
 	
-	protected void populateParentInstanceVars(boolean updateVCVMat, boolean updateMean) {
+	protected void populateParentInstanceVars(boolean updateVCVMat, boolean updateExpAtTip) {
 		// setting parent members
-		if (updateMean) { setProcessMeanVec(bmMeanVector); }
+		if (updateExpAtTip) { setProcessMeanVec(bmExpAtTipVector); }
 		if (updateVCVMat) {
 			setProcessVCVMat(bmVCVMat);
 			setProcessInvVCVMat(bmInvVCVMat);
@@ -109,8 +109,8 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	}
 	
 	@Override
-	protected void populateMeanVector() {
-		Double bmSingleMeanValue = meanInput.get().getValue();
+	protected void populateExpAtTipVector() {
+		Double rootValue = rootValueInput.get().getValue();
 		
 		// colt
 		// for (int i=0; i<nSpp; ++i) {
@@ -118,7 +118,7 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		// }
 		
 		// apache
-		bmMeanVector.set(bmSingleMeanValue);
+		bmExpAtTipVector.set(rootValue);
 	}
 	
 	@Override
@@ -174,13 +174,13 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	@Override
 	public double calculateLogP() {
 		boolean updateVCVMat = false;
-		boolean updateMean = false;
+		boolean updateExpAtTip = false;
 
 		if (treeInput.isDirty() || rateManagerInput.isDirty()) {  updateVCVMat = true; }
-		if (meanInput.isDirty()) { updateMean = true; }
+		if (rootValueInput.isDirty()) { updateExpAtTip = true; }
 		
-		populateInstanceVars(updateVCVMat, updateMean);
-		populateParentInstanceVars(updateVCVMat, updateMean);
+		populateInstanceVars(updateVCVMat, updateExpAtTip);
+		populateParentInstanceVars(updateVCVMat, updateExpAtTip);
 		
 		super.populateLogP();
 		
@@ -191,9 +191,9 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	public void store() {
 		for (int i=0; i<nSpp; ++i) {
 			// colt
-			// storedBMMeanVec.set(i, bmMeanVector.get(i));
+			// storedExpAtTipVec.set(i, bmExpAtTipVector.get(i));
 			// apache
-			storedBMMeanVec.setEntry(i, bmMeanVector.getEntry(i));
+			storedExpAtTipVec.setEntry(i, bmExpAtTipVector.getEntry(i));
 		}
 
 		super.store();
@@ -203,9 +203,9 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 	public void restore() {
 		RealVector realVecTmp;
 
-		realVecTmp = bmMeanVector;
-		bmMeanVector = storedBMMeanVec;
-		storedBMMeanVec = realVecTmp;
+		realVecTmp = bmExpAtTipVector;
+		bmExpAtTipVector = storedExpAtTipVec;
+		storedExpAtTipVec = realVecTmp;
 		
 		super.restore();
 	}
