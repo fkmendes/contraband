@@ -36,27 +36,30 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
     x = data.df[,x.name]; y = data.df[,y.name]
     reg.df = data.frame(cbind(x,y,lower,upper,plot.hdi))
 
-    pl = ggplot() + geom_point(mapping=aes(x=x, y=y), shape=20) +
-    coord_cartesian(ylim=c(y.min, y.max)) +
-    xlab(x.lab) + ylab("Posterior mean") +
-    geom_abline(slope=1, linetype="dotted") +
-    geom_abline(slope=0, intercept=prior.mean, color="blue") +
-    theme(
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        plot.background = element_blank(),
-        plot.title = element_text(hjust=0.5),
-        axis.line = element_line(),
-        axis.ticks = element_line(color="black"),
-        axis.text.x = element_text(color="black", size=10),
-        axis.text.y = element_text(color="black", size=10),
-        axis.title.x = element_text(size=12),
-        axis.title.y = element_text(size=12)
-    ) + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), breaks=c(x.min,((x.max+x.min)/2),x.max), limits=c(x.min,x.max)) +
-        scale_y_continuous(labels = function(x) round(as.numeric(x), digits=3), breaks=c(y.min,((y.max+y.min)/2),y.max), limits=c(y.min,y.max)) +
-        geom_linerange(data=reg.df[plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="red", alpha=.4, size=1.5) +
-        geom_linerange(data=reg.df[!plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="lightgray", alpha=.4)
+    pl = ggplot() +
+        geom_linerange(data=reg.df[!plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="lightblue", size=1.1, alpha=.4) +
+        geom_linerange(data=reg.df[plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="red", alpha=.4, size=1.25) +
+        geom_point(mapping=aes(x=x, y=y), shape=20, size=.75) +
+        coord_cartesian(ylim=c(y.min, y.max)) +
+        xlab(x.lab) + ylab("Posterior mean") +
+        geom_abline(slope=1, linetype="dotted") +
+        geom_abline(slope=0, intercept=prior.mean, color="blue") +
+        theme(
+            panel.grid.minor = element_blank(),
+            panel.border = element_blank(),
+            panel.background = element_blank(),
+            plot.background = element_blank(),
+            plot.title = element_text(hjust=0.5),
+            axis.line = element_line(),
+            axis.ticks = element_line(color="black"),
+            axis.text.x = element_text(color="black", size=10),
+            axis.text.y = element_text(color="black", size=10),
+            axis.title.x = element_text(size=12),
+            axis.title.y = element_text(size=12)
+        ) +
+        scale_x_continuous(labels = function(x) round(as.numeric(x), digits=3), breaks=c(x.min,((x.max+x.min)/2),x.max), limits=c(x.min,x.max)) +
+        scale_y_continuous(labels = function(x) round(as.numeric(x), digits=3), breaks=c(y.min,((y.max+y.min)/2),y.max), limits=c(y.min,y.max))
+
     return(pl)
 }
 
@@ -109,13 +112,9 @@ flip.w.bool <- function(a.df, bool.vec, col1, col2) {
     a.df.res = a.df
     for (i in 1:nrow(a.df.res)) {
         if (bool.vec[i]) {
-            print(paste0("col 1 before = ", a.df.res[i,col1]))
-            print(paste0("col 2 before = ", a.df.res[i,col2]))
             tmp = a.df[i,col2]
             a.df.res[i,col2] = a.df[i,col1]
             a.df.res[i,col1] = tmp
-            print(paste0("col 1 after = ", a.df.res[i,col1]))
-            print(paste0("col 2 after = ", a.df.res[i,col2]))
         }
     }
     return(a.df.res)

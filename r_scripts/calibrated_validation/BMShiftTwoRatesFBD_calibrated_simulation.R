@@ -9,49 +9,47 @@ library(cgwtools) # for resave
 source("calibrated_validation_utils.R")
 
 args = commandArgs(trailingOnly=TRUE)
+print(args)
 
 ### SCRIPT FLAGS AND PATH VARIABLES ###
 
-simulate <- TRUE
-write.xmls <- TRUE
-write.shellscripts <- TRUE
-cal.validation.folder <- "/Users/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/"
-n.sim <- 100
-n.spp <- 50
+## simulate <- TRUE
+## write.xmls <- TRUE
+## write.shellscripts <- TRUE
+## cal.validation.folder <- "/Users/fkur465/Documents/uoa/contraband/r_scripts/calibrated_validation/"
+## n.sim <- 100
+## n.spp <- 50
 ## job.prefix <- "BMMVNShiftTwoRatesFBD"
-job.prefix <- "BMMVNShiftTwoRatesFBDfixed"
-time.needed <- "15:00:00"
-template.name <- "BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra_template.xml"
-tree.type <- "nonultra"
-xmlfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
+## job.prefix <- "BMMVNShiftTwoRatesFBDfixed"
+## time.needed <- "15:00:00"
+## template.name <- "BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra_template.xml"
+## tree.type <- "nonultra"
 
-## simulate <- args[1]
-## write.xmls <- args[2]
-## write.shellscripts <- args[3]
-## cal.validation.folder <- args[4]
-## n.sim <- as.numeric(args[5])
-## n.spp <- as.numeric(args[6])
-## job.prefix <- args[7] # e.g., "BMMVNShiftTwoRatesFBD"
-## time.needed <- args[8] # e.g., "04:00:00"
-## template.name <- args[9]
-## tree.type <- args[10]
-## xml.file.prefix <- args[11]
+simulate <- args[1]
+write.xmls <- args[2]
+write.shellscripts <- args[3]
+cal.validation.folder <- args[4]
+n.sim <- as.numeric(args[5])
+n.spp <- as.numeric(args[6])
+job.prefix <- args[7] # e.g., "BMMVNShiftTwoRatesFBD"
+time.needed <- args[8] # e.g., "04:00:00"
+template.name <- args[9]
+tree.type <- args[10]
 
 xml.file.prefix <- paste0(job.prefix, "OneTrait_", tree.type, "_")
+xmlfolder.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
 shell.scripts.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_shellscripts/")
 template.path <- paste0(cal.validation.folder, template.name)
 rdata.path <- gsub("_template.xml", ".RData", template.path)
 
 # cluster stuff
 ## cluster.validation.folder <- cal.validation.folder
-cluster.validation.folder <- "/nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/"
-
-## cluster.validation.folder <- args[12]
+cluster.validation.folder <- args[11]
 
 xml.file.path <- paste0(cluster.validation.folder, job.prefix, "OneTrait_", tree.type, "_xmls/")
 res.path <- paste0(cluster.validation.folder, job.prefix, "OneTrait_", tree.type, "_results/")
-jar.path <- paste0(cluster.validation.folder, "contraband.jar")
-## jar.path <- args[13]
+## jar.path <- paste0(cluster.validation.folder, "contraband.jar")
+jar.path <- args[12]
 
 n.param <- 3
 ## sigma.rate <- 5 # exponential prior
@@ -73,65 +71,72 @@ psi <- rexp(1000, rate=150) # psi from exponential (mean = 1/150)
 trs <- vector("list", n.sim + 50)
 trs.heights <- vector("list", n.sim + 50)
 trs.edge.mean.lengths <- rep(0, (n.sim + 50))
-trs.color.ns <- rep(0, (n.sim + 50))
+trs.colors.ns <- rep(0, (n.sim + 50))
 trs.ntips <- rep(0, (n.sim + 50))
 trs.nedges <- rep(0, (n.sim + 50))
+trs.nsas <- rep(0, (n.sim + 50))
 fossil.entries <- vector("list", n.sim)
 
 success <- 1
 counter <- 1
 ## add 50 trees just in case some trees have SA at the root (in which case likelihoods cant be computed)
-while (success <= n.sim + 50) {
-    if (lambda[counter] > mu[counter]) {
-        if (counter==279) { set.seed(234) }
-        tr = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
+if (simulate) {
+    while (success <= n.sim + 50) {
+        if (lambda[counter] > mu[counter]) {
+            if (counter==279) { set.seed(234) }
+            tr = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
+            n.tips = length(tr$tip.label)
 
-        if (length(tr$tip.label) <= 100) {
-            cat(paste(c("Simulating tree", success, "with FBD.\n"), sep=" "))
-            int.node.idxs = (max(which(node.depth.edgelength(tr)==0))+1):(tr$Nnode + length(tr$tip.label))
+            if (n.tips <= 100) {
+                cat(paste(c("Simulating tree", success, "with FBD.\n"), sep=" "))
+                sa.idxs = tr$edge[,2][tr$edge.length==0] # get the idx of the daughter end of a branch of length 0 (i.e., a sample ancestor idx)
+                root.idx = length(tr$tip.label)+1
+                ignore.idx = c(sa.idxs, root.idx)
+                ## int.node.idxs = (max(which(node.depth.edgelength(tr)==0))+1):(tr$Nnode + length(tr$tip.label)) ## internal node indexes without root
+                node.idxs.to.sample.from = c(1:(n.tips + tr$Nnode))[-ignore.idx]
+                random.int.node = sample(node.idxs.to.sample.from, 1)
 
-            # uncomment these lines if you want larger painted clades (careful because this changes model)
-            ## n.descendants = 1
-            ## while ((n.descendants < (length(tr$tip.label) * 0.2)) | (n.descendants > (length(tr$tip.label) * 0.8))) {
-                random.int.node = sample(int.node.idxs, 1)
-            ##     n.descendants = length(getDescendants(tr, random.int.node))
-            ## }
+                # paint the tree
+                # the random local clock model "paints" the branch subtending the node with an indicator shift = true ("1")
+                trs[[success]] = paintSubTree(tr, node=random.int.node, state=2, stem=TRUE)
 
-            trs[[success]] = paintSubTree(tr, node=random.int.node, state=2, stem=FALSE)
-            trs.ntips[success] = length(tr$tip.label)
-            trs.nedges[success] = nrow(tr$edge)
-            depths = node.depth.edgelength(trs[[success]])
-            tr.height = as.numeric(as.character(max(depths)))
-            trs.heights[[success]] = tr.height
-            trs.edge.mean.lengths[success] = mean(tr$edge.length[tr$edge.length!=0.0])
-            trs.colors.ns[[success]] = as.integer(table(names(unlist(trs[[success]]$maps)))[2]) ## count is for edges with state=2
+                # collecting tree stats (for all n.sim + 50, later need to get just the ones used in trait simulation)
+                trs.ntips[success] = n.tips
+                trs.nedges[success] = nrow(tr$edge)
+                trs.nsas[success] = sum(tr$edge.length==0)
 
-            fossil.idxs = depths[1:length(trs[[success]]$tip.label)] < tr.height
-            fossil.labels = trs[[success]]$tip.label[fossil.idxs]
-            fossil.depths.backw = tr.height - depths[1:length(trs[[success]]$tip.label)][fossil.idxs]
-            ## print(fossil.labels)
-            ## print(fossil.depths.backw)
-            fossil.entries[[success]] = paste(paste(fossil.labels, fossil.depths.backw, sep="="), collapse=",\n")
-            ## print(fossil.entries[[success]])
-            success = success + 1
+                depths = node.depth.edgelength(tr)
+                tr.height = as.numeric(as.character(max(depths))) # has to be turned into character for comparison to work, have no clue why
+                trs.heights[[success]] = tr.height
+                trs.edge.mean.lengths[success] = mean(tr$edge.length[tr$edge.length!=0.0])
+                trs.colors.ns[[success]] = as.integer(table(names(unlist(trs[[success]]$maps)))[2]) ## count is for edges with state=2
+
+                fossil.idxs = depths[1:length(trs[[success]]$tip.label)] < tr.height
+                fossil.labels = trs[[success]]$tip.label[fossil.idxs]
+                fossil.depths.backw = tr.height - depths[1:length(trs[[success]]$tip.label)][fossil.idxs]
+                ## print(fossil.labels)
+                ## print(fossil.depths.backw)
+                fossil.entries[[success]] = paste(paste(fossil.labels, fossil.depths.backw, sep="="), collapse=",\n")
+                ## print(fossil.entries[[success]])
+                success = success + 1
+            }
+
+            else {
+                cat("Tree was too large.\n")
+            }
         }
-
         else {
-            cat("Tree was too large.\n")
+            cat("lambda < mu.\n")
         }
+        counter = counter + 1
     }
-    else {
-        cat("lambda < mu.\n")
-    }
-    counter = counter + 1
+
+    trs.colors.ns = as.vector(trs.colors.ns)
+    rate.assignments = unlist(as.vector((lapply(trs, function(x) paste(rep(0, 2*length(x$tip.label)-1), collapse=" ")))))
+    shift.assignments = unlist(as.vector((lapply(trs, function(x) paste(rep("false", 2*length(x$tip.label)-3), collapse=" ")))))
+    shift.assignments = paste0("true ", shift.assignments)
+    spnames.4.template = unlist(as.vector((lapply(trs, function(x) paste(x$tip.label, collapse=",")))))
 }
-
-trs.colors.ns <- as.vector(trs.colors.ns)
-
-rate.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep(0, 2*length(x$tip.label)-1), collapse=" ")))))
-shift.assignments <- unlist(as.vector((lapply(trs, function(x) paste(rep("false", 2*length(x$tip.label)-3), collapse=" ")))))
-shift.assignments <- paste0("true ", shift.assignments)
-spnames.4.template <- unlist(as.vector((lapply(trs, function(x) paste(x$tip.label, collapse=",")))))
 
 ## having a look at tree heights
 ## hist(unlist(trs.heights), prob=T)
@@ -139,16 +144,10 @@ spnames.4.template <- unlist(as.vector((lapply(trs, function(x) paste(x$tip.labe
 
 ## simulating quant trait data sets and nuc seqs
 set.seed(123)
-## sigmas.1 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp1[1] # 0.1686
-## sigmas.2 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp2[1] # 0.2275
+## sigmas.1 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp1[1]
+## sigmas.2 <- rexp(n.sim, rate=sigma.rate) # sigmas.tmp2[1]
 sigmas.1 <- rlnorm(n.sim, mean=sigma.mean, sd=sigma.sd)
 sigmas.2 <- rlnorm(n.sim, mean=sigma.mean, sd=sigma.sd)
-## twice.larger.smaller.idx <- which(((sigmas.tmp1/sigmas.tmp2)>=2 | (sigmas.tmp2/sigmas.tmp1)>=2))[1:100]
-## sigmas.tmp1 <- sigmas.tmp1[twice.larger.smaller.idx]
-## sigmas.tmp2 <- sigmas.tmp2[twice.larger.smaller.idx]
-## sigmas.1 <- c(sigmas.tmp1[sigmas.tmp1 < sigmas.tmp2], sigmas.tmp2[!sigmas.tmp1 < sigmas.tmp2])
-## sigmas.2 <- c(sigmas.tmp2[sigmas.tmp1 < sigmas.tmp2], sigmas.tmp1[!sigmas.tmp1 < sigmas.tmp2])
-
 x0s <- rnorm(n.sim, mean=x0.mean, sd=x0.sd); # x0s[1] # -0.4015
 datasets <- vector("list", n.sim) # storing trait sims
 seq.datasets <- vector("list", n.sim) # storing nuc sims
@@ -161,13 +160,12 @@ for (i in 1:(n.sim+50)) {
 }
 traits.4.template <- vector("list", n.sim)
 
-seqs.4.template <- vector("list", n.sim)
-
 ## actually simulating and populating strs for template
 set.seed(123)
 counter <- 1
 success <- 1
 successes <- rep(1, 100) # indexes of trees in trs that could have likelihoods computed
+
 if (simulate) {
     while (success <= 100) {
         ## BM barfs when the first SA is on the root
@@ -195,9 +193,22 @@ if (simulate) {
     trs.edge.mean.lengths.2.save = trs.edge.mean.lengths[successes]
     trs.colors.ns.2.save = trs.colors.ns[successes]
     trs.nedges.2.save = trs.nedges[successes]
+    trs.nsas.2.save = trs.nsas[successes]
     names(true.param.df) = c("sigma1",  "sigma2", "mu", "sigma1.mle", "sigma2.mle", "mu.mle")
     trees.2.save = trs[successes]
-    save(trees.2.save, true.param.df, trs.heights.2.save, trs.edge.mean.lengths.2.save, trs.colors.ns.2.save, trs.nedges.2.save, datasets, file=rdata.path)
+    save(trees.2.save,
+         true.param.df,
+         trs.heights.2.save,
+         trs.edge.mean.lengths.2.save,
+         trs.colors.ns.2.save,
+         trs.nedges.2.save,
+         trs.nsas.2.save,
+         datasets,
+         spnames.4.template,
+         traits.4.template,
+         rate.assignments,
+         shift.assignments,
+         file=rdata.path)
 } else {
     load(rdata.path) # don't simulate, just load saved simulation
 }
@@ -215,21 +226,24 @@ mean.trs.edge.length <- mean(unlist(trs.edge.mean.lengths)[successes]) # we want
 # so the nuc evol rate should be 0.01/mean.trs.edge.length
 
 ## simulating seqs
+seqs.4.template <- vector("list", n.sim)
 nuc.rate <- 0.01/mean.trs.edge.length
-for (i in 1:n.sim) {
-    idx = successes[i]
-    seq.datasets[[success]] = phyDat2alignment(simSeq(trs[[idx]], l=2000, type="DNA", rate=nuc.rate))
 
-    seq.string = ""
+if (simulate) {
+    for (i in 1:n.sim) {
+        seq.datasets[[i]] = phyDat2alignment(simSeq(trees.2.save[[i]], l=2000, type="DNA", rate=nuc.rate))
+
+        seq.string = ""
         sp.count = 1
-        for (sp.name in trs[[counter]]$tip.label) {
-            seq.string = paste(seq.string, paste0("<sequence id=\"", sp.count, "\" taxon=\"", sp.name, "\" totalcount=\"4\"\nvalue=\"", seq.datasets[[success]]$seq[seq.datasets[[success]]$nam==sp.name], "\"/>\n", sep="\n"))
+        for (sp.name in trees.2.save[[i]]$tip.label) {
+            seq.string = paste(seq.string, paste0("<sequence id=\"", sp.count, "\" taxon=\"", sp.name, "\" totalcount=\"4\"\nvalue=\"", seq.datasets[[i]]$seq[seq.datasets[[i]]$nam==sp.name], "\"/>\n", sep="\n"))
             sp.count = sp.count + 1
         }
-    seqs.4.template[[success]] = seq.string
-}
+        seqs.4.template[[i]] = seq.string
+    }
 
-resave(seq.datasets, trsfile=rdata.path)
+    resave(seq.datasets, seqs.4.template, nuc.rate, file=rdata.path)
+}
 
 ## writing xmls
 if (write.xmls) {

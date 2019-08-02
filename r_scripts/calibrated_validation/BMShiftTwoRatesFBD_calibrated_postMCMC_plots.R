@@ -2,40 +2,42 @@ library(ggplot2)
 library(gtools)
 library(ggpubr)
 library(ape)
+library(rowr)
 source("calibrated_validation_utils.R")
 
 args = commandArgs(trailingOnly=TRUE)
+print(args)
 
 ### SCRIPT FLAGS AND PATH VARIABLES ###
 
 tree.type <- "nonultra"
 
-cal.validation.folder <- "./"
-rdata.path <- "BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra.RData"
-n.sim <- 100
-job.prefix <- "BMMVNShiftTwoRatesFBDfixed"
-n.param <- 3
-param.names <- c("sigma1", "sigma2", "mu")
-beast.param.names <- c("rateValues1", "rateValues2", "BMMean")
-param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(y[0]))
-mle.param.names <- c("sigma1.mle", "sigma2.mle", "mu.mle")
-prior.means <- c(1.516004, 1.516004, 0.0)
+## cal.validation.folder <- "./"
+## rdata.path <- "BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra.RData"
+## n.sim <- 100
+## job.prefix <- "BMMVNShiftTwoRatesFBDfixed"
+## n.param <- 3
+## param.names <- c("sigma1", "sigma2", "mu")
+## beast.param.names <- c("rateValues1", "rateValues2", "rootValue")
+## param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(y[0]))
+## mle.param.names <- c("sigma1.mle", "sigma2.mle", "mu.mle")
+## prior.means <- c(1.516004, 1.516004, 0.0)
 
-## cal.validation.folder <- args[1]
-## rdata.path <- args[2]
-## n.sim <- as.numeric(args[3])
-## job.prefix <- args[4]
-## n.param <- as.numeric(args[5])
-## param.names <- strsplit(args[6], ",")[[1]]
-## beast.param.names <- strsplit(args[7], ",")[[1]]
-## param.labs.preparse <- strsplit(args[8], ",")[[1]]
-## prior.means.preparse <- strsplit(args[9], ",")[[1]]
-## param.labs <- prior.means <- c()
-## for (i in 1:n.param) {
-##     param.labs[i] = eval(parse(text=param.labs.preparse[i]))
-##     prior.means[i] = eval(parse(text=prior.means.preparse[i]))
-## }
-## mle.param.names <- strsplit(args[11], ",")[[1]]
+cal.validation.folder <- args[1]
+rdata.path <- args[2]
+n.sim <- as.numeric(args[3])
+job.prefix <- args[4]
+n.param <- as.numeric(args[5])
+param.names <- strsplit(args[6], ",")[[1]]
+beast.param.names <- strsplit(args[7], ",")[[1]]
+param.labs.preparse <- strsplit(args[8], ",")[[1]]
+prior.means.preparse <- strsplit(args[9], ",")[[1]]
+param.labs <- prior.means <- c()
+for (i in 1:n.param) {
+    param.labs[i] = eval(parse(text=param.labs.preparse[i]))
+    prior.means[i] = eval(parse(text=prior.means.preparse[i]))
+}
+mle.param.names <- strsplit(args[10], ",")
 
 res.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_results/")
 res.files <- mixedsort(paste0(res.path,list.files(res.path, pattern = "[0-9]\\.log$")))
@@ -58,8 +60,7 @@ for (i in 1:n.sim) {
     k = 1
     for (j in cols) {
         beast.param.name = as.character(beast.param.names[k])
-        ## log.df[i,j:(j+2)] = get.95(this.sim.df[102:1001,beast.param.name])
-        log.df[i,j:(j+2)] = get.95(this.sim.df[102:nrow(this.sim.df),beast.param.name]) # for incomplete runs
+        log.df[i,j:(j+2)] = get.95(this.sim.df[102:nrow(this.sim.df),beast.param.name])
         k = k+1
     }
 }
@@ -81,33 +82,34 @@ for (i in 1:n.param) {
     plot.hdi[[i]] = (full.df[,upper] < full.df[,param.names[i]] | full.df[,lower] > full.df[,param.names[i]])
 }
 
-# coverage
+### COVERAGE ###
 table((full.df$mu >= full.df$lower.mu) & (full.df$mu <= full.df$upper.mu))
 table((full.df$sigma1 >= full.df$lower.sigma1) & (full.df$sigma1 <= full.df$upper.sigma1))
 table((full.df$sigma2 >= full.df$lower.sigma2) & (full.df$sigma2 <= full.df$upper.sigma2))
 
 ## nonultrametric
-## mu
+## root value
 ##   FALSE  TRUE
-##       6    91
+##       6    92
 ## sigma1
 ##   FALSE  TRUE
-##      6    92
+##      6    97
 ## sigma2
 ##   FALSE  TRUE
-##      12    90
+##      12    96
 
 ### PLOTS ###
-
 all.plots <- vector("list", n.param)
 for (i in 1:n.param) {
     x.lab = param.labs[i]
     min.x = min(full.df[,param.names[i]])
     max.x = max(full.df[,param.names[i]])
-    min.y = min(full.df[,paste0("mean.",param.names[i])])
-    max.y = max(full.df[,paste0("mean.",param.names[i])])
+    ## min.y = min(full.df[,paste0("mean.",param.names[i])])
+    ## max.y = max(full.df[,paste0("mean.",param.names[i])])
+    min.y = min(full.df[,paste0("lower.",param.names[i])])
+    max.y = max(full.df[,paste0("upper.",param.names[i])])
     all.plots[[i]] = get.plot(param.names[i], paste0("mean.",param.names[i]),
-                              min.x, max.x, min.x, max.x, x.lab, prior.means[i],
+                              min.x, max.x, min.y, max.y, x.lab, prior.means[i],
                               full.df, plot.hdi[[i]])
     names(all.plots)[i] = paste0("plot", i)
 }

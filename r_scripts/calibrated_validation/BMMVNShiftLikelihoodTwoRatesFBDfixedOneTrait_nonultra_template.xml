@@ -2,7 +2,7 @@
 <beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution.speciation" required="BEAST v2.5.0" version="2.5">
 
   <data id="seqs" name="alignment">
-      [SeqsHere]
+    [SeqsHere]
   </data>
   
   <run id="mcmc" spec="MCMC" chainLength="50000000">
@@ -51,8 +51,8 @@
 	<!--   <distr id="Pois.indicator" spec="beast.math.distributions.Poisson" lambda="1"/> -->
 	<!-- </distribution> -->
 		
-        <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@rootValue">
-	  <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="[rootValuePriorMeanHere]" sigma="[rootValuePriorStdDevHere]"/>
+        <distribution id="RootValuePrior" spec="beast.math.distributions.Prior" x="@rootValue">
+	  <distr id="Normal.RootValue" spec="beast.math.distributions.Normal" mean="[RootValuePriorMeanHere]" sigma="[RootValuePriorStdDevHere]"/>
         </distribution>
       </distribution>
       <!-- END prior -->
@@ -101,7 +101,7 @@
 		      
 	    <tree idref="TheTree"/>
 	  </rateManager>
-	  <mean id="rootValue" dimension="1" spec="parameter.RealParameter">0.0</mean>
+	  <rootValue id="rootValue" dimension="1" spec="parameter.RealParameter">0.0</rootValue>
 	</distribution> <!-- END BMVN -->
 
 	<!-- <distribution id="rejectionSampling" spec="contraband.RateCategoryIdentifiability"> -->

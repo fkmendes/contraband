@@ -22,7 +22,6 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	private int nSpp;
 
-	// private Double rootValue; // this might have broken things, beware
 	private RealVector bmExpAtTipVector, bmWVector;
 	private RealMatrix bmVCVMat, bmInvVCVMat, bmAncNodeVCVMat;
 	private LUDecomposition bmVCVMatLUD;

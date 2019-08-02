@@ -188,9 +188,30 @@ Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrai
 
 ---
 
+## Fixed tree validation
+## (5) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts. Here we fix the number of regimes and the tree topology, but sample the regimes
+
+This step produces panel (a) from Fig. SX from Supplementary Information (see SI.pdf for details on priors, etc.)
+
+```
+Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBDfixed '18:00:00' BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra_template.xml nonultra /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
+```
+
+## (5.1) Plotting the mean posterior of the three BM parameters (two rates and root value) against true values
+
+```
+cd calibrated_validation/
+Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBDfixed 3 sigma1,sigma2,mu rateValues1,rateValues2,rootValue "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1.516004,1.516004,0.0" sigma1.mle,sigma2.mle,mu.mle
+```
+
 ## Sampling tree validation
-## (5) Brownian motion with multiple rates (BMMVNShift class) multivariate normal likelihood 
-## (5.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts
+## (6) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts. Here we sample both tree topologies and regime mappings
+
+```
+Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBD '24:00:00' BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml nonultra /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
+```
+
+## (6.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts
 
 We use the same priors as in 1.1, and do nonultrametric trees only using an FBD prior. The prior on FBD parameters are exponentials with rates 80, 100 and 150 (for lambda, mu and psi, respectively).
 
@@ -198,13 +219,13 @@ We use the same priors as in 1.1, and do nonultrametric trees only using an FBD 
 Rscript BMShiftOneRateFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftOneRateFBD '03:30:00' BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml nonultra BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
 ```
 
-## (5.2) Plotting the mean posterior of the two BM parameters (rate and mean/ancestral value) against true values
+## (6.2) Plotting the mean posterior of the two BM parameters (rate and mean/ancestral value) against true values
 
 ```
 Rscript BMShiftOneRateFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra.RData 100 BMMVNShiftOneRateFBD 2 sigmasq,mu rateValues,BMMean "expression(sigma^2),expression(y[0])" "1/5,0.0" sigmasq.mle,mu.mle
 ```
 
-### (5.3) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts
+### (6.3) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts 
 
 The same simulations as in 5.1, but with two rates. We pick a random internal node and all its descendants to have the second rate.
 
@@ -212,14 +233,14 @@ The same simulations as in 5.1, but with two rates. We pick a random internal no
 Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBD '10:00:00' BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml nonultra BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
 ``` 
 
-## (5.4) Plotting the mean posterior of the three BM parameters (two rates and mean/ancestral value) against true values
+## (6.4) Plotting the mean posterior of the three BM parameters (two rates and mean/ancestral value) against true values
 
 ```
 Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBD 3 sigma1,sigma2,mu rateValues1,rateValues2,BMMean "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1/5,1/5,0.0" sigma1.mle,sigma2.mle,mu.mle
 ```
 
-## (6) OU with multiple optima (OUMVN class) multivariate normal likelihood
-## (6.1) Simulating one trait, with two optima on tree, writing .xmls from template and .sh scripts
+## (7) OU with multiple optima (OUMVN class) multivariate normal likelihood
+## (7.1) Simulating one trait, with two optima on tree, writing .xmls from template and .sh scripts
 
 The FBD priors are the same as in 5.1, and we use a normal distribution with mean 1.0 and standard deviation 2.0 for the thetas, and with mean 0.0 and standard deviation 2.0 for the root value.
 We simulate two scenarios, one with high alpha and low sigma^2, and the other with high sigma^2 and low alpha. 
@@ -231,7 +252,7 @@ Rscript OUTwoOptFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNTwoOpt
 
 We name the result files with "_alphahigh" and "_alphalow" suffixes to distinguish between the two simulated settings.
 
-## (6.2) Plotting the mean posterior of the five OU parameters (rate, ancestral value, alpha and two optima) against true values
+## (7.2) Plotting the mean posterior of the five OU parameters (rate, ancestral value, alpha and two optima) against true values
 
 ```
 Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData 100 OUMVNTwoOptFBD 5 sigmasq,rv,theta1,theta2,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(alpha)" "0.003297929,0.0,1.0,1.0,1.504103" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,alpha.mle
