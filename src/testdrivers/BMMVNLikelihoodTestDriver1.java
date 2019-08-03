@@ -38,19 +38,19 @@ public class BMMVNLikelihoodTestDriver1 {
 		sigmasqInput = new Double[] { 0.005358022 };
 		RealParameter sigmasq2 = new RealParameter(sigmasqInput);
 		
-		// mean vector
-		Double[] meanVectorInput = new Double[] { 0.1 };
-		RealParameter mean1 = new RealParameter(meanVectorInput);
-		meanVectorInput = new Double[] { 0.09658954 };
-		RealParameter mean2 = new RealParameter(meanVectorInput);
+		// root value vector
+		Double[] rootValueVectorInput = new Double[] { 0.1 };
+		RealParameter rootValue1 = new RealParameter(rootValueVectorInput);
+		rootValueVectorInput = new Double[] { 0.09658954 };
+		RealParameter rootValue2 = new RealParameter(rootValueVectorInput);
 		
 		// likelihood
 		BMMVNLikelihoodOneTrait BMLk1 = new BMMVNLikelihoodOneTrait();
-		BMLk1.initByName("tree", myTree, "sigmasq", sigmasq1, "mean", mean1, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal1);
+		BMLk1.initByName("tree", myTree, "sigmasq", sigmasq1, "rootValue", rootValue1, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal1);
 		BMMVNLikelihoodOneTrait BMLk2 = new BMMVNLikelihoodOneTrait();
-		BMLk2.initByName("tree", myTree, "sigmasq", sigmasq2, "mean", mean2, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal2);
+		BMLk2.initByName("tree", myTree, "sigmasq", sigmasq2, "rootValue", rootValue2, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal2);
 //		BMMVNLikelihoodOneTrait BMLk3 = new BMMVNLikelihoodOneTrait();
-//		BMLk3.initByName("tree", myTree, "sigmasq", sigmasq3, "mean", mean, "oneTraitData", oneTraitData);
+//		BMLk3.initByName("tree", myTree, "sigmasq", sigmasq3, "rootValue", mean, "oneTraitData", oneTraitData);
 			
 		System.out.println(BMLk1.calculateLogP()); // -2.1902980
 		System.out.println(BMLk2.calculateLogP()); // -2.148631

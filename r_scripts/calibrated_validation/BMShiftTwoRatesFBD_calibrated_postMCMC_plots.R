@@ -90,20 +90,20 @@ table((full.df$sigma2 >= full.df$lower.sigma2) & (full.df$sigma2 <= full.df$uppe
 ## nonultrametric
 ## root value
 ##   FALSE  TRUE
-##       6    92
+##       7    93
 ## sigma1
 ##   FALSE  TRUE
-##      6    97
+##      4    96
 ## sigma2
 ##   FALSE  TRUE
-##      12    96
+##       5    95
 
 ### PLOTS ###
 # tree height
 hs <- data.frame(unlist(trs.heights.2.save))
 names(hs) <- c("heights")
 
-plot.heights <- ggplot(data=hs, aes(x=heights)) + geom_histogram(binwidth=50) + theme_classic() + ylab("Count") + xlab("Tree height") + theme(axis.text.x = element_text(color="black", size=10), axis.text.y = element_text(color="black", size=10), axis.title.x = element_text(size=12), axis.title.y = element_text(size=12))
+plot.heights <- ggplot(data=hs, aes(x=heights)) + geom_histogram(binwidth=50) + theme_classic() + ylab("Count") + xlab("Tree height") + theme(axis.text.x = element_text(color="black", size=10), axis.text.y = element_text(color="black", size=10), axis.title.x = element_text(size=14), axis.title.y = element_text(size=14))
 
 pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_heights.pdf"), height=3, width=4)
 plot.heights
