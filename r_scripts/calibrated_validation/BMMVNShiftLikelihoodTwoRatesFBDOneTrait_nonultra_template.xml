@@ -38,7 +38,7 @@
         </distribution>
 
 	<distribution id="FBDoriginPrior" spec="beast.math.distributions.Prior" x="@FBDorigin">
-	  <distr id="FBDoriginExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="[FBDoriginPriorMeanHere]"/>
+	  <distr id="FBDoriginUniform" spec="beast.math.distributions.Uniform" upper="Infinity"/>
         </distribution>
         
 	<distribution id="rateValuesPrior" spec="beast.math.distributions.Prior" x="@rateValues">

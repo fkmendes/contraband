@@ -201,7 +201,7 @@ Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMV
 
 ```
 cd calibrated_validation/
-Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBDfixed 3 sigma1,sigma2,mu rateValues1,rateValues2,rootValue "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1.516004,1.516004,0.0" sigma1.mle,sigma2.mle,mu.mle
+Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBDfixed 3 sigma1,sigma2,rv rateValues1,rateValues2,rootValue "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1.516004,1.516004,0.0" sigma1.mle,sigma2.mle,rv.mle
 ```
 
 ## Sampling tree validation

@@ -99,6 +99,44 @@ table((full.df$sigma2 >= full.df$lower.sigma2) & (full.df$sigma2 <= full.df$uppe
 ##      12    96
 
 ### PLOTS ###
+# tree height
+hs <- data.frame(unlist(trs.heights.2.save))
+names(hs) <- c("heights")
+
+plot.heights <- ggplot(data=hs, aes(x=heights)) + geom_histogram(binwidth=50) + theme_classic() + ylab("Count") + xlab("Tree height") + theme(axis.text.x = element_text(color="black", size=10), axis.text.y = element_text(color="black", size=10), axis.title.x = element_text(size=12), axis.title.y = element_text(size=12))
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_heights.pdf"), height=3, width=4)
+plot.heights
+dev.off()
+
+# extant tips
+ts <- data.frame(unlist(trs.ntips.2.save) - trs.nsas.2.save/trs.ntips.2.save)
+names(ts) <- c("tips")
+
+plot.leaves <- ggplot(data=ts, aes(x="", y=tips)) + geom_boxplot(notch=TRUE, fill="black") + theme_classic() + ylab("Number of leaves") + xlab("") + theme(axis.ticks.y=element_blank(), axis.text.x = element_text(color="black", size=8)) + coord_flip()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_nleaves.pdf"), height=1.25, width=3)
+plot.leaves
+dev.off()
+
+# pctg derived regime
+pctgs <- data.frame(trs.colors.ns.2.save/trs.nedges.2.save)
+names(pctgs) <- c("reg2")
+plot.regime <- ggplot(data=pctgs, aes(x="", y=reg2)) + geom_boxplot(notch=TRUE, fill="lightgray") + theme_classic() + ylab("Branches with derived regime (%)") + xlab("") + theme(axis.ticks.y=element_blank(), axis.text.x = element_text(color="black", size=8)) + coord_flip()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_regimes.pdf"), height=1.25, width=3)
+plot.regime
+dev.off()
+
+# pctg of SA's in all trait value data points
+sa.pctgs <- data.frame(trs.nsas.2.save/trs.ntips.2.save)
+names(sa.pctgs) <- c("sa")
+plot.sa <- ggplot(data=sa.pctgs, aes(x="", y=sa)) + geom_boxplot(notch=TRUE) + theme_classic() + ylab("Sampled ancestor data points (%)") + xlab("") + theme(axis.ticks.y=element_blank(), axis.text.x = element_text(color="black", size=8)) + coord_flip()
+
+pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sas.pdf"), height=1.25, width=3)
+plot.sa
+dev.off()
+
 all.plots <- vector("list", n.param)
 for (i in 1:n.param) {
     x.lab = param.labs[i]
@@ -114,6 +152,8 @@ for (i in 1:n.param) {
     names(all.plots)[i] = paste0("plot", i)
 }
 list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
+
+
 
 pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq1.pdf"), height=2, width=2.5)
 plot1
