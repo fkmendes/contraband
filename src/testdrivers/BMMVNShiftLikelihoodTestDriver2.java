@@ -4,7 +4,6 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.BMMVNShiftLikelihoodOneTrait;
-import contraband.ColorManager;
 import contraband.RateCategoryClockModel;
 import contraband.OneValueContTraits;
 import contraband.TreeToVCVMat;
@@ -36,13 +35,13 @@ public class BMMVNShiftLikelihoodTestDriver2 {
 		OneValueContTraits oneTraitData = new OneValueContTraits();
 		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
 		
-		// mean vector
-		Double[] meanVectorInput = new Double[] { -1.125558 };
-		RealParameter mean = new RealParameter(meanVectorInput);
+		// root value vector
+		Double[] rootValueVectorInput = new Double[] { -1.125558 };
+		RealParameter rootValue = new RealParameter(rootValueVectorInput);
 		
 		// likelihood
 		BMMVNShiftLikelihoodOneTrait BMLk = new BMMVNShiftLikelihoodOneTrait();
-		BMLk.initByName("tree", myTree, "rateManager", colors, "mean", mean, "oneTraitData", oneTraitData);
+		BMLk.initByName("tree", myTree, "rateManager", colors, "rootValue", rootValue, "oneTraitData", oneTraitData);
 		System.out.println(BMLk.calculateLogP()); // -0.8583676
 	}	
 }
