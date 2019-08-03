@@ -31,6 +31,8 @@ import beast.core.Logger;
 import beast.core.Operator;
 import beast.core.parameter.BooleanParameter;
 import beast.core.util.Log;
+import beast.evolution.tree.Node;
+import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
 
 import java.util.ArrayList;
@@ -44,16 +46,20 @@ import java.util.Set;
 
 @Description("Move k 'on' bits in an array of boolean bits. The number of 'on' bits remains constant under this operation.")
 public class BitMoveOperator extends Operator {
-    final public Input<Integer> kInput = new Input<>("k", "the number of 'on' bits to shift", 1);
-
+    
+	final public Input<Integer> kInput = new Input<>("k", "the number of 'on' bits to shift", 1);
     final public Input<BooleanParameter> parameterInput = new Input<>("parameter", "the parameter to operate a bit move on.", Validate.REQUIRED);
-
-
+    final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
+    final public Input<Boolean> includeSampledAncestorsInput = new Input<>("includeSampledAncestors", "true if allowed to move to sampled ancestors (i.e, nodes whose subtending branches have length zero).", false, Validate.OPTIONAL);
+    
+    Tree tree;
     List<Integer> onPositions = new ArrayList<>();
     List<Integer> offPositions = new ArrayList<>();
 
     @Override
-	public void initAndValidate() {}
+	public void initAndValidate() {
+    	tree = treeInput.get();
+    }
 
     /**
      * A bit move picks a random 'on' bit and moves it to a new position that was previously 'off'. The original position becomes 'off'.
@@ -81,7 +87,11 @@ public class BitMoveOperator extends Operator {
 
         for (int i = 0; i < kInput.get(); i++) {
 
-            int onPos = Randomizer.nextInt(onPositions.size());
+        	int onPos = -1;
+        	while (true) {
+        		onPos = Randomizer.nextInt(onPositions.size());
+        		if (!tree.getNode(onPos).isDirectAncestor()) { break; }
+        	}
             Integer on = onPositions.get(onPos);
 
             int offPos = Randomizer.nextInt(offPositions.size());

@@ -128,9 +128,12 @@
     <operator id="RateValueWalker" spec="contraband.operators.RandomLocalTraitOperator" shiftIndicators="@shiftIndicators" traits="@rateValues" windowSize="1.0" weight="50.0" p="0.5">
       <randomClockModel idref="rateRandomLocalClock"/>
     </operator>
-    <operator id="ShiftIndicatorMove" spec="contraband.operators.BitMoveOperator" weight="5.0" parameter="@shiftIndicators" k="1"/>
 
-    <operator id="MeanScaler" spec="RealRandomWalkOperator" parameter="@rootValue" windowSize="1.0" weight="3.0"/>
+    <operator id="ShiftIndicatorMove" spec="contraband.operators.BitMoveOperator" weight="5.0" parameter="@shiftIndicators" k="1">
+      <tree idref="TheTree"/>
+    </operator>
+    
+    <operator id="RootValueScaler" spec="RealRandomWalkOperator" parameter="@rootValue" windowSize="1.0" weight="3.0"/>
 	
     <logger id="tracelog" fileName="[FileNameHere].log" logEvery="50000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>

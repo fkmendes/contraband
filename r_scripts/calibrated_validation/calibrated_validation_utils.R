@@ -52,8 +52,8 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
             plot.title = element_text(hjust=0.5),
             axis.line = element_line(),
             axis.ticks = element_line(color="black"),
-            axis.text.x = element_text(color="black", size=10),
-            axis.text.y = element_text(color="black", size=10),
+            axis.text.x = element_text(color="black", size=8),
+            axis.text.y = element_text(color="black", size=8),
             axis.title.x = element_text(size=12),
             axis.title.y = element_text(size=12)
         ) +
