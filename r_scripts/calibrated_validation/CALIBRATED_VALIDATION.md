@@ -188,10 +188,8 @@ Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrai
 
 ---
 
-## Fixed tree validation
+## BM fixed tree validation
 ## (5) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts. Here we fix the number of regimes and the tree topology, but sample the regimes
-
-This step produces panel (a) from Fig. SX from Supplementary Information (see SI.pdf for details on priors, etc.)
 
 ```
 Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBDfixed '18:00:00' BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra_template.xml nonultra /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
@@ -204,11 +202,20 @@ cd calibrated_validation/
 Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBDfixed 3 sigma1,sigma2,rv rateValues1,rateValues2,rootValue "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1.516004,1.516004,0.0" sigma1.mle,sigma2.mle,rv.mle
 ```
 
-## Sampling tree validation
+## BM sampling tree validation
 ## (6) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts. Here we sample both tree topologies and regime mappings
 
 ```
 Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBD '24:00:00' BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml nonultra /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
+```
+
+## (6.1) Plotting the mean posterior of the three BM parameters (two rates and root value) against true values
+
+This step produces Fig. S1-S2 from Supplementary Information (see SI.pdf for details on priors, etc.). Data comes from previous step
+
+```
+cd calibrated_validation/
+Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBD 3 sigma1,sigma2,rv rateValues1,rateValues2,rootValue "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1.516004,1.516004,0.0" sigma1.mle,sigma2.mle,rv.mle
 ```
 
 ## (6.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts
@@ -225,22 +232,8 @@ Rscript BMShiftOneRateFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVN
 Rscript BMShiftOneRateFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra.RData 100 BMMVNShiftOneRateFBD 2 sigmasq,mu rateValues,BMMean "expression(sigma^2),expression(y[0])" "1/5,0.0" sigmasq.mle,mu.mle
 ```
 
-### (6.3) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts 
-
-The same simulations as in 5.1, but with two rates. We pick a random internal node and all its descendants to have the second rate.
-
-```
-Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBD '10:00:00' BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml nonultra BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
-``` 
-
-## (6.4) Plotting the mean posterior of the three BM parameters (two rates and mean/ancestral value) against true values
-
-```
-Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBD 3 sigma1,sigma2,mu rateValues1,rateValues2,BMMean "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1/5,1/5,0.0" sigma1.mle,sigma2.mle,mu.mle
-```
-
-## (7) OU with multiple optima (OUMVN class) multivariate normal likelihood
-## (7.1) Simulating one trait, with two optima on tree, writing .xmls from template and .sh scripts
+## OU sampling tree validation
+## (7) Simulating one trait, with two optima on tree, writing .xmls from template and .sh scripts Here we sample both tree topologies and regime mappings
 
 The FBD priors are the same as in 5.1, and we use a normal distribution with mean 1.0 and standard deviation 2.0 for the thetas, and with mean 0.0 and standard deviation 2.0 for the root value.
 We simulate two scenarios, one with high alpha and low sigma^2, and the other with high sigma^2 and low alpha. 

@@ -12,16 +12,17 @@ print(args)
 
 tree.type <- "nonultra"
 
-## cal.validation.folder <- "./"
-## rdata.path <- "BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra.RData"
-## n.sim <- 100
+cal.validation.folder <- "./"
+rdata.path <- "BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra.RData"
+n.sim <- 100
 ## job.prefix <- "BMMVNShiftTwoRatesFBDfixed"
-## n.param <- 3
-## param.names <- c("sigma1", "sigma2", "mu")
-## beast.param.names <- c("rateValues1", "rateValues2", "rootValue")
-## param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(y[0]))
-## mle.param.names <- c("sigma1.mle", "sigma2.mle", "mu.mle")
-## prior.means <- c(1.516004, 1.516004, 0.0)
+job.prefix <- "BMMVNShiftTwoRatesFBD"
+n.param <- 3
+param.names <- c("sigma1", "sigma2", "rv")
+beast.param.names <- c("rateValues1", "rateValues2", "rootValue")
+param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(y[0]))
+mle.param.names <- c("sigma1.mle", "sigma2.mle", "mu.mle")
+prior.means <- c(1.516004, 1.516004, 0.0)
 
 cal.validation.folder <- args[1]
 rdata.path <- args[2]
@@ -83,20 +84,20 @@ for (i in 1:n.param) {
 }
 
 ### COVERAGE ###
-table((full.df$mu >= full.df$lower.mu) & (full.df$mu <= full.df$upper.mu))
+table((full.df$rv >= full.df$lower.rv) & (full.df$rv <= full.df$upper.rv))
 table((full.df$sigma1 >= full.df$lower.sigma1) & (full.df$sigma1 <= full.df$upper.sigma1))
 table((full.df$sigma2 >= full.df$lower.sigma2) & (full.df$sigma2 <= full.df$upper.sigma2))
 
 ## nonultrametric
 ## root value
 ##   FALSE  TRUE
-##       7    93
+##       8    92
 ## sigma1
 ##   FALSE  TRUE
-##      4    96
+##      3    97
 ## sigma2
 ##   FALSE  TRUE
-##       5    95
+##       6    94
 
 ### PLOTS ###
 # tree height
@@ -152,8 +153,6 @@ for (i in 1:n.param) {
     names(all.plots)[i] = paste0("plot", i)
 }
 list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
-
-
 
 pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sigsq1.pdf"), height=2, width=2.5)
 plot1
