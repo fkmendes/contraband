@@ -83,7 +83,7 @@ counter <- 1
 if (simulate) {
     while (success <= n.sim + 50) {
         if (lambda[counter] > mu[counter]) {
-            if (counter==279) { set.seed(234) }
+            if (counter==279) { set.seed(234) } # this tree takes up all memory... let's ignore it
             tr = sim.fbd.taxa(n.spp, 1, lambda[counter], mu[counter], psi[counter], complete=TRUE)[[1]]
             n.tips = length(tr$tip.label)
 
