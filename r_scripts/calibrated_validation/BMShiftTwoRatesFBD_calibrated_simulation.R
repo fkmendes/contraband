@@ -21,7 +21,7 @@ print(args)
 ## n.spp <- 50
 ## job.prefix <- "BMMVNShiftTwoRatesFBD"
 ## job.prefix <- "BMMVNShiftTwoRatesFBDfixed"
-## time.needed <- "15:00:00"
+## time.needed <- "24:00:00"
 ## template.name <- "BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra_template.xml"
 ## tree.type <- "nonultra"
 
@@ -188,13 +188,13 @@ if (simulate) {
 
     ## saving true values and MLEs to .RData
     true.param.df = cbind(data.frame(sigmas.1, sigmas.2, x0s), mles)
+    names(true.param.df) = c("sigma1",  "sigma2", "rv", "sigma1.mle", "sigma2.mle", "rv.mle")
     trs.ntips.2.save = trs.ntips[successes]
     trs.heights.2.save = trs.heights[successes]
     trs.edge.mean.lengths.2.save = trs.edge.mean.lengths[successes]
     trs.colors.ns.2.save = trs.colors.ns[successes]
     trs.nedges.2.save = trs.nedges[successes]
     trs.nsas.2.save = trs.nsas[successes]
-    names(true.param.df) = c("sigma1",  "sigma2", "rv", "sigma1.mle", "sigma2.mle", "rv.mle")
     trees.2.save = trs[successes]
     save(trees.2.save,
          true.param.df,
