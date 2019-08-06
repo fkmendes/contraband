@@ -2,47 +2,46 @@ library(ggplot2)
 library(gtools)
 library(ggpubr)
 library(ape)
+library(rowr)
 source("calibrated_validation_utils.R")
 
 args = commandArgs(trailingOnly=TRUE)
 
 ### SCRIPT FLAGS AND PATH VARIABLES ###
 
-## cal.validation.folder <- "./"
-## rdata.path <- "OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData"
-## n.sim <- 100
-## job.prefix <- "OUMVNTwoOptFBD"
-## n.param <- 5
-
-cal.validation.folder <- args[1]
-rdata.path <- args[2]
-n.sim <- as.numeric(args[3])
-job.prefix <- args[4]
-n.param <- as.numeric(args[5])
-
-## param.names <- c("sigmasq", "rv", "theta1", "theta2", "alpha")
-## beast.param.names <- c("OUSigmaSq", "OURootValue", "OUTheta1", "OUTheta2", "OUAlpha")
-
-param.names <- strsplit(args[6], ",")[[1]]
-beast.param.names <- strsplit(args[7], ",")[[1]]
-param.labs.preparse <- strsplit(args[8], ",")[[1]]
-prior.means.preparse <- strsplit(args[9], ",")[[1]]
-param.labs <- prior.means <- c()
-for (i in 1:n.param) {
-    param.labs[i] = eval(parse(text=param.labs.preparse[i]))
-    prior.means[i] = eval(parse(text=prior.means.preparse[i]))
-}
-mle.param.names <- strsplit(args[11], ",")[[1]]
-
-## param.labs <- c(expression(sigma^2), expression(y[0]), expression(theta[1]), expression(theta[2]), expression(alpha))
-## mle.param.names <- c("sigmasq.mle", "rv.mle", "theta1.mle", "theta2.mle", "alpha.mle")
-## prior.means <- c(0.003297929, 0.0, 1.0, 1.0, 1.504103) ## ou-like (alpha high)
-## prior.means <- c(1.504103, 0.0, 1.0, 1.0, 0.003297929) ## bm-like (alpha low)
-
 tree.type <- "nonultra"
 
+cal.validation.folder <- "./"
+rdata.path <- "OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData"
+n.sim <- 100
+job.prefix <- "OUMVNTwoOptFBD"
+n.param <- 5
+param.names <- c("sigmasq", "rv", "theta1", "theta2", "alpha")
+beast.param.names <- c("OUSigmaSq", "OURootValue", "OUTheta1", "OUTheta2", "OUAlpha")
+param.labs <- c(expression(sigma^2), expression(y[0]), expression(theta[1]), expression(theta[2]), expression(alpha))
+mle.param.names <- c("sigmasq.mle", "rv.mle", "theta1.mle", "theta2.mle", "alpha.mle")
+prior.means <- c(0.003297929, 0.0, 1.0, 1.0, 1.504103) ## ou-like (alpha high)
+## prior.means <- c(1.504103, 0.0, 1.0, 1.0, 0.003297929) ## bm-like (alpha low)
+
+## cal.validation.folder <- args[1]
+## rdata.path <- args[2]
+## n.sim <- as.numeric(args[3])
+## job.prefix <- args[4]
+## n.param <- as.numeric(args[5])
+## param.names <- strsplit(args[6], ",")[[1]]
+## beast.param.names <- strsplit(args[7], ",")[[1]]
+## param.labs.preparse <- strsplit(args[8], ",")[[1]]
+## prior.means.preparse <- strsplit(args[9], ",")[[1]]
+## param.labs <- prior.means <- c()
+## for (i in 1:n.param) {
+##     param.labs[i] = eval(parse(text=param.labs.preparse[i]))
+##     prior.means[i] = eval(parse(text=prior.means.preparse[i]))
+## }
+## mle.param.names <- strsplit(args[10], ",")[[1]]
+
 res.path <- paste0(cal.validation.folder, job.prefix, "OneTrait_", tree.type, "_results/")
-res.files <- mixedsort(paste0(res.path,list.files(res.path)))
+res.files <- mixedsort(paste0(res.path,list.files(res.path, pattern = "[0-9]\\.log$")))
+rate.files <- mixedsort(paste0(res.path,list.files(res.path, pattern = "\\.trees\\.log$")))
 load(rdata.path)
 
 ############# DOING STUFF #############
@@ -53,6 +52,10 @@ names(log.df) <- as.vector(outer(c("lower", "upper", "mean"), param.names, paste
 cols <- seq(length.out=n.param, by=3) # 3=lower, upper, mean
 cols.2.compare <- c(3, 6)
 for (i in 1:n.sim) {
+    this.sim.rate.df = read.table(rate.files[i], header=TRUE, row.names=1, sep="\t")
+    names(this.sim.rate.df) = beast.param.names[1:2]
+    this.sim.df = read.delim(res.files[i], comment.char='#')
+    this.sim.df = cbind.fill(this.sim.rate.df, this.sim.df)
     this.sim.df = read.delim(res.files[i], comment.char='#')
 
     k = 1
@@ -66,8 +69,12 @@ for (i in 1:n.sim) {
 
 # putting true values and estimated ones together
 full.df <- cbind(true.param.df, log.df)
-cols.2.flip <- c(3, 8) # 3 and 4 should flip, 8 and 9 should flip
-full.df <- flip.trace.var(full.df, cols.2.flip)
+bool.vec <- full.df[,3] > full.df[,4]
+cols <- c(17,18,19)
+for (i in cols) {
+    full.df <- flip.w.bool(full.df, bool.vec, i, i+3)
+}
+
 plot.hdi <- vector("list", n.param)
 for (i in 1:n.param) {
     upper = paste0("upper.", param.names[i])
@@ -124,8 +131,10 @@ for (i in 1:n.param) {
     x.lab = param.labs[i]
     min.x = min(full.df[,param.names[i]])
     max.x = max(full.df[,param.names[i]])
-    min.y = min(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
-    max.y = max(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
+    ## min.y = min(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
+    ## max.y = max(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
+    min.y = min(full.df[,paste0("lower.",param.names[i])])
+    max.y = max(full.df[,paste0("upper.",param.names[i])])
     all.plots.mle[[i]] = get.plot.no.hdi(param.names[i], paste0(param.names[i],".mle"),
                               min.x, max.x, min.x, max.x, x.lab, prior.means[i],
                               full.df)
@@ -139,7 +148,7 @@ for (i in 1:n.param) {
     names(all.plots)[i] = paste0("plot", i)
 }
 list2env(all.plots.mle, .GlobalEnv) # sending plots in list into environment so I can use plot_grid
-list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I cna use plot_grid
+list2env(all.plots, .GlobalEnv) # sending plots in list into environment so I can use plot_grid
 
 ## png(paste0(cal.validation.folder, job.prefix, "_", tree.type, "_graphs.png"), height=24, width=10, unit="cm", res=300)
 ## ggarrange(plotlist=all.plots, ncol=1, nrow=3)

@@ -69,7 +69,7 @@ for (i in 1:n.sim) {
 # putting true values and estimated ones together
 full.df <- cbind(true.param.df, log.df)
 bool.vec <- full.df[,1] > full.df[,2]
-cols <- c((2*n.param+1):(2*n.param+3))
+cols <- c(7,8,9)
 for (i in cols) {
     full.df <- flip.w.bool(full.df, bool.vec, i, i+3)
 }
@@ -91,13 +91,13 @@ table((full.df$sigma2 >= full.df$lower.sigma2) & (full.df$sigma2 <= full.df$uppe
 ## nonultrametric
 ## root value
 ##   FALSE  TRUE
-##       8    92
+##       9    91
 ## sigma1
 ##   FALSE  TRUE
-##      3    97
+##      4    96
 ## sigma2
 ##   FALSE  TRUE
-##       6    94
+##       5    95
 
 ### PLOTS ###
 # tree height
