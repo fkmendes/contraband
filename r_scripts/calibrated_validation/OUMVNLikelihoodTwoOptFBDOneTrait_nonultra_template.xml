@@ -91,10 +91,10 @@
 	    <traitValues id="fixedTraitValues" spec="parameter.RealParameter">[TraitValuesHere]</traitValues>
 	  </oneTraitData>
 
-	  <optimumManager id="optimumManager" spec="contraband.ColorManagerTreeToVCVMat" coalCorrection="false">
-	    <branchRateModel id="OUThetaRandomLocalClock" spec="beast.evolution.branchratemodel.RandomLocalClockModel" scaling="false" includeRoot="true">
+	  <optimumManager id="optimumManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
+	    <branchRateModel id="OUThetaRandomLocalColor" spec="contraband.RandomLocalColorModel" scaling="false" includeRoot="true">
 	      <indicators id="shiftIndicators" spec="parameter.BooleanParameter" value="[ShiftIndicatorsHere]"/>
-	      <rates id="OUTheta" spec="parameter.RealParameter" value="0.01"/>
+	      <colors id="OUTheta" spec="parameter.RealParameter" value="1.0"/>
 	      <tree idref="TheTree"/>
 	    </branchRateModel>
 	    
@@ -123,7 +123,7 @@
     <operator id="FBDSATreeScaler" spec="SAScaleOperator" scaleFactor="0.95" tree="@TheTree" weight="3.0"/>
 
     <operator id="OUThetaValueWalker" spec="contraband.operators.RandomLocalTraitOperator" shiftIndicators="@shiftIndicators" traits="@OUTheta" windowSize="1.0" weight="50.0" p="0.5">
-      <randomClockModel idref="OUThetaRandomLocalClock"/>
+      <randomColorModel idref="OUThetaRandomLocalColor"/>
     </operator>
 
     <operator id="ShiftIndicatorMove" spec="contraband.operators.BitMoveOperator" weight="5.0" parameter="@shiftIndicators" k="1">
@@ -153,7 +153,7 @@
     </logger>
 	
     <logger id="treelog" fileName="[FileNameHere].trees" logEvery="60000" mode="tree">
-      <log id="TreeWithMetaDataLogger" spec="contraband.RateAndShiftLogger" metadata="@shiftIndicators" branchratemodel="@OUThetaRandomLocalClock" tree="@TheTree"/>
+      <log id="TreeWithMetaDataLogger" spec="contraband.RateAndShiftLogger" metadata="@shiftIndicators" branchratemodel="@OUThetaRandomLocalColor" tree="@TheTree"/>
     </logger>
   </run>
 </beast>

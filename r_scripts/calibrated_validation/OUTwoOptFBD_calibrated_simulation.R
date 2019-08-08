@@ -61,20 +61,18 @@ n.param <- 5
 ## sigsq: -5.9691 0.7171 # mean will be 0.003319
 ## alpha: 0.0932 0.8005 # mean will be 1.511
 
-## sigma.rate <- 5 # exponential prior
-sigma.mean <- -5.9691 # ou-like
-sigma.sd <- 0.7171
-## sigma.mean <- 0.0932 # bm-like
-## sigma.sd <- 0.8005
+## sigma.mean <- -5.9691 # ou-like
+## sigma.sd <- 0.7171
+sigma.mean <- 0.0932 # bm-like
+sigma.sd <- 0.8005
 rv.mean <- 0.0 # root value (theta0 in mvMORPH, the first element in the theta vector result)
 rv.sd <- 2.0 #
 th.mean <- 1.0 # thetas
 th.sd <- 2.0 #
-## alpha.mean <- -5.9691 # bm-like
-## alpha.sd <- 0.7171
-alpha.mean <- 0.0932 # ou-like
-alpha.sd <- 0.8005
-## alpha.mean <- alpha.sd <- 1.0
+alpha.mean <- -5.9691 # bm-like
+alpha.sd <- 0.7171
+## alpha.mean <- 0.0932 # ou-like
+## alpha.sd <- 0.8005
 
 ############# DOING STUFF #############
 
@@ -116,7 +114,7 @@ if (simulate) {
 
                 # paint the tree
                 # the random local clock model "paints" the branch subtending the node with an indicator shift = true ("1")
-                trs[[success]] = paintSubTree(tr, node=random.int.node, state=2, stem=FALSE)
+                trs[[success]] = paintSubTree(tr, node=random.int.node, state=2, stem=TRUE)
 
                 # collecting tree stats (for all n.sim + 50, later we need to get just the ones used in trait simulation)
                 trs.ntips[success] = n.tips
@@ -164,6 +162,7 @@ rvs <- rnorm(n.sim, mean=rv.mean, sd=rv.sd);
 ths1 <- rnorm(n.sim, mean=th.mean, sd=th.sd);
 ths2 <- rnorm(n.sim, mean=th.mean, sd=th.sd);
 alphas <- rlnorm(n.sim, mean=alpha.mean, sd=alpha.sd);
+seq.datasets <- vector("list", n.sim) # storing nuc sims
 datasets <- vector("list", n.sim) # storing sims
 mles <- data.frame(matrix(NA,100,n.param))
 
@@ -263,7 +262,7 @@ if (simulate) {
 ## writing xmls
 if (write.xmls) {
     for (sim.idx in 1:n.sim) {
-        xml.file.name = basename(gsub("template.xml", paste0(sim.idx, ".xml"), template.path))
+        xml.file.name = paste0(xml.file.prefix, sim.idx, ".xml")
         print (xml.file.name)
         if (file.exists(paste0(xmlfolder.path, xml.file.name))) {
             file.remove(paste0(xmlfolder.path, xml.file.name))

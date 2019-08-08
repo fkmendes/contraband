@@ -138,6 +138,7 @@ pdf(paste0(cal.validation.folder, "figs/", job.prefix, "_", tree.type, "_sas.pdf
 plot.sa
 dev.off()
 
+# trait params
 all.plots <- vector("list", n.param)
 for (i in 1:n.param) {
     x.lab = param.labs[i]

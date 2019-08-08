@@ -30,9 +30,9 @@ import beast.core.Input.Validate;
 import beast.core.Operator;
 import beast.core.parameter.BooleanParameter;
 import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
 import beast.evolution.branchratemodel.RandomLocalClockModel;
 import beast.util.Randomizer;
+import contraband.RandomLocalColorModel;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -50,9 +50,9 @@ public class RandomLocalTraitOperator extends Operator {
 	
 	final public Input<RealParameter> traitsInput = new Input<>("traits", "the trait (rate, optimum, etc.) associated with each tree node (including root).", Validate.REQUIRED);
 			
-    final public Input<RandomLocalClockModel> randomClockModelInput =
-            new Input<>("randomClockModel",
-                    "the random clock model on whose parameters to operate.",
+    final public Input<RandomLocalColorModel> randomColorModelInput =
+            new Input<>("randomColorModel",
+                    "the random color model on whose parameters to operate.",
                     Input.Validate.REQUIRED);
 
     final public Input<Double> pInput = new Input<>("p", "The probability of choosing a trait with an associated 1 (including the root trait when applicable).", 0.5, Validate.OPTIONAL);
@@ -64,14 +64,14 @@ public class RandomLocalTraitOperator extends Operator {
     List<Integer> onPositions = new ArrayList<>();
     List<Integer> offPositions = new ArrayList<>();
 
-    RandomLocalClockModel rlcModel;
+    RandomLocalColorModel rlcModel;
     BooleanParameter indicatorParam;
     RealParameter traitParam;
     double windowSize = 1;
 
     @Override
 	public void initAndValidate() {
-        rlcModel = randomClockModelInput.get();
+        rlcModel = randomColorModelInput.get();
         // indicatorParam = rlcModel.indicatorParamInput.get();
         // traitParam = rlcModel.rateParamInput.get();
     	

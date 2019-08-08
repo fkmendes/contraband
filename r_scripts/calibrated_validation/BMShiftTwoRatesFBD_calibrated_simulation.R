@@ -246,7 +246,6 @@ if (simulate) {
 ## writing xmls
 if (write.xmls) {
     for (sim.idx in 1:n.sim) {
-        ## xml.file.name = basename(gsub("template.xml", paste0(sim.idx, ".xml"), template.path))
         xml.file.name = paste0(xml.file.prefix, sim.idx, ".xml")
         print (xml.file.name)
         if (file.exists(paste0(xmlfolder.path, xml.file.name))) {

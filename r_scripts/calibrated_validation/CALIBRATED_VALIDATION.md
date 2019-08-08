@@ -233,22 +233,27 @@ Rscript BMShiftOneRateFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOne
 ```
 
 ## OU sampling tree validation
-## (7) Simulating one trait, with two optima on tree, writing .xmls from template and .sh scripts Here we sample both tree topologies and regime mappings
+## (7) Simulating one trait, with two optima on tree, writing .xmls from template and .sh scripts. Here we sample both tree topologies and regime mappings
 
-The FBD priors are the same as in 5.1, and we use a normal distribution with mean 1.0 and standard deviation 2.0 for the thetas, and with mean 0.0 and standard deviation 2.0 for the root value.
 We simulate two scenarios, one with high alpha and low sigma^2, and the other with high sigma^2 and low alpha. 
 Priors for sigma^2 and alpha are log-normals (harcoded in the .R script).
 
 ```
-Rscript OUTwoOptFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNTwoOptFBD '48:00:00' OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_template.xml nonultra OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
+Rscript OUTwoOptFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNTwoOptFBD '48:00:00' OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_template.xml nonultra /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
 ```
 
 We name the result files with "_alphahigh" and "_alphalow" suffixes to distinguish between the two simulated settings.
 
 ## (7.2) Plotting the mean posterior of the five OU parameters (rate, ancestral value, alpha and two optima) against true values
 
+With higher alpha, lower sigma^2.
+
 ```
-Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData 100 OUMVNTwoOptFBD 5 sigmasq,rv,theta1,theta2,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(alpha)" "0.003297929,0.0,1.0,1.0,1.504103" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,alpha.mle
+Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData 100 OUMVNTwoOptFBD 5 sigmasq,rv,theta1,theta2,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(alpha)" "0.003297929,0.0,1.0,1.0,1.504103" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,alpha.mle alphahigh
 ```
 
-To switch between simulated settings, comment and uncomment the hardcoded relevant steps inside the .R script, and remove the suffixes mentioned in 6.1 from file names of corresponding setting.
+With lower alpha, higher sigma^2.
+
+```
+Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData 100 OUMVNTwoOptFBD 5 sigmasq,rv,theta1,theta2,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(alpha)" "1.504103,0.0,1.0,1.0,0.003297929" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,alpha.mle alphalow
+```
