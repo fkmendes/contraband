@@ -249,11 +249,11 @@ We name the result files with "_alphahigh" and "_alphalow" suffixes to distingui
 With higher alpha, lower sigma^2.
 
 ```
-Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData 100 OUMVNTwoOptFBD 5 sigmasq,rv,theta1,theta2,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(alpha)" "0.003297929,0.0,1.0,1.0,1.504103" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,alpha.mle alphahigh
+Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData 100 OUMVNTwoOptFBD 5 sigmasq,rv,theta1,theta2,alpha OUSigmaSq,OURootValue,OUThetaAncestral,OUThetaDerived,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(alpha)" "0.003297929,0.0,1.0,1.0,1.504103" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,alpha.mle alphahigh
 ```
 
 With lower alpha, higher sigma^2.
 
 ```
-Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData 100 OUMVNTwoOptFBD 5 sigmasq,rv,theta1,theta2,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(alpha)" "1.504103,0.0,1.0,1.0,0.003297929" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,alpha.mle alphalow
+Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData 100 OUMVNTwoOptFBD 5 sigmasq,rv,theta1,theta2,alpha OUSigmaSq,OURootValue,OUThetaAncestral,OUThetaDerived,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(alpha)" "1.504103,0.0,1.0,1.0,0.003297929" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,alpha.mle alphalow
 ```

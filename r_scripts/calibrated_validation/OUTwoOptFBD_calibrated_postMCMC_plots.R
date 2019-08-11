@@ -12,20 +12,19 @@ print(args)
 
 tree.type <- "nonultra"
 
-cal.validation.folder <- "./"
-rdata.path <- "OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData"
-n.sim <- 100
-job.prefix <- "OUMVNTwoOptFBD"
-n.param <- 5
-param.names <- c("sigmasq", "rv", "theta1", "theta2", "alpha")
-## beast.param.names <- c("OUSigmaSq", "OURootValue", "OUTheta1", "OUTheta2", "OUAlpha")
-beast.param.names <- c("OUSigmaSq", "OURootValue", "OUThetaSmall", "OUThetaLarge", "OUAlpha")
-param.labs <- c(expression(sigma^2), expression(y[0]), expression(theta[1]), expression(theta[2]), expression(alpha))
-mle.param.names <- c("sigmasq.mle", "rv.mle", "theta1.mle", "theta2.mle", "alpha.mle")
+## cal.validation.folder <- "./"
+## rdata.path <- "OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData"
+## n.sim <- 100
+## job.prefix <- "OUMVNTwoOptFBD"
+## n.param <- 5
+## param.names <- c("sigmasq", "rv", "theta1", "theta2", "alpha")
+## beast.param.names <- c("OUSigmaSq", "OURootValue", "OUThetaAncestral", "OUThetaDerived", "OUAlpha")
+## param.labs <- c(expression(sigma^2), expression(y[0]), expression(theta[1]), expression(theta[2]), expression(alpha))
+## mle.param.names <- c("sigmasq.mle", "rv.mle", "theta1.mle", "theta2.mle", "alpha.mle")
 ## prior.means <- c(0.003297929, 0.0, 1.0, 1.0, 1.504103) ## ou-like (alpha high)
-prior.means <- c(1.504103, 0.0, 1.0, 1.0, 0.003297929) ## bm-like (alpha low)
+## prior.means <- c(1.504103, 0.0, 1.0, 1.0, 0.003297929) ## bm-like (alpha low)
 ## suffix <- "alphahigh" # ou-like
-suffix <- "alphalow" # bm-like
+## suffix <- "alphalow" # bm-like
 
 cal.validation.folder <- args[1]
 rdata.path <- args[2]
@@ -58,9 +57,11 @@ cols <- seq(length.out=n.param, by=3) # 3=lower, upper, mean
 cols.2.compare <- c(3, 6)
 for (i in 1:n.sim) {
     this.sim.rate.df = read.table(rate.files[i], header=TRUE, row.names=1, sep="\t")
-    names(this.sim.rate.df) = beast.param.names[3:4]
+    names(this.sim.rate.df) = c("OUThetaRoot", beast.param.names[3:4])
+    flip.boolean <- this.sim.rate.df$"OUThetaRoot"!=this.sim.rate.df$"OUThetaAncestral"
+    this.sim.rate.df[flip.boolean,c(2,3)] = this.sim.rate.df[flip.boolean,c(3,2)]
     this.sim.df = read.delim(res.files[i], comment.char='#')
-    this.sim.df = cbind.fill(this.sim.rate.df, this.sim.df)
+    this.sim.df = cbind.fill(this.sim.rate.df, this.sim.df) # merging
 
     k = 1
     for (j in cols) {
@@ -73,11 +74,11 @@ for (i in 1:n.sim) {
 
 # putting true values and estimated ones together
 full.df <- cbind(true.param.df, log.df)
-bool.vec <- full.df[,3] > full.df[,4]
-cols <- c(17,18,19)
-for (i in cols) {
-    full.df <- flip.w.bool(full.df, bool.vec, i, i+3)
-}
+## bool.vec <- full.df[,3] > full.df[,4]
+## cols <- c(17,18,19)
+## for (i in cols) {
+##     full.df <- flip.w.bool(full.df, bool.vec, i, i+3)
+## }
 
 plot.hdi <- vector("list", n.param)
 for (i in 1:n.param) {
@@ -96,36 +97,36 @@ table((full.df$alpha >= full.df$lower.alpha) & (full.df$alpha <= full.df$upper.a
 ## ou like
 ## sigmasq
 ## FALSE  TRUE
-##    24    76
+##     2    98
 ## rv
 ## FALSE  TRUE
-##    10    90
+##     5    95
 ## theta1
 ## FALSE  TRUE
-##     8    92
+##     7    93
 ## theta2
 ## FALSE  TRUE
-##     9    91
+##     6    94
 ## alpha
 ## FALSE  TRUE
-##    26    74
+##     3    97
 
 ## bm like
 ## sigmasq
 ## FALSE  TRUE
-##    2     98
+##    14    86
 ## rv
 ## FALSE  TRUE
-##     5    95
+##    19    81
 ## theta1
 ## FALSE  TRUE
-##    10    90
+##     3    97
 ## theta2
 ## FALSE  TRUE
-##     5    95
+##     7    93
 ## alpha
 ## FALSE  TRUE
-##     5    95
+##     4    96
 
 ### PLOTS ###
 # tree height
@@ -177,6 +178,10 @@ for (i in 1:n.param) {
     ## max.y = max(full.df[,paste0("mean.",param.names[i])], na.rm=TRUE)
     min.y = min(full.df[,paste0("lower.",param.names[i])])
     max.y = max(full.df[,paste0("upper.",param.names[i])])
+
+    min.y.mle = min(full.df[,paste0(param.names[i], ".mle")], na.rm=TRUE)
+    max.y.mle = max(full.df[,paste0(param.names[i], ".mle")], na.rm=TRUE)
+
     all.plots.mle[[i]] = get.plot.no.hdi(param.names[i], paste0(param.names[i],".mle"),
                               min.x, max.x, min.y, max.y, x.lab, prior.means[i],
                               full.df)
