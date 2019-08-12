@@ -32,7 +32,7 @@ n.sim <- as.numeric(args[3])
 job.prefix <- args[4]
 n.param <- as.numeric(args[5])
 param.names <- strsplit(args[6], ",")[[1]]
-beast.param.names <- strsplit(args[7], ",")[[1]]
+beast.param.names <- strsplit(args[7], ",")[[1]] # has to match the order in param.names
 param.labs.preparse <- strsplit(args[8], ",")[[1]]
 prior.means.preparse <- strsplit(args[9], ",")[[1]]
 param.labs <- prior.means <- c()
@@ -54,7 +54,6 @@ n.cols = n.param * 3
 log.df <- data.frame(matrix(ncol=n.cols, nrow=n.sim))
 names(log.df) <- as.vector(outer(c("lower", "upper", "mean"), param.names, paste, sep="."))
 cols <- seq(length.out=n.param, by=3) # 3=lower, upper, mean
-cols.2.compare <- c(3, 6)
 for (i in 1:n.sim) {
     this.sim.rate.df = read.table(rate.files[i], header=TRUE, row.names=1, sep="\t")
     names(this.sim.rate.df) = c("OUThetaRoot", beast.param.names[3:4])
@@ -74,11 +73,6 @@ for (i in 1:n.sim) {
 
 # putting true values and estimated ones together
 full.df <- cbind(true.param.df, log.df)
-## bool.vec <- full.df[,3] > full.df[,4]
-## cols <- c(17,18,19)
-## for (i in cols) {
-##     full.df <- flip.w.bool(full.df, bool.vec, i, i+3)
-## }
 
 plot.hdi <- vector("list", n.param)
 for (i in 1:n.param) {

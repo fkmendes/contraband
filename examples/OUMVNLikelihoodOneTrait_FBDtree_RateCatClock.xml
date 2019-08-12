@@ -133,7 +133,7 @@
     <operator id="ThetaValueScaler" spec="RealRandomWalkOperator" parameter="@OUTheta" windowSize="10.0" weight="3.0"/>
     <operator id="ThetaAssignmentWalker" spec="IntRandomWalkOperator" parameter="@OUThetaAssignments" windowSize="1" weight="10.0"/>
 	
-    <logger id="tracelog" fileName="OUMVN_samplingtree_FBD.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="OUMVN_FBDTree_RateCatClock.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
@@ -151,7 +151,7 @@
       <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:firsthalf" fileName="OUMVN_samplingtree_FBD.trees" logEvery="5000" mode="tree">
+    <logger id="treelog.t:firsthalf" fileName="OUMVN_FBDTree_RateCatClock.trees" logEvery="5000" mode="tree">
       <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>

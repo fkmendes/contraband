@@ -24,6 +24,7 @@ public class RandomLocalColorModel extends BranchRateModel.Base {
             new Input<>("indicators",
                     "the indicators associated with nodes in the tree for sampling of individual color changes among branches.",
                     Input.Validate.REQUIRED);
+
     final public Input<RealParameter> colorParamInput =
             new Input<>("colors",
                     "the color (rates, optima, etc.) parameters associated with nodes in the tree for sampling of individual colors among branches.",

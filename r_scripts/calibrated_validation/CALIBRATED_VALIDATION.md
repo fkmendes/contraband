@@ -1,5 +1,4 @@
-
-# contraband: Calibrated validation of BM-related classes
+# Deprecated below, until further notice (starts at l. 189)
 
 This file will guide you through reproducing the simulations and graph-plotting we did for our well-calibrated validation. Note that first we fix the tree to verify the BM-related likelihoods by themselves, and but we also validate with respect to a tree prior.
 
@@ -186,57 +185,27 @@ Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrai
 Rscript OUThreeOpt_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodThreeOptOneTrait_fixedtree_nonultra.RData 100 OUMVNThreeOpt nonultra 6 sigmasq,rv,theta1,theta2,theta3,alpha OUSigmaSq,OURootValue,OUTheta1,OUTheta3,OUTheta2,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(theta[3]),expression(alpha)" "1/5,0.0,0.0,1.0" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,theta3.mle,alpha.mle
 ```
 
----
-
-## BM fixed tree validation
-## (5) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts. Here we fix the number of regimes and the tree topology, but sample the regimes
-
-```
-Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBDfixed '18:00:00' BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra_template.xml nonultra /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
-```
-
-## (5.1) Plotting the mean posterior of the three BM parameters (two rates and root value) against true values
-
-```
-cd calibrated_validation/
-Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDfixedOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBDfixed 3 sigma1,sigma2,rv rateValues1,rateValues2,rootValue "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1.516004,1.516004,0.0" sigma1.mle,sigma2.mle,rv.mle
-```
-
+# contraband: Calibrated validation of BM-related classes
 ## BM sampling tree validation
-## (6) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts. Here we sample both tree topologies and regime mappings
+### (1) Simulating one trait, with two rates on whole tree under Brownian motion, writing .xmls from template and .sh scripts. Here we sample both tree topologies and regime mappings
 
 ```
 Rscript BMShiftTwoRatesFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftTwoRatesFBD '24:00:00' BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra_template.xml nonultra /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
 ```
 
-## (6.1) Plotting the mean posterior of the three BM parameters (two rates and root value) against true values
+### (1.1) Plotting the mean posterior of the three BM parameters (two rates and root value) against true values
 
-This step produces Fig. S1-S2 from Supplementary Information (see SI.pdf for details on priors, etc.). Data comes from previous step
+This step produces Fig. S1-S2 from Supplementary Information (see SI.pdf for details on priors, etc.). Data comes from previous step.
 
 ```
 cd calibrated_validation/
-Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBD 3 sigma1,sigma2,rv rateValues1,rateValues2,rootValue "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1.516004,1.516004,0.0" sigma1.mle,sigma2.mle,rv.mle
-```
-
-## (6.1) Simulating one trait, but just one rate on whole tree under Brownian motion, writing .xmls from template and .sh scripts
-
-We use the same priors as in 1.1, and do nonultrametric trees only using an FBD prior. The prior on FBD parameters are exponentials with rates 80, 100 and 150 (for lambda, mu and psi, respectively).
-
-```
-Rscript BMShiftOneRateFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 BMMVNShiftOneRateFBD '03:30:00' BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_template.xml nonultra BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra_ /cluster/validation/folder/ /cluster/jarfilepath/contraband.jar
-```
-
-## (6.2) Plotting the mean posterior of the two BM parameters (rate and mean/ancestral value) against true values
-
-```
-Rscript BMShiftOneRateFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodOneRateFBDOneTrait_nonultra.RData 100 BMMVNShiftOneRateFBD 2 sigmasq,mu rateValues,BMMean "expression(sigma^2),expression(y[0])" "1/5,0.0" sigmasq.mle,mu.mle
+Rscript BMShiftTwoRatesFBD_calibrated_postMCMC_plots.R ./ BMMVNShiftLikelihoodTwoRatesFBDOneTrait_nonultra.RData 100 BMMVNShiftTwoRatesFBD 3 sigma1,sigma2,rv rateValuesAncestral,rateValuesDerived,rootValue "expression(sigma[1]^2),expression(sigma[2]^2),expression(y[0])" "1.516004,1.516004,0.0" sigma1.mle,sigma2.mle,rv.mle
 ```
 
 ## OU sampling tree validation
-## (7) Simulating one trait, with two optima on tree, writing .xmls from template and .sh scripts. Here we sample both tree topologies and regime mappings
+### (2) Simulating one trait, with two optima on tree, writing .xmls from template and .sh scripts. Here we sample both tree topologies and regime mappings
 
-We simulate two scenarios, one with high alpha and low sigma^2, and the other with high sigma^2 and low alpha. 
-Priors for sigma^2 and alpha are log-normals (harcoded in the .R script).
+We simulate two scenarios, one with high alpha and low sigma^2, and the other with high sigma^2 and low alpha. Priors for sigma^2 and alpha are log-normals (harcoded in the .R script). Trees should match those from step (1)
 
 ```
 Rscript OUTwoOptFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNTwoOptFBD '48:00:00' OUMVNLikelihoodTwoOptFBDOneTrait_nonultra_template.xml nonultra /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/ /nesi/project/nesi00390/fkmendes/contraband/calibrated_validation/contraband.jar
@@ -244,7 +213,9 @@ Rscript OUTwoOptFBD_calibrated_simulation.R TRUE TRUE TRUE ./ 100 50 OUMVNTwoOpt
 
 We name the result files with "_alphahigh" and "_alphalow" suffixes to distinguish between the two simulated settings.
 
-## (7.2) Plotting the mean posterior of the five OU parameters (rate, ancestral value, alpha and two optima) against true values
+### (2.1) Plotting the mean posterior of the five OU parameters (rate, ancestral value, alpha and two optima) against true values
+
+This step produces Fig. S4-S5 from Supplementary Information (see SI.pdf for details on priors, etc.). Data comes from previous step.
 
 With higher alpha, lower sigma^2.
 

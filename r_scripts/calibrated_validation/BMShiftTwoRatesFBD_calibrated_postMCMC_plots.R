@@ -19,7 +19,7 @@ n.sim <- 100
 job.prefix <- "BMMVNShiftTwoRatesFBD"
 n.param <- 3
 param.names <- c("sigma1", "sigma2", "rv")
-beast.param.names <- c("rateValues1", "rateValues2", "rootValue")
+beast.param.names <- c("rateValuesAncestral", "rateValuesDerived", "rootValue") # has to match the order in param.names
 param.labs <- c(expression(sigma[1]^2), expression(sigma[2]^2), expression(y[0]))
 mle.param.names <- c("sigma1.mle", "sigma2.mle", "mu.mle")
 prior.means <- c(1.516004, 1.516004, 0.0)
@@ -54,7 +54,9 @@ cols <- seq(length.out=n.param, by=3) # 3=lower, upper, mean
 cols.2.compare <- c(3, 6)
 for (i in 1:n.sim) {
     this.sim.rate.df = read.table(rate.files[i], header=TRUE, row.names=1, sep="\t")
-    names(this.sim.rate.df) = beast.param.names[1:2]
+    names(this.sim.rate.df) = c("rateValuesRoot", beast.param.names[1:2])
+    flip.boolean = this.sim.rate.df$"rateValuesRoot"!=this.sim.rate.df$"rateValuesAncestral"
+    this.sim.rate.df[flip.boolean,c(2,3)] = this.sim.rate.df[flip.boolean,c(3,2)]
     this.sim.df = read.delim(res.files[i], comment.char='#')
     this.sim.df = cbind.fill(this.sim.rate.df, this.sim.df)
 
@@ -68,13 +70,6 @@ for (i in 1:n.sim) {
 
 # putting true values and estimated ones together
 full.df <- cbind(true.param.df, log.df)
-bool.vec <- full.df[,1] > full.df[,2]
-cols <- c(7,8,9)
-for (i in cols) {
-    full.df <- flip.w.bool(full.df, bool.vec, i, i+3)
-}
-## cols.2.flip <- c(1, 4) # 1 and 2 should flip, 4 and 5 should flip
-## full.df <- flip.trace.var(full.df, cols.2.flip)
 
 plot.hdi <- vector("list", n.param)
 for (i in 1:n.param) {
@@ -94,7 +89,7 @@ table((full.df$sigma2 >= full.df$lower.sigma2) & (full.df$sigma2 <= full.df$uppe
 ##       9    91
 ## sigma1
 ##   FALSE  TRUE
-##      4    96
+##      7    93
 ## sigma2
 ##   FALSE  TRUE
 ##       5    95
