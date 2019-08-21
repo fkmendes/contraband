@@ -83,7 +83,7 @@ public class RandomLocalColorModel extends BranchRateModel.Base {
 
         colorsAreMultipliers = colorsAreMultipliersInput.get();
 
-        meanColor = meanColorInput.get();
+        meanColor = meanRateInput.get(); // "rate" here could refer to theta's under OU (the interface calls it "rate"...)
         if (meanColor == null) {
             meanColor = new RealParameter("1.0");
         }
