@@ -228,3 +228,16 @@ With lower alpha, higher sigma^2.
 ```
 Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTrait_nonultra.RData 100 OUMVNTwoOptFBD 5 sigmasq,rv,theta1,theta2,alpha OUSigmaSq,OURootValue,OUThetaAncestral,OUThetaDerived,OUAlpha "expression(sigma^2),expression(y[0]),expression(theta[1]),expression(theta[2]),expression(alpha)" "1.504103,0.0,1.0,1.0,0.003297929" sigmasq.mle,rv.mle,theta1.mle,theta2.mle,alpha.mle alphalow
 ```
+
+## Relaxed clock validation
+### (1) Simulating one trait with a Poisson-distributed number of shifts under BM. Here we fix the tree and the root value (to zero) and sample the BM rate parameter (one rate per branch) as well as the number of shifts (by means of a binary indicator variable; see Drummond and Suchard 2010 for details). In this step we produce .xml files from a template.
+
+We prepare the directory structure by going to "calibrated_validation/RandomLocalClock" and running prepare_dirs.sh from there. But if you cloned from the GitHub repository, you can just run the simulation scripts straight away.
+
+```
+cd calibrated_validation/RandomLocalClock
+Rscript BMShiftRLC_calibrated_simulation.R BMMVNShiftLikelihoodFixedTreeOneTrait_nonultra_template /path/to/BM/cal_val/xmls/ species_tree.RData /path/to/BM/output/ 200 5
+```
+
+Here we run 200 simulations on the same tree (species_tree.RData), but each tree has its own mapping. We set the mean of the Poisson prior to be 5. 
+
