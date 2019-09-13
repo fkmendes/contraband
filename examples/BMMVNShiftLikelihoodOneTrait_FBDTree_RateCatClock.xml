@@ -28,20 +28,20 @@
       <!-- START prior -->
       <distribution id="prior" spec="util.CompoundDistribution">
 	<distribution id="FBD" spec="beast.evolution.speciation.SABirthDeathModel" conditionOnRhoSampling="true" birthRate="@FBDbirthRate" deathRate="@FBDdeathRate" samplingRate="@FBDsamplingRate" origin="@FBDorigin" tree="@TheTree"> 
-          <parameter id="FBDremovalProb" lower="0.0" name="removalProbability" upper="1.0">0.0</parameter>                                                                                     
-          <parameter id="FBDrho" estimate="false" lower="0.0" name="rho" upper="1.0">1.0</parameter>                                                                                 
+          <parameter id="FBDremovalProb" lower="0.0" name="removalProbability" upper="1.0">0.0</parameter>
+          <parameter id="FBDrho" estimate="false" lower="0.0" name="rho" upper="1.0">1.0</parameter>
         </distribution>                                                                                                                                                                        
         <distribution id="FBDbirthRatePrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
 	  <distr id="FBDbirthRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.0125"/>
-        </distribution>                                                                                                                                                                               
+        </distribution>                      
 
 	<distribution id="FBDdeathRatePrior" spec="beast.math.distributions.Prior" x="@FBDdeathRate">
 	  <distr id="FBDdeathRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.01"/>
-        </distribution>                                                                                                                                                                               
+        </distribution>               
 
 	<distribution id="FBDsamplingRatePrior" spec="beast.math.distributions.Prior" x="@FBDsamplingRate">
 	  <distr id="FBDsamplingRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.0066666"/>
-        </distribution>                                                                                                                                                                               
+        </distribution>
 
 	<distribution id="FBDoriginPrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
 	  <distr id="FBDoriginUniform" spec="beast.math.distributions.Uniform" upper="Infinity"/>
@@ -59,7 +59,6 @@
 	  <distr id="Normal.rootValue" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
       </distribution>
-      
       <!-- END prior -->
 
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">

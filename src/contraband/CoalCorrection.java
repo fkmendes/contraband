@@ -15,7 +15,7 @@ import beast.util.TreeParser;
 
 public class CoalCorrection extends CalculationNode {
 
-	final public Input<TreeParser> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
+	final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
 	final public Input<RealParameter> popSizesInput = new Input<>("popSizes", "Temporary input containing the pop size of each node in the tree.", Validate.REQUIRED);
 	
 	private Tree tree;

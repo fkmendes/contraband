@@ -43,7 +43,7 @@ public class OneValueContTraits extends CalculationNode {
 	
 	private void populateSpValuesMap() {
 		traitValues = traitInput.get().getValues();
-		
+
 		// Looping over jth traits
 		for (int j=0; j < nTraits; ++j) {
 		
@@ -131,7 +131,7 @@ public class OneValueContTraits extends CalculationNode {
 		
 //		System.out.println("Species names for trait values below:" + Arrays.toString(strings));
 //		System.out.println("traitValues inside OneValueContTraits=" + Arrays.toString(traitValues));
-		
+
 		int ithSpp=0;
 		for (String spName: strings) {
 			traitValues[ithSpp] = getSpValues(spName)[traitIdx];

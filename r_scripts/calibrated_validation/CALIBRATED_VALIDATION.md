@@ -239,5 +239,10 @@ cd calibrated_validation/RandomLocalClock
 Rscript BMShiftRLC_calibrated_simulation.R BMMVNShiftLikelihoodFixedTreeOneTrait_nonultra_template /path/to/BM/cal_val/xmls/ species_tree.RData /path/to/BM/output/ 200 5
 ```
 
-Here we run 200 simulations on the same tree (species_tree.RData), but each tree has its own mapping. We set the mean of the Poisson prior to be 5. 
+Here we run 200 simulations on the same tree (species_tree.RData), but each tree has its own mapping. We set the mean of the Poisson prior to be 5. We put all .log and .trees files inside "BM/cal_val/logs" and "BM/cal_val/trees".
 
+### (1.1) Plotting the mean posterior of K (number of rate shifts) against the true K value.
+
+```
+cd calibrated/validation/RandomLocalClock Rscript RLC_calibrated_postMCMC_plots.R 200 BM 5 /path/to/BMRLC_simdata_tr1.RData /path/to/BM/cal_val/logs/ /path/to/BM/output/ 7
+```
