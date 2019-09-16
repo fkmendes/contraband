@@ -3,6 +3,9 @@ package contraband;
 import java.util.Arrays;
 
 import org.apache.commons.math.util.MathUtils;
+import org.apache.commons.math3.util.FastMath;
+
+import beast.evolution.tree.Node;
 
 public class CoalUtils {
 	
@@ -176,7 +179,7 @@ public class CoalUtils {
 		
 		double prob = 0.0;
 		for (int i=0; i < rates.length; ++i) {
-			prob += (cis[i] * Math.exp((-rates[i]/pop) * t));
+			prob += (cis[i] * FastMath.exp((-rates[i]/pop) * t));
 		}
 		
 //		System.out.println("Printing from n to k lineages: n=" + nFrom + " k=" + nTo + " d=" + pop + " over all interval, t=" + t);
@@ -184,4 +187,6 @@ public class CoalUtils {
 				
 		return prob;
 	}
+
+
 }
