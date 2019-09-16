@@ -164,7 +164,13 @@ public class CoalUtils {
 				cis[j] *= (rate / (rate - rates[j]));
 			}
 
-			cis[cisCounter] = -Arrays.stream(cis).sum();
+			// cis[cisCounter] = -Arrays.stream(cis).sum();
+			double sum = 0;
+			for (double d : cis) {
+				sum += d;
+			}
+			cis[cisCounter] = -sum;
+			
 			cisCounter++;
 		}
 		
