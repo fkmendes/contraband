@@ -2,10 +2,7 @@ package contraband;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.LUDecomposition;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.linear.*;
 
 import beast.core.Input;
 import beast.core.State;
@@ -24,13 +21,15 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 
 	private RealVector bmExpAtTipVector, bmWVector;
 	private RealMatrix bmVCVMat, bmInvVCVMat, bmAncNodeVCVMat;
-	private LUDecomposition bmVCVMatLUD;
+	private LUDecomposition bmVCVMatLUDec;
 	
 	private OneValueContTraits oneTraitData;
 	private RealVector oneTraitDataVector;
 	
 	// stored stuff
 	private RealVector storedExpAtTipVector;
+	private RealMatrix storedBmVCVMat;
+	private RealMatrix storedBmInvVCVMat;
 	
 	@Override
 	public void initAndValidate() {	
@@ -41,7 +40,10 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		bmExpAtTipVector = new ArrayRealVector(nSpp);
 		bmWVector = new ArrayRealVector(nSpp);
 		oneTraitDataVector = new ArrayRealVector(nSpp);
+
 		storedExpAtTipVector = new ArrayRealVector(nSpp);
+		storedBmVCVMat = new Array2DRowRealMatrix(nSpp, nSpp);
+		storedBmInvVCVMat = new Array2DRowRealMatrix(nSpp, nSpp);
 		
 		// this instance vars
 		populateInstanceVars(true, true, true, false);
@@ -74,7 +76,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		// setting parent members
 		if (updateExpAtTip) { setProcessMeanVec(bmExpAtTipVector); }
 		if (updateVCVMat) {
-			setProcessVCVMat(bmVCVMat);
+			setProcessLUDec(bmVCVMatLUDec);
 			setProcessInvVCVMat(bmInvVCVMat);
 		}	
 		setProcessOneTraitDataVec(oneTraitDataVector); // also has to come AFTER setting phyloTMat
@@ -100,10 +102,10 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	protected void populateInvVCVMatrix() {
-		bmVCVMatLUD = new LUDecomposition(bmVCVMat);
+		bmVCVMatLUDec = new LUDecomposition(bmVCVMat);
 
 		try {
-			bmInvVCVMat = bmVCVMatLUD.getSolver().getInverse();
+			bmInvVCVMat = bmVCVMatLUDec.getSolver().getInverse();
 			setMatrixIsSingular(false);
 		} catch (org.apache.commons.math3.linear.SingularMatrixException e) {
 			setMatrixIsSingular(true);
@@ -140,7 +142,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		boolean updateMean = false;
 		boolean updateAncNodeVCVMat = false; // always false, only tree logger uses this as true
 		
-		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
+		if (treeInput.isDirty() || (doCoalCorrectionInput.get() && coalCorrectionInput.isDirty())) {  updatePhyloTMat = true; updateVCVMat = true; }
 		if (sigmasqInput.isDirty()) { updateVCVMat = true; }
 		if (rootValueInput.isDirty()) { updateMean = true; }
 		
@@ -172,6 +174,13 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	public void store() {
 		for (int i=0; i<nSpp; ++i) {
 			storedExpAtTipVector.setEntry(i, bmExpAtTipVector.getEntry(i));
+
+			// debugging coal correction + MSC
+			for (int j=0; j<nSpp; ++j) {
+				storedBmVCVMat.setEntry(i, j, bmVCVMat.getEntry(i, j));
+				storedBmInvVCVMat.setEntry(i, j, bmInvVCVMat.getEntry(i, j));
+			}
+			// storedBmVCVMat.setRowVector(i, bmVCVMat.getRowVector(i));
 		}
 
 		super.store();
@@ -180,11 +189,20 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	public void restore() {
 		RealVector realVecTmp;
+		RealMatrix realMatTmp; // debugging coal correction + MSC
 		
 		realVecTmp = bmExpAtTipVector;
 		bmExpAtTipVector = storedExpAtTipVector;
 		storedExpAtTipVector = realVecTmp;
-		
+
+		realMatTmp = bmVCVMat;
+		bmVCVMat = storedBmVCVMat;
+		storedBmVCVMat = realMatTmp;
+
+		realMatTmp = bmInvVCVMat;
+		bmInvVCVMat = storedBmInvVCVMat;
+		storedBmInvVCVMat = realMatTmp;
+
 		super.restore();
 	}
 	

@@ -24,9 +24,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	final public Input<Boolean> doCoalCorrectionInput = new Input<>("doCoalCorrection", "Whether or not to perform coalescent correction.", false, Validate.REQUIRED);
 	final public Input<CoalCorrection> coalCorrectionInput = new Input<>("coalCorrector", "Calculation node that produces a phylogenetic T matrix from tree and (constant) population sizes of its branches.", Validate.OPTIONAL);
 	
-	// TODO: rootEdgeLength is not a parameter, so in the future after I implement the coalescent correction, this should be figured out
-	// from the tree (in StarBeast2)
-	
 	private boolean dirty;
 	private boolean matrixWasSingularCantInvertBarf;
 	
@@ -47,7 +44,8 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private RealVector expAtTipVec;
 	
 	// VCV matrix
-	private RealMatrix vcvMat, invVCVMat;
+//	private RealMatrix vcvMat; // debugging coal correction + MSC
+	private RealMatrix invVCVMat;
 	private LUDecomposition vcvMatLUDecomposition;
 	private double detVCVMat;
 	
@@ -59,11 +57,13 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	// data
 	private RealVector oneTraitDataVector;
 
-	// stored stuff	
+	// stored stuff
+	private String[] storedSpNamesInPhyloTMatOrder;
 	private RealVector storedOneTraitDataVector = new ArrayRealVector(nSpp);
 	private RealVector storedExpAtTipVec; // need for integration with JIVE (unsure why...?)
 	private RealMatrix storedPhyloTMat; // needed for tree operators
 	private double[][] storedPhyloTMatDouble; // needed for FBD operators
+	// private RealMatrix storedVCVMat; // debuggin coal correction + MSC
 	private RealMatrix storedInvVCVMat; // (below) needed for morphology parameter operators
 	private double storedDetVCVMat;
 	
@@ -85,9 +85,11 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		}
 
 		// stored stuff
+		storedSpNamesInPhyloTMatOrder = new String[nSpp];
 		storedOneTraitDataVector = new ArrayRealVector(nSpp);
 		storedExpAtTipVec = new ArrayRealVector(nSpp);
 		storedPhyloTMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
+//		storedVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp); // debugging coal correction + MSC
 		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedPhyloTMatDouble = new double[nSpp][nSpp];
 	}
@@ -101,7 +103,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		else {
 			MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatDouble, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder); // updates last 3 args
 		}
-		
+
+//		System.out.println("phyloTMatDouble in MVNProcessOneTrait:");
+//		GeneralUtils.display2DArray(phyloTMatDouble);
+
 		// now populating RealMatrix using double[][]
 		for (int i=0; i<nSpp; ++i) {
 			for (int j=0; j<nSpp; ++j) {
@@ -112,6 +117,8 @@ public abstract class MVNProcessOneTrait extends Distribution {
 				}
 			}
 		}
+
+		double a = 1.0;
 	}
 	
 	protected void populateAncNodePhyloTMatrix() {
@@ -174,10 +181,10 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	}
 	
 	// setters
-	protected void setProcessVCVMat(RealMatrix aVCVMat) {
-		vcvMat = aVCVMat;
-		vcvMatLUDecomposition = new LUDecomposition(vcvMat);
-		detVCVMat = vcvMatLUDecomposition.getDeterminant();
+	// protected void setProcessDetVCVMat(RealMatrix aVCVMat) {
+	protected void setProcessLUDec(LUDecomposition aLUDec) {
+		// LUDecomposition vcvMatLUDecomposition = new LUDecomposition(aVCVMat);
+		detVCVMat = aLUDec.getDeterminant();
 	};
 	
 	protected void setProcessInvVCVMat(RealMatrix aInvVCVMat) {
@@ -212,15 +219,17 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	public boolean requiresRecalculation() {
 		dirty = false;
 		
-		if (treeInput.isDirty() || rootEdgeLengthInput.isDirty()) {
+		if (treeInput.isDirty() || rootEdgeLengthInput.isDirty() || (doCoalCorrectionInput.get() && coalCorrectionInput.isDirty())) {
 			dirty = true;
 		}
 		
-		return dirty;
+		return true;
 	}
 	
 	@Override
-	public void store() {	
+	public void store() {
+		System.arraycopy(spNamesInPhyloTMatOrder, 0, storedSpNamesInPhyloTMatOrder, 0, spNamesInPhyloTMatOrder.length);
+
 		for (int i=0; i<nSpp; ++i) {	
 			storedOneTraitDataVector.setEntry(i, oneTraitDataVector.getEntry(i)); // for JIVE
 			storedExpAtTipVec.setEntry(i, expAtTipVec.getEntry(i));
@@ -231,6 +240,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 			for (int j=0; j<nSpp; ++j) {
 				storedPhyloTMat.setEntry(i, j, phyloTMat.getEntry(i, j));
 				storedInvVCVMat.setEntry(i, j, invVCVMat.getEntry(i, j));
+//				storedVCVMat.setEntry(i, j, vcvMat.getEntry(i, j)); // debugging coal correction + MSC
 			}
 		}
 		
@@ -242,6 +252,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		RealMatrix realMatTmp;
 		RealVector realVecTmp;
 		double[][] double2DArrTmp;
+		String[] stringArrTmp;
 		
 		realVecTmp = oneTraitDataVector;
 		oneTraitDataVector = storedOneTraitDataVector;
@@ -254,7 +265,11 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		realMatTmp = phyloTMat;
 		phyloTMat = storedPhyloTMat;
 		storedPhyloTMat = realMatTmp;
-		
+
+//		realMatTmp = vcvMat; // debugging coal correction + MSC
+//		vcvMat = storedVCVMat;
+//		storedVCVMat = realMatTmp;
+
 		realMatTmp = invVCVMat;
 		invVCVMat = storedInvVCVMat;
 		storedInvVCVMat = realMatTmp;
@@ -264,5 +279,9 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		storedPhyloTMatDouble = double2DArrTmp;
 		
 		detVCVMat = storedDetVCVMat;
+
+		stringArrTmp = spNamesInPhyloTMatOrder;
+		spNamesInPhyloTMatOrder = storedSpNamesInPhyloTMatOrder;
+		storedSpNamesInPhyloTMatOrder = stringArrTmp;
 	}
 }

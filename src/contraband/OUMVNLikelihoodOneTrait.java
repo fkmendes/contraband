@@ -12,7 +12,6 @@ import org.apache.commons.math3.linear.RealVector;
 import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.RealParameter;
-import beast.evolution.branchratemodel.BranchRateModel;
 import beast.core.Input.Validate;
 
 public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
@@ -115,7 +114,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		// setting parent members
 		if (updateMean) { setProcessMeanVec(ouMeanVector); }
 		if (updateVCVMat) {
-			setProcessVCVMat(ouVCVMat);
+			setProcessLUDec(ouVCVMatLUD);
 			setProcessInvVCVMat(ouInvVCVMat);
 		}
 		if (updateData) {
