@@ -44,9 +44,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private RealVector expAtTipVec;
 	
 	// VCV matrix
-//	private RealMatrix vcvMat; // debugging coal correction + MSC
 	private RealMatrix invVCVMat;
-	private LUDecomposition vcvMatLUDecomposition;
 	private double detVCVMat;
 	
 	// ASR stuff 
@@ -63,7 +61,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	private RealVector storedExpAtTipVec; // need for integration with JIVE (unsure why...?)
 	private RealMatrix storedPhyloTMat; // needed for tree operators
 	private double[][] storedPhyloTMatDouble; // needed for FBD operators
-	// private RealMatrix storedVCVMat; // debuggin coal correction + MSC
 	private RealMatrix storedInvVCVMat; // (below) needed for morphology parameter operators
 	private double storedDetVCVMat;
 	
@@ -89,7 +86,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		storedOneTraitDataVector = new ArrayRealVector(nSpp);
 		storedExpAtTipVec = new ArrayRealVector(nSpp);
 		storedPhyloTMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
-//		storedVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp); // debugging coal correction + MSC
 		storedInvVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
 		storedPhyloTMatDouble = new double[nSpp][nSpp];
 	}
@@ -103,9 +99,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		else {
 			MVNUtils.populateTMatrix(tree, nodeToRootPaths, phyloTMatDouble, leftLeaves, rightLeaves, spNamesInPhyloTMatOrder); // updates last 3 args
 		}
-
-//		System.out.println("phyloTMatDouble in MVNProcessOneTrait:");
-//		GeneralUtils.display2DArray(phyloTMatDouble);
 
 		// now populating RealMatrix using double[][]
 		for (int i=0; i<nSpp; ++i) {
@@ -181,9 +174,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	}
 	
 	// setters
-	// protected void setProcessDetVCVMat(RealMatrix aVCVMat) {
 	protected void setProcessLUDec(LUDecomposition aLUDec) {
-		// LUDecomposition vcvMatLUDecomposition = new LUDecomposition(aVCVMat);
 		detVCVMat = aLUDec.getDeterminant();
 	};
 	
@@ -240,7 +231,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 			for (int j=0; j<nSpp; ++j) {
 				storedPhyloTMat.setEntry(i, j, phyloTMat.getEntry(i, j));
 				storedInvVCVMat.setEntry(i, j, invVCVMat.getEntry(i, j));
-//				storedVCVMat.setEntry(i, j, vcvMat.getEntry(i, j)); // debugging coal correction + MSC
 			}
 		}
 		
@@ -265,10 +255,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 		realMatTmp = phyloTMat;
 		phyloTMat = storedPhyloTMat;
 		storedPhyloTMat = realMatTmp;
-
-//		realMatTmp = vcvMat; // debugging coal correction + MSC
-//		vcvMat = storedVCVMat;
-//		storedVCVMat = realMatTmp;
 
 		realMatTmp = invVCVMat;
 		invVCVMat = storedInvVCVMat;

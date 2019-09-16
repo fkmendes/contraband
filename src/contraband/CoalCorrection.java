@@ -23,8 +23,8 @@ public class CoalCorrection extends CalculationNode {
 	private double[][] correctedPhyloTMat;
 
 	// stored stuff
-	private double[][] storedCorrectedPhyloTMat;
-	private double[][] storedNLineageDistAtEnd;
+//	private double[][] storedCorrectedPhyloTMat;
+//	private double[][] storedNLineageDistAtEnd;
 
 	@Override
 	public void initAndValidate() {
@@ -34,8 +34,8 @@ public class CoalCorrection extends CalculationNode {
 		nLineageDistAtEnd = new double[nNodes][];
 		correctedPhyloTMat = new double[nSpp][nSpp];
 
-		storedNLineageDistAtEnd = new double[nNodes][];
-		storedCorrectedPhyloTMat = new double[nSpp][nSpp];
+//		storedNLineageDistAtEnd = new double[nNodes][];
+//		storedCorrectedPhyloTMat = new double[nSpp][nSpp];
 
 		if (nNodes != popSizesInput.get().getValues().length) {
 			throw new RuntimeException("The number of population sizes in popSizes is different from the number of nodes in the tree.");
@@ -232,41 +232,41 @@ public class CoalCorrection extends CalculationNode {
 		return correctedPhyloTMat;
 	}
 
-	// caching
-	@Override
-	public boolean requiresRecalculation() {
-		boolean dirty = false;
-
-		if (treeInput.isDirty() || popSizesInput.isDirty()) {
-			dirty = true;
-		}
-
-		return dirty;
-	}
-
-	@Override
-	public void store() {
-		for (int i=0; i < correctedPhyloTMat.length; ++i) {
-			System.arraycopy(correctedPhyloTMat[i], 0 , storedCorrectedPhyloTMat[i], 0, correctedPhyloTMat[i].length);
-
-			double[] nDist = new double[nLineageDistAtEnd[i].length];
-			storedNLineageDistAtEnd[i] = nDist;
-			for (int j=0; j < nLineageDistAtEnd[i].length; ++j) {
-				System.arraycopy(nLineageDistAtEnd[i], 0, storedNLineageDistAtEnd[i], 0, nLineageDistAtEnd[i].length);
-			}
-		}
-	}
-
-	@Override
-	public void restore() {
-		double[][] array2DTmp;
-
-		array2DTmp = correctedPhyloTMat;
-		correctedPhyloTMat = storedCorrectedPhyloTMat;
-		storedCorrectedPhyloTMat = array2DTmp;
-
-		array2DTmp = nLineageDistAtEnd;
-		nLineageDistAtEnd = storedNLineageDistAtEnd;
-		storedNLineageDistAtEnd = array2DTmp;
-	}
+//	// caching
+//	@Override
+//	public boolean requiresRecalculation() {
+//		boolean dirty = false;
+//
+//		if (treeInput.isDirty() || popSizesInput.isDirty()) {
+//			dirty = true;
+//		}
+//
+//		return dirty;
+//	}
+//
+//	@Override
+//	public void store() {
+//		for (int i=0; i < correctedPhyloTMat.length; ++i) {
+//			System.arraycopy(correctedPhyloTMat[i], 0 , storedCorrectedPhyloTMat[i], 0, correctedPhyloTMat[i].length);
+//
+//			double[] nDist = new double[nLineageDistAtEnd[i].length];
+//			storedNLineageDistAtEnd[i] = nDist;
+//			for (int j=0; j < nLineageDistAtEnd[i].length; ++j) {
+//				System.arraycopy(nLineageDistAtEnd[i], 0, storedNLineageDistAtEnd[i], 0, nLineageDistAtEnd[i].length);
+//			}
+//		}
+//	}
+//
+//	@Override
+//	public void restore() {
+//		double[][] array2DTmp;
+//
+//		array2DTmp = correctedPhyloTMat;
+//		correctedPhyloTMat = storedCorrectedPhyloTMat;
+//		storedCorrectedPhyloTMat = array2DTmp;
+//
+//		array2DTmp = nLineageDistAtEnd;
+//		nLineageDistAtEnd = storedNLineageDistAtEnd;
+//		storedNLineageDistAtEnd = array2DTmp;
+//	}
 }

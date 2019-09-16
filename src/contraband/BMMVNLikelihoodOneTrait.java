@@ -28,9 +28,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	// stored stuff
 	private RealVector storedExpAtTipVector;
-	private RealMatrix storedBmVCVMat;
-	private RealMatrix storedBmInvVCVMat;
-	
+
 	@Override
 	public void initAndValidate() {	
 		
@@ -42,9 +40,7 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		oneTraitDataVector = new ArrayRealVector(nSpp);
 
 		storedExpAtTipVector = new ArrayRealVector(nSpp);
-		storedBmVCVMat = new Array2DRowRealMatrix(nSpp, nSpp);
-		storedBmInvVCVMat = new Array2DRowRealMatrix(nSpp, nSpp);
-		
+
 		// this instance vars
 		populateInstanceVars(true, true, true, false);
 		
@@ -176,10 +172,10 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 			storedExpAtTipVector.setEntry(i, bmExpAtTipVector.getEntry(i));
 
 			// debugging coal correction + MSC
-			for (int j=0; j<nSpp; ++j) {
-				storedBmVCVMat.setEntry(i, j, bmVCVMat.getEntry(i, j));
-				storedBmInvVCVMat.setEntry(i, j, bmInvVCVMat.getEntry(i, j));
-			}
+//			for (int j=0; j<nSpp; ++j) {
+//				storedBmVCVMat.setEntry(i, j, bmVCVMat.getEntry(i, j));
+//				storedBmInvVCVMat.setEntry(i, j, bmInvVCVMat.getEntry(i, j));
+//			}
 			// storedBmVCVMat.setRowVector(i, bmVCVMat.getRowVector(i));
 		}
 
@@ -189,19 +185,10 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	public void restore() {
 		RealVector realVecTmp;
-		RealMatrix realMatTmp; // debugging coal correction + MSC
-		
+
 		realVecTmp = bmExpAtTipVector;
 		bmExpAtTipVector = storedExpAtTipVector;
 		storedExpAtTipVector = realVecTmp;
-
-		realMatTmp = bmVCVMat;
-		bmVCVMat = storedBmVCVMat;
-		storedBmVCVMat = realMatTmp;
-
-		realMatTmp = bmInvVCVMat;
-		bmInvVCVMat = storedBmInvVCVMat;
-		storedBmInvVCVMat = realMatTmp;
 
 		super.restore();
 	}
