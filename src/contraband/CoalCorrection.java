@@ -1,17 +1,18 @@
 package contraband;
 
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import beast.core.CalculationNode;
+import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 
+@Description("coalescent correction for continuous trait on tree")
 public class CoalCorrection extends CalculationNode {
 
 	final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
@@ -22,11 +23,29 @@ public class CoalCorrection extends CalculationNode {
 	private double[][] nLineageDistAtEnd; // note that end here means earlier in "regular" (e.g., forward) time
 	private double[][] correctedPhyloTMat;
 	
+	// array with zeros, for setting parts of nLineageDistAtEnd to 0
 	double [] nullarray;
+	
+	// population sizes in Double and double forms
+	Double[] popSizes;
+	double [] popSizesd;
 
-	// stored stuff
-//	private double[][] storedCorrectedPhyloTMat;
-//	private double[][] storedNLineageDistAtEnd;
+	// cache for Gij calculation
+    double [][][] ratesCache;
+    double [][][] cisCache;
+
+    
+	int [][] commonAncestor; // node number of internal node that is common ancestors of pair of leafs 
+	List<Integer> [] commonAncestorList; // memory used to prevent new ArrayList() calls
+
+	// cache for exp(x)
+	static double [] expy, //  cache for exp(0)...exp(1) in steps of 1/N
+		intexp; // cache for exp(-750), exp(-749),...,exp(0)
+	static int N = 1024*1024; // size of cache for exp(0)...exp(1)
+
+
+	// flag to keep track of cache
+    boolean hasDirt = true;
 
 	@Override
 	public void initAndValidate() {
@@ -182,27 +201,9 @@ public class CoalCorrection extends CalculationNode {
 		return expGenealHeight;
 	}
 	
-	/*
-	 * This works for non-ultrametric trees as well, the only thing that matters
-	 * is the height of the MRCA of the two pairs of species, and expected times
-	 * are all relative to the most recent leaf in the tree, which is what we end
-	 * up using in the calculation of variances later
-	 */
-	private double getExpCoalTimePair(Node node1, Node node2, Double[] allPopSizes) {
-//		Set<String> pairOfSpNames = new HashSet<String>();
-//		pairOfSpNames.add(node1.getID());
-//		pairOfSpNames.add(node2.getID());
-//		Node mrcaInSpTree = TreeUtils.getCommonAncestorNode(tree, pairOfSpNames); // mrca of two nodes in species tree
-		
-//		java.util.Arrays.fill(nodesTraversed, false);
-//		Node mrcaInSpTree = getCommonAncestor(node1, node2);
-//		double mrcaHeightSpTree = mrcaInSpTree.getHeight();
-		
-		int k = commonAncestor[node1.getNr()][node2.getNr()];
-//		if (k != mrcaInSpTree.getNr()) {
-//			System.err.println(k + " != " + mrcaInSpTree.getNr());
-//		}
-		Node mrcaInSpTree = tree.getNode(k);
+	
+	private double getExpCoalTimePair(Node mrcaInSpTree, Double[] allPopSizes) {
+		int k = mrcaInSpTree.getNr();
 		double mrcaHeightSpTree = mrcaInSpTree.getHeight();
 		
 		double expCoalTimePair = 0.0;
@@ -219,14 +220,11 @@ public class CoalCorrection extends CalculationNode {
 			if (mrcaInSpTree.isRoot()) {
 				e = popSize;
 				probNoCoal = 0.0;
-			}
-			
-			else {
+			} else {
 				e = (1 - (branchLength * invPopSize + 1) * Math.exp(-branchLength * invPopSize)) / invPopSize;
 				probNoCoal = getHeledGij(2, 2, branchLength, popSize);
 			}
 			
-			// expCoalTimePair += (mrcaHeightSpTree + e) * probCurr * (1-probNoCoal); // original was bugged
 			expCoalTimePair += (mrcaHeightSpTree + e/(1-probNoCoal)) * (1-probNoCoal) * probCurr;
 			
 			if (mrcaInSpTree.isRoot()) {
@@ -243,64 +241,6 @@ public class CoalCorrection extends CalculationNode {
 	
 	
 	
-	
-	private double getExpCoalTimePair(Node node, Double[] allPopSizes) {
-//		Set<String> pairOfSpNames = new HashSet<String>();
-//		pairOfSpNames.add(node1.getID());
-//		pairOfSpNames.add(node2.getID());
-//		Node mrcaInSpTree = TreeUtils.getCommonAncestorNode(tree, pairOfSpNames); // mrca of two nodes in species tree
-		
-//		java.util.Arrays.fill(nodesTraversed, false);
-//		Node mrcaInSpTree = getCommonAncestor(node1, node2);
-//		double mrcaHeightSpTree = mrcaInSpTree.getHeight();
-		
-		int k = node.getNr();
-//		if (k != mrcaInSpTree.getNr()) {
-//			System.err.println(k + " != " + mrcaInSpTree.getNr());
-//		}
-		Node mrcaInSpTree = tree.getNode(k);
-		double mrcaHeightSpTree = mrcaInSpTree.getHeight();
-		
-		double expCoalTimePair = 0.0;
-		double probCurr = 1.0;
-		
-		while(true) {
-			double branchLength = mrcaInSpTree.getLength();
-			double popSize = allPopSizes[mrcaInSpTree.getNr()];
-			double invPopSize = 1.0 / popSize;
-			
-			double e = 0.0;
-			double probNoCoal = 0.0;
-			
-			if (mrcaInSpTree.isRoot()) {
-				e = popSize;
-				probNoCoal = 0.0;
-			}
-			
-			else {
-				e = (1 - (branchLength * invPopSize + 1) * Math.exp(-branchLength * invPopSize)) / invPopSize;
-				probNoCoal = getHeledGij(2, 2, branchLength, popSize);
-			}
-			
-			// expCoalTimePair += (mrcaHeightSpTree + e) * probCurr * (1-probNoCoal); // original was bugged
-			expCoalTimePair += (mrcaHeightSpTree + e/(1-probNoCoal)) * (1-probNoCoal) * probCurr;
-			
-			if (mrcaInSpTree.isRoot()) {
-				break;
-			}
-			
-			probCurr *= probNoCoal;
-			mrcaHeightSpTree += branchLength;
-			mrcaInSpTree = mrcaInSpTree.getParent();
-		}
-		
-		return expCoalTimePair;
-	}
-	
-	
-	
-	Double[] popSizes;
-	double [] popSizesd;
 
 	private void fillPhyloTMatInPlace(String[] spOrderInTMat) {
 		tree = treeInput.get();
@@ -371,117 +311,11 @@ public class CoalCorrection extends CalculationNode {
 		return correctedPhyloTMat;
 	}
 
-//	// caching
-//	@Override
-//	public boolean requiresRecalculation() {
-//		boolean dirty = false;
-//
-//		if (treeInput.isDirty() || popSizesInput.isDirty()) {
-//			dirty = true;
-//		}
-//
-//		return dirty;
-//	}
-//
-//	@Override
-//	public void store() {
-//		for (int i=0; i < correctedPhyloTMat.length; ++i) {
-//			System.arraycopy(correctedPhyloTMat[i], 0 , storedCorrectedPhyloTMat[i], 0, correctedPhyloTMat[i].length);
-//
-//			double[] nDist = new double[nLineageDistAtEnd[i].length];
-//			storedNLineageDistAtEnd[i] = nDist;
-//			for (int j=0; j < nLineageDistAtEnd[i].length; ++j) {
-//				System.arraycopy(nLineageDistAtEnd[i], 0, storedNLineageDistAtEnd[i], 0, nLineageDistAtEnd[i].length);
-//			}
-//		}
-//	}
-//
-//	@Override
-//	public void restore() {
-//		double[][] array2DTmp;
-//
-//		array2DTmp = correctedPhyloTMat;
-//		correctedPhyloTMat = storedCorrectedPhyloTMat;
-//		storedCorrectedPhyloTMat = array2DTmp;
-//
-//		array2DTmp = nLineageDistAtEnd;
-//		nLineageDistAtEnd = storedNLineageDistAtEnd;
-//		storedNLineageDistAtEnd = array2DTmp;
-//	}
-	
 
-//	// used by getCommonAncestor
-//	boolean [] nodesTraversed;
-//	
-//    protected Node getCommonAncestor(Node n1, Node n2) {
-//        // assert n1.getTree() == n2.getTree();
-//        if( ! nodesTraversed[n1.getNr()] ) {
-//            nodesTraversed[n1.getNr()] = true;
-//        }
-//        if( ! nodesTraversed[n2.getNr()] ) {
-//            nodesTraversed[n2.getNr()] = true;
-//        }
-//        while (n1 != n2) {
-//	        double h1 = n1.getHeight();
-//	        double h2 = n2.getHeight();
-//	        if ( h1 < h2 ) {
-//	            n1 = n1.getParent();
-//	            if( ! nodesTraversed[n1.getNr()] ) {
-//	                nodesTraversed[n1.getNr()] = true;
-//	            }
-//	        } else if( h2 < h1 ) {
-//	            n2 = n2.getParent();
-//	            if( ! nodesTraversed[n2.getNr()] ) {
-//	                nodesTraversed[n2.getNr()] = true;
-//	            }
-//	        } else {
-//	            //zero length branches hell
-//	            Node n;
-//	            double b1 = n1.getLength();
-//	            double b2 = n2.getLength();
-//	            if( b1 > 0 ) {
-//	                n = n2;
-//	            } else { // b1 == 0
-//	                if( b2 > 0 ) {
-//	                    n = n1;
-//	                } else {
-//	                    // both 0
-//	                    n = n1;
-//	                    while( n != null && n != n2 ) {
-//	                        n = n.getParent();
-//	                    }
-//	                    if( n == n2 ) {
-//	                        // n2 is an ancestor of n1
-//	                        n = n1;
-//	                    } else {
-//	                        // always safe to advance n2
-//	                        n = n2;
-//	                    }
-//	                }
-//	            }
-//	            if( n == n1 ) {
-//                    n = n1 = n.getParent();
-//                } else {
-//                    n = n2 = n.getParent();
-//                }
-//	            if( ! nodesTraversed[n.getNr()] ) {
-//	                nodesTraversed[n.getNr()] = true;
-//	            } 
-//	        }
-//        }
-//        return n1;
-//    }
-
-
-    double [][][] ratesCache;
-    double [][][] cisCache;
     
 	private double getHeledGij(int nFrom, int nTo, double t, double pop) {
 		if (ratesCache[nFrom][nTo] == null) {
 		
-			// nFrom = n
-			// nTo = k
-			
 			// (n-k) rates, backwards
 			double[] rates = new double[nFrom - nTo + 1];
 			int counter = 0;
@@ -520,7 +354,7 @@ public class CoalCorrection extends CalculationNode {
 		double scale = -t/pop;
 		for (int i=0; i < rates.length; ++i) {
 			//prob += cis[i] * FastMath. exp(rates[i] * scale);
-			prob += cis[i] * exp2(rates[i] * scale);
+			prob += cis[i] * exp(rates[i] * scale);
 		}
 		
 //		System.out.println("Printing from n to k lineages: n=" + nFrom + " k=" + nTo + " d=" + pop + " over all interval, t=" + t);
@@ -528,9 +362,6 @@ public class CoalCorrection extends CalculationNode {
 				
 		return prob;
 	}
-
-	int [][] commonAncestor;
-	List<Integer> [] commonAncestorList;
 
     protected List<Integer> calcCommonAncestors(Node node) {
 		int i = node.getNr();
@@ -554,10 +385,9 @@ public class CoalCorrection extends CalculationNode {
     }
 
 
-	static double [] expy, intexp;
-	static int N = 1024*1024;
 	
-	static private void initExp() {
+    // exponential calculation
+	private void initExp() {
 		expy = new double[N];
 		for (int i = 0; i < N; i++) {
 			expy[i] = Math.exp(-i/(N - 1.0));
@@ -568,8 +398,9 @@ public class CoalCorrection extends CalculationNode {
 		}
 	}
 	
+    // exponential calculation
 	// assumes val < 0
-	private static double exp2(double val) {
+	private double exp(double val) {
 		if (val < -746) {
 			return 0;
 		}
@@ -579,7 +410,8 @@ public class CoalCorrection extends CalculationNode {
 		return expy[i] * intexp[-v];
 	}
 
-    boolean hasDirt = true;
+
+	// caching
 	@Override
 	public boolean requiresRecalculation() {
 		hasDirt = false;
