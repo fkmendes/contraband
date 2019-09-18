@@ -2,7 +2,10 @@ package contraband;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import beast.core.CalculationNode;
 import beast.core.Description;
@@ -23,7 +26,7 @@ public class CoalCorrection extends CalculationNode {
 	private double[][] nLineageDistAtEnd; // note that end here means earlier in "regular" (e.g., forward) time
 	private double[][] correctedPhyloTMat;
 	
-	// array with zeros, for setting parts of nLineageDistAtEnd to 0
+	// array with zeros, for setting parts of nLineageDistAtEnd to 0 
 	double [] nullarray;
 	
 	// population sizes in Double and double forms
@@ -95,6 +98,9 @@ public class CoalCorrection extends CalculationNode {
 	private int fillNLineageDistInPlace(Node aNode) {
 
 		if (aNode.isLeaf()) {
+			if (aNode.isDirectAncestor()) {
+				return 0;
+			}
 			// nLineageDistAtEnd[nodeIdx] = new double[] { 1.0 }; // always start with 1 lineage per species
 			// maxNLineages = 1;
 			// spOrderInTMat[nodeIdx] = aNode.getID();
@@ -135,38 +141,47 @@ public class CoalCorrection extends CalculationNode {
 			maxNLineages = maxNLineagesLeft + maxNLineagesRight;
 			// nLineageDistAtEnd[nodeIdx] = new double[maxNLineages];
 			
+			if (true || isDirty) {
 			double [] left = nLineageDistAtEnd[leftIdx];
 			double [] right = nLineageDistAtEnd[rightIdx];
 			double [] nodel = nLineageDistAtEnd[nodeIdx];
 			
 			// fill nodel with zeros
 			System.arraycopy(nullarray, 0, nodel, 0, maxNLineages);
+			//Arrays.fill(nodel, 0, 0, maxNLineages);
 			
-			for (int nLineages=2; nLineages <= maxNLineages; ++nLineages) {
-				double probOfNLineages = 0.0; // going backward in time, we start at nLineages with this prob
+			if (maxNLineagesLeft == 0) {
 				
-				for (int nLeft=1; nLeft <= maxNLineagesLeft; ++nLeft) {
-					int nRight = nLineages - nLeft;
+			} else if (maxNLineagesRight == 0) {
+			
+			} else {
+				for (int nLineages=2; nLineages <= maxNLineages; ++nLineages) {
+					double probOfNLineages = 0.0; // going backward in time, we start at nLineages with this prob
 					
-					if (nRight > 0 && nRight <= maxNLineagesRight) {
-						// we're iterating over all combinations of nLeft and nRight that comprise values from 2 to maxNLineages
-						probOfNLineages += left[nLeft-1] * right[nRight-1]; // -1 is offset
-					}
-				}
-				
-				// at the root, we stop at just the probOfNLineages at the start, no Tavare coeffient
-				if (aNode.isRoot()) {
-					nodel[nLineages-1] = probOfNLineages;
-				}
-				// at other internal nodes, we have nLineages with probOfNLineages at the start, and then
-				// these nLineages might coalesce to kLineages according to Tavare's coefficients
-				else {
-					for (int kLineages=1; kLineages <= nLineages; ++kLineages) {
+					for (int nLeft=1; nLeft <= maxNLineagesLeft; ++nLeft) {
+						int nRight = nLineages - nLeft;
 						
-						nodel[kLineages-1] += probOfNLineages * 
-								getHeledGij(nLineages, kLineages, aNode.getLength(), thisNodePopSize);
+						if (nRight > 0 && nRight <= maxNLineagesRight) {
+							// we're iterating over all combinations of nLeft and nRight that comprise values from 2 to maxNLineages
+							probOfNLineages += left[nLeft-1] * right[nRight-1]; // -1 is offset
+						}
+					}
+					
+					// at the root, we stop at just the probOfNLineages at the start, no Tavare coeffient
+					if (aNode.isRoot()) {
+						nodel[nLineages-1] = probOfNLineages;
+					}
+					// at other internal nodes, we have nLineages with probOfNLineages at the start, and then
+					// these nLineages might coalesce to kLineages according to Tavare's coefficients
+					else {
+						for (int kLineages=1; kLineages <= nLineages; ++kLineages) {
+							
+							nodel[kLineages-1] += probOfNLineages * 
+									getHeledGij(nLineages, kLineages, aNode.getLength(), thisNodePopSize);
+						}
 					}
 				}
+			}
 			}
 			if (isDirty) {
 				return -maxNLineages;
@@ -274,7 +289,6 @@ public class CoalCorrection extends CalculationNode {
 		}
 		
 		
-		
 		for (int i=0; i<nSpp; ++i) {
 			spOrderInTMat[i] = nodes[i].getID(); // this is where we populate spOrderInTMat, as opposed to in MVNUtils when coalescent correction is disabled
 
@@ -295,7 +309,7 @@ public class CoalCorrection extends CalculationNode {
 				else {
 					// we subtract the expected coalescent times from the total genealogical height (= root height + expGenealHeightAtRoot)
 					// correctedPhyloTMat[i][j] = tree.getRoot().getHeight() + expGenealHeightAtRoot - getExpCoalTimePair(nodes[i], nodes[j], popSizes);
-					correctedPhyloTMat[i][j] = tree.getRoot().getHeight() + expGenealHeightAtRoot - expCoalTimePair[commonAncestor[i][j]];
+					correctedPhyloTMat[i][j] = treeHeight + expGenealHeightAtRoot - expCoalTimePair[commonAncestor[i][j]];
 					correctedPhyloTMat[j][i] = correctedPhyloTMat[i][j]; // assume matrix is symmetric
 				}
 			}
@@ -312,8 +326,26 @@ public class CoalCorrection extends CalculationNode {
 	}
 
 
+	
+	
+	class X {
+		Integer from, to; Double scale;
+		X(int from, int to, double scale) {
+			this.from = from; this.to = to; this.scale = scale;
+		}
+	}
+	
+	Map<X, Double> GijCache = new HashMap<>();
     
 	private double getHeledGij(int nFrom, int nTo, double t, double pop) {
+		double scale = -t/pop;
+//		X key = new X(nFrom, nTo, scale);
+//		if (GijCache.containsKey(key)) {
+//			return GijCache.get(key);
+//		}
+		
+		
+		
 		if (ratesCache[nFrom][nTo] == null) {
 		
 			// (n-k) rates, backwards
@@ -351,7 +383,6 @@ public class CoalCorrection extends CalculationNode {
 		double [] cis = cisCache[nFrom][nTo];
 		
 		double prob = 0.0;
-		double scale = -t/pop;
 		for (int i=0; i < rates.length; ++i) {
 			//prob += cis[i] * FastMath. exp(rates[i] * scale);
 			prob += cis[i] * exp(rates[i] * scale);
@@ -359,7 +390,8 @@ public class CoalCorrection extends CalculationNode {
 		
 //		System.out.println("Printing from n to k lineages: n=" + nFrom + " k=" + nTo + " d=" + pop + " over all interval, t=" + t);
 //		System.out.println("n to k lineages result=" + prob);
-				
+
+//		GijCache.put(key, prob);
 		return prob;
 	}
 
@@ -415,22 +447,22 @@ public class CoalCorrection extends CalculationNode {
 	@Override
 	public boolean requiresRecalculation() {
 		hasDirt = false;
-		hasDirt = true;
+		// hasDirt = true;
 
-	    if (treeInput.get().somethingIsDirty()) {
-	    	return true;
-	    }
 		if (popSizesInput.isDirty()) {
 			hasDirt = true;
 			return true;
 		}
+	    if (treeInput.get().somethingIsDirty()) {
+	    	return true;
+	    }
 		
 		return false;
 	}
 	
 	@Override
 	protected void store() {
-		hasDirt = true;
+		// hasDirt = true;
 		super.store();
 	}
 	
