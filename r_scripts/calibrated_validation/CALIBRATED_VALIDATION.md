@@ -230,9 +230,12 @@ Rscript OUTwoOptFBD_calibrated_postMCMC_plots.R ./ OUMVNLikelihoodTwoOptFBDOneTr
 ```
 
 ## Relaxed clock validation
-### (1) Simulating one trait with a Poisson-distributed number of shifts under BM. Here we fix the tree and the root value (to zero) and sample the BM rate parameter (one rate per branch) as well as the number of shifts (by means of a binary indicator variable; see Drummond and Suchard 2010 for details). In this step we produce .xml files from a template.
 
 We prepare the directory structure by going to "calibrated_validation/RandomLocalClock" and running prepare_dirs.sh from there. But if you cloned from the GitHub repository, you can just run the simulation scripts straight away.
+
+## (1) Simulating under BM
+
+Simulating one trait with a Poisson-distributed (lambda = 5) number of shifts under BM. Here we fix the tree and the root value (to zero) and sample the BM rate parameter (one rate per branch) as well as the number of rate shifts (by means of a binary indicator variable; see Drummond and Suchard 2010 for details). In this step we produce .xml files from a template.
 
 ```
 cd calibrated_validation/RandomLocalClock
@@ -244,5 +247,90 @@ Here we run 200 simulations on the same tree (species_tree.RData), but each tree
 ### (1.1) Plotting the mean posterior of K (number of rate shifts) against the true K value.
 
 ```
-cd calibrated/validation/RandomLocalClock Rscript RLC_calibrated_postMCMC_plots.R 200 BM 5 /path/to/BMRLC_simdata_tr1.RData /path/to/BM/cal_val/logs/ /path/to/BM/output/ 7
+cd calibrated_validation/RandomLocalClock
+Rscript RLC_calibrated_postMCMC_plots.R 200 BM 5 /path/to/BMRLC_simdata_tr1.RData /path/to/BM/cal_val/logs/ /path/to/BM/output/ 7
+```
+
+## (2) Preparing accuracy table for BM
+### (2.1) Producing .txt file that identifies all internal nodes for the tree fixed during simulation
+
+This step requires the R package "phangorn", and will produce file "tr1_all_nodes.txt".
+
+```
+cd calibrated_validation/RandomLocalClock
+Rscript create_node_info_txt_4fixedtree.R species_tree.RData ./
+```
+
+### (2.2) Obtaining node identification accuracy table for BM
+
+We call TreeAnnotator on all 100 .trees files.
+
+```
+cd calibrated_validation/RandomLocalClock
+./call_treeann_on_trees_BM.sh
+```
+
+### (2.3) Grabbing specific node mean posteriors for rate shifts
+
+We call a python script that grabs the mean posteriors for specified nodes. This script will produce .txt files and put them inside BM/cal_val/node_indicator/
+
+```
+cd calibrated_validation/RandomLocalClock
+./grab_node_mean_posts_from_summary_tree_BM.sh
+```
+
+### (2.4) Summarizing posteriors of shift indicators for top nodes
+
+This R script gives us how well we identified where shifts happened, putting it in table into BM/output/shift_posteriors_table.txt
+
+```
+cd calibrated_validation/RandomLocalClock
+Rscript summarize_shift_posteriors_into_table.R BM/cal_val/node_indicator/ BM/output/ BM/output/BMRLC_simdata_tr1.RData
+mv BM/output/shift_posteriors_table.txt BM/output/shift_posteriors_table_BM.txt
+```
+
+## (3) Simulating under OU
+
+Simulating one trait with a Poisson-distributed (lambda = 5) number of shifts under OU. Here we fix the tree and the root value (to zero) and sample the OU rate parameter (one rate for the whole tree), the OU alpha and theta parameters, as well as the number of theta shifts (by means of a binary indicator variable; see Drummond and Suchard 2010 for details). In this step we produce .xml files from a template.
+
+```
+cd calibrated_validation/RandomLocalClock
+Rscript OUShiftRLC_calibrated_simulation.R OUMVNLikelihoodFixedTreeOneTrait_nonultra_template.xml /path/to/OU/cal_val/xmls/ species_tree.RData /path/to/OU/output/ 200 5
+```
+
+### (3.1) Plotting the mean posterior of K (number of rate shifts) against the true K value.
+
+```
+cd calibrated_validation/RandomLocalClock
+Rscript RLC_calibrated_postMCMC_plots.R 200 OU 5 /path/to/OURLC_simdata_tr1.RData /path/to/OU/cal_val/logs/ /path/to/OU/output/ 5
+```
+
+
+## (4) Preparing accuracy table for OU
+### (4.1) Obtaining node identification accuracy table for BM
+
+We call TreeAnnotator on all 100 .trees files.
+
+```
+cd calibrated_validation/RandomLocalClock
+./call_treeann_on_trees_OU.sh
+```
+
+### (4.2) Grabbing specific node mean posteriors for rate shifts
+
+We call a python script that grabs the mean posteriors for specified nodes. This script will produce .txt files and put them inside OU/cal_val/node_indicator/
+
+```
+cd calibrated_validation/RandomLocalClock
+./grab_node_mean_posts_from_summary_tree_OU.sh
+```
+
+### (4.3) Summarizing posteriors of shift indicators for top nodes
+
+This R script gives us how well we identified where shifts happened, putting it in table into OU/output/shift_posteriors_table.txt
+
+```
+cd calibrated_validation/RandomLocalClock
+Rscript summarize_shift_posteriors_into_table.R OU/cal_val/node_indicator/ OU/output/ OU/output/OURLC_simdata_tr1.RData
+mv OU/output/shift_posteriors_table.txt OU/output/shift_posteriors_table_OU.txt
 ```

@@ -3102,7 +3102,7 @@
     <log id="SpeciesTreeLoggerX" spec="starbeast2.SpeciesTreeLogger" speciesTree="@Tree.t:Species"/>
   </logger>
 
-  <logger id="screenlog" logEvery="1" model="@posterior">
+  <logger id="screenlog" logEvery="1000" model="@posterior">
     <log idref="posterior"/>
     <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
     <log idref="likelihood"/>
