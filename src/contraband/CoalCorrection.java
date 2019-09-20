@@ -2,7 +2,6 @@ package contraband;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,21 +36,30 @@ public class CoalCorrection extends CalculationNode {
     double [][][] ratesCache;
     double [][][] cisCache;
 
-    
+    // used for MRCA table computation
 	int [][] commonAncestor; // node number of internal node that is common ancestors of pair of leafs 
-	List<Integer> [] commonAncestorList; // memory used to prevent new ArrayList() calls
+	List<Integer> [] descendantsList; // memory used to prevent new ArrayList() calls
 
 	// cache for exp(x)
 	static double [] expy, //  cache for exp(0)...exp(1) in steps of 1/N
 		intexp; // cache for exp(-750), exp(-749),...,exp(0)
 	static int N = 1024*1024; // size of cache for exp(0)...exp(1)
 
-
-	// flag to keep track of cache
+	// flag to keep track of nLineageDistAtEnd cache
+	// if true, we repopulate nLineageDistAtEnd entirely
     boolean hasDirt = true;
 
+    
+    int [] leftX, rightX, parentP; 
+    double [] scaleX;
+    
 	@Override
 	public void initAndValidate() {
+		/*
+		 * exp(x) is done multiple times and takes most
+		 * of the computation time; so we precompute and cache
+		 * many exp(x) results
+		 */
 		initExp();
 		
 		tree = treeInput.get();
@@ -76,16 +84,22 @@ public class CoalCorrection extends CalculationNode {
 		cisCache = new double [nNodes][nNodes][];
 		
 		commonAncestor = new int[nSpp][nSpp];
-		commonAncestorList = new List[nNodes];
+		descendantsList = new List[nNodes];
+		// every node will have an entry in descendantsList
 		for (int i = 0; i < nNodes; i++) {
-			commonAncestorList[i] = new ArrayList<>();
+			descendantsList[i] = new ArrayList<>();
 		}
 		for (int i = 0; i < nSpp; i++) {
-			commonAncestorList[i].add(i);
+			descendantsList[i].add(i); // we pre-initialize the tip nodes with their own node numbers
 		}		
 //		storedNLineageDistAtEnd = new double[nNodes][];
 //		storedCorrectedPhyloTMat = new double[nSpp][nSpp];
 
+		leftX = new int[nNodes];
+		rightX = new int[nNodes];
+		scaleX = new double[nNodes];
+		parentP = new int[nNodes];
+		
 		if (nNodes != popSizesInput.get().getValues().length) {
 			throw new RuntimeException("The number of population sizes in popSizes is different from the number of nodes in the tree.");
 		}
@@ -96,24 +110,37 @@ public class CoalCorrection extends CalculationNode {
 	 */
 	// private int fillNLineageDistInPlace(Node aNode, Double[] allPopSizes, String[] spOrderInTMat) {
 	private int fillNLineageDistInPlace(Node aNode) {
-
 		if (aNode.isLeaf()) {
+			// if node is sampled ancestor, it contributes no lineages
 			if (aNode.isDirectAncestor()) {
 				return 0;
 			}
+
+			/*
+			 * RB code: This allows caching of nLineageDistAtEnd
+			 *
+			 * Here, we return the number of lineages a leaf contributes (1),
+			 * but also information on the dirtiness of the leaf (the negative sign)
+			 *
+			 * Importantly, we always need to flip the sign of the number of lineages
+			 * coming into an internal node from a leaf
+			 */
+			int parent = aNode.getParent().getNr();
+			if (parentP[aNode.getNr()] != parent) {
+				parentP[aNode.getNr()] = parent;
+				return -1;
+			}
+            return 1;
+
+			// original code
 			// nLineageDistAtEnd[nodeIdx] = new double[] { 1.0 }; // always start with 1 lineage per species
 			// maxNLineages = 1;
 			// spOrderInTMat[nodeIdx] = aNode.getID();
-			if (hasDirt || (aNode.isDirty() != Tree.IS_CLEAN)) {
-                return -1;
-			} else {
-                return 1;
-			}		
 		}
 		
 		// if internal node or root
 		else {
-            boolean isDirty = hasDirt || (aNode.isDirty() != Tree.IS_CLEAN);
+            boolean isDirty = false;
             
             int maxNLineages = 0;
 			int nodeIdx = aNode.getNr();
@@ -121,68 +148,168 @@ public class CoalCorrection extends CalculationNode {
 
 			Node leftChild = aNode.getChild(0);
 			int leftIdx = leftChild.getNr();
+
+			// original code
 			// int maxNLineagesLeft = fillNLineageDistInPlace(leftChild, allPopSizes, spOrderInTMat); // recursion
+
+			// RB code
 			int maxNLineagesLeft = fillNLineageDistInPlace(leftChild); // recursion
-            if (maxNLineagesLeft < 0) {
-                isDirty = true;
-                maxNLineagesLeft = -maxNLineagesLeft;
+			if (maxNLineagesLeft < 0) {
+				/*
+				 * If sign was negative, it means left child has been operated on,
+				 * or is in the path between a node that has been operated on and the root
+				 */
+				isDirty = true;
+                maxNLineagesLeft = -maxNLineagesLeft; // flipping sign back
             }
 
 			Node rightChild = aNode.getChild(1);
 			int rightIdx = rightChild.getNr();
+
+			// original code
 			// int maxNLineagesRight = fillNLineageDistInPlace(rightChild, allPopSizes, spOrderInTMat); // recursion
+
 			int maxNLineagesRight = fillNLineageDistInPlace(rightChild);
             if (maxNLineagesRight < 0) {
-                isDirty = true;
+                // same as above
+            	isDirty = true;
                 maxNLineagesRight = -maxNLineagesRight;
             }
 
-			// folding distributions!
-			maxNLineages = maxNLineagesLeft + maxNLineagesRight;
+			int parent = aNode.isRoot() ? -1 : aNode.getParent().getNr();
+            double scale = -aNode.getLength() / thisNodePopSize;
+            if (parentP[nodeIdx] != parent ||
+            	leftX[nodeIdx] != maxNLineagesLeft || 
+            	rightX[nodeIdx] != maxNLineagesRight || 
+            	scaleX[nodeIdx] != scale) {
+            	isDirty = true;
+            }
+            parentP[nodeIdx] = parent;
+            leftX[nodeIdx] = maxNLineagesLeft; 
+            rightX[nodeIdx] = maxNLineagesRight; 
+            scaleX[nodeIdx] = scale;
+            
+            
+			// folding distributions below
+
+			// original code
 			// nLineageDistAtEnd[nodeIdx] = new double[maxNLineages];
+
+			maxNLineages = maxNLineagesLeft + maxNLineagesRight;
 			
-			if (true || isDirty) {
-			double [] left = nLineageDistAtEnd[leftIdx];
-			double [] right = nLineageDistAtEnd[rightIdx];
-			double [] nodel = nLineageDistAtEnd[nodeIdx];
+			if (true || isDirty) { // ignoring the caching of nLineageDistAtEnd while fixing sampled ancestors part
+				double [] left = nLineageDistAtEnd[leftIdx];
+				double [] right = nLineageDistAtEnd[rightIdx];
+				double [] nodel = nLineageDistAtEnd[nodeIdx];
 			
-			// fill nodel with zeros
-			System.arraycopy(nullarray, 0, nodel, 0, maxNLineages);
-			//Arrays.fill(nodel, 0, 0, maxNLineages);
-			
-			if (maxNLineagesLeft == 0) {
-				
-			} else if (maxNLineagesRight == 0) {
-			
-			} else {
-				for (int nLineages=2; nLineages <= maxNLineages; ++nLineages) {
-					double probOfNLineages = 0.0; // going backward in time, we start at nLineages with this prob
-					
-					for (int nLeft=1; nLeft <= maxNLineagesLeft; ++nLeft) {
-						int nRight = nLineages - nLeft;
-						
-						if (nRight > 0 && nRight <= maxNLineagesRight) {
-							// we're iterating over all combinations of nLeft and nRight that comprise values from 2 to maxNLineages
-							probOfNLineages += left[nLeft-1] * right[nRight-1]; // -1 is offset
+				// fill nodel with zeros
+				System.arraycopy(nullarray, 0, nodel, 0, maxNLineages);
+				// Arrays.fill(nodel, 0, nodel.length-1, 0.0); // ask Remco later if this is good
+
+				// see comments for when neither children was sampled ancestors below
+				// for an explanation of the code
+
+				// if left child was sampled ancestor
+				if (maxNLineagesLeft == 0) {
+					for (int nLineages=1; nLineages <= maxNLineages; ++nLineages) {
+						double probOfNLineages = 0.0;
+
+						for (int nRight=1; nRight <= maxNLineagesRight; ++nRight) {
+							probOfNLineages += right[nRight-1];
 						}
-					}
-					
-					// at the root, we stop at just the probOfNLineages at the start, no Tavare coeffient
-					if (aNode.isRoot()) {
-						nodel[nLineages-1] = probOfNLineages;
-					}
-					// at other internal nodes, we have nLineages with probOfNLineages at the start, and then
-					// these nLineages might coalesce to kLineages according to Tavare's coefficients
-					else {
-						for (int kLineages=1; kLineages <= nLineages; ++kLineages) {
-							
-							nodel[kLineages-1] += probOfNLineages * 
-									getHeledGij(nLineages, kLineages, aNode.getLength(), thisNodePopSize);
+
+						if (aNode.isRoot()) {
+							nodel[nLineages-1] = probOfNLineages;
+						}
+
+						else {
+							for (int kLineages=1; kLineages <= nLineages; ++kLineages) {
+
+								nodel[kLineages-1] += probOfNLineages *
+										getHeledGij(nLineages, kLineages, scale); /*aNode.getLength(), thisNodePopSize);*/
+							}
 						}
 					}
 				}
+
+				// if right child was sampled ancestor
+				else if (maxNLineagesRight == 0) {
+					for (int nLineages=1; nLineages <= maxNLineages; ++nLineages) {
+						double probOfNLineages = 0.0;
+
+						for (int nLeft=1; nLeft <= maxNLineagesRight; ++nLeft) {
+							probOfNLineages += left[nLeft - 1];
+						}
+
+						if (aNode.isRoot()) {
+							nodel[nLineages - 1] = probOfNLineages;
+						}
+
+						else {
+							for (int kLineages = 1; kLineages <= nLineages; ++kLineages) {
+
+								nodel[kLineages - 1] += probOfNLineages * getHeledGij(nLineages, kLineages, scale); /*
+										aNode.getLength(), thisNodePopSize);*/
+							}
+						}
+					}
+				}
+
+				// neither children was sampled ancestor
+				else {
+					/*
+					 * nLineages starts at 2 because if neither children are sampled ancestors,
+					 * we have a minimum of 1 lineage coming from either side (=2)
+					 */
+					for (int nLineages=2; nLineages <= maxNLineages; ++nLineages) {
+						/*
+						 * We are going backward in time
+						 *
+						 * We start at nLineages with probOfNLineages,
+						 * which we initialize at 0.0 below, but update by considering all combinations
+						 * of left and right lineages that summed up to nLineages
+						 */
+						double probOfNLineages = 0.0;
+						for (int nLeft=1; nLeft <= maxNLineagesLeft; ++nLeft) {
+							int nRight = nLineages - nLeft; // this allows us to consider different combinations, as we're always setting nRight to be the reciprocal of nLeft
+						
+							if (nRight > 0 && nRight <= maxNLineagesRight) {
+								/*
+								 * Once we determine a combination of lineages from left and right,
+								 * we now get the probability of that combination, and add it to (the
+								 * running sum) probOfNLineages
+								 */
+								probOfNLineages += left[nLeft-1] * right[nRight-1]; // -1 is offset
+							}
+						}
+					
+						// at the root, we stop at just the probOfNLineages at the start, no Tavare coeffient
+						if (aNode.isRoot()) {
+							nodel[nLineages-1] = probOfNLineages;
+						}
+
+						/*
+						 * At other internal nodes, we have nLineages with probOfNLineages at the start, and then
+						 * these nLineages might coalesce to kLineages according to Tavare's coefficients
+						 */
+						else {
+							for (int kLineages=1; kLineages <= nLineages; ++kLineages) {
+
+								nodel[kLineages-1] += probOfNLineages *
+										getHeledGij(nLineages, kLineages, scale); //aNode.getLength(), thisNodePopSize);
+							}
+						}
+					}
+			 	}
 			}
-			}
+
+			/*
+			 * RB code: as we do for leaf nodes, we return maxNLineages for this internal node,
+			 * but add a negative sign if this internal node was operated on, or if its on a path from
+			 * a node operated on and the root
+			 *
+			 * As before, this sign has to be flipped when we recur back to this internal node's parent
+			 */
 			if (isDirty) {
 				return -maxNLineages;
 			} else {
@@ -205,7 +332,7 @@ public class CoalCorrection extends CalculationNode {
 		
 		double expGenealHeight = 0.0;
 		// double maxNLineages = fillNLineageDistInPlace(root, allPopSizes, spOrderInTMat);
-		double maxNLineages = Math.abs(fillNLineageDistInPlace(root));
+		double maxNLineages = Math.abs(fillNLineageDistInPlace(root)); // call Math.abs because it could have a negative sign coming from the caching of nLineageDistAtEnd
 		hasDirt = false;
 		
 		for (int kLineages=1; kLineages <= maxNLineages; ++kLineages) {
@@ -215,8 +342,7 @@ public class CoalCorrection extends CalculationNode {
 		
 		return expGenealHeight;
 	}
-	
-	
+
 	private double getExpCoalTimePair(Node mrcaInSpTree, Double[] allPopSizes) {
 		int k = mrcaInSpTree.getNr();
 		double mrcaHeightSpTree = mrcaInSpTree.getHeight();
@@ -237,7 +363,7 @@ public class CoalCorrection extends CalculationNode {
 				probNoCoal = 0.0;
 			} else {
 				e = (1 - (branchLength * invPopSize + 1) * Math.exp(-branchLength * invPopSize)) / invPopSize;
-				probNoCoal = getHeledGij(2, 2, branchLength, popSize);
+				probNoCoal = getHeledGij(2, 2, -branchLength/popSize);
 			}
 			
 			expCoalTimePair += (mrcaHeightSpTree + e/(1-probNoCoal)) * (1-probNoCoal) * probCurr;
@@ -320,6 +446,11 @@ public class CoalCorrection extends CalculationNode {
 	 * Getters
 	 */
 	public double[][] getCorrectedPhyloTMat(String[] spOrderInTMat) {
+		
+		if (tree.getRoot().getNr() != tree.getNodeCount()-1) {
+			int h = 3;
+			h++;
+		}
 		fillPhyloTMatInPlace(spOrderInTMat);
 		
 		return correctedPhyloTMat;
@@ -337,8 +468,8 @@ public class CoalCorrection extends CalculationNode {
 	
 	Map<X, Double> GijCache = new HashMap<>();
     
-	private double getHeledGij(int nFrom, int nTo, double t, double pop) {
-		double scale = -t/pop;
+	private double getHeledGij(int nFrom, int nTo, double scale) {
+//		double scale = -t/pop;
 //		X key = new X(nFrom, nTo, scale);
 //		if (GijCache.containsKey(key)) {
 //			return GijCache.get(key);
@@ -395,28 +526,46 @@ public class CoalCorrection extends CalculationNode {
 		return prob;
 	}
 
+	/*
+	 * RB code: When populating phyloTMat pairwise, we need to grab
+	 * the common ancestor of two different nodes several times, which requires
+	 * multiple tree traversals if this is done by a function call
+	 *
+	 * Here, we precompute all the common ancestors for all pairs of species and
+	 * store them in the 2D-int array "commonAncestor". So there is a single tree
+	 * traversal done. We then just query common ancestors from "commonAncestor"
+	 */
     protected List<Integer> calcCommonAncestors(Node node) {
-		int i = node.getNr();
-    	if (node.isLeaf()) {
-    		return commonAncestorList[i];
-    	} else {
-    		List<Integer> left = calcCommonAncestors(node.getLeft());
-    		List<Integer> right = calcCommonAncestors(node.getRight());
+		int nodeIdx = node.getNr();
+
+		if (node.isLeaf()) {
+			// had already been populated in initAndValidate
+			// returns leaf index
+    		return descendantsList[nodeIdx];
+    	}
+
+		// if internal node or root
+    	else {
+    		// first we list all children
+    		List<Integer> left = calcCommonAncestors(node.getLeft()); // recursive step
+    		List<Integer> right = calcCommonAncestors(node.getRight()); // recursive step
+
+			// now we iterate over all pairs of left and right tip children
     		for (int j : left) {
     			for (int k : right) {
-    				commonAncestor[j][k] = i;
-    				commonAncestor[k][j] = i;
+    				// populating the actual MRCA table
+    				commonAncestor[j][k] = nodeIdx; // the current node is the actual MRCA of j and k
+    				commonAncestor[k][j] = nodeIdx; // the current node is the actual MRCA of k and j
     			}
     		}
-    		List<Integer> list = commonAncestorList[i];
-    		list.clear();
-    		list.addAll(left);
-    		list.addAll(right);
-    		return list;
+
+    		List<Integer> myDescList = descendantsList[nodeIdx]; // in initAndValidate we initialized it to an empty ArrayList
+    		myDescList.clear();
+    		myDescList.addAll(left); // adding left descendants
+    		myDescList.addAll(right); // adding right descendants
+    		return myDescList;
     	}
     }
-
-
 	
     // exponential calculation
 	private void initExp() {
@@ -446,7 +595,7 @@ public class CoalCorrection extends CalculationNode {
 	// caching
 	@Override
 	public boolean requiresRecalculation() {
-		hasDirt = false;
+		// hasDirt = false;
 		// hasDirt = true;
 
 		if (popSizesInput.isDirty()) {
