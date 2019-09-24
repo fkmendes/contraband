@@ -95,7 +95,7 @@ res$alpha # 2.707329e-11
 res$theta # theta_0 0.3497826
 res$LogLik # -0.1459122
 
-## (3) OUMVNLikelihoodOneTraitTest4
+## (3) OUMVNLikelihoodOneTraitTest3
 
 ## simulating fossilized birth-death tree
 set.seed(123)
@@ -115,3 +115,19 @@ res$alpha # 0.7972125
 res$theta # theta_0     1.960019e-15
           # theta_1     1.596677e-01
 res$LogLik # 25.41701
+
+## (4) OUMVNLikelihoodOneTraitTest4 (small non-ultrametric tree with sampled ancestor and fossil tip)
+
+tr <- read.tree(text="(((sp1:2.0,sp2:1.0):1.0,sp3:0.0):1.0,sp4:3.0);")
+tr <- paintSubTree(tr, node=6, state=2, stem=TRUE)
+
+set.seed(123)
+dat <- mvSIM(tr, model="OUM", param=list(theta=c(0, 0.2, 0.4), sigma=0.1, alpha=1, root=TRUE))
+
+res <- mvOU(tr, dat, model="OUM", param=list(vcv="fixedRoot", root=TRUE))
+res$sigma # 1.11256e-08
+res$alpha # 0.5564338
+res$theta # theta_0 0.87579783
+          # theta_1 0.05779027
+          # theta_2 0.19382641
+res$LogLik # 31.19386

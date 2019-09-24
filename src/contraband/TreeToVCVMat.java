@@ -136,12 +136,12 @@ public class TreeToVCVMat extends CalculationNode {
 //		return true;
 //	}
 	
-	private void populateColorValueMat() {	
+	private void populateColorValueMat() {
 		Tree tree = treeInput.get();
 		
 //		System.out.println(tree.toString());
 //		for (Node n: tree.getNodesAsArray()) {
-//			System.out.println(n.getID() + " idx=" + n.getNr() + " length=" + n.getLength() + " colorIdx=" + colorAssignments[n.getNr()]);
+//			System.out.println(n.getID() + " idx=" + n.getNr() + " length=" + n.getLength()); // + " colorIdx=" + colorAssignments[n.getNr()]);
 //		}
 		
 		fillNodeColorValuesOneTrait(tree.getRoot(), spNamesInASCIIBeticalOrTaxonSetOrder);
@@ -162,20 +162,22 @@ public class TreeToVCVMat extends CalculationNode {
 		int nodeIdx = aNode.getNr(); 
 		
 		if (aNode.isLeaf()) {		
-			// System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // uncomment to see index of all leaves 
+			System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // uncomment to see index of all leaves
 			spColorValuesMat[nodeIdx][nodeIdx] = nodeWeightedColorValues[nodeIdx]; // populating diagonal entries
 			spOrderInTMat[nodeIdx] = aNode.getID();
 			return;
 		}
 		
-		if (aNode.isRoot()) { nodeWeightedColorValues[nodeIdx] = 0.0; }
+		if (aNode.isRoot()) {
+			nodeWeightedColorValues[nodeIdx] = 0.0;
+		}
 		
 		// uncomment to see index of internal nodes and which internal node is which
-//		System.out.println("Internal node, nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // for debugging;
-//		List<Node> leafNodes = aNode.getAllLeafNodes();
-//		for (Node node: leafNodes) {
-//			System.out.println("Daughter leaf: " + node.getID());
-//		}
+		System.out.println("Internal node, nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // for debugging;
+		List<Node> leafNodes = aNode.getAllLeafNodes();
+		for (Node node: leafNodes) {
+			System.out.println("Daughter leaf: " + node.getID());
+		}
 		
 		Node left = aNode.getChild(0);
 		int leftIdx = left.getNr();

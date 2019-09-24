@@ -178,41 +178,46 @@ public class OUUtils {
 	  * Precludes needing to get the number of optima from clock model (since some clock models
 	  * do not have discrete rate categories)
 	  */
-	 public static void populateOUMeanVector(double alpha, double rootValue, Node aNode, Node rootNode, List<Node> allLeafNodes, BranchRateModel clock, RealVector ouMeanVector, boolean useRootMetaData) {		 		 
+	 public static void populateOUMeanVector(double alpha, double rootValue, Node aNode, Node rootNode, List<Node> allLeafNodes, BranchRateModel clock, RealVector ouMeanVector, boolean useRootMetaData, double avgSoFar) {
 		 /*
 		  * This is a faster, recursive solution, but it only works for ultrametric trees
 		  * 
 		  * It's tricky to generalize this to any tree because the height of a node in BEAST is 
-		  * always relative to the longest path descending from it
+		  * always relative to the longest path descending from it, and Hansen's formulation requires
+		  * not a branch length(s)=(height1 - height2), but e^{-alpha * height1} - e^{-alpha * height2}.
+		  * So note here that for a fossil tip A and a normal tip B below internal node X, X.getHeight()
+		  * would have to be larger for B than for A.
 		  * 
 		  * If a tree is non-ultrametric, some of the terms below will be larger than they should be for
 		  * extinct tips; e.g., rootNode.getHeight() is a constant, but for extinct tip paths, this
 		  * height should actually be smaller (it should be the length going from the root down to that tip
 		  * but you can't know that ahead of time during the recursion...)
 		  * 
-		  * Add double avgSoFar to parameter list if you want to see it working
+		  * Add double avgSoFar to the end parameter list if you want to try to make it work.
 		  * 
 		  */
 //		 double runningAvg = avgSoFar;
+//
 //		 if (!aNode.isRoot()) {
-//			 runningAvg += (Math.exp(-alpha * aNode.getHeight()) - Math.exp(-alpha * aNode.getParent().getHeight())) * clock.getRateForBranch(aNode);
+//			 System.out.println("parent height=" + aNode.getParent().getHeight());
+//			 System.out.println("child height=" + aNode.getHeight());
+//			 runningAvg += (Math.exp(-alpha * aNode.getParent().getHeight()) - Math.exp(-alpha * aNode.getHeight())) * clock.getRateForBranch(aNode);
 //		 }
-//		
-//		 for (Node descNode: aNode.getChildren()) {
-//			 populateOUMeanVector(alpha, rootValue, descNode, rootNode, clock, runningAvg, ouMeanVector, useRootMetaData);
+//
+//		 for (Node descNode : aNode.getChildren()) {
+//			 populateOUMeanVector(alpha, rootValue, descNode, rootNode, allLeafNodes, clock, ouMeanVector, useRootMetaData, runningAvg);
 //		 }
-//			 
+//
 //		 if (aNode.isLeaf()) {
-//			 if (useRootMetaData) {
-//				 runningAvg += (Math.exp(-alpha * (rootNode.getHeight() - aNode.getHeight()))) * rootValue;
-//			 }
-//				 
-//			 ouMeanVector.setEntry(aNode.getNr(), runningAvg);	 
-//		 }
-		
+//			if (useRootMetaData) {
+//				runningAvg += (Math.exp(-alpha * (rootNode.getHeight() - aNode.getHeight()))) * rootValue;
+//			}
+//
+//			ouMeanVector.setEntry(aNode.getNr(), runningAvg);
+//		}
+
 		 /*
-		  * This implementation below follows exactly
-		  * the explanation in Butler and King's paper.
+		  * This implementation below follows Eq. 3 in Hansen 1997.
 		  * 
 		  * But note that it traverses the tree n times, where
 		  * n is the number of species. It is slower than the
@@ -220,27 +225,31 @@ public class OUUtils {
 		  * and non-ultrametric trees
 		  * 
 		  */
-		for (Node sp: allLeafNodes) {	
+		for (Node sp: allLeafNodes) {
 			 double cellValue = 0.0;
 			 int spNr = sp.getNr();	// Will specify the row index to set in the mean vector
 
-			 // Adding the root chunk in the column of the eldest regime
 			 double currentSpHeight = sp.getHeight();
+			 double tAi = rootNode.getHeight() - currentSpHeight; // tAi is length of path for sp (not simply height of tree)
 			 if (useRootMetaData) {
-				 cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight)) * rootValue; // use y_0
+				 cellValue = Math.exp(-alpha * tAi) * rootValue; // use y_0
 			 }
 			 else {
-				 cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight)) * clock.getRateForBranch(rootNode); // use theta_0
+				 cellValue = Math.exp(-alpha * tAi) * clock.getRateForBranch(rootNode); // use theta_0
 			 }
-				
-			 // Now going from tip to root, for all tips
-			 while(!sp.isRoot()) {
-				 cellValue += (Math.exp(-alpha * (sp.getHeight() - currentSpHeight)) - Math.exp(-alpha * (sp.getParent().getHeight() - currentSpHeight))) * clock.getRateForBranch(sp);
-				 sp = sp.getParent();
+
+			// Now going from tip to root, for all tips
+			while(!sp.isRoot()) {
+				double tE = sp.getHeight() - currentSpHeight;
+				double tB = sp.getParent().getHeight() - currentSpHeight; // tB > tE
+				cellValue += (Math.exp(-alpha * tE) - Math.exp(-alpha * tB)) * clock.getRateForBranch(sp); // working
+				sp = sp.getParent();
 			 }
-			 
+
 			 ouMeanVector.setEntry(spNr, cellValue);
 		 }
+
+		// GeneralUtils.displayRealVector(ouMeanVector);
 	 }
 	 
 	 /*

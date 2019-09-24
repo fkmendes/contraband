@@ -32,7 +32,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	// basic info
     // private List<Node> allLeafNodes;
 	private int nSpp; // takes some time to compute, so part of state!
-	//private int nOptima; // used in old W mat parameterization (could remove from state technically, but am calling it a few times, so will stay here!)
+	private int nOptima; // used in old W mat parameterization (could remove from state technically, but am calling it a few times, so will stay here!)
 	
 	/* parameters below */
 	// private Double alpha; // could remove from state technically, but am calling it a few times, so will stay here!
@@ -41,6 +41,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	// mean vector
 	private TreeToVCVMat optimumManager;
+	// private RealVector thetaVector; // needed only for old parameterization with W matrix
 	// private ColorManager optimumManager;
 	// private RealMatrix wMat; // needed only for old parameterization with W matrix
 	
@@ -73,14 +74,14 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		// old parameterization using W mat
 		// initializing stuff whose size won't change for now
 		// nOptima = optimumManager.getNColors();
-		// if (useRootMetaData) {
-		//	 thetaVector = new ArrayRealVector(nOptima+1);
-		//	 wMat = new Array2DRowRealMatrix(nSpp, (nOptima+1));
-		// }
-		// else {
-		//	 thetaVector = new ArrayRealVector(nOptima);
-		//	 wMat = new Array2DRowRealMatrix(nSpp, nOptima);
-		// }
+//		 if (useRootMetaData) {
+//			 thetaVector = new ArrayRealVector(nOptima+1);
+//			 wMat = new Array2DRowRealMatrix(nSpp, (nOptima+1));
+//		 }
+//		 else {
+//			 thetaVector = new ArrayRealVector(nOptima);
+//			 wMat = new Array2DRowRealMatrix(nSpp, nOptima);
+//		 }
 		 
 		oneTraitDataVector = new ArrayRealVector(nSpp);
 		ouMeanVector = new ArrayRealVector(nSpp);
@@ -135,35 +136,42 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		
 		double alpha = alphaInput.get().getValue().doubleValue();
 		
-		OUUtils.populateOUMeanVector(alpha, rootValue, getRootNode(), getRootNode(), getAllLeafNodes(), optimumManager.getClockModel(), ouMeanVector, useRootMetaData);
+		OUUtils.populateOUMeanVector(alpha, rootValue, getRootNode(), getRootNode(), getAllLeafNodes(), optimumManager.getClockModel(), ouMeanVector, useRootMetaData, 0.0);
 		// System.out.println("Mean vector:");
 		// GeneralUtils.displayRealVector(ouMeanVector);	
+
+		// testing some values by hand
+		// RealVector thetaVector = new ArrayRealVector(3);
+		// RealMatrix wMat = new Array2DRowRealMatrix(4, 3);
+		// Integer[] thetaAssignments = new Integer[] { 1, 1, 1, 0, 1, 1, 0 };
 
 		/*
 		 * Old implementation with W matrix
 		 */
-//			int i = 0;
-//			if (useRootMetaData) {
-//				thetaVector.setEntry(0, rootValue);
-//				i++;
-//			}
-//			for (Double aTheta: thetas) {
-//				thetaVector.setEntry(i, aTheta);
-//				i++;
-//			} 
+//		int i = 0;
+//		if (useRootMetaData) {
+//			thetaVector.setEntry(0, rootValue);
+//			i++;
+//		}
 //
-//			resetRealMatrix(wMat);
-//			OUUtils.computeWMatOneTrait(thetaAssignments, getRootNode(), getAllLeafNodes(), nSpp, nOptima, alpha, wMat, useRootMetaData);
-//			
-//			System.out.println("W matrix:");
-//			GeneralUtils.displayRealMatrix(wMat);
-//			System.out.println("Theta vector:");
-//			GeneralUtils.displayRealVector(thetaVector);
-//			System.out.println("Mean vector:");
-//			GeneralUtils.displayRealVector(wMat.operate(thetaVector));
-//			
-//			ouMeanVector = wMat.operate(thetaVector);	
-	
+//		Double[] thetas = new Double[] { 0.05779027, 0.19382641 };
+//
+//		for (Double aTheta: thetas) {
+//			thetaVector.setEntry(i, aTheta);
+//			i++;
+//		}
+//
+//		resetRealMatrix(wMat);
+//		OUUtils.computeWMatOneTrait(thetaAssignments, getRootNode(), getAllLeafNodes(), nSpp, nOptima, alpha, wMat, useRootMetaData);
+//
+//		ouMeanVector = wMat.operate(thetaVector);
+//
+//		System.out.println("W matrix:");
+//		GeneralUtils.displayRealMatrix(wMat);
+//		System.out.println("Theta vector:");
+//		GeneralUtils.displayRealVector(thetaVector);
+//		System.out.println("Mean vector:");
+//		GeneralUtils.displayRealVector(ouMeanVector);
 	}
 	
 	@Override

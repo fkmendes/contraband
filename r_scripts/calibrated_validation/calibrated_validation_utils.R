@@ -25,7 +25,7 @@ write.shell.script <- function(shell.scripts.path, sim.idx, time.needed, job.pre
         "#SBATCH -D ./",
         paste0("#SBATCH -o ", job.prefix, sim.idx, "_out.txt"),
         paste0("#SBATCH -e ", job.prefix, sim.idx, "_err.txt"),
-        paste0("\nsrun java -jar ", jar.path, " ", xml.file.name),
+        paste0("\nsrun java -jar ", jar.path, " -seed 555 ", xml.file.name),
         sep="\n")
         )
 }
@@ -37,8 +37,8 @@ get.plot <- function(x.name, y.name, x.min, x.max, y.min, y.max, x.lab, prior.me
     reg.df = data.frame(cbind(x,y,lower,upper,plot.hdi))
 
     pl = ggplot() +
-        geom_linerange(data=reg.df[!plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="lightblue", size=1.1, alpha=.4) +
-        geom_linerange(data=reg.df[plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="red", alpha=.4, size=1.25) +
+        geom_linerange(data=reg.df[!plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="lightblue", size=1.1, alpha=.5) +
+        geom_linerange(data=reg.df[plot.hdi,], mapping=aes(x=x, ymax=upper, ymin=lower), color="red", alpha=.3, size=1) +
         geom_point(mapping=aes(x=x, y=y), shape=20, size=.75) +
         coord_cartesian(ylim=c(y.min, y.max)) +
         xlab(x.lab) + ylab("Posterior mean") +

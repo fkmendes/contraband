@@ -115,7 +115,7 @@
     <operator id="FBDdeathRateScaler" spec="ScaleOperator" parameter="@FBDdeathRate" scaleFactor="0.75" weight="10.0"/>
     <operator id="FBDsamplingRateScaler" spec="ScaleOperator" parameter="@FBDsamplingRate" scaleFactor="0.75" weight="10.0"/>
     <operator id="FBDLeafToSA" spec="LeafToSampledAncestorJump" tree="@TheTree" weight="10.0"/>
-    <operator id="FBDSAWilsonBalding" spec="SAWilsonBalding" tree="@TheTree" weight="10.0"/>
+    <!-- <operator id="FBDSAWilsonBalding" spec="SAWilsonBalding" tree="@TheTree" weight="10.0"/> -->
     <operator id="FBDSAWide" spec="SAExchange" isNarrow="false" tree="@TheTree" weight="10.0"/>
     <operator id="FBDSANarrow" spec="SAExchange" tree="@TheTree" weight="10.0"/>
     <operator id="FBDSAUniformOperator" spec="SAUniform" tree="@TheTree" weight="20.0"/>
@@ -131,9 +131,13 @@
     </operator>
 	
     <operator id="SigmaSqScaler" spec="ScaleOperator" parameter="@OUSigmaSq" scaleFactor="0.75" weight="3.0"/>
-    <operator id="RootValueScaler" spec="RealRandomWalkOperator" parameter="@OURootValue" windowSize="10.0" weight="3.0"/>
+    <operator id="RootValueScaler" spec="RealRandomWalkOperator" parameter="@OURootValue" windowSize="1.0" weight="3.0"/>
     <operator id="AlphaScaler" spec="ScaleOperator" parameter="@OUAlpha" scaleFactor="0.75" weight="3.0"/>
- 	
+    <operator id="UpDown" spec="UpDownOperator" scaleFactor="0.75" weight="6.0">
+      <up idref="OUSigmaSq"/>
+      <down idref="TheTree"/>
+    </operator>
+    
     <logger id="tracelog" fileName="[FileNameHere].log" logEvery="60000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
