@@ -120,7 +120,7 @@ public class OUUtils {
 	 * 
 	 * W_{ij} = e^{-\alpha T}\sum_{\gamma =1}^{\kappa (i)}\beta_{ik}^{\gamma}(e^{\alpha t_{i}^{\gamma}}-e^{\alpha t_{i}^{\gamma -1}})
 	 * 
-	 * where T is the length of the time the regime applies
+	 * where T is the length of the path between tip and root,
 	 * \beta_{ik} is the indicator value of the k-th regime (out of r), i-th species (out of N) (there is one \beta_{ik} per branch)
 	 * \gamma is a discrete variable that represents branches on a path (\gamma - 1 is the parent of \gamma), with \gammas going from
 	 * 1 to the total number of branches on a path, \kappa{i}.
@@ -138,8 +138,8 @@ public class OUUtils {
 	 * 
 	 * \text{Cov}(Y_i,Y_j)=\int_{0}^{C_{ij}}e^{-\mathbf{A}(C_{ii}-\nu)}\mathbf{R}e^{-\mathbf{A}^{T}(C_{jj}-\nu)}\text{d}\nu
 	 * 
-	 * In this less general version, we ignore the root optimum metadata, and assume theta_0 is the same as one of the other thetas
-	 * (one of the optima). We should use this with ultrametric trees.
+	 * In this less general version, we ignore the root value (y_0 = \theta_0), and assume it is the same as one of the other thetas
+	 * (in this implementation, we assume it's the same as the first optimum regime). We should use this with ultrametric trees.
 	 */
 	 public static void computeWMatOneTrait(Integer[] allNodeRegimes, Node rootNode, List<Node> allLeafNodes, int n, int r, double alpha, RealMatrix wMat, boolean useRootMetaData) {		
 		 int rootIndexOffset;
@@ -151,13 +151,13 @@ public class OUUtils {
 		 }
 		 else {
 			 rootIndexOffset = 0; // column dimension of WMat must be r	
-			 rootRegimeIdx = 0; // not getting metadata, and using the color that has index 0
+			 rootRegimeIdx = 0; // not getting metadata, and using the regime that has index 0 (first one)
 		 }
 		 
 		 for (Node sp: allLeafNodes) {	
 			 int spNr = sp.getNr();	// Will specify the row index 
 
-			 // Adding the root chunk in the column of the eldest regime
+			 // Adding the root chunk in the column of the first optimum regime
 			 double currentSpHeight = sp.getHeight();
 			 double cellValue = Math.exp(-alpha * (rootNode.getHeight() - currentSpHeight));	
 			 wMat.addToEntry(spNr, rootRegimeIdx, cellValue);
@@ -217,13 +217,33 @@ public class OUUtils {
 //		}
 
 		 /*
-		  * This implementation below follows Eq. 3 in Hansen 1997.
-		  * 
-		  * But note that it traverses the tree n times, where
-		  * n is the number of species. It is slower than the
-		  * recursive solution above, but works for both ultrametric
-		  * and non-ultrametric trees
-		  * 
+		  * This implementation below follows the notation in Eq. 3 in Hansen 1997.
+		  * This is equivalent to Eq. A4 in Butler and King 2004 (there, T = Hansen's tAi).
+		  * In Butler & King, if you do the product of the e^{-\alpha T} inside the summation with what's
+		  * inside the parenthesis, you end up with:
+		  *
+		  * (e^{-\alpha * (T - t_i^\gamma)} - e^{-\alpha * (T - t_i^{\gamma -1}})).
+		  *
+		  * This difference is in fact the same thing as:
+		  *
+		  *  (e^{-\alpha * tE) - e^{-alpha * tB}).
+		  *
+		  * Note that in this implementation, I traverse the tree n times, where n is the number of species.
+		  * It is slower than the recursive solution above, but works for both ultrametric and non-ultrametric trees
+		  *
+		  * There's another difference between this implementation and the W * \theta in computeWMatOneTrait;
+		  * note that in the latter, \theta_0 = y_0 (there is no independent parameter y_0; y_0 is just the last element in
+		  * \theta). We then assign the first optimum regime to the root (i.e., y_0 = \theta_1) when
+		  * useRootMetaData = false (i.e., \theta_0 is not used).
+		  *
+		  * But here, we have a bit more flexibility, and allow the root value y_0 to be its own parameter,
+		  * as well as having a separate \theta_0. If useRootMetaData=true, we use y_0 and ignore \theta_0.
+		  * Otherwise, \theta_0 can be whatever regime the clock model decides. In the random local clock, \theta_0
+		  * propagates down the tree, so it's effectively the "eldest regime" among K regimes. In the RateCategoryClockModel,
+		  * \theta_0 will be assigned one of the regimes, not necessarily the first one as in computeWMatOneTrait.
+		  * But most importantly, \theta_0 won't be a unique regime in itself (which would be the case of
+		  * useRootMetaData=true).
+		  *
 		  */
 		for (Node sp: allLeafNodes) {
 			 double cellValue = 0.0;
@@ -235,7 +255,7 @@ public class OUUtils {
 				 cellValue = Math.exp(-alpha * tAi) * rootValue; // use y_0
 			 }
 			 else {
-				 cellValue = Math.exp(-alpha * tAi) * clock.getRateForBranch(rootNode); // use theta_0
+				 cellValue = Math.exp(-alpha * tAi) * clock.getRateForBranch(rootNode); // use the specified theta for the root
 			 }
 
 			// Now going from tip to root, for all tips
