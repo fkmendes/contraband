@@ -49,6 +49,19 @@ public class CoalCorrection extends CalculationNode {
 	// if true, we repopulate nLineageDistAtEnd entirely
     boolean hasDirt = true;
 
+    // See with RB later
+    int [] leftX, rightX, parentIdxs;
+    double [] allBrLengthsInCU;
+
+    // stored stuff (none of these seem to solve the issue)
+	double[] storedPopSizesD;
+	double[][] storedCorrectedPhyloMat;
+	int[][] storedCommonAncestor;
+	int[] storedLeftX;
+	int[] storedRightX;
+	int[] storedParentIdxs;
+	double[] storedAllBrLengthsInCU;
+
 	@Override
 	public void initAndValidate() {
 		/*
@@ -91,9 +104,23 @@ public class CoalCorrection extends CalculationNode {
 //		storedNLineageDistAtEnd = new double[nNodes][];
 //		storedCorrectedPhyloTMat = new double[nSpp][nSpp];
 
+		leftX = new int[nNodes];
+		rightX = new int[nNodes];
+		allBrLengthsInCU = new double[nNodes]; // CU = coalescent units
+		parentIdxs = new int[nNodes];
+		
 		if (nNodes != popSizesInput.get().getValues().length) {
 			throw new RuntimeException("The number of population sizes in popSizes is different from the number of nodes in the tree.");
 		}
+
+		// stored stuff
+		storedPopSizesD = new double[popSizes.length];
+		storedCorrectedPhyloMat = new double[nSpp][nSpp];
+		storedCommonAncestor = new int[nSpp][nSpp];
+		storedLeftX = new int[nNodes];
+		storedRightX = new int[nNodes];
+		storedParentIdxs = new int[nNodes];
+		storedAllBrLengthsInCU = new double[nNodes];
 	}
 
 	/*
@@ -116,11 +143,13 @@ public class CoalCorrection extends CalculationNode {
 			 * Importantly, we always need to flip the sign of the number of lineages
 			 * coming into an internal node from a leaf
 			 */
-			if (hasDirt || (aNode.isDirty() != Tree.IS_CLEAN)) {
-                return -1;
-			} else {
-                return 1;
+			int parentIdx = aNode.getParent().getNr();
+			// if my parent changed (if I was moved to a new place)
+			if (parentIdxs[aNode.getNr()] != parentIdx) {
+				parentIdxs[aNode.getNr()] = parentIdx;
+				return -1; // ask RB how this works for SA's, as those contribute no lineages
 			}
+            return 1;
 
 			// original code
 			// nLineageDistAtEnd[nodeIdx] = new double[] { 1.0 }; // always start with 1 lineage per species
@@ -130,7 +159,7 @@ public class CoalCorrection extends CalculationNode {
 		
 		// if internal node or root
 		else {
-            boolean isDirty = hasDirt || (aNode.isDirty() != Tree.IS_CLEAN);
+            boolean isDirty = false;
             
             int maxNLineages = 0;
 			int nodeIdx = aNode.getNr();
@@ -166,13 +195,23 @@ public class CoalCorrection extends CalculationNode {
                 maxNLineagesRight = -maxNLineagesRight;
             }
 
-			// folding distributions below
+			int parent = aNode.isRoot() ? -1 : aNode.getParent().getNr();
+            double brLengthCU = -aNode.getLength() / thisNodePopSize;
+            if (parentIdxs[nodeIdx] != parent ||
+            	leftX[nodeIdx] != maxNLineagesLeft || 
+            	rightX[nodeIdx] != maxNLineagesRight || 
+            	allBrLengthsInCU[nodeIdx] != brLengthCU) {
+            	isDirty = true;
+            }
+            parentIdxs[nodeIdx] = parent;
+            leftX[nodeIdx] = maxNLineagesLeft; 
+            rightX[nodeIdx] = maxNLineagesRight; 
+            allBrLengthsInCU[nodeIdx] = brLengthCU;
 
+			// folding distributions below
 			// original code
 			// nLineageDistAtEnd[nodeIdx] = new double[maxNLineages];
-
 			maxNLineages = maxNLineagesLeft + maxNLineagesRight;
-			
 			if (true || isDirty) { // ignoring the caching of nLineageDistAtEnd while fixing sampled ancestors part
 				double [] left = nLineageDistAtEnd[leftIdx];
 				double [] right = nLineageDistAtEnd[rightIdx];
@@ -200,9 +239,8 @@ public class CoalCorrection extends CalculationNode {
 
 						else {
 							for (int kLineages=1; kLineages <= nLineages; ++kLineages) {
-
 								nodel[kLineages-1] += probOfNLineages *
-										getHeledGij(nLineages, kLineages, aNode.getLength(), thisNodePopSize);
+										getHeledGij(nLineages, kLineages, brLengthCU);
 							}
 						}
 					}
@@ -223,9 +261,8 @@ public class CoalCorrection extends CalculationNode {
 
 						else {
 							for (int kLineages = 1; kLineages <= nLineages; ++kLineages) {
-
-								nodel[kLineages - 1] += probOfNLineages * getHeledGij(nLineages, kLineages,
-										aNode.getLength(), thisNodePopSize);
+								nodel[kLineages - 1] += probOfNLineages *
+										getHeledGij(nLineages, kLineages, brLengthCU);
 							}
 						}
 					}
@@ -272,7 +309,7 @@ public class CoalCorrection extends CalculationNode {
 							for (int kLineages=1; kLineages <= nLineages; ++kLineages) {
 
 								nodel[kLineages-1] += probOfNLineages *
-										getHeledGij(nLineages, kLineages, aNode.getLength(), thisNodePopSize);
+										getHeledGij(nLineages, kLineages, brLengthCU);
 							}
 						}
 					}
@@ -339,7 +376,7 @@ public class CoalCorrection extends CalculationNode {
 				probNoCoal = 0.0;
 			} else {
 				e = (1 - (branchLength * invPopSize + 1) * Math.exp(-branchLength * invPopSize)) / invPopSize;
-				probNoCoal = getHeledGij(2, 2, branchLength, popSize);
+				probNoCoal = getHeledGij(2, 2, -branchLength/popSize);
 			}
 			
 			expCoalTimePair += (mrcaHeightSpTree + e/(1-probNoCoal)) * (1-probNoCoal) * probCurr;
@@ -355,9 +392,6 @@ public class CoalCorrection extends CalculationNode {
 		
 		return expCoalTimePair;
 	}
-	
-	
-	
 
 	private void fillPhyloTMatInPlace(String[] spOrderInTMat) {
 		tree = treeInput.get();
@@ -422,6 +456,11 @@ public class CoalCorrection extends CalculationNode {
 	 * Getters
 	 */
 	public double[][] getCorrectedPhyloTMat(String[] spOrderInTMat) {
+		
+		if (tree.getRoot().getNr() != tree.getNodeCount()-1) {
+			int h = 3;
+			h++;
+		}
 		fillPhyloTMatInPlace(spOrderInTMat);
 		
 		return correctedPhyloTMat;
@@ -439,8 +478,8 @@ public class CoalCorrection extends CalculationNode {
 	
 	Map<X, Double> GijCache = new HashMap<>();
     
-	private double getHeledGij(int nFrom, int nTo, double t, double pop) {
-		double scale = -t/pop;
+	private double getHeledGij(int nFrom, int nTo, double scale) {
+//		double scale = -t/pop;
 //		X key = new X(nFrom, nTo, scale);
 //		if (GijCache.containsKey(key)) {
 //			return GijCache.get(key);
@@ -566,7 +605,7 @@ public class CoalCorrection extends CalculationNode {
 	// caching
 	@Override
 	public boolean requiresRecalculation() {
-		hasDirt = false;
+		// hasDirt = false;
 		// hasDirt = true;
 
 		if (popSizesInput.isDirty()) {
@@ -583,11 +622,63 @@ public class CoalCorrection extends CalculationNode {
 	@Override
 	protected void store() {
 		// hasDirt = true;
+		int nSpp = tree.getLeafNodeCount();
+		for (int i=0; i<nSpp; ++i) {
+			for (int j=0; j<nSpp; ++j) {
+				storedCorrectedPhyloMat[i][j] = correctedPhyloTMat[i][j];
+				storedCommonAncestor[i][j] = commonAncestor[i][j];
+			}
+		}
+
+		for (int i=0; i<tree.getNodeCount(); ++i) {
+			storedLeftX[i] = leftX[i];
+			storedRightX[i] = rightX[i];
+			storedParentIdxs[i] = parentIdxs[i];
+			storedAllBrLengthsInCU[i] = allBrLengthsInCU[i];
+		}
+
+		for (int i=0; i<popSizesInput.get().getDimension(); ++i) {
+			storedPopSizesD[i] = popSizesd[i];
+		}
+
 		super.store();
 	}
 	
 	@Override
 	protected void restore() {
+    	double[] doubleArrTmp;
+		double[][] double2DArrTmp;
+		int[] intArrTmp;
+		int[][] int2DArrTmp;
+
+    	doubleArrTmp = popSizesd;
+    	popSizesd = storedPopSizesD;
+    	storedPopSizesD = doubleArrTmp;
+
+    	double2DArrTmp = correctedPhyloTMat;
+    	correctedPhyloTMat = storedCorrectedPhyloMat;
+    	storedCorrectedPhyloMat = double2DArrTmp;
+
+    	intArrTmp = leftX;
+    	leftX = storedLeftX;
+    	storedLeftX = intArrTmp;
+
+		intArrTmp = rightX;
+		rightX = storedRightX;
+		storedRightX = intArrTmp;
+
+		intArrTmp = parentIdxs;
+		parentIdxs = storedParentIdxs;
+		storedParentIdxs = intArrTmp;
+
+		doubleArrTmp = allBrLengthsInCU;
+		allBrLengthsInCU = storedAllBrLengthsInCU;
+		storedAllBrLengthsInCU = doubleArrTmp;
+
+		int2DArrTmp = commonAncestor;
+		commonAncestor = storedCommonAncestor;
+		storedCommonAncestor = int2DArrTmp;
+
 		hasDirt = true;
 		super.restore();
 	}
