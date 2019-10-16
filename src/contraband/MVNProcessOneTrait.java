@@ -110,8 +110,6 @@ public abstract class MVNProcessOneTrait extends Distribution {
 				}
 			}
 		}
-
-		double a = 1.0;
 	}
 	
 	protected void populateAncNodePhyloTMatrix() {

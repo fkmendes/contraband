@@ -26,7 +26,7 @@ public class CoalUtils {
 		}
 		// k * (k-1) is the same as "k take 2"
 		
-		return e;
+ 		return e;
 	}
 	
 	/*

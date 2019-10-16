@@ -1964,7 +1964,7 @@
   <operator id="turnoverScalerFBD.t:Species" spec="ScaleOperator" parameter="@turnoverFBD.t:Species" scaleFactor="0.75" weight="10.0"/>
   <operator id="samplingPScalerFBD.t:Species" spec="ScaleOperator" parameter="@samplingProportionFBD.t:Species" scaleFactor="0.75" weight="10.0"/>
   <operator id="LeafToSAFBD.t:Species" spec="LeafToSampledAncestorJump" tree="@Tree.t:Species" weight="10.0"/>
-  <operator id="SAWilsonBaldingFBD.t:Species" spec="SAWilsonBalding" tree="@Tree.t:Species" weight="10.0"/>
+  <!-- <operator id="SAWilsonBaldingFBD.t:Species" spec="SAWilsonBalding" tree="@Tree.t:Species" weight="10.0"/> -->
   <operator id="SAWideFBD.t:Species" spec="SAExchange" isNarrow="false" tree="@Tree.t:Species" weight="10.0"/>
   <operator id="SANarrowFBD.t:Species" spec="SAExchange" tree="@Tree.t:Species" weight="10.0"/>
   <operator id="SAUniformOperatorFBD.t:Species" spec="SAUniform" tree="@Tree.t:Species" weight="20.0"/>

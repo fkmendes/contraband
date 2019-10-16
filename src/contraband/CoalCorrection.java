@@ -251,7 +251,7 @@ public class CoalCorrection extends CalculationNode {
 					for (int nLineages=1; nLineages <= maxNLineages; ++nLineages) {
 						double probOfNLineages = 0.0;
 
-						for (int nLeft=1; nLeft <= maxNLineagesRight; ++nLeft) {
+						for (int nLeft=1; nLeft <= maxNLineagesLeft; ++nLeft) {
 							probOfNLineages += left[nLeft - 1];
 						}
 

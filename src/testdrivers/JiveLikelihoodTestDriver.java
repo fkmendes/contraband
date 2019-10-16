@@ -20,7 +20,7 @@ public class JiveLikelihoodTestDriver {
 		RealParameter mus = new RealParameter(meansInput);
 		
 		JiveLikelihood jive = new JiveLikelihood();
-		jive.initByName("sampleData", oneTrait, "logSigmasqs", logSigmasqs, "mus", mus);
+		jive.initByName("sampleData", oneTrait, "logSigmaSqs", logSigmasqs, "mus", mus);
 		
 		/*
 		 *  In R:

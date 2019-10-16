@@ -7,6 +7,7 @@ import java.util.Map;
 import beast.core.BEASTObject;
 import beast.core.Input;
 import beast.core.Input.Validate;
+import com.sun.tools.javac.util.ArrayUtils;
 
 public class ManyValuesOneContTrait extends BEASTObject {
 
@@ -14,11 +15,12 @@ public class ManyValuesOneContTrait extends BEASTObject {
 
 	String traitValueString;
 	String[] thisSpeciesValues;
-	double[] spValues; // return
+	// double[] spValues; // return
 	int nSpp;
 	List<String> spNames;
-	Map<String, List<Double>> spValuesMap = new HashMap<>(); 
-	
+	// Map<String, List<Double>> spValuesMap = new HashMap<>();
+	Map<String, Double[]> spValuesMap = new HashMap<>();
+
 	@Override
 	public void initAndValidate() {
 		// Getting inputs
@@ -39,31 +41,46 @@ public class ManyValuesOneContTrait extends BEASTObject {
 			spName = strTokens[0];
 			spNames.add(spName);
 			thisSpeciesValues = strTokens[1].split(",");
+
+			// making getter faster
+			int sampleSize = thisSpeciesValues.length;
+			Double[] thisSpeciesValuesDouble = new Double[sampleSize];
 			
 			// Looping over samples within a species
+			int i = 0;
 			for (String oneValue: thisSpeciesValues) {
-				if (!spValuesMap.containsKey(spName)) {
-					spValuesMap.put(spName, new ArrayList<Double>());
-				}
-				
-				spValuesMap.get(spName).add(Double.valueOf(oneValue));
+				thisSpeciesValuesDouble[i] = Double.valueOf(oneValue);
+				i++;
+//				if (!spValuesMap.containsKey(spName)) {
+//					spValuesMap.put(spName, new ArrayList<Double>());
+//				}
+//
+//				spValuesMap.get(spName).add(Double.valueOf(oneValue));
 			}
+
+			spValuesMap.put(spName, thisSpeciesValuesDouble);
 		}
 	}
 
 	/*
 	 * Get all values from the one trait from a species
 	 */
-	public double[] getSample(String spName) {
-		spValues = new double[spValuesMap.get(spName).size()]; // used by getter (different traits, same species)
+	public Double[] getSample(String spName) {
+//	public double[] getSample(String spName) {
+//		spValues = new double[spValuesMap.get(spName).size()]; // used by getter (different traits, same species)
+//
+//		int i=0;
+//		for (Double spValue: spValuesMap.get(spName)) {
+//			spValues[i] = spValue.doubleValue();
+//			i++;
+//		}
+//		return spValues;
 
-		int i=0;
-		for (Double spValue: spValuesMap.get(spName)) {
-			spValues[i] = spValue.doubleValue();
-			i++;
-		}
-
-		return spValues;
+		/*
+		 * As of now, samples won't ever change, but if at some point they do,
+		 * we need to call populateSpValuesMap() before returning;
+		 */
+		return spValuesMap.get(spName);
 	}
 	
 	public int getNSpp() {

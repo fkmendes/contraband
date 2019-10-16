@@ -233,7 +233,7 @@ public class MVNUtils {
 	 * 
 	 * Used in JIVE likelihood
 	 */
-	public static double getSampleNormalLogLk(double[] samples, Double mu, Double logSigmaSq) {		
+	public static double getSampleNormalLogLk(Double[] samples, Double mu, Double logSigmaSq) {
 		double n = samples.length;
 		
 		double sumToSubtract = 0.0;

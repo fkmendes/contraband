@@ -162,7 +162,7 @@ public class TreeToVCVMat extends CalculationNode {
 		int nodeIdx = aNode.getNr(); 
 		
 		if (aNode.isLeaf()) {		
-			System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // uncomment to see index of all leaves
+//			System.out.println("Leaf " + aNode.getID() + ", nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // uncomment to see index of all leaves
 			spColorValuesMat[nodeIdx][nodeIdx] = nodeWeightedColorValues[nodeIdx]; // populating diagonal entries
 			spOrderInTMat[nodeIdx] = aNode.getID();
 			return;
@@ -173,11 +173,11 @@ public class TreeToVCVMat extends CalculationNode {
 		}
 		
 		// uncomment to see index of internal nodes and which internal node is which
-		System.out.println("Internal node, nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // for debugging;
-		List<Node> leafNodes = aNode.getAllLeafNodes();
-		for (Node node: leafNodes) {
-			System.out.println("Daughter leaf: " + node.getID());
-		}
+//		System.out.println("Internal node, nodeIdx=" + nodeIdx + " length=" + aNode.getLength()); // for debugging;
+//		List<Node> leafNodes = aNode.getAllLeafNodes();
+//		for (Node node: leafNodes) {
+//			System.out.println("Daughter leaf: " + node.getID());
+//		}
 		
 		Node left = aNode.getChild(0);
 		int leftIdx = left.getNr();
