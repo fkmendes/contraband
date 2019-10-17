@@ -24,7 +24,7 @@ public class MVNUtilsColtTestDriver {
 		double[] meanContent = new double[] { 4.985714, 4.985714, 4.985714 };
 		DoubleMatrix1D means = DoubleFactory1D.dense.make(meanContent);
 		
-		double loglkColt = MVNUtils.getMVNLogLkColt(3, means, dat, invVcvMat, detVCVMat);
-		System.out.println("MVN log-likelihood using colt = " + loglkColt); // see BMMVNLikelihoodOneTraitTest
+		// double loglkColt = MVNUtils.getMVNLogLkColt(3, means, dat, invVcvMat, detVCVMat);
+		// System.out.println("MVN log-likelihood using colt = " + loglkColt); // see BMMVNLikelihoodOneTraitTest
 		}
 }

@@ -3,3 +3,8 @@
 *.~
 /bin/
 .metadata
+*.DS_store
+*.jar
+*.Rapp.history
+*.RData
+*.tar.gz
