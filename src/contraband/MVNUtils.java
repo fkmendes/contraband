@@ -1,26 +1,17 @@
 package contraband;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import beast.evolution.tree.Node;
+import beast.evolution.tree.Tree;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeUtils;
-import cern.colt.matrix.DoubleMatrix1D;
-import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
-import cern.jet.math.Functions;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MVNUtils {
-	
-	public static Algebra coltAlgebra = new Algebra();
-	
+
+	// public static Algebra coltAlgebra = new Algebra(); // if we ever care to switch...
+
 	/*
 	 * Recursive function for producing T matrix out of tree
 	 */
@@ -210,16 +201,16 @@ public class MVNUtils {
 		return loglikelihood;
 	}
 	
-	public static double getMVNLogLkColt (int n, DoubleMatrix1D mean, DoubleMatrix1D data, DoubleMatrix2D invVcvMat, double detVcvMat) {
-		
-		DoubleMatrix1D datMinusMean = data.assign(mean, Functions.minus); // x - mu
-		
-		double loglikelihood = -0.5 * (Math.log(detVcvMat) + n * Math.log(2.0 * Math.PI));
-		
-		loglikelihood += -0.5 * coltAlgebra.mult(coltAlgebra.mult(invVcvMat, datMinusMean), datMinusMean);
-		
-		return loglikelihood;
-	}
+	// public static double getMVNLogLkColt (int n, DoubleMatrix1D mean, DoubleMatrix1D data, DoubleMatrix2D invVcvMat, double detVcvMat) {
+	//
+	//	 DoubleMatrix1D datMinusMean = data.assign(mean, Functions.minus); // x - mu
+	//
+	//	 double loglikelihood = -0.5 * (Math.log(detVcvMat) + n * Math.log(2.0 * Math.PI));
+	//
+	//	 loglikelihood += -0.5 * coltAlgebra.mult(coltAlgebra.mult(invVcvMat, datMinusMean), datMinusMean);
+	//
+	//	 return loglikelihood;
+	// }
 	
 	/*
 	 * One-dimensional, simple normal density
@@ -240,12 +231,7 @@ public class MVNUtils {
 		for (int i=0; i<n; ++i) {
 			sumToSubtract += Math.pow(samples[i]-mu, 2);
 		}
-		
-//		System.out.println("Jive log-likelihood=" +
-//				((-((n/2.0) * Math.log(2.0 * Math.PI)) +
-//				-((n/2.0) * logSigmaSq) +
-//				-(1.0/(2.0 * Math.exp(logSigmaSq))) * sumToSubtract)));
-		
+
 		return (-((n/2.0) * Math.log(2.0 * Math.PI)) +
 			   -((n/2.0) * logSigmaSq) +
 			   -(1.0/(2.0 * Math.exp(logSigmaSq))) * sumToSubtract);
@@ -269,8 +255,7 @@ public class MVNUtils {
 		}
 		
 		double loglikelihood = -firstTerm - secondTerm - sumToSubtract;
-		// System.out.println("WN log-likelihood=" + loglikelihood);
-		
+
 		return loglikelihood;
 	}
 	

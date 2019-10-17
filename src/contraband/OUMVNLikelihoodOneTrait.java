@@ -130,15 +130,11 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	protected void populateExpAtTipVector() {
-		Double rootValue = rootValueInput.get().getValue();		
-		// Integer[] thetaAssignments = optimumManager.getColorAssignments();
-		// Double[] thetas = optimumManager.getColorValues();
-		
+		Double rootValue = rootValueInput.get().getValue();
+
 		double alpha = alphaInput.get().getValue().doubleValue();
 		
-		OUUtils.populateOUMeanVector(alpha, rootValue, getRootNode(), getRootNode(), getAllLeafNodes(), optimumManager.getClockModel(), ouMeanVector, useRootMetaData, 0.0);
-		// System.out.println("Mean vector:");
-		// GeneralUtils.displayRealVector(ouMeanVector);	
+		OUUtils.populateOUMeanVector(alpha, rootValue, getRootNode(), getAllLeafNodes(), optimumManager.getClockModel(), ouMeanVector, useRootMetaData);
 
 		// testing some values by hand
 		// RealVector thetaVector = new ArrayRealVector(3);
@@ -146,32 +142,28 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		// Integer[] thetaAssignments = new Integer[] { 1, 1, 1, 0, 1, 1, 0 };
 
 		/*
-		 * Old implementation with W matrix
+		 * Alternative implementation with W matrix
 		 */
-//		int i = 0;
-//		if (useRootMetaData) {
-//			thetaVector.setEntry(0, rootValue);
-//			i++;
-//		}
-//
-//		Double[] thetas = new Double[] { 0.05779027, 0.19382641 };
-//
-//		for (Double aTheta: thetas) {
-//			thetaVector.setEntry(i, aTheta);
-//			i++;
-//		}
-//
-//		resetRealMatrix(wMat);
-//		OUUtils.computeWMatOneTrait(thetaAssignments, getRootNode(), getAllLeafNodes(), nSpp, nOptima, alpha, wMat, useRootMetaData);
-//
-//		ouMeanVector = wMat.operate(thetaVector);
-//
-//		System.out.println("W matrix:");
-//		GeneralUtils.displayRealMatrix(wMat);
-//		System.out.println("Theta vector:");
-//		GeneralUtils.displayRealVector(thetaVector);
-//		System.out.println("Mean vector:");
-//		GeneralUtils.displayRealVector(ouMeanVector);
+		// Integer[] thetaAssignments = optimumManager.getColorAssignments();
+		// Double[] thetas = optimumManager.getColorValues();
+		//
+		// int i = 0;
+		// if (useRootMetaData) {
+		//	 thetaVector.setEntry(0, rootValue);
+		//	 i++;
+		// }
+        //
+		// Double[] thetas = new Double[] { 0.05779027, 0.19382641 };
+        //
+		// for (Double aTheta: thetas) {
+		//	 thetaVector.setEntry(i, aTheta);
+		//	 i++;
+		// }
+		//
+		// resetRealMatrix(wMat);
+		// OUUtils.computeWMatOneTrait(thetaAssignments, getRootNode(), getAllLeafNodes(), nSpp, nOptima, alpha, wMat, useRootMetaData);
+		//
+		// ouMeanVector = wMat.operate(thetaVector);
 	}
 	
 	@Override
