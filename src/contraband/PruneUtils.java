@@ -72,4 +72,16 @@ public class PruneUtils {
     public static RealVector getDVecOU(RealMatrix eMat, RealVector omegaVec) {
         return eMat.scalarMultiply(-1.0).preMultiply(omegaVec);
     }
+
+    /*
+     * Under BM, f will be the product of
+     * -0.5 and sumDetLog2PI (which under BM sumDetLog2PI is
+     * nTraits * Math.log(2 * Math.PI) and Math.log(vCVMatDet)).
+     *
+     */
+    public static double getf(int nTraits, double vCVMatDet) {
+        double sumDetLog2PI = nTraits * Math.log(2 * Math.PI) + Math.log(vCVMatDet);
+        return -0.5 * sumDetLog2PI;
+    }
+
 }
