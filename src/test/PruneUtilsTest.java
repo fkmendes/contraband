@@ -1,7 +1,6 @@
 package test;
 
 import beast.evolution.tree.Node;
-import contraband.GeneralUtils;
 import org.apache.commons.math3.linear.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,7 +10,7 @@ import contraband.PruneUtils;
 
 
 public class PruneUtilsTest {
-    final static double EPSILON = 1e-4;
+    final static double EPSILON = 1e-2;
     private RealMatrix vCVMat1; private RealMatrix aMat1; private RealMatrix eMat1; private RealMatrix cMat1; private RealVector dVec1; private double f1;
     private RealMatrix vCVMat2; private RealMatrix aMat2; private RealMatrix eMat2; private RealMatrix cMat2; private RealVector dVec2; private double f2;
     @Before
@@ -72,7 +71,6 @@ public class PruneUtilsTest {
                                           {0.00000, 0.0000000, 0.000000, 0.000000,  0.0000000,  0.000000,  0.000000,  0.0000000,  0.000000,  0.000000, 0.0000000,  0.000000,  0.0000000,  0.0000000,  5.211357}};
         RealMatrix evolRateMat2 = new Array2DRowRealMatrix(evolRateMat2DArray2);
         vCVMat2 = PruneUtils.getVCVMatForBranchInPlaceBM(node2, evolRateMat2);
-        vCVMat2 = vCVMat2.add(vCVMat2.transpose()).scalarMultiply(0.5);
 
         LUDecomposition VMatLUD2 = new LUDecomposition(vCVMat2);
         RealMatrix inverseVCVMat2 = VMatLUD2.getSolver().getInverse();
@@ -104,9 +102,9 @@ public class PruneUtilsTest {
 
         // test second node
         Assert.assertEquals(6.679951, vCVMat2.getEntry(5,14), EPSILON);
-        //Assert.assertEquals(-564.39925, aMat2.getEntry(4,5), EPSILON);
+        Assert.assertEquals(-564.39925, aMat2.getEntry(4,5), EPSILON);
         Assert.assertEquals(-62.343741, eMat2.getEntry(3,2), EPSILON);
-        //Assert.assertEquals(16675.77, cMat2.getEntry(5,10), EPSILON);
+        Assert.assertEquals(16675.77, cMat2.getEntry(5,10), EPSILON);
         Assert.assertEquals(0.0000, dVec2.getEntry(3), EPSILON);
         Assert.assertEquals(-16.76498 , f2, EPSILON);
     }
