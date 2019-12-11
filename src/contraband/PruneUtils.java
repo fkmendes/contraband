@@ -90,7 +90,7 @@ public class PruneUtils {
      * There will be one f per node.
      */
     public static void setF(Node aNode, int nTraits, double vcvMatDet, double[] fArr) {
-        fArr[aNode.getNr()] = -0.5 * nTraits * LOGTWOMATHPI + Math.log(vcvMatDet);
+        fArr[aNode.getNr()] = -0.5 * (nTraits * LOGTWOMATHPI + Math.log(vcvMatDet));
     }
 
     public static RealMatrix getLMatForLeaf(RealMatrix cMat) {
