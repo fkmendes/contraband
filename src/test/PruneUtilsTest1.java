@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class PruneUtilsTest {
+public class PruneUtilsTest1 {
     final static double EPSILON = 1e-2;
     private RealMatrix vCVMat1; private RealMatrix aMat1; private RealMatrix eMat1; private RealMatrix cMat1; private RealVector dVec1; private double f1;
     private RealMatrix vCVMat2; private RealMatrix aMat2; private RealMatrix eMat2; private RealMatrix cMat2; private RealVector dVec2; private double f2;
@@ -24,24 +24,28 @@ public class PruneUtilsTest {
 
 
         // initiate lists
-        RealMatrix initRM = new Array2DRowRealMatrix(new double[10][10]);
-        RealVector iniVec = new ArrayRealVector(new double[10]);
+        RealMatrix initRM1 = new Array2DRowRealMatrix(new double[10][10]);
+        RealVector iniVec1 = new ArrayRealVector(new double[10]);
+        RealMatrix initRM2 = new Array2DRowRealMatrix(new double [15][15]);
+        RealVector iniVec2 = new ArrayRealVector(new double[15]);
+
         List<RealMatrix> vcvMatList = new ArrayList<>(tree.getNodeCount());
         List<RealMatrix> aMatList = new ArrayList<>(tree.getNodeCount());
         List<RealMatrix> eMatList = new ArrayList<>(tree.getNodeCount());
         List<RealMatrix> cMatList = new ArrayList<>(tree.getNodeCount());
         List<RealVector> dVecList = new ArrayList<>(tree.getNodeCount());
         double[] fArrary = new double[tree.getNodeCount()];
-        for (int i = 0; i < tree.getNodeCount(); i++) {
-            vcvMatList.add(i, new Array2DRowRealMatrix(new double[10][10]));
-            aMatList.add(i, initRM);
-            eMatList.add(i, initRM);
-            cMatList.add(i, initRM);
-            dVecList.add(i, iniVec);
-        }
 
         // Node1
         Node node1 = tree.getNode(10);
+        for (int i = 0; i < tree.getNodeCount(); i++) {
+            vcvMatList.add(i, initRM1);
+            aMatList.add(i, initRM1);
+            eMatList.add(i, initRM1);
+            cMatList.add(i, initRM1);
+            dVecList.add(i, iniVec1);
+        }
+
         double[][] evolRateMat2DArray1 = {{9.568333, -0.9333169, 1.452668, -5.078245, 7.790786, 4.1706094, 8.0459809, -3.636380, -5.339318, -5.869372},
                                         {0.000000, 6.7757064, -7.941506, - 9.158809, 3.856068, 0.8813205, 3.8141056, -5.367484, -0.680751, -7.449367},
                                         {0.000000, 0.0000000, 8.998250, -3.441586, 2.810136, 1.8828404, 5.9093484, -7.144000, -4.680547, 5.066157},
@@ -76,9 +80,16 @@ public class PruneUtilsTest {
         double vCVMatDet1 = VMatLUD1.getDeterminant();
         PruneUtils.setF(node1, 10, vCVMatDet1, fArrary);
         f1 = fArrary[node1.getNr()];
-/*
+
         // Node2
         Node node2 = tree.getNode(3);
+        for (int i = 0; i < tree.getNodeCount(); i++) {
+            vcvMatList.add(i, initRM2);
+            aMatList.add(i, initRM2);
+            eMatList.add(i, initRM2);
+            cMatList.add(i, initRM2);
+            dVecList.add(i, iniVec2);
+        }
         double[][] evolRateMat2DArray2 = {{8.99825, -5.0782453, -3.441586, 3.856068,  4.1706094, 9.260485, 5.169191, -2.6230910, -1.155999,  3.302304,  5.0895032,  3.361112,  3.1351626,  8.2887637,  2.957870},
                                           {0.00000, 0.4205953, 9.090073, 2.810136,  0.8813205,  8.045981, -5.671841, -6.9511050,  5.978497, -8.103187,  2.5844226, -1.647064, -3.5925352,  2.1746996, -3.603588},
                                           {0.00000, 0.0000000, 8.895393, 9.885396,  1.8828404,  3.814106, -3.636380, -7.2238787, -7.562015, -2.320607,  4.2036480,  5.763917, -6.2461776, -1.7862045, -3.845600},
@@ -95,25 +106,29 @@ public class PruneUtilsTest {
                                           {0.00000, 0.0000000, 0.000000, 0.000000,  0.0000000,  0.000000,  0.000000,  0.0000000,  0.000000,  0.000000,  0.0000000,  0.000000,  0.0000000,  4.0451028,  4.741555},
                                           {0.00000, 0.0000000, 0.000000, 0.000000,  0.0000000,  0.000000,  0.000000,  0.0000000,  0.000000,  0.000000, 0.0000000,  0.000000,  0.0000000,  0.0000000,  5.211357}};
         RealMatrix evolRateMat2 = new Array2DRowRealMatrix(evolRateMat2DArray2);
-        vCVMat2 = PruneUtils.setVCVMatForBranchBM(node2, evolRateMat2);
+        PruneUtils.setVCVMatForBranchBM(node2, evolRateMat2, vcvMatList);
+        vCVMat2 = vcvMatList.get(node2.getNr());
 
         LUDecomposition VMatLUD2 = new LUDecomposition(vCVMat2);
         RealMatrix inverseVCVMat2 = VMatLUD2.getSolver().getInverse();
 
-        aMat2 = PruneUtils.setAMat(inverseVCVMat2);
+        PruneUtils.setAMat(node2, inverseVCVMat2, aMatList);
+        aMat2 = aMatList.get(node2.getNr());
 
         RealMatrix phiMat2 = MatrixUtils.createRealIdentityMatrix(15);
-        eMat2 = PruneUtils.setEMatOU(inverseVCVMat2, phiMat2.transpose());
+        PruneUtils.setEMatOU(node2, inverseVCVMat2, phiMat2.transpose(), eMatList);
+        eMat2 = eMatList.get(node2.getNr());
 
-        cMat2 = PruneUtils.setCMatOU(eMat2, phiMat2);
+        PruneUtils.setCMatOU(node2, eMat2, phiMat2, cMatList);
+        cMat2 = cMatList.get(node2.getNr());
 
         RealVector omegaVec2 = new ArrayRealVector(new double [15]);
-        dVec2 = PruneUtils.setDVecOU(eMat2, omegaVec2);
-
+        PruneUtils.setDVecOU(node2, eMat2, omegaVec2, dVecList);
+        dVec2 = dVecList.get(node2.getNr());
 
         double vCVMatDet2 = VMatLUD2.getDeterminant();
-        f2 = PruneUtils.setF(15, vCVMatDet2);
-*/
+        PruneUtils.setF(node2, 15, vCVMatDet2, fArrary);
+        f2 = fArrary[node2.getNr()];
     }
     @Test
     public void againstresLikelihood () {
@@ -126,13 +141,12 @@ public class PruneUtilsTest {
         Assert.assertEquals(-23.76009, f1, EPSILON);
 
         // test second node
-        /*
+
         Assert.assertEquals(6.679951, vCVMat2.getEntry(5,14), EPSILON);
         Assert.assertEquals(-564.39925, aMat2.getEntry(4,5), EPSILON);
         Assert.assertEquals(-62.343741, eMat2.getEntry(3,2), EPSILON);
         Assert.assertEquals(16675.77, cMat2.getEntry(5,10), EPSILON);
         Assert.assertEquals(0.0000, dVec2.getEntry(3), EPSILON);
         Assert.assertEquals(-16.76498 , f2, EPSILON);
-        */
     }
 }

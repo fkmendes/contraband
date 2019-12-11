@@ -8,7 +8,7 @@ import beast.evolution.tree.Node;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PruneUtilsTestDriver {
+public class PruneUtilsTestDriver1 {
     public static void main(String[] args) {
         // initialize bifurcating tree
         // set branch lengths to 1.0 for simplicity
@@ -32,7 +32,7 @@ public class PruneUtilsTestDriver {
         List<RealVector> dVecList = new ArrayList<>(tree.getNodeCount());
         double[] fArrary = new double[tree.getNodeCount()];
         for (int i = 0; i < tree.getNodeCount(); i++) {
-            vcvMatList.add(i, new Array2DRowRealMatrix(new double[10][10]));
+            vcvMatList.add(i, new Array2DRowRealMatrix(new double[4][4]));
             aMatList.add(i, initRM);
             eMatList.add(i, initRM);
             cMatList.add(i, initRM);
