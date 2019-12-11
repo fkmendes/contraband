@@ -32,24 +32,24 @@ public class PruneUtilsTest {
                                         {0.000000, 0.0000000, 0.000000, 0.000000, 0.000000, 0.0000000, 0.0000000,  0.000000, 5.609480, -4.512327},
                                         {0.000000, 0.0000000, 0.000000, 0.000000, 0.000000, 0.0000000, 0.0000000,  0.000000, 0.000000, 8.146400}};
         RealMatrix evolRateMat1 = new Array2DRowRealMatrix(evolRateMat2DArray1);
-        vCVMat1 = PruneUtils.getVCVMatForBranchInPlaceBM(node1, evolRateMat1);
+        vCVMat1 = PruneUtils.setVCVMatForBranchBM(node1, evolRateMat1);
 
         LUDecomposition VMatLUD1 = new LUDecomposition(vCVMat1);
         RealMatrix inverseVCVMat1 = VMatLUD1.getSolver().getInverse();
 
-        aMat1 = PruneUtils.getAMatInPlace(inverseVCVMat1);
+        aMat1 = PruneUtils.setAMat(inverseVCVMat1);
 
         RealMatrix phiMat1 = MatrixUtils.createRealIdentityMatrix(10);
-        eMat1 = PruneUtils.getEMatOU(inverseVCVMat1, phiMat1.transpose());
+        eMat1 = PruneUtils.setEMatOU(inverseVCVMat1, phiMat1.transpose());
 
-        cMat1 = PruneUtils.getCMatOU(eMat1, phiMat1);
+        cMat1 = PruneUtils.setCMatOU(eMat1, phiMat1);
 
         RealVector omegaVec1 = new ArrayRealVector(new double [10]);
-        dVec1 = PruneUtils.getDVecOU(eMat1, omegaVec1);
+        dVec1 = PruneUtils.setDVecOU(eMat1, omegaVec1);
 
 
         double vCVMatDet1 = VMatLUD1.getDeterminant();
-        f1 = PruneUtils.getf(10, vCVMatDet1);
+        f1 = PruneUtils.setF(10, vCVMatDet1);
 
 
         // Node2
@@ -70,24 +70,24 @@ public class PruneUtilsTest {
                                           {0.00000, 0.0000000, 0.000000, 0.000000,  0.0000000,  0.000000,  0.000000,  0.0000000,  0.000000,  0.000000,  0.0000000,  0.000000,  0.0000000,  4.0451028,  4.741555},
                                           {0.00000, 0.0000000, 0.000000, 0.000000,  0.0000000,  0.000000,  0.000000,  0.0000000,  0.000000,  0.000000, 0.0000000,  0.000000,  0.0000000,  0.0000000,  5.211357}};
         RealMatrix evolRateMat2 = new Array2DRowRealMatrix(evolRateMat2DArray2);
-        vCVMat2 = PruneUtils.getVCVMatForBranchInPlaceBM(node2, evolRateMat2);
+        vCVMat2 = PruneUtils.setVCVMatForBranchBM(node2, evolRateMat2);
 
         LUDecomposition VMatLUD2 = new LUDecomposition(vCVMat2);
         RealMatrix inverseVCVMat2 = VMatLUD2.getSolver().getInverse();
 
-        aMat2 = PruneUtils.getAMatInPlace(inverseVCVMat2);
+        aMat2 = PruneUtils.setAMat(inverseVCVMat2);
 
         RealMatrix phiMat2 = MatrixUtils.createRealIdentityMatrix(15);
-        eMat2 = PruneUtils.getEMatOU(inverseVCVMat2, phiMat2.transpose());
+        eMat2 = PruneUtils.setEMatOU(inverseVCVMat2, phiMat2.transpose());
 
-        cMat2 = PruneUtils.getCMatOU(eMat2, phiMat2);
+        cMat2 = PruneUtils.setCMatOU(eMat2, phiMat2);
 
         RealVector omegaVec2 = new ArrayRealVector(new double [15]);
-        dVec2 = PruneUtils.getDVecOU(eMat2, omegaVec2);
+        dVec2 = PruneUtils.setDVecOU(eMat2, omegaVec2);
 
 
         double vCVMatDet2 = VMatLUD2.getDeterminant();
-        f2 = PruneUtils.getf(15, vCVMatDet2);
+        f2 = PruneUtils.setF(15, vCVMatDet2);
 
     }
     @Test

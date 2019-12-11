@@ -21,7 +21,7 @@ public class PruneUtilsTestDriver {
 
         // block for matrix VCV
         System.out.println("Printing matrix VCVMatForBranch:");
-        RealMatrix vCVMat = PruneUtils.getVCVMatForBranchInPlaceBM(tree.getNode(1),evolRateMat);
+        RealMatrix vCVMat = PruneUtils.setVCVMatForBranchBM(tree.getNode(1),evolRateMat);
         GeneralUtils.displayRealMatrix(vCVMat);
 
         RealMatrix inverseVCVMat = new Array2DRowRealMatrix(new double [4][4]);
@@ -36,20 +36,20 @@ public class PruneUtilsTestDriver {
         // block for matrix A
         System.out.println("Printing matrix A:");
         // write code to initialize aMat from PruneUtils
-        RealMatrix aMat = PruneUtils.getAMatInPlace(vCVMat);
+        RealMatrix aMat = PruneUtils.setAMat(vCVMat);
         GeneralUtils.displayRealMatrix(aMat);
 
         // block for matrix E
         System.out.println("Printing matrix E:");
         // write code to initialize eMat from PruneUtils
         RealMatrix phiMat = MatrixUtils.createRealIdentityMatrix(4);
-        RealMatrix eMat = PruneUtils.getEMatOU(inverseVCVMat, phiMat.transpose());
+        RealMatrix eMat = PruneUtils.setEMatOU(inverseVCVMat, phiMat.transpose());
         GeneralUtils.displayRealMatrix(eMat);
 
         // block for matrix C
         System.out.println("Printing matrix C:");
         // write code to initialize cMat from PruneUtils
-        RealMatrix cMat = PruneUtils.getCMatOU(eMat, phiMat);
+        RealMatrix cMat = PruneUtils.setCMatOU(eMat, phiMat);
         GeneralUtils.displayRealMatrix(cMat);
 
         // block for vector B
@@ -62,7 +62,7 @@ public class PruneUtilsTestDriver {
         System.out.println("Printing vector D:");
         // write code to initialize dVec from PruneUtils
         RealVector omegaVec = new ArrayRealVector(new double [4]);
-        RealVector dVec = PruneUtils.getDVecOU(eMat, omegaVec);
+        RealVector dVec = PruneUtils.setDVecOU(eMat, omegaVec);
         GeneralUtils.displayRealVector(dVec);
 
         // block for double f
@@ -74,7 +74,7 @@ public class PruneUtilsTestDriver {
         catch (SingularMatrixException e) {
             System.out.println("vCVMat at this node is singular");
         }
-        double f = PruneUtils.getf(4, vCVMatDet);
+        double f = PruneUtils.setF(4, vCVMatDet);
         System.out.println("Printing double f:" + f);
 
     }
