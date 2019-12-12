@@ -104,7 +104,7 @@ public class PruneUtils {
     /*
      * Document here
      */
-    public static void setLMatForIntNode(Node aNode, List<RealMatrix> aMatList, List<RealMatrix> lMatList, List<RealMatrix> aPlusLListList, List<RealMatrix> invAPlusLList) {
+    public static void setLMatForIntNode(Node aNode, List<RealMatrix> aMatList, List<RealMatrix> cMatList, List<RealMatrix> eMatList, List<RealMatrix> lMatList, List<RealMatrix> aPlusLListList, List<RealMatrix> invAPlusLList) {
         int thisNodeIdx = aNode.getNr();
         RealMatrix thisNodeLMat = lMatList.get(thisNodeIdx);
 
@@ -123,10 +123,10 @@ public class PruneUtils {
             RealMatrix invAPlusL = aPlusLLUD.getSolver().getInverse();
             invAPlusLList.set(childIdx, invAPlusL); // update list of (A+L)^-1, so we don't have to do this again
 
-            // TODO: finish things here...
             // C_childIdx - 0.25 * E_childIdx * (A_childIdx + L_childIdx).inverse * E_childIdx.transpose
             // add to thisNodeLMat
-            thisNodeLMat = thisNodeLMat.add(lMatList.get(childIdx));
+            thisNodeLMat = thisNodeLMat.add(
+                    cMatList.get(childIdx).subtract(eMatList.get(childIdx).multiply(invAPlusL).multiply(eMatList.get(childIdx).transpose().scalarMultiply(0.25))));
         }
 
         lMatList.set(thisNodeIdx, thisNodeLMat);
@@ -152,7 +152,7 @@ public class PruneUtils {
      * FINISH implementation and documentation here
      *
      */
-    public static void setRForIntNode(Node aNode, List<RealMatrix> lMatList, List<RealMatrix> aMatList, List<RealMatrix> aPlusLList, double[] rArr) {
+    public static void setRForIntNode(Node aNode, List<RealMatrix> aPlusLList, List<RealMatrix> invAPlusLList, List<RealVector> mVecList, double[] rArr, double[] fArr) {
         int thisNodeIdx = aNode.getNr();
         double thisNodeR = rArr[thisNodeIdx];
 
@@ -164,16 +164,16 @@ public class PruneUtils {
 
             // A + L
             RealMatrix aPlusL = aPlusLList.get(childIdx);
-            // TODO: get determinant of aPlusL
+            // get determinant of -2*aPlusL
+            double logDetaPlusL = Math.log(new LUDecomposition(aPlusL.scalarMultiply(-2)).getDeterminant());
 
             // f_childIdx + r_childIdx + 0.5 * nTraits * log(2*PI)
             // - 0.5 * log(det(-2 * (A_childIdx + L_childIdx)))
             // - 0.25 * m_childIdx.transpose * (A_childIdx + L_childIdx).inverse * m_childIdx
 
-            // TODO: finish here
-            thisNodeR += rArr[childIdx];
-            // add to thisNodeR
-            thisNodeR = thisNodeR + childNodeR;
+            // add up to parent
+            thisNodeR += rArr[childIdx] + fArr[childIdx] + 0.5 * aPlusL.getColumnDimension() * LOGTWOMATHPI
+                         - 0.5 * logDetaPlusL - mVecList.get(childIdx).dotProduct(invAPlusLList.get(childIdx).preMultiply(mVecList.get(childIdx)));
         }
 
         rArr[thisNodeIdx] = thisNodeR;
@@ -198,7 +198,7 @@ public class PruneUtils {
      *
      * There will be one eVec per internal node.
      */
-    public static void setMVecForIntNodeBM(Node aNode, List<RealMatrix> lMatList, List<RealMatrix> aMatList, List<RealMatrix> invAPlusLList, List<RealMatrix> eMatList, List<RealVector> mVecList) {
+    public static void setMVecForIntNodeBM(Node aNode, List<RealMatrix> invAPlusLList, List<RealMatrix> eMatList, List<RealVector> mVecList) {
         int thisNodeIdx = aNode.getNr();
         RealVector thisNodeMVec = mVecList.get(thisNodeIdx);
 
