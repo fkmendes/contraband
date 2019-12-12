@@ -1,6 +1,7 @@
 package contraband;
 
 import beast.evolution.tree.Node;
+import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import java.util.List;
@@ -103,7 +104,7 @@ public class PruneUtils {
     /*
      * Document here
      */
-    public static void setLMatForIntNode(Node aNode, List<RealMatrix> lMatList) {
+    public static void setLMatForIntNode(Node aNode, List<RealMatrix> aMatList, List<RealMatrix> lMatList, List<RealMatrix> aPlusLListList, List<RealMatrix> invAPlusLList) {
         int thisNodeIdx = aNode.getNr();
         RealMatrix thisNodeLMat = lMatList.get(thisNodeIdx);
 
@@ -112,6 +113,17 @@ public class PruneUtils {
         // running sum
         for (Node child : children) {
             int childIdx = child.getNr();
+
+            // A + L
+            RealMatrix aPlusL = aMatList.get(childIdx).add(lMatList.get(childIdx));
+            aPlusLListList.set(childIdx, aPlusL);
+
+            // now invert A + L
+            LUDecomposition aPlusLLUD = new LUDecomposition(aPlusL);
+            RealMatrix invAPlusL = aPlusLLUD.getSolver().getInverse();
+            invAPlusLList.set(childIdx, invAPlusL); // update list of (A+L)^-1, so we don't have to do this again
+
+            // TODO: finish things here...
             // C_childIdx - 0.25 * E_childIdx * (A_childIdx + L_childIdx).inverse * E_childIdx.transpose
             // add to thisNodeLMat
             thisNodeLMat = thisNodeLMat.add(lMatList.get(childIdx));
@@ -137,8 +149,10 @@ public class PruneUtils {
      * Under BM, bVec is a vector of 0's, so the term
      * b + m in the equation is equivalent to m in Mitov et al. (2019).
      *
+     * FINISH implementation and documentation here
+     *
      */
-    public static void setRForIntNode(Node aNode, double[] rArr) {
+    public static void setRForIntNode(Node aNode, List<RealMatrix> lMatList, List<RealMatrix> aMatList, List<RealMatrix> aPlusLList, double[] rArr) {
         int thisNodeIdx = aNode.getNr();
         double thisNodeR = rArr[thisNodeIdx];
 
@@ -147,10 +161,17 @@ public class PruneUtils {
         // running sum
         for (Node child : children) {
             int childIdx = child.getNr();
+
+            // A + L
+            RealMatrix aPlusL = aPlusLList.get(childIdx);
+            // TODO: get determinant of aPlusL
+
             // f_childIdx + r_childIdx + 0.5 * nTraits * log(2*PI)
             // - 0.5 * log(det(-2 * (A_childIdx + L_childIdx)))
             // - 0.25 * m_childIdx.transpose * (A_childIdx + L_childIdx).inverse * m_childIdx
-            double childNodeR;
+
+            // TODO: finish here
+            thisNodeR += rArr[childIdx];
             // add to thisNodeR
             thisNodeR = thisNodeR + childNodeR;
         }
@@ -160,10 +181,10 @@ public class PruneUtils {
 
     /*
      * Under BM, dVec is a vector of 0's, se we can ignore the first
-     * term inside the summation in the equation that defines mBec in
+     * term inside the summation in the equation that defines mVec in
      * Mitov et al. (2019).
      *
-     * There will be one eMat per leaf (and one eMat per internal node).
+     * There will be one eVec per leaf.
      */
     public static RealVector getMVecForLeafBM(RealMatrix eMat, RealVector traitsValues) {
         RealVector mVec = eMat.preMultiply(traitsValues);
@@ -171,7 +192,30 @@ public class PruneUtils {
         return mVec;
     }
 
-    public static void setMVecForIntNode
+    /*
+     * Under BM, dVec is a vector of 0's, so we can ignore the first term inside
+     * the summation that defines mVec in Mitov et al. (2019).
+     *
+     * There will be one eVec per internal node.
+     */
+    public static void setMVecForIntNodeBM(Node aNode, List<RealMatrix> lMatList, List<RealMatrix> aMatList, List<RealMatrix> invAPlusLList, List<RealMatrix> eMatList, List<RealVector> mVecList) {
+        int thisNodeIdx = aNode.getNr();
+        RealVector thisNodeMVec = mVecList.get(thisNodeIdx);
+
+        List<Node> children = aNode.getChildren();
+
+        // running sum
+        for (Node child : children) {
+            int childIdx = child.getNr();
+            RealMatrix invAPlusL = invAPlusLList.get(childIdx); // it has already been inverted when computing L
+
+            thisNodeMVec.add(
+                    eMatList.get(childIdx).multiply(invAPlusL).preMultiply(mVecList.get(childIdx)).mapMultiply(-0.5)
+            );
+        }
+
+        mVecList.set(thisNodeIdx, thisNodeMVec);
+    }
 
 
 }
