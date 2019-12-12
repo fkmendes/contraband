@@ -141,7 +141,6 @@ public class PruneUtilsTest1 {
         Assert.assertEquals(-23.76009, f1, EPSILON);
 
         // test second node
-
         Assert.assertEquals(6.679951, vCVMat2.getEntry(5,14), EPSILON);
         Assert.assertEquals(-564.39925, aMat2.getEntry(4,5), EPSILON);
         Assert.assertEquals(-62.343741, eMat2.getEntry(3,2), EPSILON);

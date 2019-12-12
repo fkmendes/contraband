@@ -112,6 +112,8 @@ public class PruneUtils {
         // running sum
         for (Node child : children) {
             int childIdx = child.getNr();
+            // C_childIdx - 0.25 * E_childIdx * (A_childIdx + L_childIdx).inverse * E_childIdx.transpose
+            // add to thisNodeLMat
             thisNodeLMat = thisNodeLMat.add(lMatList.get(childIdx));
         }
 
@@ -132,6 +134,31 @@ public class PruneUtils {
     }
 
     /*
+     * Under BM, bVec is a vector of 0's, so the term
+     * b + m in the equation is equivalent to m in Mitov et al. (2019).
+     *
+     */
+    public static void setRForIntNode(Node aNode, double[] rArr) {
+        int thisNodeIdx = aNode.getNr();
+        double thisNodeR = rArr[thisNodeIdx];
+
+        List<Node> children = aNode.getChildren();
+
+        // running sum
+        for (Node child : children) {
+            int childIdx = child.getNr();
+            // f_childIdx + r_childIdx + 0.5 * nTraits * log(2*PI)
+            // - 0.5 * log(det(-2 * (A_childIdx + L_childIdx)))
+            // - 0.25 * m_childIdx.transpose * (A_childIdx + L_childIdx).inverse * m_childIdx
+            double childNodeR;
+            // add to thisNodeR
+            thisNodeR = thisNodeR + childNodeR;
+        }
+
+        rArr[thisNodeIdx] = thisNodeR;
+    }
+
+    /*
      * Under BM, dVec is a vector of 0's, se we can ignore the first
      * term inside the summation in the equation that defines mBec in
      * Mitov et al. (2019).
@@ -143,6 +170,8 @@ public class PruneUtils {
 
         return mVec;
     }
+
+    public static void setMVecForIntNode
 
 
 }
