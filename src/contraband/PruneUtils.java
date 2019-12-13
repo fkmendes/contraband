@@ -94,6 +94,12 @@ public class PruneUtils {
         fArr[aNode.getNr()] = -0.5 * (nTraits * LOGTWOMATHPI + Math.log(vcvMatDet));
     }
 
+    /*
+     * Under both BM and OU, we need matrix cMat to calculate
+     * lMat at this leaf node.
+     *
+     * There will be one lMat per leaf (and one r per internal node).
+     */
     public static RealMatrix getLMatForLeaf(RealMatrix cMat) {
         RealMatrix tCMat = cMat.transpose();
         RealMatrix lMat = cMat.add(tCMat).scalarMultiply(0.5);
@@ -102,7 +108,8 @@ public class PruneUtils {
     }
 
     /*
-     * Document here
+     * Under both BM and OU, we need matrix aMat, cMat, eMat
+     * and lMat from this internal node's children.
      */
     public static void setLMatForIntNode(Node aNode, List<RealMatrix> aMatList, List<RealMatrix> cMatList, List<RealMatrix> eMatList, List<RealMatrix> lMatList, List<RealMatrix> aPlusLListList, List<RealMatrix> invAPlusLList) {
         int thisNodeIdx = aNode.getNr();
@@ -149,7 +156,6 @@ public class PruneUtils {
      * Under BM, bVec is a vector of 0's, so the term
      * b + m in the equation is equivalent to m in Mitov et al. (2019).
      *
-     * FINISH implementation and documentation here
      *
      */
     public static void setRForIntNode(Node aNode, List<RealMatrix> aPlusLList, List<RealMatrix> invAPlusLList, List<RealVector> mVecList, double[] rArr, double[] fArr) {
@@ -173,7 +179,7 @@ public class PruneUtils {
 
             // add up to parent
             thisNodeR += rArr[childIdx] + fArr[childIdx] + 0.5 * aPlusL.getColumnDimension() * LOGTWOMATHPI
-                         - 0.5 * logDetaPlusL - mVecList.get(childIdx).dotProduct(invAPlusLList.get(childIdx).preMultiply(mVecList.get(childIdx)));
+                         - 0.5 * logDetaPlusL - 0.25 * mVecList.get(childIdx).dotProduct(invAPlusLList.get(childIdx).preMultiply(mVecList.get(childIdx)));
         }
 
         rArr[thisNodeIdx] = thisNodeR;
@@ -209,6 +215,7 @@ public class PruneUtils {
             int childIdx = child.getNr();
             RealMatrix invAPlusL = invAPlusLList.get(childIdx); // it has already been inverted when computing L
 
+            // 0.5 * E * (A + L).inverse * mVec
             thisNodeMVec.add(
                     eMatList.get(childIdx).multiply(invAPlusL).preMultiply(mVecList.get(childIdx)).mapMultiply(-0.5)
             );
