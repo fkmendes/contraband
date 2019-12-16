@@ -8,6 +8,10 @@ import beast.evolution.tree.Node;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * This test driver runs PruneUtils class using a tree with four taxa and a 4 * 4 evolutionary rate matrix,
+ * and returns results of sets methods for VCV matrix, A matrix, B vector, C matrix, D vector, E matrix and f double.
+ */
 public class PruneUtilsTestDriver1 {
     public static void main(String[] args) {
         // initialize bifurcating tree

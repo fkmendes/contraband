@@ -11,7 +11,13 @@ import contraband.PruneUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/*
+ * In this unit test, we run PruneUtils using a fixed tree with 8 taxa
+ * and test the sets methods of vCVMat, aMat, bVec, cMat, dVec, eMat, f.
+ * We select two nodes:
+ * 1) node number 10, at which there is a 10 * 10 evolutionary rate matrix.
+ * 2) node number 3, at which there is a 15 * 15 evolutionary rate matrix.
+ */
 public class PruneUtilsTest1 {
     final static double EPSILON = 1e-2;
     private RealMatrix vCVMat1; private RealMatrix aMat1; private RealMatrix eMat1; private RealMatrix cMat1; private RealVector dVec1; private double f1;
