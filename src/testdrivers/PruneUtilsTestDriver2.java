@@ -110,42 +110,44 @@ public class PruneUtilsTestDriver2 {
 
         // block for matrix L
         System.out.println("Printing lMat at tip 0:");
-        RealMatrix lMat = PruneUtils.getLMatForLeaf(cMatList.get(0));
-        GeneralUtils.displayRealMatrix(lMat);
-        lMatList.set(0, lMat );
-        lMatList.set(1, PruneUtils.getLMatForLeaf(cMatList.get(1)));
-        lMatList.set(2, PruneUtils.getLMatForLeaf(cMatList.get(2)));
+        GeneralUtils.displayRealMatrix(PruneUtils.getLMatForLeaf(cMatList.get(0)));
+        System.out.println("Printing lMat at tip 1:");
+        GeneralUtils.displayRealMatrix(PruneUtils.getLMatForLeaf(cMatList.get(1)));
+        System.out.println("Printing lMat at tip 2:");
+        GeneralUtils.displayRealMatrix(PruneUtils.getLMatForLeaf(cMatList.get(2)));
 
         System.out.println("Printing lMat at this internal node 3:");
         PruneUtils.setLMatForIntNode(tree.getNode(3), aMatList, cMatList, eMatList, lMatList, aPlusLListList, invAPlusLList);
         GeneralUtils.displayRealMatrix(lMatList.get(3));
+
+        System.out.println("Printing lMat at this internal node 4:");
         PruneUtils.setLMatForIntNode(tree.getNode(4), aMatList, cMatList, eMatList, lMatList, aPlusLListList, invAPlusLList);
-        System.out.println(lMatList);
+        GeneralUtils.displayRealMatrix(lMatList.get(4));
+
         // block for vector m
-        System.out.println("Printing mVec at tip:");
-        RealVector mVec = PruneUtils.getMVecForLeafBM(eMatList.get(0), traitValuesVec.get(0));
-        GeneralUtils.displayRealVector(mVec);
-        mVecList.set(0, mVec);
-        mVecList.set(1, PruneUtils.getMVecForLeafBM(eMatList.get(1), traitValuesVec.get(1)));
-        mVecList.set(2, PruneUtils.getMVecForLeafBM(eMatList.get(2), traitValuesVec.get(2)));
-        System.out.println(mVecList);
+        System.out.println("Printing mVec at tip 0:");
+        GeneralUtils.displayRealVector(PruneUtils.getMVecForLeafBM(eMatList.get(0), traitValuesVec.get(0)));
+        System.out.println("Printing mVec at tip 1:");
+        GeneralUtils.displayRealVector(PruneUtils.getMVecForLeafBM(eMatList.get(1), traitValuesVec.get(1)));
+        System.out.println("Printing mVec at tip 2:");
+        GeneralUtils.displayRealVector(PruneUtils.getMVecForLeafBM(eMatList.get(2), traitValuesVec.get(2)));
 
         System.out.println("Printing mVec at this internal node 3:");
-        PruneUtils.setMVecForIntNodeBM(tree.getNode(3), invAPlusLList, eMatList, mVecList);
+        PruneUtils.setMVecForIntNodeBM(tree.getNode(3), invAPlusLList, eMatList, mVecList, traitValuesVec);
         GeneralUtils.displayRealVector(mVecList.get(3));
-        PruneUtils.setMVecForIntNodeBM(tree.getNode(4), invAPlusLList, eMatList, mVecList);
+        System.out.println("Printing mVec at this internal node 4:");
+        PruneUtils.setMVecForIntNodeBM(tree.getNode(4), invAPlusLList, eMatList, mVecList, traitValuesVec);
+        GeneralUtils.displayRealVector(mVecList.get(4));
 
         // block for double r
-        double r = PruneUtils.getRForLeafBM(aMatList.get(0),traitValuesVec.get(0), traitValuesVec.get(0), fArr[0]);
-        System.out.println("Printing r at leaf:" + r);
-        rArr[0] = r;
-        rArr[1] = PruneUtils.getRForLeafBM(aMatList.get(1),traitValuesVec.get(1), traitValuesVec.get(1), fArr[1]);
-        rArr[2] = PruneUtils.getRForLeafBM(aMatList.get(2),traitValuesVec.get(2), traitValuesVec.get(2), fArr[2]);
+        System.out.println("Printing r at tip 0:" + PruneUtils.getRForLeafBM(aMatList.get(0),traitValuesVec.get(0), fArr[0]));
+        System.out.println("Printing r at tip 1:" + PruneUtils.getRForLeafBM(aMatList.get(1),traitValuesVec.get(1), fArr[1]));
+        System.out.println("Printing r at tip 2:" + PruneUtils.getRForLeafBM(aMatList.get(2),traitValuesVec.get(2), fArr[2]));
 
-        PruneUtils.setRForIntNode(tree.getNode(3), aPlusLListList, invAPlusLList, mVecList, rArr, fArr);
-        System.out.println("Printing r at this internal node:" + rArr[3]);
-        PruneUtils.setRForIntNode(tree.getNode(4), aPlusLListList, invAPlusLList, mVecList, rArr, fArr);
-
+        PruneUtils.setRForIntNode(tree.getNode(3), aMatList, aPlusLListList, invAPlusLList, mVecList, traitValuesVec, rArr, fArr);
+        System.out.println("Printing r at this internal node 3:" + rArr[3]);
+        PruneUtils.setRForIntNode(tree.getNode(4), aMatList, aPlusLListList, invAPlusLList, mVecList, traitValuesVec, rArr, fArr);
+        System.out.println("Printing r at this internal node 4:" + rArr[4]);
 
     }
 }
