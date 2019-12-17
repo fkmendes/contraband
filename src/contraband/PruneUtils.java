@@ -147,7 +147,7 @@ public class PruneUtils {
      * There will be one r per leaf (and one r per internal node).
      */
     public static double getRForLeafBM(RealMatrix aMat, RealVector traitsValues, RealVector tTraitsValues, double f) {
-        double r = aMat.preMultiply(traitsValues).dotProduct(traitsValues);
+        double r = aMat.preMultiply(traitsValues).dotProduct(traitsValues) + f;
 
         return r;
     }
