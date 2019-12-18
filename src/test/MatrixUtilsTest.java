@@ -18,6 +18,7 @@ public class MatrixUtilsTest {
 	private RealMatrix resRM4;
 	private RealMatrix resRM5;
 	private RealMatrix resRM6;
+	private RealMatrix resRM7;
 	@Before
 	public void setUP() throws Exception {
 		// block for matrix add
@@ -112,6 +113,22 @@ public class MatrixUtilsTest {
 		resRM6 = MatrixUtils.matrixTranspose(inRM6, resRM6);
 		GeneralUtils.displayRealMatrix(resRM6);
 
+		System.out.println("Display matrix multiply resRM7:");
+		RealMatrix inRM7 = new Array2DRowRealMatrix(new double [][]
+				{{2.380636, 2.433278, 3.357671},
+				 {3.346462, 2.153579, 3.418715},
+				 {1.607831, 3.758575, 2.292255},
+				 {2.131158, 3.110730, 2.237507}
+				});
+		RealMatrix rmToMultiply = new Array2DRowRealMatrix(new double [][]
+				{{0.7944735, 0.3748316, 0.225552, 0.9200768, 0.9144262},
+				 {2.6796039, 0.8591790, 2.216772, 3.0319734, 2.7087573},
+				 {0.8331090, 2.0754329, 2.853639, 1.6177571, 1.1335097}
+				});
+		resRM7 = new Array2DRowRealMatrix(new double [4][5]);
+		resRM7 = MatrixUtils.matrixMultiply(inRM7, rmToMultiply, resRM7);
+		GeneralUtils.displayRealMatrix(resRM7);
+
 	}
 
 	@Test
@@ -122,5 +139,6 @@ public class MatrixUtilsTest {
 		Assert.assertEquals(-5.285823, resRM4.getEntry(3,4), EPSILON);
 		Assert.assertEquals(5.550460, resRM5.getEntry(0,1), EPSILON);
 		Assert.assertEquals(5.431592, resRM6.getEntry(3,4), EPSILON);
+		Assert.assertEquals(15.23582, resRM7.getEntry(2,2), EPSILON);
 	}
 }

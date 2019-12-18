@@ -54,6 +54,11 @@ public class MatrixUtilsTestDriver {
 		System.out.println("Printing matrix inRM * 2:");
 		GeneralUtils.displayRealMatrix(resRM);
 
+		// printing result for multiply
+		resRM = MatrixUtils.matrixMultiply(inRM, rmToAdd, resRM);
+		System.out.println("Printing matrix inRM * rmToAdd:");
+		GeneralUtils.displayRealMatrix(resRM);
+
 		// printing result for scalar add
 		MatrixUtils.matrixScalarAdd(inRM, 2, resRM);
 		System.out.println("Printing matrix inRM + 2:");

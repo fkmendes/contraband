@@ -51,6 +51,31 @@ public class MatrixUtils {
     }
 
     /*
+     *
+     */
+    public static RealMatrix matrixMultiply(RealMatrix inRM, RealMatrix rmToMultiply, RealMatrix resRM) {
+        if (inRM.getColumnDimension() == rmToMultiply.getRowDimension()
+            && inRM.getRowDimension() == resRM.getRowDimension()
+            && rmToMultiply.getColumnDimension() == resRM.getColumnDimension()) {
+            for (int i = 0; i < resRM.getRowDimension(); i ++) {
+
+                for (int j = 0; j < resRM.getColumnDimension(); j ++) {
+                    double sumTemp = 0.0;
+
+                    for (int k = 0; k < rmToMultiply.getRowDimension(); k++) {
+                        sumTemp += inRM.getEntry(i, k) * rmToMultiply.getEntry(k, j);
+                    }
+
+                    resRM.setEntry(i, j, sumTemp);
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("Dimension does not match in matrix multiply!");
+        }
+        return resRM;
+    }
+
+    /*
      * This method multiplies matrix inRM by a double scalar.
      *
      * Note that this method returns a RealMatrix
