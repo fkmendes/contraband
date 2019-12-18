@@ -21,6 +21,8 @@ public class MatrixUtils {
                     resRM.setEntry(i, j, inRM.getEntry(i, j) + rmToAdd.getEntry(i, j));
                 }
             }
+        } else {
+            throw new IllegalArgumentException("Dimension does not match in matrix add!");
         }
         return resRM;
     }
@@ -42,6 +44,8 @@ public class MatrixUtils {
                     resRM.setEntry(i, j, inRM.getEntry(i, j) - rmToSubtract.getEntry(i, j));
                 }
             }
+        } else {
+            throw new IllegalArgumentException("Dimension does not match in matrix subtract!");
         }
         return resRM;
     }
@@ -61,6 +65,8 @@ public class MatrixUtils {
                     resRM.setEntry(i, j, inRM.getEntry(i, j) * scalar);
                 }
             }
+        } else {
+            throw new IllegalArgumentException("Dimension does not match in matrix scalar multiply!");
         }
         return resRM;
     }
@@ -80,6 +86,8 @@ public class MatrixUtils {
                     resRM.setEntry(i, j, inRM.getEntry(i, j) + scalar);
                 }
             }
+        } else {
+            throw new IllegalArgumentException("Dimension does not match in matrix scalar add!");
         }
         return resRM;
     }
@@ -100,6 +108,8 @@ public class MatrixUtils {
                     resRM.setEntry(j, i, inRM.getEntry(i, j));
                 }
             }
+        } else {
+            throw new IllegalArgumentException("Dimension does not match in matrix transpose!");
         }
         return resRM;
     }
