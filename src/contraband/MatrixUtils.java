@@ -1,6 +1,7 @@
 package contraband;
 
 import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 
 public class MatrixUtils {
 
@@ -139,5 +140,64 @@ public class MatrixUtils {
         return resRM;
     }
 
+    /*
+     * This method calculates vector dotProduct and matrix preMultiply, i.e.
+     * inVec.transpose * inRm * inVec,
+     * and returns a double value.
+     */
+    public static double vecDotMatrixPreMultiply(RealVector inVec, RealMatrix inRM) {
+        double res = 0.0;
+        for (int i = 0; i < inRM.getColumnDimension(); i++) {
+            double sum = 0.0;
+            for (int j = 0; j < inRM.getRowDimension(); j++) {
+                sum = sum + inVec.getEntry(j) * inRM.getEntry(i, j);
+            }
+            res = res + sum * inVec.getEntry(i);
+        }
+        return res;
+    }
+
+    /*
+     * This method calculates matrix preMultiply, i.e.
+     * resVec <- inVec * inRM
+     *
+     * Note that this method not only populates resVec,
+     * but also returns resVec.
+     */
+    public static RealVector matrixPremultiply(RealVector inVec, RealMatrix inRM, RealVector resVec) {
+        for (int i = 0; i < inRM.getColumnDimension(); i++) {
+            double sum = 0.0;
+            for (int j = 0; j < inRM.getRowDimension(); j++) {
+                sum = sum + inVec.getEntry(j) * inRM.getEntry(i, j);
+            }
+            resVec.setEntry(i, sum);
+        }
+        return resVec;
+    }
+
+    /*
+     * This method calculates vector map multiply, i.e.
+     * resVec <- inVec * scalar
+     *
+     * Note that this not only populates resVec,
+     * but also returns resVec.
+     */
+    public static RealVector vectorMapmultiply(RealVector inVec, double scalar, RealVector resVec) {
+        for (int i = 0; i < inVec.getDimension(); i++) {
+            resVec.setEntry(i, inVec.getEntry(i) * scalar);
+        }
+        return resVec;
+    }
+
+    /*
+     * This method adds inVec to vecToAdd, i.e.
+     * resVec <- inVec + vecToAdd
+     */
+    public static RealVector vectorAdd (RealVector inVec, RealVector vecToAdd, RealVector resVec) {
+        for (int i = 0; i < inVec.getDimension(); i++) {
+            resVec.setEntry(i, inVec.getEntry(i) + vecToAdd.getEntry(i));
+        }
+        return resVec;
+    }
 
 }
