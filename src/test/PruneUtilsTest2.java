@@ -1,13 +1,13 @@
 package test;
 
 import beast.evolution.tree.Node;
-import contraband.GeneralUtils;
+import contraband.utils.GeneralUtils;
 import org.apache.commons.math3.linear.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import beast.util.TreeParser;
-import contraband.PruneUtils;
+import contraband.prunelikelihood.PruneUtils;
 
 import java.util.ArrayList;
 import java.util.List;

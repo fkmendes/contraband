@@ -2,9 +2,9 @@ package testdrivers;
 
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
-import contraband.BMMVNLikelihoodOneTrait;
-import contraband.CoalCorrection;
-import contraband.OneValueContTraits;
+import contraband.mvnlikelihood.BMMVNLikelihoodOneTrait;
+import contraband.coalescent.CoalCorrection;
+import contraband.valuewrappers.OneValueContTraits;
 
 /*
  * Matches BMMVNLikelihoodTest4

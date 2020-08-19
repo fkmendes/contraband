@@ -6,7 +6,6 @@ import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
 import cern.jet.math.Functions;
-import contraband.MVNUtils;
 
 public class MVNUtilsColtTestDriver {
 

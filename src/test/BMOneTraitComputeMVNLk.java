@@ -16,8 +16,8 @@ import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-import contraband.GeneralUtils;
-import contraband.MVNUtils;
+import contraband.utils.GeneralUtils;
+import contraband.math.MVNUtils;
 
 public class BMOneTraitComputeMVNLk {
 	

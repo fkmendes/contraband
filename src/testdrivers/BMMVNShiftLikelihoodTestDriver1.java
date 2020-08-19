@@ -3,11 +3,11 @@ package testdrivers;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
-import contraband.BMMVNShiftLikelihoodOneTrait;
-// import contraband.ColorManager;
-import contraband.RateCategoryClockModel;
-import contraband.OneValueContTraits;
-import contraband.TreeToVCVMat;
+import contraband.mvnlikelihood.BMMVNShiftLikelihoodOneTrait;
+// import contraband.clock.ColorManager;
+import contraband.clock.RateCategoryClockModel;
+import contraband.valuewrappers.OneValueContTraits;
+import contraband.clock.TreeToVCVMat;
 
 /*
  * This testdriver runs the BMMVNShift class with a single rate for the whole tree (matches/reduces to BMMVNLikelihoodTestDriver)

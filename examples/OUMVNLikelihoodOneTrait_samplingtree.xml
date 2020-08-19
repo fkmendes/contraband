@@ -43,7 +43,7 @@
       <!-- END prior -->
 
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
-	<distribution id="OUMVN" spec="contraband.OUMVNLikelihoodOneTrait" eqDist="false" useRootMetaData="true">	    
+	<distribution id="OUMVN" spec="contraband.mvnlikelihood.OUMVNLikelihoodOneTrait" eqDist="false" useRootMetaData="true">
 	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,sp2:1.0):1.0,sp3:2.0);" offset="0" singlechild="false" binarizeMultifurcations="true">
 
 	    <taxonset id="TaxonSet" spec="TaxonSet">
@@ -53,11 +53,11 @@
 	    </taxonset>
 	  </tree>
   
-	  <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" nTraits="1" spNames="sp1,sp2,sp3">
+	  <oneTraitData id="oneTraitData" spec="contraband.valuewrappers.OneValueContTraits" nTraits="1" spNames="sp1,sp2,sp3">
 	    <traitValues id="fixedTraitvalues" spec="parameter.RealParameter">4.1 4.5 5.9</traitValues>
 	  </oneTraitData>
 
-	  <optimumManager id="optimumManager" spec="contraband.ColorManager" nTraits="1" nColors="1" coalCorrection="false">
+	  <optimumManager id="optimumManager" spec="contraband.clock.ColorManager" nTraits="1" nColors="1" coalCorrection="false">
 	    <tree idref="TheTree"/>
 	    <colorValues id="OUTheta" spec="parameter.RealParameter">1.0</colorValues>
 	    <colorAssignments id="OUThetaAssignments" spec="parameter.IntegerParameter">0 0 0 0 0</colorAssignments>

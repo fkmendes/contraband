@@ -3,15 +3,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
-import contraband.EBUtils;
-import contraband.GeneralUtils;
-import contraband.MVNUtils;
+import contraband.math.EBUtils;
+import contraband.math.MVNUtils;
 
 
 // In this test we will verify the value of function GChunk, kronecker and computeEBtMat for an Early Burst model.
@@ -51,7 +49,7 @@ public class EBcomputeEBtMatTest {
 		// GChunk and covariance calculation
 		double[][] gMat = new double[n][n];
 		res1 = new double[n * m][n * m];
-		EBUtils.Gchunk(g, tMatInput, gMat);
+		EBUtils.computeGSpeedMat(g, tMatInput, gMat);
 		
 		EBUtils.computeEBtMat(gMat, sigmaMat, res1);
 		
@@ -84,7 +82,7 @@ public class EBcomputeEBtMatTest {
 		// GChunk and covariance calculation
 		double[][] gMat = new double[n][n];
 		res2 = new double[n * m][n * m];
-		EBUtils.Gchunk(g, tMatInput, gMat);
+		EBUtils.computeGSpeedMat(g, tMatInput, gMat);
 		
 		EBUtils.computeEBtMat(gMat, sigmaMat, res2);
 		

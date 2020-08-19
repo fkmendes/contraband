@@ -9,9 +9,9 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
-// import contraband.ColorManager;
-import contraband.RateCategoryClockModel;
-import contraband.TreeToVCVMat;
+// import contraband.clock.ColorManager;
+import contraband.clock.RateCategoryClockModel;
+import contraband.clock.TreeToVCVMat;
 
 public class ColorManagerTest {
 

@@ -9,7 +9,7 @@ import beast.util.TreeParser;
 
 import java.util.ArrayList;
 import java.util.List;
-import contraband.MVNUtils;
+import contraband.math.MVNUtils;
 
 public class MVNPhyloTMatTest {
 	

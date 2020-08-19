@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import beast.core.parameter.RealParameter;
-import contraband.OneValueContTraits;
+import contraband.valuewrappers.OneValueContTraits;
 
 public class OneValueContTraitsTest {
 

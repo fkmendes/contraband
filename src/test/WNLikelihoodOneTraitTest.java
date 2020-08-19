@@ -6,8 +6,8 @@ import org.junit.Test;
 
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
-import contraband.OneValueContTraits;
-import contraband.WNLikelihood;
+import contraband.valuewrappers.OneValueContTraits;
+import contraband.otherlikelihood.WNLikelihood;
 
 public class WNLikelihoodOneTraitTest {
 

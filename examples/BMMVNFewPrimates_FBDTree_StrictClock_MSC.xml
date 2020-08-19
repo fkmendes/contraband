@@ -1218,15 +1218,15 @@
 
     <!-- START: likelihood -->
     <distribution id="likelihood" spec="util.CompoundDistribution">
-      <distribution id="BMMVN" spec="contraband.BMMVNLikelihoodOneTrait" doCoalCorrection="true">
+      <distribution id="BMMVN" spec="contraband.mvnlikelihood.BMMVNLikelihoodOneTrait" doCoalCorrection="true">
         <tree idref="Tree.t:Species"/>
 
-	<coalCorrector id="CoalCorrector" spec="contraband.CoalCorrection">
+	<coalCorrector id="CoalCorrector" spec="contraband.coalescent.CoalCorrection">
 	  <popSizes idref="constPopSizes.Species"/>
 	  <tree idref="Tree.t:Species"/>
 	</coalCorrector>
 
-	<oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" spNames="Pan_troglodytes,Homo_sapiens,Gorilla_gorilla,Macaca_mulatta,Aotus_nancymaae,Carlito_syrichta,Otolemur_garnettii,Galeopterus_variegatus,Absarokius_abbotti,Abuqatrania_basiodontos,Adapis_parisiensis,Aegyptopithecus_zeuxis" nTraits="1">
+	<oneTraitData id="oneTraitData" spec="contraband.valuewrappers.OneValueContTraits" spNames="Pan_troglodytes,Homo_sapiens,Gorilla_gorilla,Macaca_mulatta,Aotus_nancymaae,Carlito_syrichta,Otolemur_garnettii,Galeopterus_variegatus,Absarokius_abbotti,Abuqatrania_basiodontos,Adapis_parisiensis,Aegyptopithecus_zeuxis" nTraits="1">
 	  <traitValues id="fixedTraitValues" spec="parameter.RealParameter">1.630427875 1.857935265 2.23146959 1.041392685 -0.100179498 -0.872895202 -0.100179498 0.031408464 -0.698970004 -0.467245621 0.113943352 0.826074803</traitValues>
 	</oneTraitData>
 

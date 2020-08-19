@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import contraband.MVNUtils;
+import contraband.math.MVNUtils;
 
 public class SampleNormalLogLkTest {
 	double logLik;

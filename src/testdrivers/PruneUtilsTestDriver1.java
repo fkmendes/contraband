@@ -1,8 +1,8 @@
 package testdrivers;
 
 import beast.util.TreeParser;
-import contraband.GeneralUtils;
-import contraband.PruneUtils;
+import contraband.utils.GeneralUtils;
+import contraband.prunelikelihood.PruneUtils;
 import org.apache.commons.math3.linear.*;
 import beast.evolution.tree.Node;
 import java.util.ArrayList;

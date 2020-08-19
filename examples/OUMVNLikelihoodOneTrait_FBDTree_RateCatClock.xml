@@ -69,11 +69,11 @@
       <!-- END prior -->
 
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
-	<distribution id="rejectionSampling" spec="contraband.RateCategoryIdentifiability">
+	<distribution id="rejectionSampling" spec="contraband.otherlikelihood.RateCategoryIdentifiability">
 	  <rates idref="OUTheta"/>
 	</distribution>
 
- 	<distribution id="OUMVN" spec="contraband.OUMVNLikelihoodOneTrait" eqDist="false" useRootMetaData="true">
+ 	<distribution id="OUMVN" spec="contraband.mvnlikelihood.OUMVNLikelihoodOneTrait" eqDist="false" useRootMetaData="true">
 	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,f2:0.10):1.0,(sp2:1.0,f1:0.8):1.0)" offset="0" singlechild="false">
 	    <trait id="FossilSet" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
 	      sp1=0.0,
@@ -91,12 +91,12 @@
 	    </taxonset>
 	  </tree>
 
-	  <oneTraitData id="oneTraitData" spec="contraband.OneValueContTraits" nTraits="1" spNames="sp1,sp2,f1,f2">
+	  <oneTraitData id="oneTraitData" spec="contraband.valuewrappers.OneValueContTraits" nTraits="1" spNames="sp1,sp2,f1,f2">
 	    <traitValues id="fixedTraitValues" spec="parameter.RealParameter">0.3975946 0.2423501 -0.6398611 0.3134564</traitValues>
 	  </oneTraitData>
 
-	  <optimumManager id="optimumManager" spec="contraband.TreeToVCVMat" coalCorrection="false">
-	    <branchRateModel id="rateCatClock" spec="contraband.RateCategoryClockModel" nCat="2">
+	  <optimumManager id="optimumManager" spec="contraband.clock.TreeToVCVMat" coalCorrection="false">
+	    <branchRateModel id="rateCatClock" spec="contraband.clock.RateCategoryClockModel" nCat="2">
 	      <rates id="OUTheta" spec="parameter.RealParameter" lower="-Infinity" upper="Infinity">0.01 0.05</rates>
 	      <rateCatAssign id="OUThetaAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0 0 0 0 0 0 0</rateCatAssign>
 	      <tree idref="TheTree"/>

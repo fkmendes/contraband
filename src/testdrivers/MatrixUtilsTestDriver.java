@@ -3,8 +3,8 @@ package testdrivers;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
-import contraband.MatrixUtils;
-import contraband.GeneralUtils;
+import contraband.math.MatrixUtils;
+import contraband.utils.GeneralUtils;
 
 
 public class MatrixUtilsTestDriver {

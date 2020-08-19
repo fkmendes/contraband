@@ -1,6 +1,9 @@
 package test;
 
-import contraband.*;
+import contraband.clock.RateCategoryClockModel;
+import contraband.clock.TreeToVCVMat;
+import contraband.mvnlikelihood.OUMVNLikelihoodOneTrait;
+import contraband.valuewrappers.OneValueContTraits;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

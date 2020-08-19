@@ -2,7 +2,7 @@ package testdrivers;
 
 import java.util.Arrays;
 
-import contraband.ManyValuesOneContTrait;
+import contraband.valuewrappers.ManyValuesOneContTrait;
 
 public class ManyValuesOneContTraitTestDriver {
 

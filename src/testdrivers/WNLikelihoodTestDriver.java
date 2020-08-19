@@ -2,9 +2,9 @@ package testdrivers;
 
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
-import contraband.MVNUtils;
-import contraband.OneValueContTraits;
-import contraband.WNLikelihood;
+import contraband.math.MVNUtils;
+import contraband.valuewrappers.OneValueContTraits;
+import contraband.otherlikelihood.WNLikelihood;
 
 /*
  * This testdriver runs the WNLikelihood class with a single rate for the whole tree

@@ -3,6 +3,7 @@ package test;
 import java.util.ArrayList;
 import java.util.List;
 
+import contraband.math.MatrixUtils;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.CholeskyDecomposition;
 import org.apache.commons.math3.linear.EigenDecomposition;
@@ -10,9 +11,9 @@ import org.apache.commons.math3.linear.RealMatrix;
 
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
-import contraband.GeneralUtils;
-import contraband.MVNUtils;
-import contraband.OUUtils;
+import contraband.utils.GeneralUtils;
+import contraband.math.MVNUtils;
+import contraband.math.OUUtils;
 
 public class OUmultiTraitGeneralTest {
 
@@ -88,7 +89,7 @@ public class OUmultiTraitGeneralTest {
 		
 		// Element wise product
 		double[][] elementWiseRes = new double[m][m];
-		GeneralUtils.elementWiseProduct(mainChunk, ecChunk.getData(), elementWiseRes);
+		MatrixUtils.elementWiseProduct(mainChunk, ecChunk.getData(), elementWiseRes);
 		System.out.println("elementwise");
 		GeneralUtils.display2DArray(elementWiseRes);
 		
@@ -128,7 +129,7 @@ public class OUmultiTraitGeneralTest {
 		GeneralUtils.displayRealMatrix(W01);
 		
 		// Test a forLoopRange
-		int[] Lista = GeneralUtils.forLoopRange(20, 10); //Lista de 20 hasta 29
+		int[] Lista = MatrixUtils.forLoopRange(20, 10); //Lista de 20 hasta 29
 		System.out.println("Lista de prueba = " + Lista[2]);
 		
 		// Works fine

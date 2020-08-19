@@ -5,8 +5,8 @@ import org.apache.commons.math3.linear.RealMatrix;
 
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
-import contraband.GeneralUtils;
-import contraband.MVNUtils;
+import contraband.utils.GeneralUtils;
+import contraband.math.MVNUtils;
 
 public class RateMatrixTestDriver {
 

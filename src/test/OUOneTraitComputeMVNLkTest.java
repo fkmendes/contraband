@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import contraband.GeneralUtils;
-import contraband.MVNUtils;
+import contraband.utils.GeneralUtils;
+import contraband.math.MVNUtils;
 import beast.evolution.tree.Node;
-import contraband.OUUtils;
+import contraband.math.OUUtils;
 
 public class OUOneTraitComputeMVNLkTest {
 	

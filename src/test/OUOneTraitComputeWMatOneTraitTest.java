@@ -12,8 +12,7 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
-import contraband.ColorManager;
-import contraband.OUUtils;
+import contraband.clock.ColorManager;
 
 /*
  * This test is deprecated because color manager now does handle rate (color) values anymore

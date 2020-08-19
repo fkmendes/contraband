@@ -6,8 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import beast.core.parameter.RealParameter;
-import contraband.JiveLikelihood;
-import contraband.ManyValuesOneContTrait;
+import contraband.otherlikelihood.JiveLikelihood;
+import contraband.valuewrappers.ManyValuesOneContTrait;
 
 public class JiveLikelihoodTest {
 

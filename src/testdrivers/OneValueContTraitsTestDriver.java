@@ -1,12 +1,9 @@
 package testdrivers;
 
 import java.util.Arrays;
-import java.util.List;
 
 import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
-import contraband.OneValueContTraits;
+import contraband.valuewrappers.OneValueContTraits;
 
 public class OneValueContTraitsTestDriver {
 

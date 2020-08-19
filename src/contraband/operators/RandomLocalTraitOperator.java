@@ -30,9 +30,8 @@ import beast.core.Input.Validate;
 import beast.core.Operator;
 import beast.core.parameter.BooleanParameter;
 import beast.core.parameter.RealParameter;
-import beast.evolution.branchratemodel.RandomLocalClockModel;
 import beast.util.Randomizer;
-import contraband.RandomLocalColorModel;
+import contraband.clock.RandomLocalColorModel;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package test;
 
-import contraband.MVNUtils;
+import contraband.math.MVNUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;

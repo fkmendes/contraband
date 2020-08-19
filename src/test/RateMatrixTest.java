@@ -1,21 +1,15 @@
 package test;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
-import contraband.GeneralUtils;
-import contraband.MVNUtils;
+import contraband.utils.GeneralUtils;
+import contraband.math.MVNUtils;
 
 public class RateMatrixTest {
 

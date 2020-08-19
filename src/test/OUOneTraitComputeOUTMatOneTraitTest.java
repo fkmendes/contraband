@@ -1,5 +1,6 @@
 package test;
 
+import contraband.math.MatrixUtils;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Assert;
@@ -11,11 +12,9 @@ import beast.util.TreeParser;
 import java.util.ArrayList;
 import java.util.List;
 
-import contraband.GeneralUtils;
-
 import beast.evolution.tree.Node;
-import contraband.MVNUtils;
-import contraband.OUUtils;
+import contraband.math.MVNUtils;
+import contraband.math.OUUtils;
 
 public class OUOneTraitComputeOUTMatOneTraitTest {
 	
@@ -74,10 +73,10 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 		OUUtils.computeOUTMatOneTrait(n, alphaRI, tMatInput, ouTMat1RI, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMat1RM, true);
 		
-		GeneralUtils.scalarByRealMatrix(ouTMat1FI, sigsqFI);
-		GeneralUtils.scalarByRealMatrix(ouTMat1FM, sigsqFM);
-		GeneralUtils.scalarByRealMatrix(ouTMat1RI, sigsqRI);
-		GeneralUtils.scalarByRealMatrix(ouTMat1RM, sigsqRM);
+		MatrixUtils.scalarByRealMatrix(ouTMat1FI, sigsqFI);
+		MatrixUtils.scalarByRealMatrix(ouTMat1FM, sigsqFM);
+		MatrixUtils.scalarByRealMatrix(ouTMat1RI, sigsqRI);
+		MatrixUtils.scalarByRealMatrix(ouTMat1RM, sigsqRM);
 	}
 	
 	/*
@@ -123,10 +122,10 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 		OUUtils.computeOUTMatOneTrait(n, alphaRI, tMatInput, ouTMat2RI, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMat2RM, true);
 
-		GeneralUtils.scalarByRealMatrix(ouTMat2FI, sigsqFI);
-		GeneralUtils.scalarByRealMatrix(ouTMat2FM, sigsqFM);
-		GeneralUtils.scalarByRealMatrix(ouTMat2RI, sigsqRI);
-		GeneralUtils.scalarByRealMatrix(ouTMat2RM, sigsqRM);
+		MatrixUtils.scalarByRealMatrix(ouTMat2FI, sigsqFI);
+		MatrixUtils.scalarByRealMatrix(ouTMat2FM, sigsqFM);
+		MatrixUtils.scalarByRealMatrix(ouTMat2RI, sigsqRI);
+		MatrixUtils.scalarByRealMatrix(ouTMat2RM, sigsqRM);
 	}
 	
 	/*
@@ -173,10 +172,10 @@ public class OUOneTraitComputeOUTMatOneTraitTest {
 		OUUtils.computeOUTMatOneTrait(n, alphaRI, tMatInput, ouTMat3RI, true);
 		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMat3RM, true);
 		
-		GeneralUtils.scalarByRealMatrix(ouTMat3FI, sigsqFI);
-		GeneralUtils.scalarByRealMatrix(ouTMat3FM, sigsqFM);
-		GeneralUtils.scalarByRealMatrix(ouTMat3RI, sigsqRI);
-		GeneralUtils.scalarByRealMatrix(ouTMat3RM, sigsqRM);
+		MatrixUtils.scalarByRealMatrix(ouTMat3FI, sigsqFI);
+		MatrixUtils.scalarByRealMatrix(ouTMat3FM, sigsqFM);
+		MatrixUtils.scalarByRealMatrix(ouTMat3RI, sigsqRI);
+		MatrixUtils.scalarByRealMatrix(ouTMat3RM, sigsqRM);
 	}
 
 	@Test	// Test 1

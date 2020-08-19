@@ -1,6 +1,6 @@
 package testdrivers;
 
-import contraband.CoalUtils;
+import contraband.coalescent.CoalUtils;
 
 public class CoalUtilsTestDriver {
 

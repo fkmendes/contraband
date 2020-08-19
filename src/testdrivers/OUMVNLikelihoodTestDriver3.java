@@ -3,11 +3,10 @@ package testdrivers;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
-import contraband.ColorManager;
-import contraband.OUMVNLikelihoodOneTrait;
-import contraband.OneValueContTraits;
-import contraband.RateCategoryClockModel;
-import contraband.TreeToVCVMat;
+import contraband.mvnlikelihood.OUMVNLikelihoodOneTrait;
+import contraband.valuewrappers.OneValueContTraits;
+import contraband.clock.RateCategoryClockModel;
+import contraband.clock.TreeToVCVMat;
 
 public class OUMVNLikelihoodTestDriver3 {
 

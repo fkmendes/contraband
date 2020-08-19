@@ -1,6 +1,6 @@
 package testdrivers;
 
-import contraband.GeneralUtils;
+import contraband.utils.GeneralUtils;
 import org.apache.commons.math3.linear.*;
 
 public class MatrixOperationTest {

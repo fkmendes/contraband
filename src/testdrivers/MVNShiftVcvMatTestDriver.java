@@ -11,8 +11,8 @@ import org.apache.commons.math3.linear.RealVector;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
-import contraband.ColorManager;
-import contraband.MVNUtils;
+import contraband.clock.ColorManager;
+import contraband.math.MVNUtils;
 
 public class MVNShiftVcvMatTestDriver {
 

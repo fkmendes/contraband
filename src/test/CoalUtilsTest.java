@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
-import contraband.CoalUtils;
+import contraband.coalescent.CoalUtils;
 
 public class CoalUtilsTest {
 

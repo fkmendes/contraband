@@ -3,9 +3,9 @@ package testdrivers;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
-import contraband.ColorManager;
-import contraband.OUMVNLikelihoodOneTrait;
-import contraband.OneValueContTraits;
+import contraband.clock.ColorManager;
+import contraband.mvnlikelihood.OUMVNLikelihoodOneTrait;
+import contraband.valuewrappers.OneValueContTraits;
 
 public class OUMVNLikelihoodJiveRealExampleTestDriver {
 

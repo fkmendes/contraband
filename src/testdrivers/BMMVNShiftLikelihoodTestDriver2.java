@@ -3,10 +3,10 @@ package testdrivers;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
-import contraband.BMMVNShiftLikelihoodOneTrait;
-import contraband.RateCategoryClockModel;
-import contraband.OneValueContTraits;
-import contraband.TreeToVCVMat;
+import contraband.mvnlikelihood.BMMVNShiftLikelihoodOneTrait;
+import contraband.clock.RateCategoryClockModel;
+import contraband.valuewrappers.OneValueContTraits;
+import contraband.clock.TreeToVCVMat;
 
 /*
  * This TestDriver matches BMMVNShiftLikelihoodOneTest4. Small tree, shift-rate (2 rates) BM
