@@ -35,7 +35,7 @@ public class BMMVNShiftLikelihoodOneTraitTest {
     BMMVNShiftLikelihoodOneTrait bmLk;
 
     /*
-     * Small tree, one trait, one rate, without and with root edge (of 1.0). Should match/reduce to BMMVNLikelihoodOneTraitTest.
+     * (1) Small tree, one trait, one rate, without and with root edge (of 1.0). Should match/reduce to BMMVNLikelihoodOneTraitTest.
      */
     @Test
     public void testBMMVNShiftLkOneTraitSmallTree() {
@@ -85,7 +85,7 @@ public class BMMVNShiftLikelihoodOneTraitTest {
     }
 
     /*
-     * Large ultrametric tree, one trait, one rate, no shifts.
+     * (2) Large ultrametric tree, one trait, one rate, no shifts.
      */
     @Test
     public void testBMMVNShiftLkOneTraitLargeTree() {
@@ -121,7 +121,7 @@ public class BMMVNShiftLikelihoodOneTraitTest {
     }
 
     /*
-     * Large NON-ultrametric tree, one trait, one rate, no shifts.
+     * (3) Large NON-ultrametric tree, one trait, one rate, no shifts.
      */
     @Test
     public void testBMMVNShiftLkOneTraitLargeTreeNonUltra() {
@@ -157,7 +157,7 @@ public class BMMVNShiftLikelihoodOneTraitTest {
     }
 
     /*
-     * Small ultrametric tree, one trait, two rates (one shift).
+     * (4) Small ultrametric tree, one trait, two rates (one shift).
      */
     @Test
     public void testBMMVNShiftLkOneTraitSmallTreeTwoRates() {
@@ -193,7 +193,7 @@ public class BMMVNShiftLikelihoodOneTraitTest {
     }
 
     /*
-     * Large ultrametric tree, one trait, three rates (two shifts).
+     * (5) Large ultrametric tree, one trait, three rates (two shifts).
      */
     @Test
     public void testBMMVNShiftLkOneTraitLargeTreeThreeRates() {
@@ -245,7 +245,7 @@ public class BMMVNShiftLikelihoodOneTraitTest {
     }
 
     /*
-     * Large NON-ultrametric tree with sampled ancestors, one trait, one rate.
+     * (6) Large NON-ultrametric tree with sampled ancestors, one trait, one rate.
      */
     @Test
     public void testBMMVNShiftLkOneTraitLargeTreeNonUltraSampledAnc() {
@@ -281,7 +281,7 @@ public class BMMVNShiftLikelihoodOneTraitTest {
     }
 
     /*
-     * Large NON-ultrametric tree with sampled ancestors, no fossils, one trait, one rate.
+     * (7) Large NON-ultrametric tree with sampled ancestors, no fossils, one trait, one rate.
      */
     @Test
     public void testBMMVNShiftLkOneTraitLargeTreeNonUltraSampledAncNoFossils() {

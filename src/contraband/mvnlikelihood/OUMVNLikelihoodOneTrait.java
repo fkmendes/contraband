@@ -19,7 +19,7 @@ import beast.core.Input.Validate;
 
 public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 
-	final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Sigma^2, the variance of the process.", Validate.REQUIRED);
+	final public Input<RealParameter> sigmasqInput = new Input<>("sigmaSq", "Sigma^2, the variance of the process.", Validate.REQUIRED);
 	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "Root trait value, or y_0, also the mean of the stationary distribution at the root if one is assumed.", Validate.REQUIRED);
 	final public Input<Boolean> eqDistInput = new Input<>("eqDist", "Whether or not to assume equilibrium (stationary) distribution at the root. The mean of that distribution will rootValue", Validate.REQUIRED);
 	final public Input<Boolean> useRootMetaDataInput = new Input<>("useRootMetaData", "Whether or not to use root meta data (specified optimum). If set to 'false', root optimum is set to eldest regime (regimes are numbered from the root toward the tips).", Validate.REQUIRED);

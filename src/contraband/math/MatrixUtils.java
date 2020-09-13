@@ -199,7 +199,7 @@ public class MatrixUtils {
         }
         return resVec;
     }
-    
+
     public static void elementWiseProduct(double[][] mat1, double[][] mat2, double[][] res) {
         int rows = mat1.length;
         int cols = mat1[0].length;

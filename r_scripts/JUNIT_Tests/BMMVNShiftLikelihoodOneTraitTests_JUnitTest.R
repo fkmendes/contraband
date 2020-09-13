@@ -9,59 +9,10 @@
 # (6) testBMMVNShiftLkOneTraitLargeTreeNonUltraSampledAnc
 # (7) testBMMVNShiftLkOneTraitLargeTreeNonUltraSampledAncNoFossils
 
-# 'MVNShiftVcvMatTest'
-# (1) MVNShiftVcvMatTest
-# (2) MVNShiftVcvMatTest2
-
 library(TreeSim)
 library(FossilSim)
 library(mvMORPH)
 library(phytools)
-
-### 'MVNShiftVcvMatTest'
-
-tr <- read.tree(text="((sp1:1.0,sp2:1.0):1.0,sp3:2.0);")
-tr <- paintSubTree(tr, node=5, state=2)
-plotSimmap(tr)
-# black = 0.1, red = 0.2
-
-## sigmas <- matrix(c((0.1+5.0), 0.1, 0.0, 0.1, (0.1+5.0), 0.0, 0.0, 0.0, 0.1*2), 3) # works as well, but not the "right" way
-sigmas <- list(black=2.0, red=0.2)
-
-set.seed(1)
-dat <- mvSIM(tr, nsim=1, model="BMM", param=list(ntraits=1, sigma=sigmas, theta=0.0))
-res <- mvBM(tr, dat, model="BMM")
-res$sigma # 0.2804859, 0.226648
-res$theta # 0.362281
-res$LogLik # -3.106221
-
-## (2) 'MVNShiftVcvMatTest2'
-
-tr <- read.tree(text="(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):2.0,(sp4:2.5,sp5:2.5):1.5);")
-## plotTree(tr, branch.numbers=T)
-## edgelabels()
-## painting internal nodes
-tr <- paintSubTree(tr, node=7, state=3, stem=TRUE)
-tr <- paintSubTree(tr, node=8, state=2, stem=TRUE)
-tr <- paintSubTree(tr, node=9, state=5, stem=TRUE)
-
-## painting tips
-tr <- paintBranches(tr, edge=1, state=4)
-tr <- paintBranches(tr, edge=2, state=5)
-tr <- paintBranches(tr, edge=3, state=1)
-tr <- paintBranches(tr, edge=4, state=1)
-tr <- paintBranches(tr, edge=5, state=1)
-plotSimmap(tr)
-
-## sigmas <- matrix(c(2.2, 1.4, 0.8, 0.0, 0.0, 1.4, 2.2, 0.8, 0.0, 0.0, 0.8, 0.8, 1.2, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 1.5, 0.0, 0.0, 0.0, 1.5, 2.0),5)
-sigmas <- list()
-
-set.seed(2)
-dat <- mvSIM(tr, model="BMM", nsim=1, param=list(ntraits=1, sigma=sigmas, theta=0.0))
-res <- mvBM(tr, dat, model="BMM")
-res$sigma # 0.05573311, 4.31897, 0.2748663, 1.884965e-13, 0.3798448
-res$theta # -1.047182 (root value)
-res$LogLik # -6.355337
 
 ## 'BMMVNShiftLikelihoodOneTraitTest'
 ### (1) testBMMVNShiftLkOneTraitSmallTree: see expectations from BMMVNLikelihoodOnetraitTest
@@ -167,16 +118,53 @@ names(dat) <- "trait.value"
 
 res <- mvBM(tr, dat, model="BM1")
 
-res$sigma # 0.06715078
-res$theta # -0.4990207
-res$LogLik # -48.54424
-
-## (9) 'BMMVNShiftLikelihoodOneTraitTest7'
-set.seed(123)
-tr <- sim.fbd.taxa(10, 1, 0.01, 0.005, 0.01, complete=FALSE)[[1]]
-dat <- mvSIM(tr, nsim=1, model="BM1", param=list(ntraits=1, sigma=0.1, theta=0.0))
-res <- mvBM(tr, dat, model="BM1")
-
 res$sigma # 0.07044749
 res$theta # 0.8925689
 res$LogLik # -38.44236
+
+##### Later have a look at this, might deprecate
+# 'MVNShiftVcvMatTest'
+# (1) MVNShiftVcvMatTest
+# (2) MVNShiftVcvMatTest2
+
+### (1) 'MVNShiftVcvMatTest'
+
+## tr <- read.tree(text="((sp1:1.0,sp2:1.0):1.0,sp3:2.0);")
+## tr <- paintSubTree(tr, node=5, state=2)
+## plotSimmap(tr) # black = 0.1, red = 0.2
+
+## sigmas <- list(black=2.0, red=0.2)
+
+## set.seed(1)
+## dat <- mvSIM(tr, nsim=1, model="BMM", param=list(ntraits=1, sigma=sigmas, theta=0.0))
+## res <- mvBM(tr, dat, model="BMM")
+## res$sigma # 0.2804859, 0.226648
+## res$theta # 0.362281
+## res$LogLik # -3.106221
+
+## (2) 'MVNShiftVcvMatTest2'
+
+## tr <- read.tree(text="(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):2.0,(sp4:2.5,sp5:2.5):1.5);")
+## plotTree(tr, branch.numbers=T)
+## edgelabels()
+## painting internal nodes
+## tr <- paintSubTree(tr, node=7, state=3, stem=TRUE)
+## tr <- paintSubTree(tr, node=8, state=2, stem=TRUE)
+## tr <- paintSubTree(tr, node=9, state=5, stem=TRUE)
+
+## painting tips
+## tr <- paintBranches(tr, edge=1, state=4)
+## tr <- paintBranches(tr, edge=2, state=5)
+## tr <- paintBranches(tr, edge=3, state=1)
+## tr <- paintBranches(tr, edge=4, state=1)
+## tr <- paintBranches(tr, edge=5, state=1)
+## plotSimmap(tr)
+
+## sigmas <- list()
+
+## set.seed(2)
+## dat <- mvSIM(tr, model="BMM", nsim=1, param=list(ntraits=1, sigma=sigmas, theta=0.0))
+## res <- mvBM(tr, dat, model="BMM")
+## res$sigma # 0.05573311, 4.31897, 0.2748663, 1.884965e-13, 0.3798448
+## res$theta # -1.047182 (root value)
+## res$LogLik # -6.355337

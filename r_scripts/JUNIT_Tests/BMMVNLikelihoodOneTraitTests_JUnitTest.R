@@ -13,7 +13,7 @@ library(Rcpp)
 sourceCpp(file="./bm_direct_new.cpp")
 source("coalBM_lib.R")
 
-## 'BMMVNLikelihoodOneTraitTest1'
+## 'BMMVNLikelihoodOneTraitTest'
 
 ### (1) testBMMVNLkOneTraitSmallTree
 
