@@ -1,9 +1,9 @@
 package contraband.mvnlikelihood;
+
 import java.util.List;
 import java.util.Random;
 
 import contraband.math.OUUtils;
-import contraband.valuewrappers.OneValueContTraits;
 import contraband.clock.TreeToVCVMat;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -23,10 +23,11 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "Root trait value, or y_0, also the mean of the stationary distribution at the root if one is assumed.", Validate.REQUIRED);
 	final public Input<Boolean> eqDistInput = new Input<>("eqDist", "Whether or not to assume equilibrium (stationary) distribution at the root. The mean of that distribution will rootValue", Validate.REQUIRED);
 	final public Input<Boolean> useRootMetaDataInput = new Input<>("useRootMetaData", "Whether or not to use root meta data (specified optimum). If set to 'false', root optimum is set to eldest regime (regimes are numbered from the root toward the tips).", Validate.REQUIRED);
-	final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
 	final public Input<TreeToVCVMat> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
 	final public Input<RealParameter> alphaInput = new Input<>("alpha", "Pull toward optimum or optima.", Validate.REQUIRED);
-	//final public Input<ColorManager> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
+	final public Input<RealParameter> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
+	// final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED); // original implementation (for the above line) with OneValueContTraits data wrapper
+	// final public Input<ColorManager> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
 	
 	private boolean dirty;
 	private boolean eqDistAtRoot;
@@ -38,7 +39,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	private int nOptima; // used in old W mat parameterization (could remove from state technically, but am calling it a few times, so will stay here!)
 	
 	/* parameters below */
-	// private Double alpha; // could remove from state technically, but am calling it a few times, so will stay here!
+	// private Double alpha;
 	// private Double rootValue; // this is y_0, the value we condition on, or assume has a stationary distr
 	                          // the value we condition y_0 on is often theta_0 (root optimum), which is a very liberal assumption!
 	
@@ -50,19 +51,19 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	// VCV matrix
 	// private RealVector thetaVector; // needed only for old parameterization with W matrix
-	private RealVector ouMeanVector;
+	private RealVector ouMeanVec;
 	private RealMatrix ouTMat, ouVCVMat, ouInvVCVMat;
 	private LUDecomposition ouVCVMatLUD;
 	
 	// data
-	private OneValueContTraits oneTraitData;
-	private RealVector oneTraitDataVector;
+	// private OneValueContTraits oneTraitData; // original implementation with OneValueContTraits data wrapper
+	private RealVector oneTraitDataVec;
 	
 	// stored stuff
 	private RealMatrix storedVCVMat;
-	private RealVector storedOUMeanVector;
-	private RealVector storedOneTraitDataVector;
-	
+	private RealVector storedOUMeanVec;
+	private RealVector storedOneTraitDataVec;
+
 	@Override
 	public void initAndValidate() {	
 		
@@ -86,14 +87,14 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 //			 wMat = new Array2DRowRealMatrix(nSpp, nOptima);
 //		 }
 		 
-		oneTraitDataVector = new ArrayRealVector(nSpp);
-		ouMeanVector = new ArrayRealVector(nSpp);
+		oneTraitDataVec = new ArrayRealVector(nSpp);
+		ouMeanVec = new ArrayRealVector(nSpp);
 		ouTMat = new Array2DRowRealMatrix(nSpp, nSpp);
 		
 		// store	
-		storedOneTraitDataVector = new ArrayRealVector(nSpp);
+		storedOneTraitDataVec = new ArrayRealVector(nSpp);
 		storedVCVMat = MatrixUtils.createRealMatrix(nSpp, nSpp);
-		storedOUMeanVector = new ArrayRealVector(nSpp);
+		storedOUMeanVec = new ArrayRealVector(nSpp);
 		
 		// this instance vars
 		populateInstanceVars(true, true, true, true);
@@ -116,13 +117,13 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	private void populateParentInstanceVars(boolean updateVCVMat, boolean updateMean,  boolean updateData) {
 		// setting parent members
-		if (updateMean) { setProcessMeanVec(ouMeanVector); }
+		if (updateMean) { setProcessMeanVec(ouMeanVec); }
 		if (updateVCVMat) {
 			setProcessLUDec(ouVCVMatLUD);
 			setProcessInvVCVMat(ouInvVCVMat);
 		}
 		if (updateData) {
-			setProcessOneTraitDataVec(oneTraitDataVector);
+			setProcessOneTraitDataVec(oneTraitDataVec);
 		}
 	}
 	
@@ -137,7 +138,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 
 		double alpha = alphaInput.get().getValue().doubleValue();
 		
-		OUUtils.populateOUMeanVector(alpha, rootValue, getRootNode(), getAllLeafNodes(), optimumManager.getClockModel(), ouMeanVector, useRootMetaData);
+		OUUtils.populateOUMeanVector(alpha, rootValue, getRootNode(), getAllLeafNodes(), optimumManager.getClockModel(), ouMeanVec, useRootMetaData);
 
 		// testing some values by hand
 		// RealVector thetaVector = new ArrayRealVector(3);
@@ -191,11 +192,20 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	
 	@Override
 	protected void populateOneTraitDataVector() {
-		oneTraitData = oneTraitInput.get();
+		/* Original implementation with data wrapper, prior to Parameter having .getValue(aString) */
+		// oneTraitData = oneTraitInput.get();
 		
+		// int i = 0;
+		// for (Double traitValue: oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder())) {
+		//     oneTraitDataVec.setEntry(i, traitValue);
+		//	   ++i;
+		// }
+
+		String[] spNamesInPhyloTMatOrder = getSpNamesInPhyloTMatOrder();
+		RealParameter oneTraitValues = oneTraitInput.get();
 		int i = 0;
-		for (Double traitValue: oneTraitData.getTraitValues(0, getSpNamesInPhyloTMatOrder())) {
-			oneTraitDataVector.setEntry(i, traitValue);
+		for (String spName: spNamesInPhyloTMatOrder) {
+			oneTraitDataVec.setEntry(i, oneTraitValues.getValue(spName));
 			++i;
 		}
 	}
@@ -240,8 +250,8 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	@Override
 	public void store() {				
 		for (int i=0; i<nSpp; ++i) {
-			storedOUMeanVector.setEntry(i, ouMeanVector.getEntry(i)); // for JIVE
-			storedOneTraitDataVector.setEntry(i, oneTraitDataVector.getEntry(i));
+			storedOUMeanVec.setEntry(i, ouMeanVec.getEntry(i)); // for JIVE
+			storedOneTraitDataVec.setEntry(i, oneTraitDataVec.getEntry(i));
 
 			for (int j=0; j<nSpp; ++j) {
 				storedVCVMat.setEntry(i, j, ouVCVMat.getEntry(i, j));
@@ -260,13 +270,13 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		ouVCVMat = storedVCVMat;
 		storedVCVMat = realMatTmp;
 		
-		realVecTmp = ouMeanVector;
-		ouMeanVector = storedOUMeanVector;
-		storedOUMeanVector = realVecTmp;
+		realVecTmp = ouMeanVec;
+		ouMeanVec = storedOUMeanVec;
+		storedOUMeanVec = realVecTmp;
 		
-		realVecTmp = oneTraitDataVector;
-		oneTraitDataVector = storedOneTraitDataVector;
-		storedOneTraitDataVector = realVecTmp;
+		realVecTmp = oneTraitDataVec;
+		oneTraitDataVec = storedOneTraitDataVec;
+		storedOneTraitDataVec = realVecTmp;
 
 		super.restore();
 	}

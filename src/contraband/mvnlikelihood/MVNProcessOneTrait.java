@@ -3,6 +3,8 @@ package contraband.mvnlikelihood;
 import java.util.ArrayList;
 import java.util.List;
 
+import beast.core.Citation;
+import beast.core.Description;
 import contraband.coalescent.CoalCorrection;
 import contraband.math.MVNUtils;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -17,6 +19,17 @@ import beast.core.Input.Validate;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
+@Description("Matrix algebra engine for continuous trait evolutionary models. " +
+		" Used by Brownian motion and Ornstein-Uhlenbeck classes.")
+@Citation(value = "Felsenstein, J. (1985). Maximum-likelihood estimation " +
+		"of evolutionary trees from continuous characters. Am. J. Hum. Genet. 25, " +
+		"471-492.", DOI = "PMCID: PMC1762641",
+		year = 1985,
+		firstAuthorSurname = "Felsenstein")
 public abstract class MVNProcessOneTrait extends Distribution {
 	
 	final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
@@ -191,9 +204,9 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	/*
 	 * Used in previous parameterization using W matrix for OU
 	 */
-//	protected void setProcessWMat(RealVector aWVec) {
-//		wVec = aWVec;
-//	}
+    //	protected void setProcessWMat(RealVector aWVec) {
+    //		wVec = aWVec;
+    //	}
 	
 	protected void setProcessAncNodeVCVMatrix(RealMatrix aAncNodeVCVMat) {
 		ancNodeVCVMat = aAncNodeVCVMat;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution.speciation" required="BEAST v2.5.0" version="2.5">
+<beast namespace="beast.core:beast.evolution.alignment:beast.core.util:beast.evolution.operators:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
 
   <run id="mcmc" spec="MCMC" chainLength="5000000">
     <state id="state" storeEvery="5000">
@@ -12,7 +12,7 @@
       <stateNode idref="OURootValue"/>
       <stateNode idref="OUAlpha"/>
       <stateNode idref="OUTheta"/>
-      <stateNode idref="OUThetaAssignments"/>
+      <stateNode idref="OUThetaAssignments"/> 
     </state>
 
     <!-- <init id="RandomTree" spec="beast.evolution.tree.RandomTree" estimate="false" initial="@TheTree" taxa="@DummySeq"> -->
@@ -20,59 +20,61 @@
     <!--     <parameter id="randomPopSizes" name="popSize">1.0</parameter> -->
     <!--   </populationModel> -->
     <!-- </init> -->
-	    
+
+    <!-- START posterior -->
     <distribution id="posterior" spec="util.CompoundDistribution">
 
       <!-- START prior -->
       <distribution id="prior" spec="util.CompoundDistribution">
-	    <distribution id="FBD" spec="beast.evolution.speciation.SABirthDeathModel" conditionOnRhoSampling="true" birthRate="@FBDbirthRate" deathRate="@FBDdeathRate" samplingRate="@FBDsamplingRate" origin="@FBDorigin" tree="@TheTree"> 
-          <parameter id="FBDremovalProb" lower="0.0" name="removalProbability" upper="1.0">0.0</parameter>                                                                                     
-          <parameter id="FBDrho" estimate="false" lower="0.0" name="rho" upper="1.0">1.0</parameter>                                                                                 
-        </distribution>                                                                                                                                                                        
-
+	<distribution id="FBD" spec="beast.evolution.speciation.SABirthDeathModel" conditionOnRhoSampling="true" birthRate="@FBDbirthRate" deathRate="@FBDdeathRate" samplingRate="@FBDsamplingRate" origin="@FBDorigin" tree="@TheTree"> 
+          <parameter id="FBDremovalProb" lower="0.0" name="removalProbability" upper="1.0">0.0</parameter>         
+          <parameter id="FBDrho" estimate="false" lower="0.0" name="rho" upper="1.0">1.0</parameter>                                                                             
+        </distribution>
+	
         <distribution id="FBDbirthRatePrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
-	      <distr id="FBDbirthRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.0125"/>
-        </distribution>                                                                                                                                                                               
+	  <distr id="FBDbirthRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.0125"/>
+        </distribution>
 
-	    <distribution id="FBDdeathRatePrior" spec="beast.math.distributions.Prior" x="@FBDdeathRate">
-	      <distr id="FBDdeathRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.01"/>
-        </distribution>                                                                                                                                                                               
-
-		<distribution id="FBDsamplingRatePrior" spec="beast.math.distributions.Prior" x="@FBDsamplingRate">
-		  <distr id="FBDsamplingRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.0066666"/>
-        </distribution>                                                                                                                                                                               
-
-		<distribution id="FBDoriginPrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
-	  	  <distr id="FBDoriginUniform" spec="beast.math.distributions.Uniform" upper="Infinity"/>
+	<distribution id="FBDdeathRatePrior" spec="beast.math.distributions.Prior" x="@FBDdeathRate">
+	  <distr id="FBDdeathRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.01"/>
         </distribution>
         
-	    <distribution id="SigmaSqPrior" spec="beast.math.distributions.Prior" x="@OUSigmaSq">
-	  	  <distr id="Exp.OUSigmaSq" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
+	<distribution id="FBDsamplingRatePrior" spec="beast.math.distributions.Prior" x="@FBDsamplingRate">
+	  <distr id="FBDsamplingRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.0066666"/>
+        </distribution>             
+
+	<distribution id="FBDoriginPrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
+	  <distr id="FBDoriginUniform" spec="beast.math.distributions.Uniform" upper="Infinity"/>
+        </distribution>
+        
+	<distribution id="SigmaSqPrior" spec="beast.math.distributions.Prior" x="@OUSigmaSq">
+	  <distr id="Exp.OUSigmaSq" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
         </distribution>
 
-	    <distribution id="RootValuePrior" spec="beast.math.distributions.Prior" x="@OURootValue">
-	      <distr id="Normal.OURootValue" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+	<distribution id="RootValuePrior" spec="beast.math.distributions.Prior" x="@OURootValue">
+	  <distr id="Normal.OURootValue" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
 
-		<distribution id="AlphaPrior" spec="beast.math.distributions.Prior" x="@OUAlpha">
-	  	  <distr id="LogNormal.OUAlpha" spec="beast.math.distributions.LogNormalDistributionModel" S="1.0" M="1.0"/>
-		</distribution>
-	
-		<distribution id="ThetaValuePrior" spec="beast.math.distributions.Prior" x="@OUTheta">
-	  	  <distr id="Normal.OUTheta" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
-        </distribution>
-
-	<distribution id="ThetaAssignmentsPrior" spec="beast.math.distributions.Prior" x="@OUThetaAssignments">
-	  <distr id="Unif.thetaAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/>
+	<distribution id="AlphaPrior" spec="beast.math.distributions.Prior" x="@OUAlpha">
+	  <distr id="LogNormal.OUAlpha" spec="beast.math.distributions.LogNormalDistributionModel" S="1.0" M="1.0"/>
 	</distribution>
+	
+	<distribution id="ThetaValuePrior" spec="beast.math.distributions.Prior" x="@OUTheta">
+	  <distr id="Normal.OUTheta" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+        </distribution>
+
+	<!-- <distribution id="ThetaAssignmentsPrior" spec="beast.math.distributions.Prior" x="@OUThetaAssignments"> -->
+	<!--   <distr id="Unif.thetaAssignments" spec="beast.math.distributions.Uniform" offset="0.0" lower="0.0" upper="1.0"/> -->
+	<!-- </distribution> -->
       </distribution>
       <!-- END prior -->
 
+      <!-- START likelihood -->
       <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
 	<distribution id="rejectionSampling" spec="contraband.otherlikelihood.RateCategoryIdentifiability">
 	  <rates idref="OUTheta"/>
 	</distribution>
-
+	
  	<distribution id="OUMVN" spec="contraband.mvnlikelihood.OUMVNLikelihoodOneTrait" eqDist="false" useRootMetaData="true">
 	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,f2:0.10):1.0,(sp2:1.0,f1:0.8):1.0)" offset="0" singlechild="false">
 	    <trait id="FossilSet" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
@@ -91,9 +93,12 @@
 	    </taxonset>
 	  </tree>
 
-	  <oneTraitData id="oneTraitData" spec="contraband.valuewrappers.OneValueContTraits" nTraits="1" spNames="sp1,sp2,f1,f2">
-	    <traitValues id="fixedTraitValues" spec="parameter.RealParameter">0.3975946 0.2423501 -0.6398611 0.3134564</traitValues>
-	  </oneTraitData>
+	  <!-- (DEPRECATED) Original implementation used OneValueContTraits as a data wrapper, prior to Parameter having the "keys" argument -->
+	  <!-- <oneTraitData id="oneTraitData" spec="contraband.valuewrappers.OneValueContTraits" nTraits="1" spNames="sp1,sp2,f1,f2"> -->
+	  <!--   <traitValues id="fixedTraitValues" spec="parameter.RealParameter">0.3975946 0.2423501 -0.6398611 0.3134564</traitValues> -->
+	  <!-- </oneTraitData> -->
+
+	  <oneTraitData id="oneTraitData" spec="parameter.RealParameter" keys="sp1 sp2 f1 f2" value="0.3975 0.2423 -0.6398 0.3134"/>
 
 	  <optimumManager id="optimumManager" spec="contraband.clock.TreeToVCVMat" coalCorrection="false">
 	    <branchRateModel id="rateCatClock" spec="contraband.clock.RateCategoryClockModel" nCat="2">
@@ -105,7 +110,7 @@
 	    <tree idref="TheTree"/>
 	  </optimumManager>
 	    
-	  <sigmasq id="OUSigmaSq" dimension="1" spec="parameter.RealParameter">0.1</sigmasq>
+	  <sigmaSq id="OUSigmaSq" dimension="1" spec="parameter.RealParameter">0.1</sigmaSq>
 
 	  <alpha id="OUAlpha" dimension="1" spec="parameter.RealParameter">1.0</alpha>
 	      
@@ -137,7 +142,7 @@
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
-	  <log idref="OUSigmaSq"/>
+      <log idref="OUSigmaSq"/>
       <log idref="OURootValue"/>
       <log idref="OUAlpha"/>
       <log idref="OUTheta"/>

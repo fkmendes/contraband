@@ -2,6 +2,8 @@ package contraband.mvnlikelihood;
 import java.util.List;
 import java.util.Random;
 
+import beast.core.Citation;
+import beast.core.Description;
 import org.apache.commons.math3.linear.*;
 
 import beast.core.Input;
@@ -9,6 +11,17 @@ import beast.core.State;
 import beast.core.parameter.RealParameter;
 import beast.core.Input.Validate;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
+@Description("Brownian motion model (matrix algebra implementation) " +
+		"for analyses of continuous trait evolution.")
+@Citation(value = "Felsenstein, J. (1985). Maximum-likelihood estimation " +
+		"of evolutionary trees from continuous characters. Am. J. Hum. Genet. 25, " +
+		"471-492.", DOI = "PMCID: PMC1762641",
+		year = 1985,
+		firstAuthorSurname = "Felsenstein")
 public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 
 	final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Sigma^2, the variance of the process.", Validate.REQUIRED); // OPTIONAL because BMMVNShift has ColorManager instead
