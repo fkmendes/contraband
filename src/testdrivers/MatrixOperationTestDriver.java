@@ -3,7 +3,7 @@ package testdrivers;
 import contraband.utils.GeneralUtils;
 import org.apache.commons.math3.linear.*;
 
-public class MatrixOperationTest {
+public class MatrixOperationTestDriver {
     public static void main(String[] args) {
         System.out.println("Printing a = ");
         RealMatrix aMat = new Array2DRowRealMatrix(new double [][]

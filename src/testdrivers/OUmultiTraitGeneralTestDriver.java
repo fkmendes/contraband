@@ -15,7 +15,7 @@ import contraband.utils.GeneralUtils;
 import contraband.math.MVNUtils;
 import contraband.math.OUUtils;
 
-public class OUmultiTraitGeneralTest {
+public class OUmultiTraitGeneralTestDriver {
 
 	public static void main(String[] args) {
 		
