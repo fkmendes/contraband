@@ -32,12 +32,12 @@ public class OneValueContTraitsTest {
 		twoTrait.initByName("nTraits", 2, "spNames", spNames, "traitValues", twoTraitValues);
 		
 		spValues = oneTrait.getSpValues("sp3");
-		System.out.println("spValues=" + Arrays.toString(spValues));
+		//System.out.println("spValues=" + Arrays.toString(spValues));
 		sp3 = spValues[0];
 		sp2 = oneTrait.getSpValue("sp2", 0);
 		
 		sp4 = twoTrait.getSpValues("sp4");
-		System.out.println("sp4=" + Arrays.toString(sp4));
+		//System.out.println("sp4=" + Arrays.toString(sp4));
 		sp4OneValue = twoTrait.getSpValue("sp4", 1);
 	
 		sp4Expected = new Double[] { 0.0, 1.0 };

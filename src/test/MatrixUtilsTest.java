@@ -29,13 +29,13 @@ public class MatrixUtilsTest {
 		RealMatrix rmToAdd1 = new Array2DRowRealMatrix(new double [][]
 				{{3.0}}
 		);
-        System.out.println("Display [2.0] + [3.0] = ");
+        //System.out.println("Display [2.0] + [3.0] = ");
 		resRM1 = new Array2DRowRealMatrix(new double [1][1]);
         resRM1 = MatrixUtils.matrixAdd(inRM1, rmToAdd1, resRM1);
-        GeneralUtils.displayRealMatrix(resRM1);
+        //GeneralUtils.displayRealMatrix(resRM1);
 
         // test a 4 * 3 matrix
-		System.out.println("Display matrix add resRM2:");
+		//System.out.println("Display matrix add resRM2:");
 		RealMatrix inRM2 = new Array2DRowRealMatrix(new double [][]
 				{{2.0, 3.0, 4.0},
 				 {4.0, 5.0, 6.0},
@@ -50,10 +50,10 @@ public class MatrixUtilsTest {
 				});
 		resRM2 = new Array2DRowRealMatrix(new double [4][3]);
 		resRM2 = MatrixUtils.matrixAdd(inRM2, rmToAdd2, resRM2);
-		GeneralUtils.displayRealMatrix(resRM2);
+		//GeneralUtils.displayRealMatrix(resRM2);
 
 		// block for matrix subtract
-		System.out.println("Display matrix subtract resRM3:");
+		//System.out.println("Display matrix subtract resRM3:");
 		RealMatrix inRM3 = new Array2DRowRealMatrix(new double [][]
 				{{-1.994546, -2.114393, -1.599438, -2.122436,},
 				 {-1.735437, -1.670169, -1.780834, -2.245477},
@@ -68,10 +68,10 @@ public class MatrixUtilsTest {
 				});
 		resRM3 = new Array2DRowRealMatrix(new double [4][4]);
 		resRM3 = MatrixUtils.matrixSubtract(inRM3, rmToSubtract1, resRM3);
-		GeneralUtils.displayRealMatrix(resRM3);
+		//GeneralUtils.displayRealMatrix(resRM3);
 
 		// block for matrix scalar multiply
-		System.out.println("Display matrix scalar multiply resRM4:");
+		//System.out.println("Display matrix scalar multiply resRM4:");
 		RealMatrix inRM4 = new Array2DRowRealMatrix(new double [][]
 				{{1.767012, 2.960950, 1.681112, 2.720202, 1.891744},
 				 {1.319742, 2.048568, 1.982075, 3.104222, 1.966111},
@@ -81,10 +81,10 @@ public class MatrixUtilsTest {
 		double scalar1 = -2.0;
 		resRM4 = new Array2DRowRealMatrix(new double [4][5]);
 		resRM4 = MatrixUtils.matrixScalarMultiply(inRM4, scalar1, resRM4);
-		GeneralUtils.displayRealMatrix(resRM4);
+		//GeneralUtils.displayRealMatrix(resRM4);
 
 		// block for matrix scalar add
-		System.out.println("Display matrix scalar add resRM5:");
+		//System.out.println("Display matrix scalar add resRM5:");
 		RealMatrix inRM5 = new Array2DRowRealMatrix(new double [][]
 				{{2.550531, 2.350460, 1.242473, 1.534543},
 				 {1.702243, 2.455985, 2.423319, 1.267112},
@@ -96,10 +96,10 @@ public class MatrixUtilsTest {
 		double scalar2 = 3.2;
 		resRM5 = new Array2DRowRealMatrix(new double [6][4]);
 		resRM5 = MatrixUtils.matrixScalarAdd(inRM5, scalar2, resRM5);
-		GeneralUtils.displayRealMatrix(resRM5);
+		//GeneralUtils.displayRealMatrix(resRM5);
 
 		// block for matrix transpose
-		System.out.println("Display matrix transpose resRM6:");
+		//System.out.println("Display matrix transpose resRM6:");
 		RealMatrix inRM6 = new Array2DRowRealMatrix(new double [][]
 				{{5.555278, 3.637867, 3.826537, 5.580623, 4.233251, 4.265012, 5.668205, 5.960273},
 				 {7.102671, 3.008732, 3.668539, 7.797644, 7.149419, 4.708736, 6.938855, 6.028421},
@@ -111,9 +111,9 @@ public class MatrixUtilsTest {
 				});
 		resRM6 = new Array2DRowRealMatrix(new double [8][7]);
 		resRM6 = MatrixUtils.matrixTranspose(inRM6, resRM6);
-		GeneralUtils.displayRealMatrix(resRM6);
+		//GeneralUtils.displayRealMatrix(resRM6);
 
-		System.out.println("Display matrix multiply resRM7:");
+		//System.out.println("Display matrix multiply resRM7:");
 		RealMatrix inRM7 = new Array2DRowRealMatrix(new double [][]
 				{{2.380636, 2.433278, 3.357671},
 				 {3.346462, 2.153579, 3.418715},
@@ -127,7 +127,7 @@ public class MatrixUtilsTest {
 				});
 		resRM7 = new Array2DRowRealMatrix(new double [4][5]);
 		resRM7 = MatrixUtils.matrixMultiply(inRM7, rmToMultiply, resRM7);
-		GeneralUtils.displayRealMatrix(resRM7);
+		//GeneralUtils.displayRealMatrix(resRM7);
 
 	}
 

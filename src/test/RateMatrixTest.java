@@ -43,7 +43,7 @@ public class RateMatrixTest {
 		row4Expected = new double[] { 4.0, 4.0, 4.0, 3.0 };
 		row4 = rateMatrix.getRow(3);
 		
-		GeneralUtils.displayRealMatrix(rateMatrix);
+		//GeneralUtils.displayRealMatrix(rateMatrix);
 	}
 
 	@Test

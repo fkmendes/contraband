@@ -29,7 +29,7 @@ public class CoalCorrectionTest {
 		coal.initByName("tree", myTree, "popSizes", popSizes);
 		correctedPhyloTMat = coal.getCorrectedPhyloTMat(spNamesInPhyloTMatOrder);
 		
-		GeneralUtils.display2DArray(correctedPhyloTMat);
+		//GeneralUtils.display2DArray(correctedPhyloTMat);
 		
 		expected1row = new double[] { 3.5638913869461915, 2.3059405550002823, 0.8797906714751229, 0.06389138694619145, 0.06389138694619145 };
 		expected2row = new double[] { 2.3059405550002823, 3.5638913869461915, 0.8797906714751229, 0.06389138694619145, 0.06389138694619145 };
