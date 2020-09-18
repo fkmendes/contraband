@@ -21,7 +21,7 @@ import beast.evolution.tree.Tree;
 
 @Description("Matrix algebra engine for continuous trait evolutionary models, " +
 		" with rates allowed to shift. Used by Brownian motion classes.")
-@Citation(value = "Brian O'Meara et al. (2006). Testing for different rates " +
+@Citation(value = "O'Meara B, et al. (2006). Testing for different rates " +
 		"of continuous trait evolution using likelihood. Evolution 60(4), " +
 		"922-933.", DOI = "10.1111/j.0014-3820.2006.tb01171.x",
 		year = 2006,

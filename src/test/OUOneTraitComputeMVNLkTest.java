@@ -129,7 +129,7 @@ public class OUOneTraitComputeMVNLkTest {
 		RealVector realThetaRI = new ArrayRealVector(thetaRI);
 		RealVector realThetaRM = new ArrayRealVector(thetaRM);	
 		
-		GeneralUtils.displayRealVector(ouWeightFI.operate(realThetaFI));
+		// GeneralUtils.displayRealVector(ouWeightFI.operate(realThetaFI));
 		
 		// Finally computing likelihoods for OU
 		ouLik1FI = MVNUtils.getMVNLk(n, ouWeightFI.operate(realThetaFI), realData, invFullCovFI, varToNdetRealCovFI);

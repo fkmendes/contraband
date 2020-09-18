@@ -3,6 +3,8 @@ package contraband.mvnlikelihood;
 import java.util.List;
 import java.util.Random;
 
+import beast.core.Citation;
+import beast.core.Description;
 import contraband.math.OUUtils;
 import contraband.clock.TreeToVCVMat;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -17,6 +19,18 @@ import beast.core.State;
 import beast.core.parameter.RealParameter;
 import beast.core.Input.Validate;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
+@Description("Ornstein-Uhlenbeck model (matrix algebra implementation) " +
+		"for analyses of continuous trait evolution. Adaptive optima are allowed " +
+		"to shift.")
+@Citation(value = "Hansen, TF (1997). Stabilizing selection " +
+		"and the comparative analysis of adaptation. Evolution 51(5), " +
+		"1341-1351.", DOI = " 10.1111/j.1558-5646.1997.tb01457.x",
+		year = 1997,
+		firstAuthorSurname = "Hansen")
 public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 
 	final public Input<RealParameter> sigmasqInput = new Input<>("sigmaSq", "Sigma^2, the variance of the process.", Validate.REQUIRED);

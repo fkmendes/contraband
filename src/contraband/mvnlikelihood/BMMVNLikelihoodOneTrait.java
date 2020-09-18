@@ -17,7 +17,7 @@ import beast.core.Input.Validate;
 
 @Description("Brownian motion model (matrix algebra implementation) " +
 		"for analyses of continuous trait evolution.")
-@Citation(value = "Felsenstein, J. (1985). Maximum-likelihood estimation " +
+@Citation(value = "Felsenstein, J (1985). Maximum-likelihood estimation " +
 		"of evolutionary trees from continuous characters. Am. J. Hum. Genet. 25, " +
 		"471-492.", DOI = "PMCID: PMC1762641",
 		year = 1985,

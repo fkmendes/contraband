@@ -20,7 +20,7 @@ import beast.core.parameter.RealParameter;
 @Description("Brownian motion model (matrix algebra implementation) " +
 		"for analyses of continuous trait evolution. Rates are allowed " +
 		"to shift.")
-@Citation(value = "Brian O'Meara et al. (2006). Testing for different rates " +
+@Citation(value = "O'Meara B, et al. (2006). Testing for different rates " +
 		"of continuous trait evolution using likelihood. Evolution 60(4), " +
 		"922-933.", DOI = "10.1111/j.0014-3820.2006.tb01171.x",
 		year = 2006,
