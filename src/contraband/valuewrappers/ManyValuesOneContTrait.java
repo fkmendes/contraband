@@ -7,7 +7,6 @@ import java.util.Map;
 import beast.core.BEASTObject;
 import beast.core.Input;
 import beast.core.Input.Validate;
-import com.sun.tools.javac.util.ArrayUtils;
 
 public class ManyValuesOneContTrait extends BEASTObject {
 
