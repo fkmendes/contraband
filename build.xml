@@ -1,0 +1,160 @@
+<project default="build" basedir="." name="BUILD_contraband">
+  <description>
+    Build contraband.
+  </description>
+
+  <!-- ########## PROPERTIES ########## -->
+  <property name="binName" value="contraband"/>
+  <property name="projName" value="contraband"/>
+  <property name="projVersion" value="0.0.1"/>
+
+  <!-- contraband-related paths -->
+  <property name="srcContra" location="src"/>
+  <property name="buildContra" location="build"/>
+  <property name="libContra" location="lib"/>
+  <property name="release_dir" location="release"/>
+  <property name="distContra" location="${buildContra}/dist"/>
+
+  <!-- unit test related paths -->
+  <property name="testReportsContra" location="${buildContra}/test-reports"/>
+  <property name="buildTestContra" location="${buildContra}/build-test"/>
+  <property name="buildLib" location="${buildContra}/build-lib"/>
+
+  <!-- beast2-related paths -->
+  <property name="beast2path" location="../beast2"/>
+  <property name="libBeast2" location="${beast2path}/lib"/>
+  <property name="srcBeast2" location="${beast2path}/src"/>
+  <property name="beast2classpath" location="${beast2path}/build"/>
+
+  <!-- SA-related paths -->
+  <property name="SAPath" location="../sampled-ancestors"/>
+  <property name="SAClasspath" location="${SAPath}/build" />
+
+  <!-- BEAST 2 currently uses Java 1.8 -->
+  <property name="sourceVersion" value="1.8"/>
+  <property name="targetVersion" value="1.8"/>
+
+  <!-- <import file="${SAPath}/build.xml" /> -->
+
+  <!-- classpath -->
+  <path id="classpath">
+    <pathelement path="${buildContra}"/>
+    <fileset dir="${libBeast2}" includes="*.jar"/>
+    <fileset dir="${libContra}" includes="*.jar"/>
+    <pathelement path="${beast2classpath}"/> <!-- We need BEAST 2 compiled files to compile contraband -->
+  </path>
+
+  <!-- Other -->
+  <property name="BEASTmain" value="beast.app.BeastMCMC"/>
+  <property name="report" value="${buildContra}/junitreport"/>
+
+  <!-- ########## BUILDING  ########## -->
+  <target name="init">
+    <mkdir dir="${buildContra}"/>
+    <mkdir dir="${distContra}"/>
+    <mkdir dir="${libContra}"/>
+    <mkdir dir="${testReportsContra}"/>
+    <mkdir dir="${buildTestContra}"/>
+    <mkdir dir="${buildLib}"/>
+    <echo message="${ant.project.name}: ${ant.file}"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${buildContra}"/>
+    <delete dir="${distContra}"/>
+    <delete dir="${testReportsContra}"/>
+    <delete dir="${buildTestContra}"/>
+    <delete dir="${buildLib}"/>
+  </target>
+
+  <!-- Entry point: clean -> init -> compile -> unit tests -> release -->
+  <target name="build" depends="clean,compile,test,release"
+	  description="Clean, build and release all we need to run this package.">
+  </target>
+
+  <!-- Compile -->
+  <target name="compile" depends="init">
+    <!-- Capture the path as a delimited property using the refid attribute -->
+    <property name="myclasspath" refid="classpath"/>
+
+    <!-- Emit the property to the ant console -->
+    <echo message="Classpath = ${myclasspath}"/>
+
+    <javac srcdir="${srcContra}" destdir="${buildContra}" classpath="${myclasspath}"
+           target="${targetVersion}" source="${sourceVersion}"
+	   includeantruntime="false"
+	   debug="true"
+	   fork="true"
+	   memoryinitialsize="256m"
+	   memorymaximumsize="1024m">
+      <include name="**/**" />
+    </javac>
+
+    <echo message="Successfully compiled."/>
+  </target>
+
+  <!-- Jar release -->
+  <target name="release" depends="compile">
+
+    <!-- Put everything in contraband.vSomeVersion.jar -->
+    <jar jarfile="${distContra}/${binName}.v${projVersion}.jar">
+      <manifest>
+	<attribute name="Built-By" value="${user.name}"/>
+	<attribute name="Main-Class" value="${BEASTmain}"/>
+      </manifest>
+
+      <!-- Add source and compiled files from contraband -->
+      <fileset dir="${buildContra}">
+	<include name="**/*.class"/>
+	<include name="**/*.java"/>
+      </fileset>
+
+      <!-- Add compiled files from beast2 (so we can actually run things) -->
+      <fileset dir="${beast2classpath}">
+	<include name="beast/**/*.class"/>
+	<include name="org/**/*.class"/>
+      </fileset>
+
+      <fileset dir="${libBeast2}">
+	<include name="*.jar"/>
+      </fileset>
+
+      <!-- Add compiled files from sampled-ancestors -->
+      <fileset dir="${SAClasspath}">
+	<include name="beast/**/*.class"/>
+      </fileset>
+
+      <!-- Bundles executables and a bunch of other files from these libs -->
+      <!-- e.g., it creates /org/antlr/v4/runtime/a.class -->
+      <zipgroupfileset dir="${libBeast2}" includes="beagle.jar"/>
+      <zipgroupfileset dir="${libBeast2}" includes="colt.jar"/>
+      <zipgroupfileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
+      <zipgroupfileset dir="${libBeast2}" includes="jam.jar"/>
+      <zipgroupfileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
+    </jar>
+
+  </target>
+
+  <!-- Unit testing -->
+  <target name="test" depends="compile">
+
+    <junit printsummary="yes" failureproperty="testFailed" showoutput="true">
+      <classpath>
+	<pathelement path="${myclasspath}"/>
+	<pathelement path="${buildContra}"/>
+	<pathelement path="${buildTestContra}"/>
+	<fileset dir="${buildLib}" includes="*.jar"/>
+      </classpath>
+
+      <batchtest fork="yes" todir="${testReportsContra}">
+	<fileset dir="${srcContra}">
+	  <include name="**/*Test.java"/>
+	</fileset>
+	<formatter type="plain"/>
+      </batchtest>
+    </junit>
+
+    <fail if="testFailed" status="1" message="Unit test failed."/>
+  </target>
+  
+</project>
