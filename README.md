@@ -25,7 +25,7 @@ In order to build an executable .jar file for the *contraband* package:
 
     This command invokes the *ant* tool, which executes the building instructions inside *build.xml*. The new *contraband* .jar file will be put inside *build/dist/*.
 
-## Running an analysis with *bdtree*
+## Running an analysis with *contraband*
 
 From your shell or Terminal, type:
 
