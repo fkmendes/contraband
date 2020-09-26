@@ -44,7 +44,7 @@ public class BMMVNShiftLikelihoodOneTraitTest {
         myTree = new TreeParser(treeStr, false, false, true, 0);
 
         // VCV Mat
-        colorValues = new RealParameter(new Double[]{0.2704762});
+        colorValues = new RealParameter(new Double[]{ 0.2704762 });
         colorAssignments = new IntegerParameter(new Integer[]{0, 0, 0, 0, 0});
         // IntegerParameter rootEdgeColorAssignment = new IntegerParameter(new Integer[] { 0 });
         rcc = new RateCategoryClockModel();

@@ -2,19 +2,18 @@ package test;
 
 import static org.junit.Assert.*;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import beast.core.parameter.RealParameter;
-import contraband.otherlikelihood.JiveLikelihood;
+import contraband.otherlikelihood.JiveLikelihoodOneTrait;
 import contraband.valuewrappers.ManyValuesOneContTrait;
 
-public class JiveLikelihoodTest {
+public class JiveLikelihoodOneTraitTest {
 
-	double logLik;
+	final static double EPSILON = 1e-6;
 	
-	@Before
-	public void setUp() throws Exception {
+	@Test
+	public void testJiveLkOneTrait() {
 		String oneTraitValues = "sp1=-0.65187041,2.04994431,0.70321432,0.61298809,0.04211039|sp2=0.9181909,1.7149411,-0.2674609,0.8641253,1.4442747";
 		ManyValuesOneContTrait oneTrait = new ManyValuesOneContTrait();
 		oneTrait.initByName("traitValues", oneTraitValues);
@@ -27,15 +26,10 @@ public class JiveLikelihoodTest {
 		Double[] meansInput = new Double[] { 0.1, 1.1 };
 		RealParameter mus = new RealParameter(meansInput);
 		
-		JiveLikelihood jive = new JiveLikelihood();
+		JiveLikelihoodOneTrait jive = new JiveLikelihoodOneTrait();
 		jive.initByName("sampleData", oneTrait, "logSigmaSqs", logSigmaSqs, "mus", mus);
-		
-		logLik = jive.calculateLogP();
-	}
+		double logLik = jive.calculateLogP();
 
-	@Test
-	public void test() {
-		assertEquals(-13.13221, logLik, 1E-5);
+		assertEquals(-13.13221, logLik, EPSILON);
 	}
-
 }

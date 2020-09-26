@@ -6,33 +6,22 @@ import java.util.List;
 import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Input.Validate;
-import beast.core.parameter.IntegerParameter;
-import beast.core.parameter.RealParameter;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 
 /*
- * This class implements an uncorrelated discrete-distribution local color
- * where color here can be the evolutionary rate, or OU optimum 
+ * DEPRECATED
+ *
+ * This class was the original wrapper that worked as a clock rate model,
+ * implementing an uncorrelated discrete-distribution local color.
+ * Color here can be the evolutionary rate, or OU optimum
  */
 public class ColorManager extends CalculationNode {
 
-
 	final public Input<BranchRateModel.Base> branchRateModelInput = new Input<>("branchRateModel", "the rate or optimum on each branch", Validate.REQUIRED);
-
 	final public Input<BranchRateModel.Base> branchOptimaModelInput = new Input<>("branchOptimaModel", "the rate or optimum on each branch", Validate.OPTIONAL);
-
 	final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Validate.REQUIRED);
-
-	//final public Input<Integer> nTraitsInput = new Input<>("nTraits", "Number of traits.", Validate.REQUIRED);
-	//final public Input<Integer> nColorsInput = new Input<>("nColors", "Maximum number of colors.", Validate.REQUIRED);
-
-	//final public Input<RealParameter> colorValuesInput = new Input<>("colorValues", "Real values (e.g., rates, optima, whatever colors represent) associated to each color (all values for 1st trait, then all values for 2nd trait, and so on).", Validate.REQUIRED);
-	//final public Input<IntegerParameter> colorAssignmentInput = new Input<>("colorAssignments", "Integers representing colors, one per branch.", Validate.REQUIRED);
-
-	//final public Input<IntegerParameter> rootEdgeColorAssignmentInput = new Input<>("rootEdgeColorAssignment", "Integer representing color of root edge.");
-
 	final public Input<Boolean> coalCorrectionInput = new Input<>("coalCorrection", "Whether or not to do coalescent correction.", Validate.REQUIRED);
 	final public Input<Double> rootEdgeLengthInput = new Input<>("rootEdgeLength", "root edge length.", 0.0);
 	
@@ -44,30 +33,22 @@ public class ColorManager extends CalculationNode {
 	private List<Node> leftLeaves;
 	private List<Node> rightLeaves;
 	private String[] spNamesInASCIIBeticalOrTaxonSetOrder;
-	
-	// private TreeParser tree;
-	//private Double[] colorValues;
-	//private Integer[] colorAssignments;
-	
-	//private Double rootEdgeColorValue;
-	//private Integer rootEdgeColorAssignment;
 
 	private double rootEdgeVar;
-
 	private double rootEdgeLength;
 
 	// stored stuff
-	//Double[] storedColorValues;
-	//Integer[] storedColorAssignments;
+	// Double[] storedColorValues;
+	// Integer[] storedColorAssignments;
 	double[][] storedSpColorValuesMat;
 	
 	@Override
 	public void initAndValidate() {
 		Tree tree = treeInput.get();
-		//colorValues = colorValuesInput.get().getValues();
-		//colorAssignments = colorAssignmentInput.get().getValues();
+		// colorValues = colorValuesInput.get().getValues();
+		// colorAssignments = colorAssignmentInput.get().getValues();
 
-		//checkDimensions();
+		// checkDimensions();
 		
 		doCoalCorrection = coalCorrectionInput.get();
 		// TODO: this will change when I link it to the MSC

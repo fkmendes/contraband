@@ -1,7 +1,7 @@
 package testdrivers;
 
 import beast.core.parameter.RealParameter;
-import contraband.otherlikelihood.JiveLikelihood;
+import contraband.otherlikelihood.JiveLikelihoodOneTrait;
 import contraband.valuewrappers.ManyValuesOneContTrait;
 
 public class JiveLikelihoodTestDriver {
@@ -19,7 +19,7 @@ public class JiveLikelihoodTestDriver {
 		Double[] meansInput = new Double[] { 0.1, 1.1 };
 		RealParameter mus = new RealParameter(meansInput);
 		
-		JiveLikelihood jive = new JiveLikelihood();
+		JiveLikelihoodOneTrait jive = new JiveLikelihoodOneTrait();
 		jive.initByName("sampleData", oneTrait, "logSigmaSqs", logSigmasqs, "mus", mus);
 		
 		/*

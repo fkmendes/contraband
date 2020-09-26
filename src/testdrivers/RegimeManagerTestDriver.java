@@ -1,16 +1,16 @@
 package testdrivers;
 
-import java.util.Arrays;
-
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 import beast.util.TreeParser;
-// import contraband.clock.ColorManager;
 import contraband.clock.RateCategoryClockModel;
 import contraband.clock.TreeToVCVMat;
 
-public class ColorManagerTestDriver {
+/*
+ * Matches testRegimeManagerValues
+ */
+public class RegimeManagerTestDriver {
 
 	public static void main(String[] args) {
 		// tree
@@ -20,17 +20,20 @@ public class ColorManagerTestDriver {
 		// initializing data
 		RealParameter colorValues = new RealParameter(new Double[] { 0.2, 0.4, 0.6, 0.8, 1.0 });
 		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 3, 3, 0, 0, 0, 2, 1, 4, 0 });
-		RateCategoryClockModel lsc = new RateCategoryClockModel();
-		lsc.initByName("nCat", 5, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
-		
-		// ColorManager colors = new ColorManager();
-		// colors.initByName("nTraits", 1, "maxNColors", 5, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
+		RateCategoryClockModel rcc = new RateCategoryClockModel();
+		rcc.initByName("nCat", 5, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
+
 		TreeToVCVMat colors = new TreeToVCVMat();
-		colors.initByName("branchRateModel", lsc, "tree", myTree, "coalCorrection", false);
+		colors.initByName("branchRateModel", rcc, "tree", myTree, "coalCorrection", false);
 		
 		double[][] colorValuesMat = colors.getSpColorValuesMatOneTrait();
 		for (int i=0; i<colorValuesMat.length; ++i) {
-			System.out.println(Arrays.toString(colorValuesMat[i]));
+			for (int j=0; j<colorValuesMat[i].length; ++j) {
+				String val = String.format("%.1f", colorValuesMat[i][j]);
+				System.out.printf(val + " ");
+			}
+
+			System.out.println();
 		}
 		
 		Node sp1Node = myTree.getNode(0);
@@ -39,5 +42,4 @@ public class ColorManagerTestDriver {
 		Node sp3Node = myTree.getNode(2);
 		System.out.println(colors.getNodeColorValue(sp3Node, 0));
 	}
-
 }

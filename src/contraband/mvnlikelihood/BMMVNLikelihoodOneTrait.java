@@ -24,7 +24,7 @@ import beast.core.Input.Validate;
 		firstAuthorSurname = "Felsenstein")
 public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 
-	final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Sigma^2, the variance of the process.", Validate.REQUIRED); // OPTIONAL because BMMVNShift has ColorManager instead
+	final public Input<RealParameter> sigmasqInput = new Input<>("sigmaSq", "Sigma^2, the variance of the process.", Validate.REQUIRED); // OPTIONAL because BMMVNShift has ColorManager instead
 	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "rootValue, or y_0, the root value and the expected value at the tips.", Validate.REQUIRED);
 	final public Input<RealParameter> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
 	// final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED); // original implementation (for the above line) with OneValueContTraits data wrapper

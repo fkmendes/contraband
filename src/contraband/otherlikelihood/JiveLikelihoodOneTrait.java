@@ -11,14 +11,13 @@ import beast.core.parameter.RealParameter;
 import contraband.math.MVNUtils;
 import contraband.valuewrappers.ManyValuesOneContTrait;
 
-public class JiveLikelihood extends Distribution {
+public class JiveLikelihoodOneTrait extends Distribution {
 
 	final public Input<ManyValuesOneContTrait> oneTraitInput = new Input<>("sampleData", "TWO OR MORE continuous data values for ONE trait, from many species.", Validate.REQUIRED);
 	final public Input<RealParameter> logSigmaSqsInput = new Input<>("logSigmaSqs", "log-sigma^2s, the log-variances of the normal densities, one per species.", Validate.REQUIRED);
 	final public Input<RealParameter> meansInput = new Input<>("mus", "mus, the means of the normal densities, one per species.", Validate.REQUIRED);
 	
 	private ManyValuesOneContTrait sampleData;
-	// private Double[] logSigmasqs, mus; // in the order of spNames from sampleData
 	private int nSpp;
 	private String[] spNames;
 	
@@ -27,9 +26,6 @@ public class JiveLikelihood extends Distribution {
 		sampleData = oneTraitInput.get();
 		nSpp = sampleData.getNSpp();
 		spNames = sampleData.getSpNames().toArray(new String[nSpp]);
-		
-//		logSigmasqs = logSigmasqsInput.get().getValues();
-//		mus = meansInput.get().getValues();
 	}
 	
 	@Override

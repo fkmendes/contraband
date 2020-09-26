@@ -1,6 +1,7 @@
 package testdrivers;
 
 import beast.core.parameter.RealParameter;
+import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import contraband.coalescent.CoalCorrection;
 import contraband.utils.GeneralUtils;
@@ -10,7 +11,7 @@ public class CoalCorrectionTestDriver {
 	public static void main(String[] args) {
 		// tree
 		String treeStr = "(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):1.0,(sp4:1.0,sp5:1.0):2.0);";
-		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
+		Tree myTree = new TreeParser(treeStr, false, false, true, 0);
 		String[] spNamesInPhyloTMatOrder = new String[myTree.getLeafNodeCount()];
 
 		// pop sizes

@@ -1,19 +1,24 @@
 package testdrivers;
 
 import beast.core.parameter.RealParameter;
+import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import contraband.mvnlikelihood.BMMVNLikelihoodOneTrait;
 import contraband.coalescent.CoalCorrection;
 import contraband.valuewrappers.OneValueContTraits;
 
+import java.util.Arrays;
+import java.util.List;
+
 /*
- * Matches BMMVNLikelihoodTest4
+ * Matches testBMMVNLkOneTraitSmallTreeDiffPopSizes
  */
 public class BMMVNLikelihoodTestDriver1 {
+
 	public static void main(String[] args) {
 		// tree
 		String treeStr = "(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):1.0,sp4:3.0);";
-		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
+		Tree myTree = new TreeParser(treeStr, false, false, true, 0);
 		
 		// coal correction
 		Double[] smallpopSizesInput = new Double[] { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
@@ -27,31 +32,29 @@ public class BMMVNLikelihoodTestDriver1 {
 		coal2.initByName("tree", myTree, "popSizes", largePopSizes);
 		
 		// initializing data
-		RealParameter oneTraitValues = new RealParameter(new Double[] { 0.07680552, -0.07201447, -0.03776352, 0.29705797 });
-		String spNames = "sp1,sp2,sp3,sp4";
-		OneValueContTraits oneTraitData = new OneValueContTraits();
-		oneTraitData.initByName("nTraits", 1, "spNames", spNames, "traitValues", oneTraitValues);
+		String spNames = "sp1 sp2 sp3 sp4";
+		List<Double> oneTraitValues = Arrays.asList(0.07680552, -0.07201447, -0.03776352, 0.29705797);
+		RealParameter oneTraitData = new RealParameter();
+		oneTraitData.initByName("value", oneTraitValues, "keys", spNames);
 		
 		// sigmasq
 		Double[] sigmasqInput = new Double[] { 0.006319092 };
-		RealParameter sigmasq1 = new RealParameter(sigmasqInput);
+		RealParameter sigmaSq1 = new RealParameter(sigmasqInput);
 		sigmasqInput = new Double[] { 0.005358022 };
-		RealParameter sigmasq2 = new RealParameter(sigmasqInput);
+		RealParameter sigmaSq2 = new RealParameter(sigmasqInput);
 		
 		// root value vector
 		Double[] rootValueVectorInput = new Double[] { 0.1 };
 		RealParameter rootValue1 = new RealParameter(rootValueVectorInput);
 		rootValueVectorInput = new Double[] { 0.09658954 };
 		RealParameter rootValue2 = new RealParameter(rootValueVectorInput);
-		
+
 		// likelihood
 		BMMVNLikelihoodOneTrait BMLk1 = new BMMVNLikelihoodOneTrait();
-		BMLk1.initByName("tree", myTree, "sigmasq", sigmasq1, "rootValue", rootValue1, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal1);
+		BMLk1.initByName("tree", myTree, "sigmaSq", sigmaSq1, "rootValue", rootValue1, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal1);
 		BMMVNLikelihoodOneTrait BMLk2 = new BMMVNLikelihoodOneTrait();
-		BMLk2.initByName("tree", myTree, "sigmasq", sigmasq2, "rootValue", rootValue2, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal2);
-//		BMMVNLikelihoodOneTrait BMLk3 = new BMMVNLikelihoodOneTrait();
-//		BMLk3.initByName("tree", myTree, "sigmasq", sigmasq3, "rootValue", mean, "oneTraitData", oneTraitData);
-			
+		BMLk2.initByName("tree", myTree, "sigmaSq", sigmaSq2, "rootValue", rootValue2, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal2);
+
 		System.out.println(BMLk1.calculateLogP()); // -2.1902980
 		System.out.println(BMLk2.calculateLogP()); // -2.148631
 	}

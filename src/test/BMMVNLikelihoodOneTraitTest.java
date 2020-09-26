@@ -60,11 +60,11 @@ public class BMMVNLikelihoodOneTraitTest {
 
 		// lnL1
 		bmLk = new BMMVNLikelihoodOneTrait();
-		bmLk.initByName("tree", myTree, "sigmasq", sigmaSq, "rootValue", rootValue, "oneTraitData", oneTraitData);
+		bmLk.initByName("tree", myTree, "sigmaSq", sigmaSq, "rootValue", rootValue, "oneTraitData", oneTraitData);
 		double lnLk1 = bmLk.calculateLogP(); // no root edge
 
 		bmLk = new BMMVNLikelihoodOneTrait();
-		bmLk.initByName("tree", myTree, "sigmasq", sigmaSq, "rootValue", rootValue, "oneTraitData", oneTraitData, "rootEdgeLength", 1.0);
+		bmLk.initByName("tree", myTree, "sigmaSq", sigmaSq, "rootValue", rootValue, "oneTraitData", oneTraitData, "rootEdgeLength", 1.0);
 		double lnLk2 = bmLk.calculateLogP(); // with root edge
 
 		Assert.assertEquals(-3.191339, lnLk1, EPSILON); // no root edge
@@ -101,7 +101,7 @@ public class BMMVNLikelihoodOneTraitTest {
 		rootValue = new RealParameter(rootValueVectorInput);
 
 		BMMVNLikelihoodOneTrait bmLk = new BMMVNLikelihoodOneTrait();
-		bmLk.initByName("tree", myTree, "sigmasq", sigmaSq, "rootValue", rootValue, "oneTraitData", oneTraitData);
+		bmLk.initByName("tree", myTree, "sigmaSq", sigmaSq, "rootValue", rootValue, "oneTraitData", oneTraitData);
 
 		double lnLk = bmLk.calculateLogP(); // with root edge
 		Assert.assertEquals(-78.328212, lnLk, EPSILON);
@@ -137,7 +137,7 @@ public class BMMVNLikelihoodOneTraitTest {
 		rootValue = new RealParameter(rootValueVectorInput);
 
 		BMMVNLikelihoodOneTrait bmLk = new BMMVNLikelihoodOneTrait();
-		bmLk.initByName("tree", myTree, "sigmasq", sigmaSq, "rootValue", rootValue, "oneTraitData", oneTraitData);
+		bmLk.initByName("tree", myTree, "sigmaSq", sigmaSq, "rootValue", rootValue, "oneTraitData", oneTraitData);
 
 		double lnLk = bmLk.calculateLogP(); // with root edge
 		Assert.assertEquals(-10.808402, lnLk, EPSILON);
@@ -189,9 +189,9 @@ public class BMMVNLikelihoodOneTraitTest {
 
 		// likelihood
 		BMMVNLikelihoodOneTrait BMLk1 = new BMMVNLikelihoodOneTrait();
-		BMLk1.initByName("tree", myTree, "sigmasq", sigmaSq1, "rootValue", rootValue1, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal1);
+		BMLk1.initByName("tree", myTree, "sigmaSq", sigmaSq1, "rootValue", rootValue1, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal1);
 		BMMVNLikelihoodOneTrait BMLk2 = new BMMVNLikelihoodOneTrait();
-		BMLk2.initByName("tree", myTree, "sigmasq", sigmaSq2, "rootValue", rootValue2, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal2);
+		BMLk2.initByName("tree", myTree, "sigmaSq", sigmaSq2, "rootValue", rootValue2, "oneTraitData", oneTraitData, "doCoalCorrection", true, "coalCorrector", coal2);
 
 		double lnLk1 = BMLk1.calculateLogP();
 		double lnLk2 = BMLk2.calculateLogP();
