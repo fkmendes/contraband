@@ -1,7 +1,6 @@
 package test;
 
 import beast.evolution.tree.Node;
-import contraband.utils.GeneralUtils;
 import org.apache.commons.math3.linear.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,6 +10,10 @@ import contraband.prunelikelihood.PruneUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * @author Rong Zhang
+ */
 
 /*
  * In this unit test, we run PruneUtils using a fixed tree with 8 taxa
@@ -155,14 +158,14 @@ public class PruneUtilsTest2 {
         }
 
         lMat = lMatList.get(6);
-        System.out.println("printing lMat at root:");
-        GeneralUtils.displayRealMatrix(lMat);
-        System.out.println("printing mVec at root:");
+//        System.out.println("printing lMat at root:");
+//        GeneralUtils.displayRealMatrix(lMat);
+//        System.out.println("printing mVec at root:");
         mVec = mVecList.get(6);
-        GeneralUtils.displayRealVector(mVec);
-        System.out.println("printing r at root:");
+//        GeneralUtils.displayRealVector(mVec);
+//        System.out.println("printing r at root:");
         r = rArr[6];
-        System.out.println(r);
+//        System.out.println(r);
     }
     @Test
     public void againstresLikelihood () {

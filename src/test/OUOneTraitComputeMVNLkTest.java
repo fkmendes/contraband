@@ -10,14 +10,16 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import beast.util.TreeParser;
+import beast.evolution.tree.Node;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import contraband.utils.GeneralUtils;
 import contraband.math.MVNUtils;
-import beast.evolution.tree.Node;
 import contraband.math.OUUtils;
+
+/**
+ * @author Pau Bravo
+ */
 
 public class OUOneTraitComputeMVNLkTest {
 	
