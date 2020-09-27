@@ -9,17 +9,18 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.mvnlikelihood.OUMVNLikelihoodOneTrait;
-import contraband.valuewrappers.OneValueContTraits;
 import contraband.clock.RateCategoryClockModel;
 import contraband.clock.TreeToVCVMat;
 
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 /*
- * Small tree, three optima, with and without stationary distr for root value; having root value as a separate
- * parameter or setting it to be optimum with index 0 (the index 0, and the optima have to be in increasing order,
- * this can have effects when comparing mvMORPH's results and ours, so make sure they match)
+ * This class contains unit tests for OUMVNLikelihoodOneTrait
  */
 public class OUMVNLikelihoodOneTraitTest {
 
@@ -284,7 +285,7 @@ public class OUMVNLikelihoodOneTraitTest {
 		ouLk.initByName("tree", myTree2, "sigmaSq", sigmaSq, "alpha", alpha, "optimumManager", optima, "useRootMetaData", false, "oneTraitData", oneTraitData, "rootValue", rootValue, "eqDist", true);
 		double lnLk = ouLk.calculateLogP();
 
-		Assert.assertEquals(-0.5143806, lnLk, EPSILON); // in R, we get 1.171086
+		Assert.assertEquals(-0.5143806, lnLk, EPSILON); // in R, we get -0.5143806
 	}
 
 	/*

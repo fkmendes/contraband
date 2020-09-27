@@ -6,6 +6,9 @@ import org.apache.commons.math3.linear.RealMatrix;
 import contraband.math.MatrixUtils;
 import contraband.utils.GeneralUtils;
 
+/**
+ * @author Pau Bravo
+ */
 
 public class MatrixUtilsTestDriver {
 

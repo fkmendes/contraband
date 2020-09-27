@@ -6,6 +6,10 @@ import beast.util.TreeParser;
 import contraband.coalescent.CoalCorrection;
 import contraband.utils.GeneralUtils;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 public class CoalCorrectionTestDriver {
 
 	public static void main(String[] args) {

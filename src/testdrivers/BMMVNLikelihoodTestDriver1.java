@@ -5,10 +5,13 @@ import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import contraband.mvnlikelihood.BMMVNLikelihoodOneTrait;
 import contraband.coalescent.CoalCorrection;
-import contraband.valuewrappers.OneValueContTraits;
 
 import java.util.Arrays;
 import java.util.List;
+
+/**
+ * @author Fabio K. Mendes
+ */
 
 /*
  * Matches testBMMVNLkOneTraitSmallTreeDiffPopSizes

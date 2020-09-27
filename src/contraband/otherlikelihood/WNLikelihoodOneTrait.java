@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import beast.core.Description;
 import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.State;
@@ -12,14 +13,15 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import contraband.math.MVNUtils;
 
-/*
- * This is the likelihood for the white noise (WN) model. This model assumes that the each species data comes from
- * a normal distribution. The normal distribution can be set to be the same for all species, or different for
- * all species ("Multiple regime" WN).
- * 
- * Note that under WN, we are basically saying that the trait data does not evolve along a tree (or, if we want to
- * think it in tree terms, it evolves along a star tree).
+/**
+ * @author Fabio K. Mendes
  */
+
+@Description("This is the likelihood for the white noise (WN) model." +
+		"This model assumes that the each species data comes from a normal distribution." +
+		"The normal distribution can be set to be the same for all species, or different for all species." +
+		"Note that under WN, we are basically saying that the trait data does not evolve along a tree" +
+		"(or, if we want to think it in tree terms, it evolves along a star tree).")
 public class WNLikelihoodOneTrait extends Distribution {
 
 	final public Input<RealParameter> sigmaSqsInput = new Input<>("sigmaSqs", "Sigma^2 of each species' normal density.", Validate.REQUIRED);

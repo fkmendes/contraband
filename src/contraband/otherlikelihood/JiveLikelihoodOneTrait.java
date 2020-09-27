@@ -3,14 +3,24 @@ package contraband.otherlikelihood;
 import java.util.List;
 import java.util.Random;
 
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.State;
+import beast.core.*;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
 import contraband.math.MVNUtils;
 import contraband.valuewrappers.ManyValuesOneContTrait;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
+@Description("JIVE model (Joint inter- and Intraspecific Variance Evolution) implementation," +
+        "for analyses of continuous trait evolution in multiple individuals" +
+        "and multiple species.")
+@Citation(value = "Gaboriau, T. et al. (2020). A multi-platform package for" +
+        "the analysis of intra- and interspecific trait evolution. Method. Ecol. Evol., 1-9",
+        DOI = "10.1111/2041-210X.13458",
+        year = 2020,
+        firstAuthorSurname = "Gaboriau")
 public class JiveLikelihoodOneTrait extends Distribution {
 
 	final public Input<ManyValuesOneContTrait> oneTraitInput = new Input<>("sampleData", "TWO OR MORE continuous data values for ONE trait, from many species.", Validate.REQUIRED);

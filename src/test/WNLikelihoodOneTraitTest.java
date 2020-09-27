@@ -12,6 +12,10 @@ import contraband.otherlikelihood.WNLikelihoodOneTrait;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 public class WNLikelihoodOneTraitTest {
 
 	final static double EPSILON = 1e-6;

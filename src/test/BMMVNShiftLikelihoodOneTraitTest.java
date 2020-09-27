@@ -14,6 +14,10 @@ import contraband.clock.TreeToVCVMat;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 /*
  * This class contains unit tests for BMMVNShiftLikelihoodOneTrait, which allows for rate shifts (without and with coalescent correction)
  */

@@ -4,13 +4,16 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import contraband.math.MatrixUtils;
-import contraband.utils.GeneralUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author Pau Bravo
+ */
 
 public class MatrixUtilsTest {
+
 	final static double EPSILON = 1e-4;
 	private RealMatrix resRM1;
 	private RealMatrix resRM2;
@@ -19,6 +22,7 @@ public class MatrixUtilsTest {
 	private RealMatrix resRM5;
 	private RealMatrix resRM6;
 	private RealMatrix resRM7;
+
 	@Before
 	public void setUP() throws Exception {
 		// block for matrix add

@@ -9,6 +9,10 @@ import contraband.otherlikelihood.WNLikelihoodOneTrait;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 /*
  * This testdriver runs the WNLikelihood class with a single rate for the whole tree
  */

@@ -6,7 +6,10 @@ import org.junit.Test;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.coalescent.CoalCorrection;
-import contraband.utils.GeneralUtils;
+
+/**
+ * @author Fabio K. Mendes
+ */
 
 public class CoalCorrectionTest {
 	

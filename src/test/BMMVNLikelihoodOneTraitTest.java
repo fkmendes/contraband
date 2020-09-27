@@ -11,6 +11,10 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 /*
  * This class contains unit tests for BMMVNLikelihoodOneTrait (without and with coalescent correction)
  */

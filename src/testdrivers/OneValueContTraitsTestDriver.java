@@ -5,11 +5,13 @@ import java.util.Arrays;
 import beast.core.parameter.RealParameter;
 import contraband.valuewrappers.OneValueContTraits;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 public class OneValueContTraitsTestDriver {
 
 	public static void main(String[] args) {
-//		String oneTraitValues = "sp1=4.1,sp2= 4.5,sp3=5.9,sp4 =0.0 ";
-//		String twoTraitValues = "sp1=4.1,sp2=4.5 ,sp4=0.0,sp3=5.9 |sp1=5.1, sp2=5.5,sp3=6.9,sp4=1.0";
 		String spNames = "sp1,sp2,sp3,sp4";
 		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
 		RealParameter twoTraitValues = new RealParameter(new Double[] { 4.1, 5.1, 4.5, 5.5, 5.9, 6.9, 0.0, 1.0 });
@@ -28,5 +30,4 @@ public class OneValueContTraitsTestDriver {
 		System.out.println(Arrays.toString(spValues2));
 		System.out.println(spValue3);
 	}
-
 }

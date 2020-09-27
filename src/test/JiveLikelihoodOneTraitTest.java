@@ -1,12 +1,15 @@
 package test;
 
 import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import beast.core.parameter.RealParameter;
 import contraband.otherlikelihood.JiveLikelihoodOneTrait;
 import contraband.valuewrappers.ManyValuesOneContTrait;
+
+/**
+ * @author Fabio K. Mendes
+ */
 
 public class JiveLikelihoodOneTraitTest {
 
@@ -30,6 +33,6 @@ public class JiveLikelihoodOneTraitTest {
 		jive.initByName("sampleData", oneTrait, "logSigmaSqs", logSigmaSqs, "mus", mus);
 		double logLik = jive.calculateLogP();
 
-		assertEquals(-13.13221, logLik, EPSILON);
+		assertEquals(-13.1322153, logLik, EPSILON);
 	}
 }

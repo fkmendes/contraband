@@ -4,6 +4,10 @@ import beast.core.parameter.RealParameter;
 import contraband.otherlikelihood.JiveLikelihoodOneTrait;
 import contraband.valuewrappers.ManyValuesOneContTrait;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 public class JiveLikelihoodTestDriver {
 
 	public static void main(String[] args) {
@@ -30,5 +34,4 @@ public class JiveLikelihoodTestDriver {
 		 */
 		System.out.println(jive.calculateLogP()); // from R: -13.13222
 	}
-
 }

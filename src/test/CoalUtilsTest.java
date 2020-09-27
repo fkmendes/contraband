@@ -6,6 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import contraband.coalescent.CoalUtils;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 public class CoalUtilsTest {
 
 	double g10to2tau3Tavare, g10to2t3000ne1000Heled;
@@ -22,5 +26,4 @@ public class CoalUtilsTest {
 		assertEquals(0.12119509364945, g10to2tau3Tavare, 1E-8);
 		assertEquals(0.12119509364945, g10to2t3000ne1000Heled, 1E-8);
 	}
-
 }

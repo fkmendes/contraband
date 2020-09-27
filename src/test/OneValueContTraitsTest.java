@@ -1,7 +1,5 @@
 package test;
 
-import java.util.Arrays;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,18 +7,20 @@ import org.junit.Test;
 import beast.core.parameter.RealParameter;
 import contraband.valuewrappers.OneValueContTraits;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 public class OneValueContTraitsTest {
 
-	final static double EPSILON = 1e-4;
 	private Double[] spValues, sp4, sp4Expected;
 	private Double sp2, sp3, sp4OneValue;
 	private Double[] trait1, trait1b, trait2, trait1Expected, trait1Expected2, trait2Expected;
 	
-	@Before
-	public void setUp() throws Exception {
+	@Test
+	public void setUp() {
 		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
 		RealParameter twoTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0, 5.1, 5.5, 6.9, 1.0 });
-//		RealParameter twoTraitValues = new RealParameter(new Double[] { 4.1, 5.1, 4.5, 5.5, 5.9, 6.9, 0.0, 1.0 });
 		String spNames = "sp1,sp2,sp3,sp4";
 		String[] spNameInNewickOrder = { "sp1", "sp2", "sp3", "sp4" };
 		String[] spNameInNewickOrder2 = { "sp4", "sp2", "sp3", "sp1" };
@@ -32,12 +32,10 @@ public class OneValueContTraitsTest {
 		twoTrait.initByName("nTraits", 2, "spNames", spNames, "traitValues", twoTraitValues);
 		
 		spValues = oneTrait.getSpValues("sp3");
-		//System.out.println("spValues=" + Arrays.toString(spValues));
 		sp3 = spValues[0];
 		sp2 = oneTrait.getSpValue("sp2", 0);
 		
 		sp4 = twoTrait.getSpValues("sp4");
-		//System.out.println("sp4=" + Arrays.toString(sp4));
 		sp4OneValue = twoTrait.getSpValue("sp4", 1);
 	
 		sp4Expected = new Double[] { 0.0, 1.0 };
@@ -50,17 +48,10 @@ public class OneValueContTraitsTest {
 		
 		trait2 = twoTrait.getTraitValues(1, spNameInNewickOrder);
 		trait2Expected = new Double[] { 5.1, 5.5, 6.9, 1.0 };
-	}
 
-	@Test
-	public void test1() {
 		Assert.assertEquals(5.9, sp3, 0.0);
 		Assert.assertEquals(4.5, sp2, 0.0);
 		Assert.assertArrayEquals(sp4Expected, sp4);
-	}
-	
-	@Test
-	public void test2() {
 		Assert.assertArrayEquals(trait1Expected, trait1);
 		Assert.assertArrayEquals(trait1Expected2, trait1b);
 		Assert.assertArrayEquals(trait2Expected, trait2);

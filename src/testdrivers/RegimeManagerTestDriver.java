@@ -7,6 +7,10 @@ import beast.util.TreeParser;
 import contraband.clock.RateCategoryClockModel;
 import contraband.clock.TreeToVCVMat;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 /*
  * Matches testRegimeManagerValues
  */

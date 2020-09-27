@@ -2,6 +2,10 @@ package testdrivers;
 
 import contraband.coalescent.CoalUtils;
 
+/**
+ * @author Fabio K. Mendes
+ */
+
 public class CoalUtilsTestDriver {
 
 	public static void main(String[] args) {

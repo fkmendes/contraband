@@ -5,13 +5,15 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import contraband.mvnlikelihood.BMMVNShiftLikelihoodOneTrait;
-// import contraband.clock.ColorManager;
 import contraband.clock.RateCategoryClockModel;
-import contraband.valuewrappers.OneValueContTraits;
 import contraband.clock.TreeToVCVMat;
 
 import java.util.Arrays;
 import java.util.List;
+
+/**
+ * @author Fabio K. Mendes
+ */
 
 /*
  * Reduces to testBMMVNLkOneTraitSmallTree

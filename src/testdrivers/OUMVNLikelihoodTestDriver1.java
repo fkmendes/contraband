@@ -2,59 +2,60 @@ package testdrivers;
 
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
+import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import contraband.mvnlikelihood.OUMVNLikelihoodOneTrait;
-import contraband.valuewrappers.OneValueContTraits;
 import contraband.clock.RateCategoryClockModel;
 import contraband.clock.TreeToVCVMat;
 
+import java.util.Arrays;
+import java.util.List;
+
 /*
- * Equivalent to first likelihood test inside OUMVNLikelihoodOneTraitTest2.java
+ * Matches testOUMVNLkOneTraitSmallTree3optRandomRVEstimateRV
  */
 public class OUMVNLikelihoodTestDriver1 {
 
-	private static double lnLk;
-	
 	public static void main(String[] args) {
 		// tree
-		// String treeStr = "(((sp1[&Regime=1]:1.0, sp2[&Regime=1]:1.0)[&Regime=1]:1.0, sp3[&Regime=2]:2.0)[&Regime=0]:1.0, sp4[&Regime=0]:3.0)[&Regime=0];";
 		String treeStr = "(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):1.0,sp4:3.0);";
-		TreeParser myTree = new TreeParser(treeStr, false, false, true, 0);
-				
-		RealParameter colorValues = new RealParameter(new Double[] { -4.047373e-16, 4.3, 5.9 }); // thetas
-		IntegerParameter colorAssignments = new IntegerParameter(new Integer[] { 1, 1, 2, 0, 1, 0, 0 });
+		Tree myTree = new TreeParser(treeStr, false, false, true, 0);
+
+		// thetas
+		RealParameter colorValues = new RealParameter(new Double[]{ 0.206222932117995, 0.26633408087427, 0.88122539543514 });
+		IntegerParameter colorAssignments = new IntegerParameter(new Integer[]{ 1, 1, 2, 0, 1, 0, 0 });
 		RateCategoryClockModel rcc = new RateCategoryClockModel();
 		rcc.initByName("nCat", 3, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", myTree);
-		
+
 		TreeToVCVMat optima = new TreeToVCVMat();
-		optima.initByName("branchRateModel", rcc, "tree", myTree, "coalCorrection", false, "nColors", 3, "colorValues", colorValues, "colorAssignments", colorAssignments);
+		optima.initByName("branchRateModel", rcc, "tree", myTree, "coalCorrection", false);
 		// ColorManager optima = new ColorManager();
 		// optima.initByName("nTraits", 1, "nColors", 3, "tree", myTree, "colorValues", colorValues, "colorAssignments", colorAssignments, "coalCorrection", false);
 		
 		// initializing data		
-		RealParameter oneTraitValues = new RealParameter(new Double[] { 4.1, 4.5, 5.9, 0.0 });
-		String spNames = "sp1,sp2,sp3,sp4";
-		OneValueContTraits oneTraitData = new OneValueContTraits();
-		oneTraitData.initByName("nTraits", 1, "traitValues", oneTraitValues, "spNames", spNames);
+		String spNames = "sp1 sp2 sp3 sp4";
+		List<Double> oneTraitValues = Arrays.asList(0.237649365136715, 0.295018750722361, 0.881225138279161, 0.206222932069516);
+		RealParameter oneTraitData = new RealParameter();
+		oneTraitData.initByName("value", oneTraitValues, "keys", spNames);
 				
 		// sigmasq
-		Double[] sigmasqInput = new Double[] { 1.734117 };
-		RealParameter sigmasq = new RealParameter(sigmasqInput);
+		Double[] sigmasqInput = new Double[] { 0.008287661 };
+		RealParameter sigmaSq = new RealParameter(sigmasqInput);
 				
 		// alpha
-		Double[] alphaInput = new Double[] { 43.35287 };
+		Double[] alphaInput = new Double[] { 10.07163 };
 		RealParameter alpha = new RealParameter(alphaInput);	
 		
 		// root value
-		Double[] rootValueInput = new Double[] { 3.348633e-56 };
+		Double[] rootValueInput = new Double[] { 1.021864e-13 };
 		RealParameter rootValue = new RealParameter(rootValueInput);
 				
 		// likelihood
-		OUMVNLikelihoodOneTrait OULk = new OUMVNLikelihoodOneTrait();
-		OULk.initByName("tree", myTree, "sigmasq", sigmasq, "alpha", alpha, "optimumManager", optima,
-				"useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue, "eqDist", true);
+		OUMVNLikelihoodOneTrait ouLk = new OUMVNLikelihoodOneTrait();
+		ouLk.initByName("tree", myTree, "sigmaSq", sigmaSq, "alpha", alpha, "optimumManager", optima, "useRootMetaData", true, "oneTraitData", oneTraitData, "rootValue", rootValue, "eqDist", true); // rootValue here is irrelevant
+		double lnLk = ouLk.calculateLogP();
 		
-		lnLk = OULk.calculateLogP(); 
-		System.out.println(lnLk); // 2.1482918780359883
+		lnLk = ouLk.calculateLogP();
+		System.out.println(lnLk); // 9.916106821947409
 	}
 }
