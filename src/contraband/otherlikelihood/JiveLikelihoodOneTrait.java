@@ -6,7 +6,7 @@ import java.util.Random;
 import beast.core.*;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
-import contraband.math.MVNUtils;
+import contraband.utils.MVNUtils;
 import contraband.valuewrappers.ManyValuesOneContTrait;
 
 /**

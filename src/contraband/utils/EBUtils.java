@@ -1,4 +1,6 @@
-package contraband.math;
+package contraband.utils;
+
+import contraband.math.MatrixUtils;
 
 import static java.lang.Math.exp;
 

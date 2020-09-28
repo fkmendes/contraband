@@ -1,4 +1,4 @@
-package contraband.math;
+package contraband.utils;
 
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;

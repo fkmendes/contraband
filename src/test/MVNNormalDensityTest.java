@@ -1,6 +1,6 @@
 package test;
 
-import contraband.math.MVNUtils;
+import contraband.utils.MVNUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

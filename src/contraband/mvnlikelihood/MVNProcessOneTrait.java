@@ -6,7 +6,7 @@ import java.util.List;
 import beast.core.Citation;
 import beast.core.Description;
 import contraband.coalescent.CoalCorrection;
-import contraband.math.MVNUtils;
+import contraband.utils.MVNUtils;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;

@@ -2,8 +2,6 @@ package testdrivers;
 
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
-import contraband.math.MVNUtils;
-import contraband.valuewrappers.OneValueContTraits;
 import contraband.otherlikelihood.WNLikelihoodOneTrait;
 
 import java.util.Arrays;

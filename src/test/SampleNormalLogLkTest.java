@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import contraband.math.MVNUtils;
+import contraband.utils.MVNUtils;
 
 /**
  * @author Fabio K. Mendes

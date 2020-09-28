@@ -14,14 +14,14 @@ import beast.evolution.tree.Node;
 import java.util.ArrayList;
 import java.util.List;
 
-import contraband.math.MVNUtils;
-import contraband.math.OUUtils;
+import contraband.utils.MVNUtils;
+import contraband.utils.OUUtils;
 
 /**
  * @author Pau Bravo
  */
 
-public class OUOneTraitComputeMVNLkTest {
+public class OUMVNLikelihoodOneTraitFromUtilsTest {
 	
 	final static double EPSILON = 1e-4;
 	

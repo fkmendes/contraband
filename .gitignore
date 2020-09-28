@@ -1,7 +1,6 @@
 *.classpath
 *.project
 *~
-/bin/
 .metadata
 *.DS_store
 *.jar
@@ -13,3 +12,6 @@
 *.state
 *.iml
 in_review/*
+bin/
+build/
+.idea/

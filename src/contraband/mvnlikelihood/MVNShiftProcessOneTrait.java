@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import beast.core.*;
-import contraband.math.MVNUtils;
+import contraband.utils.MVNUtils;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;

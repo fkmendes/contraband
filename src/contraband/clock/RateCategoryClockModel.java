@@ -67,4 +67,9 @@ public class RateCategoryClockModel extends BranchRateModel.Base {
         int index = rateCatAssignInput.get().getValue(node.getNr());
         return rateValuesInput.get().getArrayValue(index);
     }
+
+    public int getCatForBranch(Node node) {
+        int index = rateCatAssignInput.get().getValue(node.getNr());
+        return index;
+    }
 }

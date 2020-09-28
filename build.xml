@@ -26,9 +26,11 @@
   <property name="srcBeast2" location="${beast2path}/src"/>
   <property name="beast2classpath" location="${beast2path}/build"/>
 
-  <!-- SA-related paths -->
+  <!-- other packages paths -->
   <property name="SAPath" location="../sampled-ancestors"/>
   <property name="SAClasspath" location="${SAPath}/build" />
+  <property name="starbeast2Path" location="../starbeast2"/>
+  <property name="starbeast2Classpath" location="${starbeast2Path}/build"/>
 
   <!-- BEAST 2 currently uses Java 1.8 -->
   <property name="sourceVersion" value="1.8"/>
@@ -119,9 +121,13 @@
 	<include name="*.jar"/>
       </fileset>
 
-      <!-- Add compiled files from sampled-ancestors -->
+      <!-- Add compiled files from other packages -->
       <fileset dir="${SAClasspath}">
 	<include name="beast/**/*.class"/>
+      </fileset>
+
+      <fileset dir="{starbeast2Classpath}">
+	<include name="starbeast2/**/*.class"/>
       </fileset>
 
       <!-- Bundles executables and a bunch of other files from these libs -->
@@ -131,6 +137,15 @@
       <zipgroupfileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
       <zipgroupfileset dir="${libBeast2}" includes="jam.jar"/>
       <zipgroupfileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
+    </jar>
+
+    <!-- Put everything in contraband.vSomeVersion.src.jar -->
+    <!-- This is a source jar distribution that guarantees the source
+	 files match the executable .jar -->
+    <jar jarfile="${distContra}/${binName}.v${projVersion}.src.jar">
+      <fileset dir="${srcContra}">
+	<include name="**/*.java"/>
+      </fileset>
     </jar>
 
   </target>

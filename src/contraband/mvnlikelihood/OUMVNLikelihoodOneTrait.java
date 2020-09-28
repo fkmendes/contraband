@@ -5,7 +5,7 @@ import java.util.Random;
 
 import beast.core.Citation;
 import beast.core.Description;
-import contraband.math.OUUtils;
+import contraband.utils.OUUtils;
 import contraband.clock.TreeToVCVMat;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
