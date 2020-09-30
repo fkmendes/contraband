@@ -5,7 +5,7 @@
 # (2) 'testComputeOUWMatSmallTreeNonUltra'
 # (3) 'testComputeOUWMatLargerTreeNonUltra'
 
-# devtools::load_all("/Users/entimos/Desktop/mvMORPH") # Modified mvMORPH package with printing of the final covariance matrix and weight matrix
+# devtools::load_all("/path/to/modified/mvMORPH") # Modified mvMORPH package with printing of the final covariance matrix and weight matrix
 
 ## The following three commands are aimed to modify mvMORPH package in order for it to print
 ## the final covariance matrix (multiplied by sigma^2) and weight matrix of the OU model to compare our implementation with mvMORPH's.

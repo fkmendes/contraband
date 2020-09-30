@@ -1,59 +1,53 @@
-# ---------- #
-# JUnit OUUtils tests expected values
-# ---------- #
+# author: Pau Bravo
+# This R script gives us the expected values for JUnit tests
+# 'OUUtilsComputeOUTMatOneTraitTest'
+# (1) 'testComputeOUTMatSmallTree'
+# (2) 'testComputeOUTMatSmallTreeNonUltra'
+# (3) 'testComputeOUTMatLargeTreeNonUltra'
 
 library(mvMORPH)
 
 ## The following three commands are aimed to modify mvMORPH package in order for it to print
 ## the final covariance matrix (multiplied by sigma^2) and weight matrix of the OU model to compare our implementation with mvMORPH's.
 envirMORPH <- environment(mvMORPH::mvOU)
-source(file = "/Users/entimos/GitHub/contraband/r_scripts/mvOU.r")
+source(file="../mvOU.R")
 environment(mvOU) <- envirMORPH
 
 # The following command loads prior functions to calculate the covariance matrix,
 # the weight matrix and the likelihood of the Hansen model to compare their results with mvMORPH's results
-source(file = "/Users/entimos/GitHub/contraband/r_scripts/OUfunctions.R")
+source(file = "../OUfunctions.R")
 
 EPSILON <- 1e-04 # Tolerance value for comparing mvMORPH with PAU's functions
 
-# 1, 2, 3 refers to Test 1, Test 2 and Test 3 respectively
+## OUMVNLikelihoodOneTraitFromUtilsTest
 
 # ----- START: MVNUtils.computeMVNLk validation ----- #
-# JUnit: OUOneTraitcomputeMVNLkTest 
+# JUnit: OUOneTraitcomputeMVNLkTest
 
-# For the covariance matrices we can assume two different hipothesis:
-# 'F' suffix refers to assuming a fixed parameter Root
-# 'R' suffix refers to assuming a random variable Root (stationary distribution)
-# For the weight matrices we can assume two different hipothesis:
-# 'I' suffix refers to isolating the root optimum value in the weight Matrix
-# 'M' suffix refers to merging the root parameter with the optimum parameter associated with the eldest selective regime
+## R: rootIsRandVar=true (vcv="randomRoot")
+## F: rootIsRandVar=false (vcv="fixedRoot")
+## I: useRootMetaData=true (root=T)
+## M: useRootMetaData=false (root=F)
 
-# Every test has four different outputs according to the combination of the previous situations: FI, FM, RI, RM
+### (1) testComputeOULikSmallTreeThreeOpt
 
-### Test 1: Ultrametric Tree (3 regimes)
+tr <- paintSubTree(read.tree(text="(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):1.0,sp4:3.0);"), node=6, state="group1", anc.state="group0")
+tr <- paintSubTree(tr, node=3, state="group2", anc.state="group0", stem=T)
+dat <- c(4.1, 4.5, 5.9, 0.0)
+plotSimmap(tr)
 
-# Tree data
-ultTreeStr <- "(((sp1:1.0, sp2:1.0):1.0, sp3:2.0):1.0, sp4:3.0);"
-ultTree <- read.tree(text = ultTreeStr)
-ultTree <- paintSubTree(ultTree, node = 6, state = "group1", anc.state = "group0")
-ultTree <- paintSubTree(ultTree, node = 3, state = "group2", anc.state = "group0", stem = T)
-ult.data <- c(4.1, 4.5, 5.9, 0.0)
-plot(ultTree)
+fitFI <- mvOU(tr, dat, model="OUM", param=list(root=T, vcv="fixedRoot"))
+fitFM <- mvOU(tr, dat, model="OUM", param=list(root=F, vcv="fixedRoot"))
+fitRI <- mvOU(tr, dat, model="OUM", param=list(root=T, vcv="randomRoot"))
+fitRM <- mvOU(tr, dat, model="OUM", param=list(root=F, vcv="randomRoot"))
 
-# mvMORPH output
-fitFI <- mvOU(ultTree, ult.data, model = "OUM", param = list(root = T, vcv = "fixedRoot"))
-fitFM <- mvOU(ultTree, ult.data, model = "OUM", param = list(root = F, vcv = "fixedRoot"))
-fitRI <- mvOU(ultTree, ult.data, model = "OUM", param = list(root = T, vcv = "randomRoot"))
-fitRM <- mvOU(ultTree, ult.data, model = "OUM", param = list(root = F, vcv = "randomRoot"))
-
-# Values to use on JUNIT Tests
-
-fitFI$alpha   # 31.20814  
-fitFI$sigma   # 1.248328  
+#### Values to use on JUNIT Tests
+fitFI$alpha   # 31.20814
+fitFI$sigma   # 1.248328
 fitFI$theta   # c(theta0, group0, group1, group2) = c(2.228585e-40, -4.047373e-16, 4.300000e+00, 5.900000e+00)
 
 fitFM$alpha   # 31.20814
-fitFM$sigma   #  1.248328 
+fitFM$sigma   #  1.248328
 fitFM$theta   # c(group0, group1, group2) = c(8.128044e-27, 4.300000e+00, 5.900000e+00)
 
 fitRI$alpha   # 43.35287
@@ -61,16 +55,11 @@ fitRI$sigma   # 1.734117
 fitRI$theta   # c(theta0, group0, group1, group2) = c(3.348633e-56, -1.903330e-16, 4.300000e+00, 5.900000e+00)
 
 fitRM$alpha   # 43.35287
-fitRM$sigma   # 1.734117 
+fitRM$sigma   # 1.734117
 fitRM$theta   # c(group0, group1, group2) = c(2.297268e-37, 4.300000e+00, 5.900000e+00)
 
-# LogLikelihood values to compare with Java classes
-fitFI$LogLik  # 2.148292
-fitFM$LogLik  # 2.148292
-fitRI$LogLik  # 2.148292
-fitRM$LogLik  # 2.148292
-
-# PAU's functions output
+#### Values to compare with Java classe# Pau's functions output
+##### Pau's functions output
 regimes <- c(1, 1, 2, 0, 0, 0, 1); regimes <- factor(regimes);
 
 ouCovFI <- varOU(ultTree, as.numeric(fitFI$alpha), T)
@@ -90,35 +79,36 @@ likFM <- computeLk(ult.data, ouWFM %*% fitFM$theta, ouCovFM, as.numeric(fitFM$si
 likRI <- computeLk(ult.data, ouWRI %*% fitRI$theta, ouCovRI, as.numeric(fitRI$sigma))
 likRM <- computeLk(ult.data, ouWRM %*% fitRM$theta, ouCovRM, as.numeric(fitRM$sigma))
 
-# Comparing mvMORPH output with PAU's R functions
-all.equal(as.numeric(log(likFI)), as.numeric(fitFI$LogLik), tolerance = EPSILON)
-all.equal(as.numeric(log(likFM)), as.numeric(fitFM$LogLik), tolerance = EPSILON) 
-all.equal(as.numeric(log(likRI)), as.numeric(fitRI$LogLik), tolerance = EPSILON)
-all.equal(as.numeric(log(likRM)), as.numeric(fitRM$LogLik), tolerance = EPSILON)
+##### LogLikelihoods
+fitFI$LogLik  # 2.148292
+fitFM$LogLik  # 2.148292
+fitRI$LogLik  # 2.148292
+fitRM$LogLik  # 2.148292
 
+##### Comparing mvMORPH output with Pau's R functions
+all.equal(as.numeric(log(likFI)), as.numeric(fitFI$LogLik), tolerance=EPSILON)
+all.equal(as.numeric(log(likFM)), as.numeric(fitFM$LogLik), tolerance=EPSILON)
+all.equal(as.numeric(log(likRI)), as.numeric(fitRI$LogLik), tolerance=EPSILON)
+all.equal(as.numeric(log(likRM)), as.numeric(fitRM$LogLik), tolerance=EPSILON)
 
-### Test 2: Non-ultrametric tree (1 regime)
+### (2) testComputeOULikSmallTreeNonUltraOneOpt
 
-# Tree data
-nonultTreeStr <- "(((sp1:2.0, sp2:1.0):1.0, sp3:4.0):1.0, sp4:3.0);"
-nonultTree <- read.tree(text = nonultTreeStr)
-nonult.data <- c(4.1, 4.5, 5.9, 0.0)
-plot(nonultTree)
+tr2 <- read.tree(text="(((sp1:2.0, sp2:1.0):1.0, sp3:4.0):1.0, sp4:3.0);")
+dat <- c(4.1, 4.5, 5.9, 0.0)
+plot(tr2)
 
-# mvMORPH output
-fitFI <- mvOU(nonultTree, nonult.data, model = "OU1", param = list(root = T, vcv = "fixedRoot"))
-fitFM <- mvOU(nonultTree, nonult.data, model = "OU1", param = list(root = F, vcv = "fixedRoot"))
-fitRI <- mvOU(nonultTree, nonult.data, model = "OU1", param = list(root = T, vcv = "randomRoot"))
-fitRM <- mvOU(nonultTree, nonult.data, model = "OU1", param = list(root = F, vcv = "randomRoot"))
+fitFI <- mvOU(tr2, dat, model="OU1", param=list(root=T, vcv="fixedRoot"))
+fitFM <- mvOU(tr2, dat, model="OU1", param=list(root=F, vcv="fixedRoot"))
+fitRI <- mvOU(tr2, dat, model="OU1", param=list(root=T, vcv="randomRoot"))
+fitRM <- mvOU(tr2, dat, model="OU1", param=list(root=F, vcv="randomRoot"))
 
-# Values to use on JUNIT Tests
-
-fitFI$alpha   # 0.7465763 
-fitFI$sigma   # 4.003551 
+#### Values to use on JUNIT Tests
+fitFI$alpha   # 0.7465763
+fitFI$sigma   # 4.003551
 fitFI$theta   # c(theta0, group0) = c(-33.591241, 6.449917)
 
 fitFM$alpha   # 1.40338e-08
-fitFM$sigma   # 1.237864 
+fitFM$sigma   # 1.237864
 fitFM$theta   # 2.792045
 
 fitRI$alpha   # 0.8609833
@@ -129,61 +119,56 @@ fitRM$alpha   # 0.7085376
 fitRM$sigma   # 6.841867
 fitRM$theta   # 3.586504
 
-# LogLikelihood values to compare with Java classes
+#### Values to compare with Java classe# Pau's functions output
+##### Pau's functions output
+regimes <- c(0, 0, 0, 0, 0, 0, 0); regimes <- factor(regimes);
+
+ouCovFI <- varOU(tr2, as.numeric(fitFI$alpha), T)
+ouWFI <- weightMat(tr2, as.numeric(fitFI$alpha), length(levels(regimes)), regimes, F)
+
+ouCovFM <- varOU(tr2, as.numeric(fitFM$alpha), T)
+ouWFM <- weightMat(tr2, as.numeric(fitFM$alpha), length(levels(regimes)), regimes, T)
+
+ouCovRI <- varOU(tr2, as.numeric(fitRI$alpha), F)
+ouWRI <- weightMat(tr2, as.numeric(fitRI$alpha), length(levels(regimes)), regimes, F)
+
+ouCovRM <- varOU(tr2, as.numeric(fitRM$alpha), F)
+ouWRM <- weightMat(tr2, as.numeric(fitRM$alpha), length(levels(regimes)), regimes, T)
+
+likFI <- computeLk(dat, ouWFI %*% fitFI$theta, ouCovFI, as.numeric(fitFI$sigma))
+likFM <- computeLk(dat, ouWFM %*% fitFM$theta, ouCovFM, as.numeric(fitFM$sigma))
+likRI <- computeLk(dat, ouWRI %*% fitRI$theta, ouCovRI, as.numeric(fitRI$sigma))
+likRM <- computeLk(dat, ouWRM %*% fitRM$theta, ouCovRM, as.numeric(fitRM$sigma))
+
+##### LogLikelihoods
 fitFI$LogLik  # -7.630117
 fitFM$LogLik  # -8.457486
 fitRI$LogLik  # -7.63854
 fitRM$LogLik  # -8.817273
 
-# PAU's functions output
-regimes <- c(0, 0, 0, 0, 0, 0, 0); regimes <- factor(regimes);
-
-ouCovFI <- varOU(nonultTree, as.numeric(fitFI$alpha), T)
-ouWFI <- weightMat(nonultTree, as.numeric(fitFI$alpha), length(levels(regimes)), regimes, F)
-
-ouCovFM <- varOU(nonultTree, as.numeric(fitFM$alpha), T)
-ouWFM <- weightMat(nonultTree, as.numeric(fitFM$alpha), length(levels(regimes)), regimes, T)
-
-ouCovRI <- varOU(nonultTree, as.numeric(fitRI$alpha), F)
-ouWRI <- weightMat(nonultTree, as.numeric(fitRI$alpha), length(levels(regimes)), regimes, F)
-
-ouCovRM <- varOU(nonultTree, as.numeric(fitRM$alpha), F)
-ouWRM <- weightMat(nonultTree, as.numeric(fitRM$alpha), length(levels(regimes)), regimes, T)
-
-likFI <- computeLk(nonult.data, ouWFI %*% fitFI$theta, ouCovFI, as.numeric(fitFI$sigma))
-likFM <- computeLk(nonult.data, ouWFM %*% fitFM$theta, ouCovFM, as.numeric(fitFM$sigma))
-likRI <- computeLk(nonult.data, ouWRI %*% fitRI$theta, ouCovRI, as.numeric(fitRI$sigma))
-likRM <- computeLk(nonult.data, ouWRM %*% fitRM$theta, ouCovRM, as.numeric(fitRM$sigma))
-
-# Comparing mvMORPH output with PAU's R functions
+##### Comparing mvMORPH output with Pau's R functions
 all.equal(as.numeric(log(likFI)), as.numeric(fitFI$LogLik), tolerance = EPSILON)
-all.equal(as.numeric(log(likFM)), as.numeric(fitFM$LogLik), tolerance = EPSILON) 
+all.equal(as.numeric(log(likFM)), as.numeric(fitFM$LogLik), tolerance = EPSILON)
 all.equal(as.numeric(log(likRI)), as.numeric(fitRI$LogLik), tolerance = EPSILON)
 all.equal(as.numeric(log(likRM)), as.numeric(fitRM$LogLik), tolerance = EPSILON)
 
+### (3) testComputeOULikLargeTreeNonUltraFiveOpt
 
-### Test 3: Non-ultrametric tree (5 regimes)
+tr3 <- paintSubTree(read.tree(text="(((((sp1:1.0,sp2:1.0):1.0,sp3:1.0):2.0,(sp4:1.0,sp5:1.0):3.0):2.0,sp6:6.0):1.0,sp7:3.0);"), node=12, state="group1", anc.state="group0", stem=T)
+tr3 <- paintSubTree(tr3, node=12, state="group1", anc.state="group0", stem=T)
+tr3 <- paintSubTree(tr3, node=13, state="group2", anc.state="group0", stem=T)
+tr3 <- paintSubTree(tr3, node=6, state="group3", anc.state="group0", stem=T)
+tr3 <- paintSubTree(tr3, node=7, state="group4", anc.state="group0", stem=T)
+dat <- c(4.1, 4.5, 5.9, 0.0, 3.2, 2.5, 5.4)
+plotSimmap(tr3)
 
-# Tree data
-nonultTreeStrBig = "(((((sp1:1.0, sp2:1.0):1.0, sp3:1.0):2.0, (sp4:1.0, sp5:1.0):3.0):2.0, sp6:6.0):1.0, sp7:3.0);"
-nonultTreeBig <- read.tree(text = nonultTreeStrBig)
-nonultTreeBig <- paintSubTree(nonultTreeBig, node = 12, state = "group1", anc.state = "group0", stem = T)
-nonultTreeBig <- paintSubTree(nonultTreeBig, node = 13, state = "group2", anc.state = "group0", stem = T)
-nonultTreeBig <- paintSubTree(nonultTreeBig, node = 6, state = "group3", anc.state = "group0", stem = T)
-nonultTreeBig <- paintSubTree(nonultTreeBig, node = 7, state = "group4", anc.state = "group0", stem = T)
-nonultTreeBig.data <- c(4.1, 4.5, 5.9, 0.0, 3.2, 2.5, 5.4)
-plot(nonultTreeBig)
-
-# mvMORPH output
-fitFI <- mvOU(nonultTreeBig, nonultTreeBig.data, model = "OUM", param = list(root = T, vcv = "fixedRoot"))
-fitFM <- mvOU(nonultTreeBig, nonultTreeBig.data, model = "OUM", param = list(root = F, vcv = "fixedRoot"))
-fitRI <- mvOU(nonultTreeBig, nonultTreeBig.data, model = "OUM", param = list(root = T, vcv = "randomRoot"))
-fitRM <- mvOU(nonultTreeBig, nonultTreeBig.data, model = "OUM", param = list(root = F, vcv = "randomRoot"))
-
-# Values to use on JUNIT Tests
+fitFI <- mvOU(tr3, dat, model="OUM", param=list(root=T, vcv="fixedRoot"))
+fitFM <- mvOU(tr3, dat, model="OUM", param=list(root=F, vcv="fixedRoot"))
+fitRI <- mvOU(tr3, dat, model="OUM", param=list(root=T, vcv="randomRoot"))
+fitRM <- mvOU(tr3, dat, model="OUM", param=list(root=F, vcv="randomRoot"))
 
 fitFI$alpha   # 7.142986
-fitFI$sigma   # 10.61289 
+fitFI$sigma   # 10.61289
 fitFI$theta   # c(2.666338e-09, 5.900000e+00, 4.299999e+00, 1.600000e+00, 2.500000e+00, 5.400000e+00)
 
 fitFM$alpha   # 7.142986
@@ -198,37 +183,35 @@ fitRM$alpha   # 7.84511
 fitRM$sigma   # 11.65586
 fitRM$theta   # c(5.9, 4.3, 1.6, 2.5, 5.4)
 
+#### Values to compare with Java classe# Pau's functions output
+##### Pau's functions output
+regimes <- c(1, 1, 0, 2, 2, 3, 4, 0, 0, 0, 0, 1, 2); regimes <- factor(regimes)
 
-# LogLikelihood values to compare with Java classes
+ouCovFI <- varOU(tr3, as.numeric(fitFI$alpha), T)
+ouWFI <- weightMat(tr3, as.numeric(fitFI$alpha), length(levels(regimes)), regimes, F)
+
+ouCovFM <- varOU(tr3, as.numeric(fitFM$alpha), T)
+ouWFM <- weightMat(tr3, as.numeric(fitFM$alpha), length(levels(regimes)), regimes, T)
+
+ouCovRI <- varOU(tr3, as.numeric(fitRI$alpha), F)
+ouWRI <- weightMat(tr3, as.numeric(fitRI$alpha), length(levels(regimes)), regimes, F)
+
+ouCovRM <- varOU(tr3, as.numeric(fitRM$alpha), F)
+ouWRM <- weightMat(tr3, as.numeric(fitRM$alpha), length(levels(regimes)), regimes, T)
+
+likFI <- computeLk(dat, ouWFI %*% fitFI$theta, ouCovFI, as.numeric(fitFI$sigma))
+likFM <- computeLk(dat, ouWFM %*% fitFM$theta, ouCovFM, as.numeric(fitFM$sigma))
+likRI <- computeLk(dat, ouWRI %*% fitRI$theta, ouCovRI, as.numeric(fitRI$sigma))
+likRM <- computeLk(dat, ouWRM %*% fitRM$theta, ouCovRM, as.numeric(fitRM$sigma))
+
+##### LogLikelihoods
 fitFI$LogLik  # -8.892192
 fitFM$LogLik  # -8.892192
 fitRI$LogLik  # -8.89219
 fitRM$LogLik  # -8.89219
 
-# PAU's functions output
-regimes <- c(1, 1, 0, 2, 2, 3, 4, 0, 0, 0, 0, 1, 2); regimes <- factor(regimes)
-
-ouCovFI <- varOU(nonultTreeBig, as.numeric(fitFI$alpha), T)
-ouWFI <- weightMat(nonultTreeBig, as.numeric(fitFI$alpha), length(levels(regimes)), regimes, F)
-
-ouCovFM <- varOU(nonultTreeBig, as.numeric(fitFM$alpha), T)
-ouWFM <- weightMat(nonultTreeBig, as.numeric(fitFM$alpha), length(levels(regimes)), regimes, T)
-
-ouCovRI <- varOU(nonultTreeBig, as.numeric(fitRI$alpha), F)
-ouWRI <- weightMat(nonultTreeBig, as.numeric(fitRI$alpha), length(levels(regimes)), regimes, F)
-
-ouCovRM <- varOU(nonultTreeBig, as.numeric(fitRM$alpha), F)
-ouWRM <- weightMat(nonultTreeBig, as.numeric(fitRM$alpha), length(levels(regimes)), regimes, T)
-
-likFI <- computeLk(nonultTreeBig.data, ouWFI %*% fitFI$theta, ouCovFI, as.numeric(fitFI$sigma))
-likFM <- computeLk(nonultTreeBig.data, ouWFM %*% fitFM$theta, ouCovFM, as.numeric(fitFM$sigma))
-likRI <- computeLk(nonultTreeBig.data, ouWRI %*% fitRI$theta, ouCovRI, as.numeric(fitRI$sigma))
-likRM <- computeLk(nonultTreeBig.data, ouWRM %*% fitRM$theta, ouCovRM, as.numeric(fitRM$sigma))
-
-# Comparing mvMORPH output with PAU's R functions
+##### Comparing mvMORPH output with Pau's R functions
 all.equal(as.numeric(log(likFI)), as.numeric(fitFI$LogLik), tolerance = EPSILON)
-all.equal(as.numeric(log(likFM)), as.numeric(fitFM$LogLik), tolerance = EPSILON) 
+all.equal(as.numeric(log(likFM)), as.numeric(fitFM$LogLik), tolerance = EPSILON)
 all.equal(as.numeric(log(likRI)), as.numeric(fitRI$LogLik), tolerance = EPSILON)
 all.equal(as.numeric(log(likRM)), as.numeric(fitRM$LogLik), tolerance = EPSILON)
-
-# ----- END: MVNUtils.computeMVNLk validation ----- #
