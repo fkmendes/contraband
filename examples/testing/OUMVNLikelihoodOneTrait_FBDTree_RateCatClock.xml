@@ -98,7 +98,7 @@
 	  <!--   <traitValues id="fixedTraitValues" spec="parameter.RealParameter">0.3975946 0.2423501 -0.6398611 0.3134564</traitValues> -->
 	  <!-- </oneTraitData> -->
 
-	  <oneTraitData id="oneTraitData" spec="parameter.RealParameter" keys="sp1 sp2 f1 f2" value="0.3975 0.2423 -0.6398 0.3134"/>
+	  <oneTraitData id="oneTraitData" spec="outercore.parameter.KeyEnhancedRealParameter" keys="sp1 sp2 f1 f2" value="0.3975 0.2423 -0.6398 0.3134"/>
 
 	  <optimumManager id="optimumManager" spec="contraband.clock.TreeToVCVMat" coalCorrection="false">
 	    <branchRateModel id="rateCatClock" spec="contraband.clock.RateCategoryClockModel" nCat="2">

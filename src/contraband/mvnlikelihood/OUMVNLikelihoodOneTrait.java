@@ -19,7 +19,6 @@ import beast.core.State;
 import beast.core.parameter.RealParameter;
 import beast.core.Input.Validate;
 import outercore.parameter.KeyEnhancedRealParameter;
-import outercore.parameter.KeyRealParameter;
 
 /**
  * @author Fabio K. Mendes

@@ -55,7 +55,7 @@
 	  <!--   <traitValues id="fixedTraitvalues" spec="parameter.RealParameter">4.1 4.5 5.9</traitValues> -->
 	  <!-- </oneTraitData> -->
           
-	  <oneTraitData id="oneTraitData" spec="parameter.RealParameter" keys="sp1 sp2 sp3" value="4.1 4.5 5.9"/>
+	  <oneTraitData id="oneTraitData" spec="outercore.parameter.KeyEnhancedRealParameter" keys="sp1 sp2 sp3" value="4.1 4.5 5.9"/>
 
 	  <!-- (DEPRECATED) Original implementation had my own ColorManager regime mapper -->
 	  <!-- <optimumManager id="optimumManager" spec="contraband.clock.ColorManager" nTraits="1" nColors="1" coalCorrection="false"> -->

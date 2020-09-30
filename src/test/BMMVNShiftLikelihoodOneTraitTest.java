@@ -11,7 +11,6 @@ import contraband.mvnlikelihood.BMMVNShiftLikelihoodOneTrait;
 import contraband.clock.RateCategoryClockModel;
 import contraband.clock.TreeToVCVMat;
 import outercore.parameter.KeyEnhancedRealParameter;
-import outercore.parameter.KeyRealParameter;
 
 import java.util.Arrays;
 import java.util.List;

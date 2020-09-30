@@ -40,7 +40,7 @@
 	  <!--   <traitValues id="fixedTraitValues" spec="parameter.RealParameter">4.1 4.5 5.9 0.0</traitValues> -->
 	  <!-- </oneTraitData> -->
 
-	  <oneTraitData id="oneTraitData" spec="parameter.RealParameter" keys="sp1 sp2 sp3 sp4" value="4.1 4.5 5.9 0.0"/>
+	  <oneTraitData id="oneTraitData" spec="outercore.parameter.KeyEnhancedRealParameter" keys="sp1 sp2 sp3 sp4" value="4.1 4.5 5.9 0.0"/>
 	  
 	  <sigmaSq id="rateValue" dimension="1" spec="parameter.RealParameter">1.4822794118</sigmaSq>
 	  

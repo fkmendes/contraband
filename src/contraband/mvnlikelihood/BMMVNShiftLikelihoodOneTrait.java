@@ -13,8 +13,6 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
 import outercore.parameter.KeyEnhancedRealParameter;
-import outercore.parameter.KeyParameter;
-import outercore.parameter.KeyRealParameter;
 
 /**
  * @author Fabio K. Mendes
