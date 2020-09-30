@@ -28,9 +28,11 @@
 
   <!-- other packages paths -->
   <property name="SAPath" location="../sampled-ancestors"/>
-  <property name="SAClasspath" location="${SAPath}/build" />
+  <property name="SAClasspath" location="${SAPath}/build"/>
   <property name="starbeast2Path" location="../starbeast2"/>
   <property name="starbeast2Classpath" location="${starbeast2Path}/build"/>
+  <property name="beast-outercorePath" location="../beast-outercore"/>
+  <property name="beast-outercoreClasspath" location="${beast-outercorePath}/build" />
 
   <!-- BEAST 2 currently uses Java 1.8 -->
   <property name="sourceVersion" value="1.8"/>
@@ -128,6 +130,10 @@
 
       <fileset dir="{starbeast2Classpath}">
 	<include name="starbeast2/**/*.class"/>
+      </fileset>
+
+      <fileset dir="{beast-outercoreClasspath}">
+	<include name="outercore/**/*.class"/>
       </fileset>
 
       <!-- Bundles executables and a bunch of other files from these libs -->

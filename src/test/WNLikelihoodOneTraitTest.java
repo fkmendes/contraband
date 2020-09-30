@@ -1,13 +1,12 @@
 package test;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
-import contraband.valuewrappers.OneValueContTraits;
 import contraband.otherlikelihood.WNLikelihoodOneTrait;
+import outercore.parameter.KeyEnhancedRealParameter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +32,7 @@ public class WNLikelihoodOneTraitTest {
 		// initializing data
 		String spNames = "sp1 sp2 sp3";
 		List<Double> oneTraitValues = Arrays.asList(1.5952808, 0.3295078, -0.8204684);
-		RealParameter oneTraitData = new RealParameter();
+		KeyEnhancedRealParameter oneTraitData = new KeyEnhancedRealParameter();
 		oneTraitData.initByName("value", oneTraitValues, "keys", spNames);
 
 		RealParameter sigmaSqs = new RealParameter(new Double[] { 0.9733856, 0.0, 1.0 });
