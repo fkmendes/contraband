@@ -333,22 +333,22 @@ public class MatrixUtilsContra {
         }
     }
 
-    public static void setArray (double[] inArr, double[] arrayToSet, int position, int dim) {
-        System.arraycopy(arrayToSet, 0, inArr, position * dim, dim);
+    public static void setMatrixRow (double[] aMat, double[] rowValuesToSet, int rowIdx, int dim) {
+        System.arraycopy(rowValuesToSet, 0, aMat, rowIdx * dim, dim);
     }
 
-    public static void  getRowArray(double[] m, final int i, final int dim, final double[] rowValues) {
+    public static void getMatrixRow (double[] aMat, final int rowIdx, final int dim, final double[] rowValues) {
         for (int j = 0; j < dim; j++) {
-            rowValues[j] = getArrayEntry(m, i, j, dim);
+            rowValues[j] = getMatrixEntry(aMat, rowIdx, j, dim);
         }
     }
 
-    public static double getArrayEntry(double[] m, final int i, final int j, final int dim){
+    public static double getMatrixEntry(double[] aMat, final int rowIdx, final int colIdx, final int dim){
         // row index i
         // column index j
         // dimension of the matrix (2D double array)
-        // index in m[] = (i - 1) * dim + j
-        return m[i * dim + j];
+        // index in aMat[] = (i - 1) * dim + j
+        return aMat[rowIdx * dim + colIdx];
     }
 
     /*
@@ -405,7 +405,7 @@ public class MatrixUtilsContra {
     public static double[] matrixTranspose (double [] inArr, int dim, double[] resArr) {
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
-                setMatrixEntry(resArr, j, i, getArrayEntry(inArr, i, j, dim), dim);
+                setMatrixEntry(resArr, j, i, getMatrixEntry(inArr, i, j, dim), dim);
             }
         }
         return resArr;
@@ -421,7 +421,7 @@ public class MatrixUtilsContra {
                 double sumTemp = 0.0;
 
                 for (int k = 0; k < dim; k++) {
-                    sumTemp += getArrayEntry(inMat,i,k,dim) * getArrayEntry(matToMultiply, k, j, dim);
+                    sumTemp += getMatrixEntry(inMat,i,k,dim) * getMatrixEntry(matToMultiply, k, j, dim);
                 }
                 setMatrixEntry(resMat, i, j, sumTemp, dim);
             }

@@ -28,9 +28,9 @@ public class LUDecompositionForArray {
 
             // upper
             for (int row = 0; row < col; row++) {
-                double sum = MatrixUtilsContra.getArrayEntry(lu, row, col, m);
+                double sum = MatrixUtilsContra.getMatrixEntry(lu, row, col, m);
                 for (int i = 0; i < row; i++) {
-                    sum -= MatrixUtilsContra.getArrayEntry(lu, row, i, m) * MatrixUtilsContra.getArrayEntry(lu, i, col, m);
+                    sum -= MatrixUtilsContra.getMatrixEntry(lu, row, i, m) * MatrixUtilsContra.getMatrixEntry(lu, i, col, m);
                 }
                 MatrixUtilsContra.setMatrixEntry(lu, row, col, sum, m);
             }
@@ -39,9 +39,9 @@ public class LUDecompositionForArray {
             int max = col; // permutation row
             double largest = Double.NEGATIVE_INFINITY;
             for (int row = col; row < m; row++) {
-                double sum = MatrixUtilsContra.getArrayEntry(lu, row, col, m);
+                double sum = MatrixUtilsContra.getMatrixEntry(lu, row, col, m);
                 for (int i = 0; i < col; i++) {
-                    sum -= MatrixUtilsContra.getArrayEntry(lu, row, i, m) * MatrixUtilsContra.getArrayEntry(lu, i, col, m);
+                    sum -= MatrixUtilsContra.getMatrixEntry(lu, row, i, m) * MatrixUtilsContra.getMatrixEntry(lu, i, col, m);
                 }
                 //luRow[col] = sum;
                 MatrixUtilsContra.setMatrixEntry(lu, row, col, sum, m);
@@ -55,7 +55,7 @@ public class LUDecompositionForArray {
 
             // Singularity check
             //if (FastMath.abs(lu[max][col]) < DEFAULT_TOO_SMALL) {
-            if (FastMath.abs(MatrixUtilsContra.getArrayEntry(lu, max, col, m)) < DEFAULT_TOO_SMALL) {
+            if (FastMath.abs(MatrixUtilsContra.getMatrixEntry(lu, max, col, m)) < DEFAULT_TOO_SMALL) {
                 //singular = true;
                 //return new boolean[] {even, singular};
                 evensingular[1] = true;
@@ -65,8 +65,8 @@ public class LUDecompositionForArray {
             if (max != col) {
                 double tmp = 0;
                 for (int i = 0; i < m; i++) {
-                    tmp = MatrixUtilsContra.getArrayEntry(lu, max, i, m);
-                    MatrixUtilsContra.setMatrixEntry(lu, max, i, MatrixUtilsContra.getArrayEntry(lu, col, i,m), m);
+                    tmp = MatrixUtilsContra.getMatrixEntry(lu, max, i, m);
+                    MatrixUtilsContra.setMatrixEntry(lu, max, i, MatrixUtilsContra.getMatrixEntry(lu, col, i,m), m);
                     MatrixUtilsContra.setMatrixEntry(lu, col, i, tmp, m);
                 }
 
@@ -80,10 +80,10 @@ public class LUDecompositionForArray {
 
             // Divide the lower elements by the "winning" diagonal elt.
             //final double luDiag = lu[col][col];
-            final double luDiag = MatrixUtilsContra.getArrayEntry(lu, col, col, m);
+            final double luDiag = MatrixUtilsContra.getMatrixEntry(lu, col, col, m);
             for (int row = col + 1; row < m; row++) {
                 //lu[row][col] /= luDiag;
-                MatrixUtilsContra.setMatrixEntry(lu, row, col, MatrixUtilsContra.getArrayEntry(lu, row, col, m) / luDiag, m);
+                MatrixUtilsContra.setMatrixEntry(lu, row, col, MatrixUtilsContra.getMatrixEntry(lu, row, col, m) / luDiag, m);
             }
         }
 
@@ -98,7 +98,7 @@ public class LUDecompositionForArray {
         } else {
             double determinant = even ? 1 : -1;
             for (int i = 0; i < m; i++) {
-                determinant = determinant * MatrixUtilsContra.getArrayEntry(lu, i, i, m);
+                determinant = determinant * MatrixUtilsContra.getMatrixEntry(lu, i, i, m);
             }
             return determinant;
         }
@@ -120,7 +120,7 @@ public class LUDecompositionForArray {
             final int pRow = pivot[row];
             for (int col = 0; col < m; col++) {
                 //bpRow[col] = identity[pRow][col];
-                MatrixUtilsContra.setMatrixEntry(inv, row, col, MatrixUtilsContra.getArrayEntry(identity, pRow, col, m), m);
+                MatrixUtilsContra.setMatrixEntry(inv, row, col, MatrixUtilsContra.getMatrixEntry(identity, pRow, col, m), m);
             }
 
         }
@@ -133,15 +133,15 @@ public class LUDecompositionForArray {
                 //final double[] bpI = inv[i];
 
                 //final double luICol = lu[i][col];
-                final double luICol = MatrixUtilsContra.getArrayEntry(lu, i, col, m);
+                final double luICol = MatrixUtilsContra.getMatrixEntry(lu, i, col, m);
 
                 for (int j = 0; j < m; j++) {
                     //bpI[j] -= bpCol[j] * luICol;
 
                     // bpCol[j] = inv[j][col]
                     // bpI[j] = inv[i][j]
-                    double bpIj = MatrixUtilsContra.getArrayEntry(inv, i, j, m);
-                    double bpColj = MatrixUtilsContra.getArrayEntry(inv, col, j, m);
+                    double bpIj = MatrixUtilsContra.getMatrixEntry(inv, i, j, m);
+                    double bpColj = MatrixUtilsContra.getMatrixEntry(inv, col, j, m);
                     MatrixUtilsContra.setMatrixEntry(inv, i, j, bpIj - bpColj * luICol, m);
                 }
             }
@@ -152,11 +152,11 @@ public class LUDecompositionForArray {
             //final double[] bpCol = inv[col];
 
             //final double luDiag = lu[col][col];
-            final double luDiag = MatrixUtilsContra.getArrayEntry(lu, col, col, m);
+            final double luDiag = MatrixUtilsContra.getMatrixEntry(lu, col, col, m);
 
             for (int j = 0; j < m; j++) {
                 //bpCol[j] /= luDiag;
-                double boColj = MatrixUtilsContra.getArrayEntry(inv, col, j, m);
+                double boColj = MatrixUtilsContra.getMatrixEntry(inv, col, j, m);
                 MatrixUtilsContra.setMatrixEntry(inv, col, j, boColj / luDiag, m);
 
 
@@ -165,12 +165,12 @@ public class LUDecompositionForArray {
                 //final double[] bpI = inv[i];
 
                 //final double luICol = lu[i][col];
-                final double luICol = MatrixUtilsContra.getArrayEntry(lu, i, col, m);
+                final double luICol = MatrixUtilsContra.getMatrixEntry(lu, i, col, m);
 
                 for (int j = 0; j < m; j++) {
                     //bpI[j] -= bpCol[j] * luICol;
-                    double bpIj = MatrixUtilsContra.getArrayEntry(inv, i, j, m);
-                    double bpColj = MatrixUtilsContra.getArrayEntry(inv, col, j, m);
+                    double bpIj = MatrixUtilsContra.getMatrixEntry(inv, i, j, m);
+                    double bpColj = MatrixUtilsContra.getMatrixEntry(inv, col, j, m);
                     MatrixUtilsContra.setMatrixEntry(inv, i, j, bpIj-bpColj*luICol,m);
 
 

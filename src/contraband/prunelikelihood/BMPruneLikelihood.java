@@ -97,7 +97,7 @@ public class BMPruneLikelihood extends PruneLikelihoodProcess {
         // for multiple traits
         else {
             for (int i = 0; i < getNTraits(); i++) {
-                MatrixUtilsContra.getRowArray(getNodeMath().getTraitRateMatrix(), i, getNTraits(), getNodeMath().getRateMatrixRow());
+                MatrixUtilsContra.getMatrixRow(getNodeMath().getTraitRateMatrix(), i, getNTraits(), getNodeMath().getRateMatrixRow());
                 rateRealMatrix.setRow(i, getNodeMath().getRateMatrixRow());
             }
 

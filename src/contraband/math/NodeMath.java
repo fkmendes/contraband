@@ -231,7 +231,7 @@ public class NodeMath extends CalculationNode {
     public double getRForNode (int nodeIdx) { return rArray[nodeIdx]; }
 
     public double[] getMVecForNode (int nodeIdx) {
-        MatrixUtilsContra.getRowArray(mVecArray, nodeIdx, nTraits, mVec);
+        MatrixUtilsContra.getMatrixRow(mVecArray, nodeIdx, nTraits, mVec);
         return mVec;
     }
 
@@ -277,21 +277,21 @@ public class NodeMath extends CalculationNode {
     public void setRForNode (int nodeIdx, double value) { rArray[nodeIdx] = value; }
 
     public void setMVecForNode (int nodeIdx, double[] value) {
-        MatrixUtilsContra.setArray(mVecArray, value, nodeIdx, nTraits);
+        MatrixUtilsContra.setMatrixRow(mVecArray, value, nodeIdx, nTraits);
     }
 
     public void setLikelihoodForSampledAncestors (double value) { likForSA = value; }
 
     public void setTraitsVecForTip (double[] traitValues, int tipIdx) {
-        MatrixUtilsContra.getRowArray(traitValues, tipIdx, nTraits, traitsVec);
+        MatrixUtilsContra.getMatrixRow(traitValues, tipIdx, nTraits, traitsVec);
     }
 
     public void setTraitsVecForSampledAncestor (double[] traitValues, int nodeIdx) {
-        MatrixUtilsContra.getRowArray(traitValues, nodeIdx, nTraits, traitVecForSA);
+        MatrixUtilsContra.getMatrixRow(traitValues, nodeIdx, nTraits, traitVecForSA);
     }
 
     public void setExpectationForTip (int nodeIdx) {
-        MatrixUtilsContra.setArray(nodeExpectation, traitsVec, nodeIdx, nTraits);
+        MatrixUtilsContra.setMatrixRow(nodeExpectation, traitsVec, nodeIdx, nTraits);
     }
 
     public void setVarianceForTip (int nodeIdx, double value) { nodeVariance[nodeIdx] = value; }
@@ -305,12 +305,12 @@ public class NodeMath extends CalculationNode {
     public void setExpectationForParent (int parentIdx, int child1Idx, int child2Idx) {
         double vc1 = nodeVariance[child1Idx];
         double vc2 = nodeVariance[child2Idx];
-        MatrixUtilsContra.getRowArray(nodeExpectation, child1Idx, nTraits, expect1);
-        MatrixUtilsContra.getRowArray(nodeExpectation, child2Idx, nTraits, expect2);
+        MatrixUtilsContra.getMatrixRow(nodeExpectation, child1Idx, nTraits, expect1);
+        MatrixUtilsContra.getMatrixRow(nodeExpectation, child2Idx, nTraits, expect2);
         MatrixUtilsContra.vectorMapMultiply(expect1, vc2/(vc1+vc2), expect1);
         MatrixUtilsContra.vectorMapMultiply(expect2, vc1/(vc1+vc2), expect2);
         MatrixUtilsContra.vectorAdd(expect1, expect2, expectp);
-        MatrixUtilsContra.setArray(nodeExpectation, expectp, parentIdx, nTraits);
+        MatrixUtilsContra.setMatrixRow(nodeExpectation, expectp, parentIdx, nTraits);
     }
 
     public void setNTraits (int value) { nTraits = value; }
@@ -361,7 +361,7 @@ public class NodeMath extends CalculationNode {
             rootValuesVec = rootValuesInput.get().getDoubleValues();
         }
         if(!sampleRoot) {
-            MatrixUtilsContra.getRowArray(nodeExpectation, rootIdx, nTraits, rootValuesVec);
+            MatrixUtilsContra.getMatrixRow(nodeExpectation, rootIdx, nTraits, rootValuesVec);
         }
     }
 
