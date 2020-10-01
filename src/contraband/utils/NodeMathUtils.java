@@ -23,7 +23,7 @@ public class NodeMathUtils {
     public static void populateTraitRateMatrix(double variance, double[] covariance, double[] sigma, double [] transSigma, int nTraits, double[] traitRateMatrix) {
         populateUpperTriangularMat(variance, covariance, nTraits, sigma);
 
-        MatrixUtilsContra.vectorTranspose(sigma, nTraits, transSigma);
+        MatrixUtilsContra.matrixTranspose(sigma, nTraits, transSigma);
 
         MatrixUtilsContra.matrixMultiply(sigma, transSigma, nTraits, traitRateMatrix);
     }
@@ -70,7 +70,7 @@ public class NodeMathUtils {
             populateUpperTriangularMat(variance, covariance, nTraits, sigma);
         }
 
-        MatrixUtilsContra.vectorTranspose(sigma, nTraits, transSigma);
+        MatrixUtilsContra.matrixTranspose(sigma, nTraits, transSigma);
 
         MatrixUtilsContra.matrixMultiply(sigma, transSigma, nTraits, traitRateMatrix);
     }

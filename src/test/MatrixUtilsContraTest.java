@@ -2,9 +2,11 @@ package test;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import contraband.math.MatrixUtilsContra;
+import org.apache.commons.math3.linear.RealVector;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -229,5 +231,95 @@ public class MatrixUtilsContraTest {
 		Double[] resArrDouble = ArrayUtils.toObject(MatrixUtilsContra.vectorMapMultiply(inArr, scalar, resArr));
 
 		Assert.assertArrayEquals(resArrDouble, new Double[] { 13.0, 26.0, 39.0 });
+	}
+
+	/*
+	 * In R
+	 *
+	 * a = matrix(c(1.0, 5.0, 9.0, 13.0, 2.0, 6.0, 10.0, 14.0, 3.0, 7.0, 11.0, 15.0, 4.0, 8.0, 12.0, 16.0), ncol = 4)
+	 * b = matrix(c(17.0, 21.0, 25.0, 29.0, 18.0, 22.0, 26.0, 30.0, 19.0, 23.0, 27.0, 31.0, 20.0, 24.0, 28.0, 32.0), ncol = 4)
+	 *
+	 * t(a) %*% t(b)
+	 */
+	@Test
+	public void testMatrixMultiply(){
+		int ncol = 4;
+		int length = ncol * ncol;
+
+		double[] aMat = new double[]{
+				1.0, 5.0, 9.0, 13.0,
+				2.0, 6.0, 10.0, 14.0,
+				3.0, 7.0, 11.0, 15.0,
+				4.0, 8.0, 12.0, 16.0
+		};
+		double[] bMat = new double[]{
+				17.0, 21.0, 25.0, 29.0,
+				18.0, 22.0, 26.0, 30.0,
+				19.0, 23.0, 27.0, 31.0,
+				20.0, 24.0, 28.0, 32.0
+		};
+		double [] resMat = new double[length];
+
+		Double[] resMatDouble = ArrayUtils.toObject(MatrixUtilsContra.matrixMultiply(aMat, bMat, ncol, resMat));
+
+		Assert.assertArrayEquals(new Double[] { 538.0, 650.0, 762.0, 874.0, 612.0, 740.0, 868.0, 996.0, 686.0, 830.0, 974.0, 1118.0, 760.0, 920.0, 1080.0, 1240.0 }, resMatDouble);
+	}
+
+	/*
+	 * In R
+	 * a = matrix(c(3.92476468143533, 2.95493862847269, 5.47315682161247, 2.85610318223451, 3.62535769121946, 3.72081122250077, 3.70889115977579, 3.64833976126344, 4.32677785441579, 3.77038177701209, 3.31385684718126, 3.67462891649159, 3.73658224109536, 4.00675227771716, 3.23330588599873, 3.80698366724091), 4)
+	 * a = t(a)
+	 *
+	 * res = t(a)
+	 */
+	@Test
+	public void testVectorTranspose() {
+		int ncol = 4;
+		double[] aMat = new double[]{
+				3.92476468143533, 2.95493862847269, 5.47315682161247, 2.85610318223451,
+				3.62535769121946, 3.72081122250077, 3.70889115977579, 3.64833976126344,
+				4.32677785441579, 3.77038177701209, 3.31385684718126, 3.67462891649159,
+				3.73658224109536, 4.00675227771716, 3.23330588599873, 3.80698366724091
+		};
+		double[] resMat = new double[ncol * ncol];
+
+		Double[] resMatDouble = ArrayUtils.toObject(MatrixUtilsContra.matrixTranspose(aMat, ncol, resMat));
+
+		Assert.assertArrayEquals(new Double[]{3.92476468143533, 3.62535769121946, 4.32677785441579, 3.73658224109536, 2.95493862847269, 3.72081122250077, 3.77038177701209, 4.00675227771716, 5.47315682161247, 3.70889115977579, 3.31385684718126, 3.23330588599873, 2.85610318223451, 3.64833976126344, 3.67462891649159, 3.80698366724091}, resMatDouble);
+	}
+
+	/*
+	 * In R
+	 *
+	 * a = c(2, -5, 3, -4)
+     * b = c(3.95493862847269, 4.72081122250077, 4.77038177701209, 5.00675227771716)
+	 * options(digits=17)
+	 * res = a %*% b
+	 */
+	@Test
+	public void testVectorDotMultiply(){
+		double[] aVec = new double [] {2, -5, 3, -4};
+		double[] bVec = new double [] {3.95493862847269, 4.72081122250077, 4.77038177701209, 5.00675227771716};
+
+		double res = MatrixUtilsContra.vectorDotMultiply(aVec, bVec);
+
+		Assert.assertEquals(-21.410042635390845, res, 0.0);
+	}
+
+	/*
+	 * In R
+	 *
+	 * a = c(-0.206399781564555, 1.28555407499791, 1.0553689032024, 1.49801714307272, 1.20285942488946)
+	 * options(digits=17)
+	 * res = 0.2 * t(a) %*% a
+	 */
+	@Test
+	public void testVecTransScalarMultiply () {
+		double[] aVec = new double [] {
+				-0.206399781564555, 1.28555407499791, 1.0553689032024, 1.49801714307272, 1.20285942488946
+		};
+		double scalar = 0.2;
+		double res = MatrixUtilsContra.vecTransScalarMultiply(aVec, scalar, 5);
+		Assert.assertEquals(1.2999959656810844, res, 0.0);
 	}
 }

@@ -400,9 +400,9 @@ public class MatrixUtilsContra {
     }
 
     /*
-     * This method makes a column vector to a row vector
+     * This method populates the matrix transpose
      */
-    public static double[] vectorTranspose(double [] inArr, int dim, double[] resArr) {
+    public static double[] matrixTranspose (double [] inArr, int dim, double[] resArr) {
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
                 setMatrixEntry(resArr, j, i, getArrayEntry(inArr, i, j, dim), dim);
