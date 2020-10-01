@@ -7,7 +7,7 @@ import contraband.coalescent.CoalCorrection;
 import contraband.mvnlikelihood.BMMVNLikelihoodOneTrait;
 import org.junit.Assert;
 import org.junit.Test;
-import outercore.parameter.KeyEnhancedRealParameter;
+import outercore.parameter.KeyRealParameter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +31,7 @@ public class BMMVNLikelihoodOneTraitTest {
 	Double[] rootValueVectorInput;
 	RealParameter rootValue;
 	List<Double> oneTraitValues;
-	KeyEnhancedRealParameter oneTraitData;
+	KeyRealParameter oneTraitData;
 	BMMVNLikelihoodOneTrait bmLk;
 
 	/*
@@ -52,7 +52,7 @@ public class BMMVNLikelihoodOneTraitTest {
 		// initializing data
 		spNames = "sp1 sp2 sp3";
 		oneTraitValues = Arrays.asList(4.1, 4.5, 5.9);
-		oneTraitData = new KeyEnhancedRealParameter();
+		oneTraitData = new KeyRealParameter();
 		oneTraitData.initByName("value", oneTraitValues, "keys", spNames);
 
 		// sigmasq
@@ -93,7 +93,7 @@ public class BMMVNLikelihoodOneTraitTest {
 
 		// initializing data
 		spNames = "t39 t26 t9 t7 t34 t13 t19 t50 t4 t1 t40 t30 t43 t25 t16 t24 t11 t20 t8 t3 t29 t42 t33 t12 t22 t17 t10 t28 t46 t32 t14 t45 t2 t49 t44 t23 t6 t48 t21 t35 t38 t5 t27 t47 t36 t41 t37 t18 t15 t31";
-		oneTraitData = new KeyEnhancedRealParameter();
+		oneTraitData = new KeyRealParameter();
         oneTraitValues = Arrays.asList(2.6217033, 2.3837527, 0.66385, 2.0554696, 4.6116682, 4.2175155, 1.6890947, 1.1548256, -0.6414763, 2.02788, -0.4061393, 0.2212728, 3.1044734, 2.3983881, 3.4179581, 1.994293, -0.2234107, -0.1731294, -0.9781789, 0.3593945, -1.1369789, 1.7804662, 4.4069651, -0.3154813, 2.3581627, 2.7665761, 2.6999333, 1.051665, 1.5705502, 1.2644854, 2.0151375, 0.0178691, 3.1121187, 2.4489679, 4.461729, 2.8168993, 2.2227894, 6.3508146, 4.6171196, 2.1775336, 2.5118373, -0.2920445, 0.1249836, 1.775187, 1.5983678, 1.4397621, 1.4127476, 3.1335225, 2.7158012, 2.668979);
         oneTraitData.initByName("value", oneTraitValues, "keys", spNames);
 
@@ -130,7 +130,7 @@ public class BMMVNLikelihoodOneTraitTest {
 		// initializing data
 		oneTraitValues = Arrays.asList(2.27209315774825,2.35770577479828,2.28619045504381,2.10885751414985,2.21395120993299,2.21616242171277,2.10440705636749,2.23088719352124,2.01612727139994,1.97250353865042,2.04619347343212,1.98626432483887,2.13708092824067,2.0924140883466,2.1149054702513,2.21828980377753,2.21523666408597,2.11038317942733,2.20594065029627,2.17222408711307,2.15525917958223,4.61079655144365,2.05099175361785,2.00896701757015,3.48910077756198,2.57568303611276,2.12434389950229,3.2130625470875,3.07020561053238,1.96918061689753,1.3901244857742,1.45248420753707,1.48390042153334,3.53093468620019,2.88001212857536,1.73916538132083,1.74793606069044,2.15738753957675,1.72286491883736,1.81294836498846,2.03876259543693,1.59727328820493,3.91840500639177,3.23605812584825,3.23116427461224,3.04963684259685,1.99914518841533,3.83711101138963,5.36818679644893,4.67121421317176);
 		spNames = "t35 t32 t10 t18 t47 t9 t43 t38 t20 t14 t19 t24 t50 t8 t25 t12 t5 t37 t42 t13 t41 t34 t4 t36 t7 t29 t22 t46 t40 t28 t33 t21 t26 t48 t39 t2 t44 t23 t11 t49 t45 t31 t16 t30 t1 t17 t15 t3 t27 t6";
-		oneTraitData = new KeyEnhancedRealParameter();
+		oneTraitData = new KeyRealParameter();
 		oneTraitData.initByName("value", oneTraitValues, "keys", spNames);
 
 		// sigmasq
@@ -177,7 +177,7 @@ public class BMMVNLikelihoodOneTraitTest {
 		// initializing data
 		spNames = "sp1 sp2 sp3 sp4";
 		oneTraitValues = Arrays.asList(0.07680552, -0.07201447, -0.03776352, 0.29705797);
-		oneTraitData = new KeyEnhancedRealParameter();
+		oneTraitData = new KeyRealParameter();
 		oneTraitData.initByName("value", oneTraitValues, "keys", spNames);
 
 		// sigmasq

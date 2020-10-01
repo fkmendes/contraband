@@ -11,7 +11,7 @@ import beast.core.Input.Validate;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import contraband.utils.MVNUtils;
-import outercore.parameter.KeyEnhancedRealParameter;
+import outercore.parameter.KeyRealParameter;
 
 /**
  * @author Fabio K. Mendes
@@ -27,7 +27,7 @@ public class WNLikelihoodOneTrait extends Distribution {
 	final public Input<RealParameter> sigmaSqsInput = new Input<>("sigmaSqs", "Sigma^2 of each species' normal density.", Validate.REQUIRED);
 	final public Input<RealParameter> meansInput = new Input<>("mus", "Means of each species' normal density.", Validate.REQUIRED);
 	final public Input<IntegerParameter> normalAssignmentsInput = new Input<>("normalAssignments", "Which normal density each species has.", Validate.REQUIRED);
-	final public Input<KeyEnhancedRealParameter> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
+	final public Input<KeyRealParameter> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
 	// final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED); // original implementation (for the above line) with OneValueContTraits data wrapper
 	
 	// private OneValueContTraits sampleData; // original implementation with OneValueContTraits data wrapper
@@ -41,7 +41,7 @@ public class WNLikelihoodOneTrait extends Distribution {
 	public void initAndValidate() {
 		super.initAndValidate();
 
-		KeyEnhancedRealParameter oneTraitValues = oneTraitInput.get();
+		KeyRealParameter oneTraitValues = oneTraitInput.get();
 		oneTraitDataArr = oneTraitValues.getValues();
 
 		int nSpp = oneTraitValues.getMinorDimension2();
@@ -79,7 +79,7 @@ public class WNLikelihoodOneTrait extends Distribution {
 	
 	private void populateSampleData(boolean updateTipValues) {
 		if (updateTipValues) {
-			KeyEnhancedRealParameter oneTraitValues = oneTraitInput.get();
+			KeyRealParameter oneTraitValues = oneTraitInput.get();
 
 			/* This is the safest way to do it when there is
 			a PhyloTMatrix whose species orders might not match

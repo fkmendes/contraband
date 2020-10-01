@@ -18,7 +18,7 @@ import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.RealParameter;
 import beast.core.Input.Validate;
-import outercore.parameter.KeyEnhancedRealParameter;
+import outercore.parameter.KeyRealParameter;
 
 /**
  * @author Fabio K. Mendes
@@ -40,7 +40,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 	final public Input<Boolean> useRootMetaDataInput = new Input<>("useRootMetaData", "Whether or not to use root meta data (specified optimum). If set to 'false', root optimum is set to eldest regime (regimes are numbered from the root toward the tips).", Validate.REQUIRED);
 	final public Input<TreeToVCVMat> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
 	final public Input<RealParameter> alphaInput = new Input<>("alpha", "Pull toward optimum or optima.", Validate.REQUIRED);
-	final public Input<KeyEnhancedRealParameter> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
+	final public Input<KeyRealParameter> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
 	// final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED); // original implementation (for the above line) with OneValueContTraits data wrapper
 	// final public Input<ColorManager> optimumManagerInput = new Input<>("optimumManager", "color manager object that paints branches with their own optima.", Validate.REQUIRED);
 	
@@ -217,7 +217,7 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		// }
 
 		String[] spNamesInPhyloTMatOrder = getSpNamesInPhyloTMatOrder();
-		KeyEnhancedRealParameter oneTraitValues = oneTraitInput.get();
+		KeyRealParameter oneTraitValues = oneTraitInput.get();
 		int i = 0;
 		for (String spName: spNamesInPhyloTMatOrder) {
 			oneTraitDataVec.setEntry(i, oneTraitValues.getValue(spName));
