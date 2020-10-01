@@ -1,6 +1,5 @@
 package contraband.utils;
 
-import contraband.math.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 

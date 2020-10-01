@@ -3,7 +3,7 @@ package contraband.math;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-public class MatrixUtils {
+public class MatrixUtilsContra {
 
     /*
      * This method adds matrix inRM to rmToAdd.
@@ -118,7 +118,6 @@ public class MatrixUtils {
         return resRM;
     }
 
-
     /*
      * This method transposes matrix inRM.
      *
@@ -142,51 +141,114 @@ public class MatrixUtils {
 
     /*
      * This method calculates vector dotProduct and matrix preMultiply, i.e.
-     * inVec.transpose * inRm * inVec,
-     * and returns a double value.
+     * inVec.transpose * inRm * inVec, and returns a double value.
      */
-    public static double vecDotMatrixPreMultiply(RealVector inVec, RealMatrix inRM) {
+    public static double tVecDotMatrixDotVec(RealVector inVec, RealMatrix inRM) {
         double res = 0.0;
+
         for (int i = 0; i < inRM.getColumnDimension(); i++) {
             double sum = 0.0;
+
             for (int j = 0; j < inRM.getRowDimension(); j++) {
                 sum = sum + inVec.getEntry(j) * inRM.getEntry(i, j);
             }
+
             res = res + sum * inVec.getEntry(i);
         }
+
         return res;
     }
 
     /*
-     * This method calculates matrix preMultiply, i.e.
+     * This method calculates the dot product of
+     * a row vector, a matrix, and the same vector as column vector,
+     *
+     * i.e., if input vector is column vector, this method
+     * returns
+     * t(vec) *dot* mat *dot* vec
+     */
+    public static double tVecDotMatrixDotVec(double[] inArr, double[] inMatArr, int nCol) {
+        double res = 0.0;
+
+        for (int i = 0; i < nCol; i++) {
+            double sum = 0.0;
+
+            for (int j = 0; j < nCol; j++) {
+                sum = sum + inArr[j] * inMatArr[i * nCol + j];
+            }
+
+            res = res + sum * inArr[i];
+        }
+
+        return res;
+    }
+
+    /*
+     * This method calculates matrix preMultiply, i.e.,
      * resVec <- inVec * inRM
      *
-     * Note that this method not only populates resVec,
-     * but also returns resVec.
+     * Populates and returns resVec
      */
-    public static RealVector matrixPremultiply(RealVector inVec, RealMatrix inRM, RealVector resVec) {
+    public static RealVector matrixPreMultiply(RealVector inVec, RealMatrix inRM, RealVector resVec) {
         for (int i = 0; i < inRM.getColumnDimension(); i++) {
             double sum = 0.0;
+
             for (int j = 0; j < inRM.getRowDimension(); j++) {
                 sum = sum + inVec.getEntry(j) * inRM.getEntry(i, j);
             }
+
             resVec.setEntry(i, sum);
         }
+
         return resVec;
+    }
+
+    /*
+     * This method calculates a row vector-matrix product, i.e.,
+     * resVec <- inVec * inRM
+     *
+     * Populates and returns resArr.
+     */
+    public static double[] matrixPreMultiply(double[] inArr, double[] inMatArr, int nCol, int nRow, double[] resArr) {
+        for (int i = 0; i < nCol; i++) {
+            double sum = 0.0;
+
+            for (int j = 0; j < nRow; j++) {
+                sum = sum + inArr[j] * inMatArr[j * nCol + i];
+            }
+
+            resArr[i] = sum;
+        }
+
+        return resArr;
     }
 
     /*
      * This method calculates vector map multiply, i.e.
      * resVec <- inVec * scalar
      *
-     * Note that this not only populates resVec,
-     * but also returns resVec.
+     * Populates and returns resVec.
      */
-    public static RealVector vectorMapmultiply(RealVector inVec, double scalar, RealVector resVec) {
+    public static RealVector vectorMapMultiply(RealVector inVec, double scalar, RealVector resVec) {
         for (int i = 0; i < inVec.getDimension(); i++) {
             resVec.setEntry(i, inVec.getEntry(i) * scalar);
         }
+
         return resVec;
+    }
+
+    /*
+     * This method calculates vector map multiply, i.e.
+     * resArr <- inArr * scalar
+     *
+     * Populates and returns resArr.
+     */
+    public static double[] vectorMapMultiply(double[] inArr, double scalar, double[] resArr) {
+        for (int i = 0; i < inArr.length; i++) {
+            resArr[i] = inArr[i] * scalar;
+        }
+
+        return resArr;
     }
 
     /*
@@ -197,6 +259,7 @@ public class MatrixUtils {
         for (int i = 0; i < inVec.getDimension(); i++) {
             resVec.setEntry(i, inVec.getEntry(i) + vecToAdd.getEntry(i));
         }
+
         return resVec;
     }
 

@@ -1,6 +1,6 @@
 package contraband.utils;
 
-import contraband.math.MatrixUtils;
+import contraband.math.MatrixUtilsContra;
 
 import static java.lang.Math.exp;
 
@@ -10,7 +10,7 @@ import static java.lang.Math.exp;
 public class EBUtils {
 	
 	public static void computeEBtMat(double[][] gMat, double[][] Sigma, double[][] ebMat) {
-		MatrixUtils.kronecker(gMat, Sigma, ebMat);
+		MatrixUtilsContra.kronecker(gMat, Sigma, ebMat);
 	}
 	
 	// Computation of the g speed matrix for EB model ( (exp(g * tMat) - 1)/g )

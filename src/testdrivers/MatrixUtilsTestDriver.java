@@ -3,7 +3,7 @@ package testdrivers;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
-import contraband.math.MatrixUtils;
+import contraband.math.MatrixUtilsContra;
 import contraband.utils.GeneralUtils;
 
 /**
@@ -35,40 +35,40 @@ public class MatrixUtilsTestDriver {
 		GeneralUtils.displayRealMatrix(inRM);
 		System.out.println("Printing matrix rmToAdd:");
 		GeneralUtils.displayRealMatrix(rmToAdd);
-		resRM = MatrixUtils.matrixAdd(inRM, rmToAdd, resRM);
+		resRM = MatrixUtilsContra.matrixAdd(inRM, rmToAdd, resRM);
 		System.out.println("Printing matrix inRM + rmToAdd:");
 		GeneralUtils.displayRealMatrix(resRM);
 
 		// doing another sum, printing result to see if it changed
 		// (checking side-effect)
-		resRM2 = MatrixUtils.matrixAdd(inRM2, rmToAdd, resRM);
+		resRM2 = MatrixUtilsContra.matrixAdd(inRM2, rmToAdd, resRM);
 		System.out.println("Printing original result matrix to see if there was a side-effect:");
 		GeneralUtils.displayRealMatrix(resRM);
 		System.out.println("Printing second result matrix:");
 		GeneralUtils.displayRealMatrix(resRM2);
 
 		// printing result for subtraction
-		resRM = MatrixUtils.matrixSubtract(inRM, rmToAdd, resRM);
+		resRM = MatrixUtilsContra.matrixSubtract(inRM, rmToAdd, resRM);
 		System.out.println("Printing matrix inRM - rmToAdd:");
 		GeneralUtils.displayRealMatrix(resRM);
 
 		// printing result for scalar multiply
-		resRM = MatrixUtils.matrixScalarMultiply(inRM, 2, resRM);
+		resRM = MatrixUtilsContra.matrixScalarMultiply(inRM, 2, resRM);
 		System.out.println("Printing matrix inRM * 2:");
 		GeneralUtils.displayRealMatrix(resRM);
 
 		// printing result for multiply
-		resRM = MatrixUtils.matrixMultiply(inRM, rmToAdd, resRM);
+		resRM = MatrixUtilsContra.matrixMultiply(inRM, rmToAdd, resRM);
 		System.out.println("Printing matrix inRM * rmToAdd:");
 		GeneralUtils.displayRealMatrix(resRM);
 
 		// printing result for scalar add
-		MatrixUtils.matrixScalarAdd(inRM, 2, resRM);
+		MatrixUtilsContra.matrixScalarAdd(inRM, 2, resRM);
 		System.out.println("Printing matrix inRM + 2:");
 		GeneralUtils.displayRealMatrix(resRM);
 
 		// printing result for transpose
-		MatrixUtils.matrixTranspose(inRM, resRM);
+		MatrixUtilsContra.matrixTranspose(inRM, resRM);
 		System.out.println("Printing matrix inRM^T:");
 		GeneralUtils.displayRealMatrix(resRM);
 	}

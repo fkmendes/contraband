@@ -2,7 +2,7 @@ package contraband.utils;
 
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.tree.Node;
-import contraband.math.MatrixUtils;
+import contraband.math.MatrixUtilsContra;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -210,7 +210,7 @@ public class OUUtils {
 		if (fixedRoot) {
 			
 			OUUtils.treeAlphaChunkMat(m, eigenObjectAlpha.getRealEigenvalues(), cii, cjj, cij, fixedRoot, res);
-			MatrixUtils.elementWiseProduct(res, eigenCholChunk, res);
+			MatrixUtilsContra.elementWiseProduct(res, eigenCholChunk, res);
 			resMat = new Array2DRowRealMatrix(res);
 
 			resMat = OUUtils.getExpAlphaMat(m, eigenObjectAlpha.getD(), eigenObjectAlpha.getV(), cii - cij)
@@ -221,7 +221,7 @@ public class OUUtils {
 		} else {
 			
 			OUUtils.treeAlphaChunkMat(m, eigenObjectAlpha.getRealEigenvalues(), cii, cjj, cij, false, res);
-			MatrixUtils.elementWiseProduct(res, eigenCholChunk, res);
+			MatrixUtilsContra.elementWiseProduct(res, eigenCholChunk, res);
 			resMat = new Array2DRowRealMatrix(res);
 			resMat = eigenObjectAlpha.getV()
 					.multiply(resMat)
@@ -287,7 +287,7 @@ public class OUUtils {
 				for(int k = 0; k < r; k++) {
 		
 					blockWeightMat = multiTraitWeightMatSpVsRegime(m, sp, k, nodeRoot, regimes, EigenAlphaObject, true);
-					MatrixUtils.setBlocksInMatrix(blockWeightMat.getData(), m, sp.getNr(), k, Result);
+					MatrixUtilsContra.setBlocksInMatrix(blockWeightMat.getData(), m, sp.getNr(), k, Result);
 				}
 			}
 			
@@ -297,12 +297,12 @@ public class OUUtils {
 				
 				double spHeight = sp.getHeight();
 				RealMatrix cellValue = OUUtils.getExpAlphaMat(m, EigenAlphaObject.getD(), EigenAlphaObject.getV(), nodeRoot.getHeight() - spHeight); 
-				MatrixUtils.setBlocksInMatrix(cellValue.getData(), m, sp.getNr(), 0, Result);
+				MatrixUtilsContra.setBlocksInMatrix(cellValue.getData(), m, sp.getNr(), 0, Result);
 				
 				for(int k = 0; k < r; k++) {
 		
 					blockWeightMat = multiTraitWeightMatSpVsRegime(m, sp, k, nodeRoot, regimes, EigenAlphaObject, false);
-					MatrixUtils.setBlocksInMatrix(blockWeightMat.getData(), m, sp.getNr(), k + 1, Result);
+					MatrixUtilsContra.setBlocksInMatrix(blockWeightMat.getData(), m, sp.getNr(), k + 1, Result);
 				}
 			}
 		}

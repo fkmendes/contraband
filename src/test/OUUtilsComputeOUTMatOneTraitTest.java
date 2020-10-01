@@ -1,7 +1,7 @@
 package test;
 
 import beast.evolution.tree.Tree;
-import contraband.math.MatrixUtils;
+import contraband.math.MatrixUtilsContra;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Assert;
@@ -26,7 +26,7 @@ import contraband.utils.OUUtils;
 public class OUUtilsComputeOUTMatOneTraitTest {
 	
 	final static double EPSILON = 1e-4;
-	
+
 	/* 
 	 * The matrix we are computing here (after multiplying by sigma^2)
 	 * is what is referred to in Butler & King as the V (variance) matrix of
@@ -86,10 +86,10 @@ public class OUUtilsComputeOUTMatOneTraitTest {
 		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMat1RM, true);
 
 		// multiplying by sigma^2 in place
-		MatrixUtils.scalarByRealMatrix(ouTMat1FI, sigsqFI);
-		MatrixUtils.scalarByRealMatrix(ouTMat1FM, sigsqFM);
-		MatrixUtils.scalarByRealMatrix(ouTMat1RI, sigsqRI);
-		MatrixUtils.scalarByRealMatrix(ouTMat1RM, sigsqRM);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat1FI, sigsqFI);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat1FM, sigsqFM);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat1RI, sigsqRI);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat1RM, sigsqRM);
 
 		Assert.assertEquals(1.563088e-29, ouTMat1FI.getEntry(0, 1), EPSILON);
 		Assert.assertEquals(2.000003e-02, ouTMat1FI.getEntry(2, 2), EPSILON);
@@ -149,10 +149,10 @@ public class OUUtilsComputeOUTMatOneTraitTest {
 		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMat2RM, true);
 
 		// multiplying by sigma^2 in place
-		MatrixUtils.scalarByRealMatrix(ouTMat2FI, sigsqFI);
-		MatrixUtils.scalarByRealMatrix(ouTMat2FM, sigsqFM);
-		MatrixUtils.scalarByRealMatrix(ouTMat2RI, sigsqRI);
-		MatrixUtils.scalarByRealMatrix(ouTMat2RM, sigsqRM);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat2FI, sigsqFI);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat2FM, sigsqFM);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat2RI, sigsqRI);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat2RM, sigsqRM);
 
 		Assert.assertEquals(0.2711105, ouTMat2FI.getEntry(0, 1), EPSILON);
 		Assert.assertEquals(2.67973939, ouTMat2FI.getEntry(2, 2), EPSILON);
@@ -217,10 +217,10 @@ public class OUUtilsComputeOUTMatOneTraitTest {
 		OUUtils.computeOUTMatOneTrait(n, alphaRM, tMatInput, ouTMat3RM, true);
 
 		// multiplying by sigma^2 in place
-		MatrixUtils.scalarByRealMatrix(ouTMat3FI, sigsqFI);
-		MatrixUtils.scalarByRealMatrix(ouTMat3FM, sigsqFM);
-		MatrixUtils.scalarByRealMatrix(ouTMat3RI, sigsqRI);
-		MatrixUtils.scalarByRealMatrix(ouTMat3RM, sigsqRM);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat3FI, sigsqFI);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat3FM, sigsqFM);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat3RI, sigsqRI);
+		MatrixUtilsContra.scalarByRealMatrix(ouTMat3RM, sigsqRM);
 
 		Assert.assertEquals(4.640928e-07, ouTMat3FI.getEntry(0, 1), EPSILON);
 		Assert.assertEquals(7.428888e-01, ouTMat3FI.getEntry(2, 2), EPSILON);
