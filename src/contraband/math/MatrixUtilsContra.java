@@ -416,7 +416,7 @@ public class MatrixUtilsContra {
      * The code that calls this function should already have verified
      * that (nColInMat == nRowMatToMultiply) is true.
      *
-     * Also, note that nColInMat = nResMat in matrix multiplication.
+     * Also, note that nColInMat = nColResMat in matrix multiplication.
      */
     public static double[] matrixMultiply (double[] inMat, double[] matToMultiply, int nRowInMat, int nColInMat, double[] resMat) {
         for (int i = 0; i < nRowInMat; i ++) {
