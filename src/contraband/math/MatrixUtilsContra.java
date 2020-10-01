@@ -332,4 +332,102 @@ public class MatrixUtilsContra {
             i++;
         }
     }
+
+    public static void setArray (double[] inArr, double[] arrayToSet, int position, int dim) {
+        System.arraycopy(arrayToSet, 0, inArr, position * dim, dim);
+    }
+
+    public static void  getRowArray(double[] m, final int i, final int dim, final double[] rowValues) {
+        for (int j = 0; j < dim; j++) {
+            rowValues[j] = getArrayEntry(m, i, j, dim);
+        }
+    }
+
+    public static double getArrayEntry(double[] m, final int i, final int j, final int dim){
+        // row index i
+        // column index j
+        // dimension of the matrix (2D double array)
+        // index in m[] = (i - 1) * dim + j
+        return m[i * dim + j];
+    }
+
+    /*
+     * This method adds inVec to vecToAdd, i.e.
+     * resVec <- inVec + vecToAdd
+     */
+    public static double[] vectorAdd (double[] inVec, double[] vecToAdd, double[] resVec) {
+        for (int i = 0; i < inVec.length; i++) {
+            resVec[i] = inVec[i] + vecToAdd[i];
+        }
+        return resVec;
+    }
+
+    /*
+     * This method sets the value in a matrix
+     *
+     * row index i
+     * column index j
+     * dimension of the matrix (2D double array)
+     * index in m[] = (i - 1) * dim + j
+     */
+    public static void setMatrixEntry(double[] m, final int i, final int j, final double value, final int dim){
+        m[i * dim + j] = value;
+    }
+
+    /*
+     * This method calculates vector dotProduct and matrix preMultiply, i.e.
+     * scalar * inVec.transpose * inVec,
+     * and returns a double value.
+     */
+    public static double vecTransScalarMultiply(double[] inVec, double scalar, int dim) {
+        double res = 0.0;
+        for (int i = 0; i < dim; i++) {
+            res = res + inVec[i] * inVec[i];
+        }
+        return res * scalar;
+    }
+
+    /*
+     * This method calculates the dot product of two vectors
+     */
+    public static double vectorDotMultiply(double[] aVec, double[] bVec) {
+        double res = 0.0;
+
+        for (int i = 0; i < aVec.length; i++) {
+            res += aVec[i] * bVec[i];
+        }
+        return res;
+    }
+
+    /*
+     * This method makes a column vector to a row vector
+     */
+    public static double[] vectorTranspose(double [] inArr, int dim, double[] resArr) {
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                setMatrixEntry(resArr, j, i, getArrayEntry(inArr, i, j, dim), dim);
+            }
+        }
+        return resArr;
+    }
+
+    /*
+     * This methods calculates the matrix product
+     */
+    public static double[] matrixMultiply (double[] inMat, double[] matToMultiply, int dim, double[] resMat) {
+        for (int i = 0; i < dim; i ++) {
+
+            for (int j = 0; j < dim; j ++) {
+                double sumTemp = 0.0;
+
+                for (int k = 0; k < dim; k++) {
+                    sumTemp += getArrayEntry(inMat,i,k,dim) * getArrayEntry(matToMultiply, k, j, dim);
+                }
+                setMatrixEntry(resMat, i, j, sumTemp, dim);
+            }
+        }
+        return resMat;
+    }
+
+
 }
