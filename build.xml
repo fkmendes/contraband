@@ -27,18 +27,18 @@
   <property name="beast2classpath" location="${beast2path}/build"/>
 
   <!-- other packages paths -->
-  <property name="SAPath" location="../sampled-ancestors"/>
-  <property name="SAClasspath" location="${SAPath}/build"/>
-  <property name="starbeast2Path" location="../starbeast2"/>
-  <property name="starbeast2Classpath" location="${starbeast2Path}/build"/>
-  <property name="beast-outercorePath" location="../beast-outercore"/>
-  <property name="beast-outercoreClasspath" location="${beast-outercorePath}/build" />
+  <property name="SApath" location="../sampled-ancestors"/>
+  <property name="SAclasspath" location="${SApath}/build"/>
+  <property name="starbeast2path" location="../starbeast2"/>
+  <property name="starbeast2classpath" location="${starbeast2path}/build"/>
+  <property name="beast-outercorepath" location="../beast-outercore"/>
+  <property name="beast-outercoreclasspath" location="${beast-outercorepath}/build" />
 
   <!-- BEAST 2 currently uses Java 1.8 -->
   <property name="sourceVersion" value="1.8"/>
   <property name="targetVersion" value="1.8"/>
 
-  <!-- <import file="${SAPath}/build.xml" /> -->
+  <!-- <import file="${SApath}/build.xml" /> -->
 
   <!-- classpath -->
   <path id="classpath">
@@ -46,6 +46,7 @@
     <fileset dir="${libBeast2}" includes="*.jar"/>
     <fileset dir="${libContra}" includes="*.jar"/>
     <pathelement path="${beast2classpath}"/> <!-- We need BEAST 2 compiled files to compile contraband -->
+    <pathelement path="${beast-outercoreclasspath}"/> <!-- We need beast-outercore compiled files to compile contraband -->
   </path>
 
   <!-- Other -->
@@ -124,15 +125,15 @@
       </fileset>
 
       <!-- Add compiled files from other packages -->
-      <fileset dir="${SAClasspath}">
+      <fileset dir="${SAclasspath}">
 	<include name="beast/**/*.class"/>
       </fileset>
 
-      <fileset dir="{starbeast2Classpath}">
+      <fileset dir="${starbeast2classpath}">
 	<include name="starbeast2/**/*.class"/>
       </fileset>
 
-      <fileset dir="{beast-outercoreClasspath}">
+      <fileset dir="${beast-outercoreclasspath}">
 	<include name="outercore/**/*.class"/>
       </fileset>
 
