@@ -25,7 +25,7 @@ public class NodeMathUtils {
 
         MatrixUtilsContra.matrixTranspose(sigma, nTraits, transSigma);
 
-        MatrixUtilsContra.matrixMultiply(sigma, transSigma, nTraits, traitRateMatrix);
+        MatrixUtilsContra.matrixMultiply(sigma, transSigma, nTraits, nTraits, traitRateMatrix);
     }
 
     /*
@@ -72,7 +72,7 @@ public class NodeMathUtils {
 
         MatrixUtilsContra.matrixTranspose(sigma, nTraits, transSigma);
 
-        MatrixUtilsContra.matrixMultiply(sigma, transSigma, nTraits, traitRateMatrix);
+        MatrixUtilsContra.matrixMultiply(sigma, transSigma, nTraits, nTraits, traitRateMatrix);
     }
 
     public static void populateTraitRateMatrixDirectly(double[] sigmasq, double[] rho, int nTraits, double[] traitRateMatrix) {

@@ -412,22 +412,25 @@ public class MatrixUtilsContra {
     }
 
     /*
-     * This methods calculates the matrix product
+     * This methods calculates product of inMat and matToMultiply.
+     * The code that calls this function should already have verified
+     * that (nColInMat == nRowMatToMultiply) is true.
+     *
+     * Also, note that nColInMat = nResMat in matrix multiplication.
      */
-    public static double[] matrixMultiply (double[] inMat, double[] matToMultiply, int dim, double[] resMat) {
-        for (int i = 0; i < dim; i ++) {
-
-            for (int j = 0; j < dim; j ++) {
+    public static double[] matrixMultiply (double[] inMat, double[] matToMultiply, int nRowInMat, int nColInMat, double[] resMat) {
+        for (int i = 0; i < nRowInMat; i ++) {
+            for (int j = 0; j < nColInMat; j ++) {
                 double sumTemp = 0.0;
 
-                for (int k = 0; k < dim; k++) {
-                    sumTemp += getArrayEntry(inMat,i,k,dim) * getArrayEntry(matToMultiply, k, j, dim);
+                for (int k = 0; k < nColInMat; k++) {
+                    sumTemp += getArrayEntry(inMat,i,k,nColInMat) * getArrayEntry(matToMultiply, k, j, nColInMat);
                 }
-                setMatrixEntry(resMat, i, j, sumTemp, dim);
+
+                setMatrixEntry(resMat, i, j, sumTemp, nColInMat);
             }
         }
+
         return resMat;
     }
-
-
 }

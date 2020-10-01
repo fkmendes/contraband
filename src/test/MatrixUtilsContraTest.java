@@ -154,8 +154,8 @@ public class MatrixUtilsContraTest {
 	/*
 	 * In R:
 	 *
-	 * a = matrix(c(1,2,3,4,5,6,7,8,9), nrow=3)
-	 * b = c(1,2,3)
+	 * a <- matrix(c(1,2,3,4,5,6,7,8,9), nrow=3)
+	 * b <- c(1,2,3)
 	 *
 	 * t(b)
 	 *      [,1] [,2] [,3]
@@ -187,8 +187,8 @@ public class MatrixUtilsContraTest {
 	/*
 	 * In R:
 	 *
-	 * a = matrix(c(1,2,3,4,5,6,7,8,9), nrow=3)
-	 * b = c(1,2,3)
+	 * a <- matrix(c(1,2,3,4,5,6,7,8,9), nrow=3)
+	 * b <- c(1,2,3)
 	 * t(b)
 	 *       [,1] [,2] [,3]
 	 * [1,]    1    2    3
@@ -214,7 +214,7 @@ public class MatrixUtilsContraTest {
 	/*
 	 * In R:
 	 *
-	 * b = c(1,2,3)
+	 * b <- c(1,2,3)
 	 * t(b)
 	 *       [,1] [,2] [,3]
 	 * [1,]    1    2    3
@@ -234,35 +234,52 @@ public class MatrixUtilsContraTest {
 	}
 
 	/*
-	 * In R
+	 * In R:
+	 * a <- matrix(c(1.0, 5.0, 9.0, 13.0,
+	 *               2.0, 6.0, 10.0, 14.0,
+	 *               3.0, 7.0, 11.0, 15.0,
+	 *               4.0, 8.0, 12.0, 16.0), ncol=4, byrow=T)
+	 * b <- matrix(c(17.0, 21.0, 25.0, 29.0,
+	 *               18.0, 22.0, 26.0, 30.0,
+	 *               19.0, 23.0, 27.0, 31.0,
+	 *               20.0, 24.0, 28.0, 32.0), ncol=4, byrow=T)
 	 *
-	 * a = matrix(c(1.0, 5.0, 9.0, 13.0, 2.0, 6.0, 10.0, 14.0, 3.0, 7.0, 11.0, 15.0, 4.0, 8.0, 12.0, 16.0), ncol = 4)
-	 * b = matrix(c(17.0, 21.0, 25.0, 29.0, 18.0, 22.0, 26.0, 30.0, 19.0, 23.0, 27.0, 31.0, 20.0, 24.0, 28.0, 32.0), ncol = 4)
-	 *
-	 * t(a) %*% t(b)
+	 * a %*% b
+	 *      [,1] [,2] [,3] [,4]
+	 * [1,]  538  650  762  874
+	 * [2,]  612  740  868  996
+	 * [3,]  686  830  974 1118
+	 * [4,]  760  920 1080 1240
 	 */
 	@Test
-	public void testMatrixMultiply(){
-		int ncol = 4;
-		int length = ncol * ncol;
+	public void testMatrixMultiply() {
+		int nRowInMat = 4;
+		int nColInMat = 4;
+		int length = nRowInMat * nColInMat;
 
-		double[] aMat = new double[]{
+		double[] aMat = new double[] {
 				1.0, 5.0, 9.0, 13.0,
 				2.0, 6.0, 10.0, 14.0,
 				3.0, 7.0, 11.0, 15.0,
 				4.0, 8.0, 12.0, 16.0
 		};
-		double[] bMat = new double[]{
+
+		double[] bMat = new double[] {
 				17.0, 21.0, 25.0, 29.0,
 				18.0, 22.0, 26.0, 30.0,
 				19.0, 23.0, 27.0, 31.0,
 				20.0, 24.0, 28.0, 32.0
 		};
-		double [] resMat = new double[length];
 
-		Double[] resMatDouble = ArrayUtils.toObject(MatrixUtilsContra.matrixMultiply(aMat, bMat, ncol, resMat));
+		double[] resMat = new double[length];
 
-		Assert.assertArrayEquals(new Double[] { 538.0, 650.0, 762.0, 874.0, 612.0, 740.0, 868.0, 996.0, 686.0, 830.0, 974.0, 1118.0, 760.0, 920.0, 1080.0, 1240.0 }, resMatDouble);
+		Double[] resMatDouble = ArrayUtils.toObject(MatrixUtilsContra.matrixMultiply(aMat, bMat, nRowInMat, nColInMat, resMat));
+
+		Assert.assertArrayEquals(new Double[] {
+				538.0, 650.0, 762.0, 874.0,
+				612.0, 740.0, 868.0, 996.0,
+				686.0, 830.0, 974.0, 1118.0,
+				760.0, 920.0, 1080.0, 1240.0 }, resMatDouble);
 	}
 
 	/*
