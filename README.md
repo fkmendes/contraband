@@ -12,8 +12,9 @@ In order to build an executable .jar file for the *contraband* package:
 
 + (1) Clone and build dependencies:
     + (1.1) BEAST2 from [here](https://github.com/CompEvol/beast2);
-    + (1.2) BEASTLabs from [here](examples/testing/BMMVNLikelihoodOneTrait_fixedtree.xml);
-    + (1.3) sampled-ancestors from [here](https://github.com/CompEvol/sampled-ancestors);
+    + (1.2) beast-outercore from [here](https://github.com/LinguaPhylo/beast-outercore);
+    + (1.3) BEASTLabs from [here](examples/testing/BMMVNLikelihoodOneTrait_fixedtree.xml);
+    + (1.4) sampled-ancestors from [here](https://github.com/CompEvol/sampled-ancestors);
 
 + (2) Clone the *contraband* repository side-by-side with the dependencies' (above) directories resulting from step (1);
 
