@@ -339,4 +339,131 @@ public class MatrixUtilsContraTest {
 		double res = MatrixUtilsContra.vecTransScalarMultiply(aVec, scalar, 5);
 		Assert.assertEquals(1.2999959656810844, res, 0.0);
 	}
+
+	/*
+	 * In R
+	 *
+	 * a = c(2.1, -5.2, 3.3, -4.4)
+	 * b = c(3.95493862847269, 4.72081122250077, 4.77038177701209, 5.00675227771716)
+	 *
+	 * a + b
+	 */
+	@Test
+	public void testVectorAdd () {
+		int ncol = 4;
+
+		double[] aVec = new double [] { 2.1, -5.2, 3.3, -4.4 };
+		double[] bVec = new double [] { 3.95493862847269, 4.72081122250077, 4.77038177701209, 5.00675227771716 };
+
+		double[] resVec = new double[ncol];
+
+		Double[] resVecDouble = ArrayUtils.toObject(MatrixUtilsContra.vectorAdd(aVec, bVec, resVec));
+		RealVector aRealVec = new ArrayRealVector(aVec);
+		RealVector bRealVec = new ArrayRealVector(bVec);
+		RealVector resRealVec = aRealVec.add(bRealVec);
+
+		Assert.assertArrayEquals(new Double[] { resRealVec.getEntry(0), resRealVec.getEntry(1), resRealVec.getEntry(2), resRealVec.getEntry(3) }, resVecDouble);
+	}
+
+	@Test
+	public void testGetMatrixEntry () {
+		int ncol = 4;
+		double[] aMat = new double[]{
+				3.92476468143533, 2.95493862847269, 5.47315682161247, 2.85610318223451,
+				3.62535769121946, 3.72081122250077, 3.70889115977579, 3.64833976126344,
+				4.32677785441579, 3.77038177701209, 3.31385684718126, 3.67462891649159,
+				3.73658224109536, 4.00675227771716, 3.23330588599873, 3.80698366724091
+		};
+
+		RealMatrix aMatRM = new Array2DRowRealMatrix(new double[][]{
+				{3.92476468143533, 2.95493862847269, 5.47315682161247, 2.85610318223451},
+				{3.62535769121946, 3.72081122250077, 3.70889115977579, 3.64833976126344},
+				{4.32677785441579, 3.77038177701209, 3.31385684718126, 3.67462891649159},
+				{3.73658224109536, 4.00675227771716, 3.23330588599873, 3.80698366724091}
+		});
+
+		Assert.assertEquals(aMatRM.getEntry(2 ,3), MatrixUtilsContra.getMatrixEntry(aMat, 2, 3, ncol), 0.0);
+	}
+
+	@Test
+	public void testSetMatrixEntry () {
+		int ncol = 4;
+		double[] aMat = new double[]{
+				3.92476468143533, 2.95493862847269, 5.47315682161247, 2.85610318223451,
+				3.62535769121946, 3.72081122250077, 3.70889115977579, 3.64833976126344,
+				4.32677785441579, 3.77038177701209, 3.31385684718126, 3.67462891649159,
+				3.73658224109536, 4.00675227771716, 3.23330588599873, 3.80698366724091
+		};
+
+		RealMatrix aMatRM = new Array2DRowRealMatrix(new double[][]{
+				{3.92476468143533, 2.95493862847269, 5.47315682161247, 2.85610318223451},
+				{3.62535769121946, 3.72081122250077, 3.70889115977579, 3.64833976126344},
+				{4.32677785441579, 3.77038177701209, 3.31385684718126, 3.67462891649159},
+				{3.73658224109536, 4.00675227771716, 3.23330588599873, 3.80698366724091}
+		});
+
+		double value = 6.8;
+
+		MatrixUtilsContra.setMatrixEntry(aMat, 2,3, value, ncol);
+		aMatRM.setEntry(2, 3, value);
+
+		Assert.assertEquals(aMatRM.getEntry(2 ,3), MatrixUtilsContra.getMatrixEntry(aMat, 2, 3, ncol), 0.0);
+	}
+
+	@Test
+	public void testGetMatrixRow () {
+		int ncol = 4;
+		double[] aMat = new double[]{
+				3.92476468143533, 2.95493862847269, 5.47315682161247, 2.85610318223451,
+				3.62535769121946, 3.72081122250077, 3.70889115977579, 3.64833976126344,
+				4.32677785441579, 3.77038177701209, 3.31385684718126, 3.67462891649159,
+				3.73658224109536, 4.00675227771716, 3.23330588599873, 3.80698366724091
+		};
+
+		RealMatrix aMatRM = new Array2DRowRealMatrix(new double[][]{
+				{3.92476468143533, 2.95493862847269, 5.47315682161247, 2.85610318223451},
+				{3.62535769121946, 3.72081122250077, 3.70889115977579, 3.64833976126344},
+				{4.32677785441579, 3.77038177701209, 3.31385684718126, 3.67462891649159},
+				{3.73658224109536, 4.00675227771716, 3.23330588599873, 3.80698366724091}
+		});
+
+		double[] rowValues = new double [ncol];
+		MatrixUtilsContra.getMatrixRow(aMat, 2, ncol, rowValues);
+
+		Assert.assertArrayEquals(ArrayUtils.toObject(aMatRM.getRow(2)), ArrayUtils.toObject(rowValues));
+	}
+
+	@Test
+	public void testSetMatrixRow () {
+		int ncol = 4;
+		double[] aMat = new double[]{
+				3.92476468143533, 2.95493862847269, 5.47315682161247, 2.85610318223451,
+				3.62535769121946, 3.72081122250077, 3.70889115977579, 3.64833976126344,
+				4.32677785441579, 3.77038177701209, 3.31385684718126, 3.67462891649159,
+				3.73658224109536, 4.00675227771716, 3.23330588599873, 3.80698366724091
+		};
+
+		RealMatrix aMatRM = new Array2DRowRealMatrix(new double[][]{
+				{3.92476468143533, 2.95493862847269, 5.47315682161247, 2.85610318223451},
+				{3.62535769121946, 3.72081122250077, 3.70889115977579, 3.64833976126344},
+				{4.32677785441579, 3.77038177701209, 3.31385684718126, 3.67462891649159},
+				{3.73658224109536, 4.00675227771716, 3.23330588599873, 3.80698366724091}
+		});
+
+		double[] rowValuesToSet = new double[] {5.2, 3.4, 1.0, -3.3};
+
+		MatrixUtilsContra.setMatrixRow(aMat, rowValuesToSet, 2, ncol);
+
+		aMatRM.setRow(2, rowValuesToSet);
+
+		double[] rowValuesAfterSet = new double[ncol];
+
+		MatrixUtilsContra.getMatrixRow(aMat, 2, ncol, rowValuesAfterSet);
+
+		Assert.assertArrayEquals(ArrayUtils.toObject(aMatRM.getRow(2)), ArrayUtils.toObject(rowValuesAfterSet));
+	}
+
+
+
+
 }
