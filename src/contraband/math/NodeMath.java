@@ -237,6 +237,8 @@ public class NodeMath extends CalculationNode {
 
     public double[] getTraitRateMatrix () { return traitRateMatrix; }
 
+    public RealMatrix getTraitRateRealMatrix () { return traitRateRM; }
+
     public double getTraitRateMatrixDeterminant () { return detTraitRateMat; }
 
     public double[] getTraitRateMatrixInverse () { return invTraitRateMatrix; }
@@ -262,6 +264,14 @@ public class NodeMath extends CalculationNode {
     public double [] getTransformedTraitValues () { return transformedTraitValues; }
 
     public boolean useShrinkage () { return useShrinkage; }
+
+    public RealMatrix getUnbiasedRho () { return unbiasedRhoRM; }
+
+    public RealMatrix getShrinkageRho () { return shrinkageRhoRM; }
+
+    public double getDetShrinkageRho () { return detRhoMatrix; }
+
+    public double getDetInvShrinkageRho () { return detInvRhoMatrix; }
 
     //setters
     public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
@@ -566,7 +576,7 @@ public class NodeMath extends CalculationNode {
     }
 
     // This method populates determinant based on Rho matrix
-    public void populateInverseTraitRateMatrx() {
+    public void populateInverseTraitRateMatrix () {
         double sigmasq = sigmasqInput.get().getValue();
         detTraitRateMat = Math.log(detRhoMatrix) + nTraits * FastMath.log(sigmasq);
         detInvTraitRateMat = Math.log(detInvRhoMatrix) + nTraits * FastMath.log(1 / sigmasq);

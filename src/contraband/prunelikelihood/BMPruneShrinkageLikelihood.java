@@ -73,7 +73,7 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
         // estimated in the beginning and fixed in the mcmc chain
         getNodeMath().populateShrinkageEstimation(delta);
         getNodeMath().populateTraitRateMatrix();
-        getNodeMath().populateInverseTraitRateMatrx();
+        getNodeMath().populateInverseTraitRateMatrix();
         getNodeMath().populateTransformedTraitValues(traitRM);
     }
 
@@ -83,7 +83,7 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
         // the data has to be transformed.
         if (getNodeMath().updateParameters()) {
             getNodeMath().populateTraitRateMatrix();
-            getNodeMath().populateInverseTraitRateMatrx();
+            getNodeMath().populateInverseTraitRateMatrix();
             getNodeMath().populateTransformedTraitValues(traitRM);
         }
 
