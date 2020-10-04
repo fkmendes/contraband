@@ -207,7 +207,7 @@ public class PruneLikelihoodUtils {
         nodeMath.setLForNode(nodeIdx,nodeMath.getCForNode(nodeIdx)  - 0.25 * eAPlusLInv * nodeMath.getEForNode(nodeIdx));
     }
 
-    public static RealMatrix populatePopulationVarianceMatrix(RealMatrix traitRM, RealMatrix originRM, int nTraits, double lambda) {
+    public static RealMatrix populateTraitValueMatrixEstimatedPopulationVariance(RealMatrix traitRM, RealMatrix originRM, int nTraits, double lambda) {
         Variance var = new Variance();
         Median median= new Median();
         double[] empVariance = new double[nTraits];
@@ -225,7 +225,7 @@ public class PruneLikelihoodUtils {
         return originRM.multiply(MatrixUtils.createRealDiagonalMatrix(empStandardDeviation));
     }
 
-    public static RealMatrix populatePopulationVarianceMatrix(RealMatrix traitRM, RealMatrix originRM, double popVar, int nTraits){
+    public static RealMatrix populateTraitValueMatrixGivenPopulationVariance(RealMatrix originRM, double popVar, int nTraits){
         double [] empStandardDeviation = new double[nTraits];
         for (int k = 0; k < nTraits; k ++) {
             empStandardDeviation[k] = 1.0 / Math.sqrt(popVar);
