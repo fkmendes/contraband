@@ -144,7 +144,7 @@ public class NodeMathTest {
      * Note: every trait has its own evolutionary rate
      */
     @Test
-    public void testNonShrinakgeOperationsMultipleRates () {
+    public void testNonShrinkageOperationsMultipleRates () {
         // tree
         treeStr = "((A:23.0058179,B:23.0058179):14.350951,C:37.3567689);";
         tree = new TreeParser(treeStr, false, false, true, 0);
