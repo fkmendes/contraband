@@ -27,7 +27,7 @@ public class NodeMathTest {
     private double[] traitValuesArr;
     private RealParameter sigmasq;
     private RealParameter correlation;
-
+    final static double EPSILON = 1e-7;
     /*
      * This test includes shrinkage estimations of trait correlations and operations of trait rate matrix
      */
@@ -69,27 +69,29 @@ public class NodeMathTest {
         // here we have two traits, there is 1 correlation
         nodeMath.populateShrinkageEstimation(0.25925925925926);
         RealMatrix shrinkageEstimation = nodeMath.getShrinkageRho();
-        Assert.assertEquals(0.7273929674533072, shrinkageEstimation.getEntry(0, 1), 0.0);
+        Assert.assertEquals(0.727392967453307, shrinkageEstimation.getEntry(0, 1), EPSILON);
 
         // (3) test the determinant of shrinkage matrix
+        // the determinant is in real space
         double detShrinkageRho = nodeMath.getDetShrinkageRho();
         double detInvShrinkageRho = nodeMath.getDetInvShrinkageRho();
-        Assert.assertEquals(0.47089947089947204, detShrinkageRho, 0.0);
-        Assert.assertEquals(2.1235955056179723, detInvShrinkageRho , 0.0);
+        Assert.assertEquals(0.470899470899473, detShrinkageRho, EPSILON);
+        Assert.assertEquals(2.123595505617968, detInvShrinkageRho , EPSILON);
 
         // (4) test the trait rate matrix
         // When using shrinkage method, the trait rate matrix is used to transform the trait values
         nodeMath.populateTraitRateMatrix();
         RealMatrix traitRateRM = nodeMath.getTraitRateRealMatrix();
-        Assert.assertEquals(0.11223949897132161, traitRateRM.getEntry(0, 1), 0.0);
+        Assert.assertEquals(0.1122394989713215, traitRateRM.getEntry(0, 1), EPSILON);
 
         // (5) test the determinant of trait rate matrix
         // When using shrinkage method, the determinant is calculated based on shrinkage rho matrix
+        // the determinant is in log space
         nodeMath.populateInverseTraitRateMatrix();
         double detTraitRateMatrix = nodeMath.getTraitRateMatrixDeterminant();
         double detInvTraitRateMatrix = nodeMath.getTraitRateMatrixInverseDeterminant();
-        Assert.assertEquals(-4.490774430461402, detTraitRateMatrix, 0.0);
-        Assert.assertEquals(4.490774430461401, detInvTraitRateMatrix, 0.0);
+        Assert.assertEquals(-4.4907744304614, detTraitRateMatrix, EPSILON);
+        Assert.assertEquals(4.4907744304614, detInvTraitRateMatrix, EPSILON);
 
         // (6) test the transformed trait values that are independent with other
         nodeMath.populateTransformedTraitValues(traitRM);
@@ -133,8 +135,8 @@ public class NodeMathTest {
 
         // (2) test the determinant of trait rate matrix
         nodeMath.performMatrixOperations();
-        Assert.assertEquals(-2.824245359292377, nodeMath.getTraitRateMatrixDeterminant(), 0.0);
-        Assert.assertEquals(16.848225830433464, nodeMath.getTraitRateMatrixInverseDeterminant(), 0.0);
+        Assert.assertEquals(-2.824245359292377, nodeMath.getTraitRateMatrixDeterminant(), EPSILON); // the determinant is in log space
+        Assert.assertEquals(16.84822583043347, nodeMath.getTraitRateMatrixInverseDeterminant(), EPSILON); // the determinant is in real space
     }
 
     /*
@@ -173,7 +175,7 @@ public class NodeMathTest {
 
         // (2) test the determinant of trait rate matrix
         nodeMath.performMatrixOperations();
-        Assert.assertEquals(-3.544373678152544, nodeMath.getTraitRateMatrixDeterminant(), 0.0);
-        Assert.assertEquals(34.61799654333531, nodeMath.getTraitRateMatrixInverseDeterminant(), 0.0);
+        Assert.assertEquals(-3.544373678152544, nodeMath.getTraitRateMatrixDeterminant(), 0.0); // the determinant is in log space
+        Assert.assertEquals(34.61799654333531, nodeMath.getTraitRateMatrixInverseDeterminant(), 0.0); // the determinant is in real space
     }
 }
