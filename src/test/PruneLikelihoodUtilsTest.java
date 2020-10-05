@@ -28,7 +28,7 @@ public class PruneLikelihoodUtilsTest {
     private String spNames;
     private List<Double> data;
     private final KeyRealParameter traitValues = new KeyRealParameter();
-
+    final static double EPSILON = 1e-7;
     /*
      * (1) Populates trait values in an array and a real matrix
      */
@@ -91,8 +91,8 @@ public class PruneLikelihoodUtilsTest {
                 -0.226074849617958, -2.11000367246907
         );
         traitValues.initByName("value", data, "keys", spNames, "minordimension", nTraits);
-        double[] traitValuesArrayList = new double[3 * nTraits];
-        PruneLikelihoodUtils.populateTraitValuesArr(traitValues, tree, nTraits, traitValuesArrayList);
+        double[] traitValuesArray = new double[3 * nTraits];
+        PruneLikelihoodUtils.populateTraitValuesArr(traitValues, tree, nTraits, traitValuesArray);
 
         // BM model parameters
         // When shrinkage method is not used, correlations among traits are taken from input
@@ -102,50 +102,63 @@ public class PruneLikelihoodUtilsTest {
         NodeMath nodeMath = new NodeMath();
         nodeMath.initByName("traits", traitValues, "sigmasq", sigmasq, "correlation", correlation, "rootValues", rootValues,"oneRateOnly", true);
 
-        // the pruning algorithm starts from tips to the root
+        // populate trait rate matrix and calculate determinant
+        nodeMath.performMatrixOperations();
+
+        // initialize the mVector for the parent of A and B
+        double[] mVecD = new double [2];
+
         // the first node, i.e. tip A
         int tipIdx = 0;
         PruneLikelihoodUtils.populateACEf(nodeMath, tree.getNode(tipIdx).getLength(), nTraits, tipIdx);
         Assert.assertEquals(-0.021733632865102357, nodeMath.getAForNode(tipIdx), 0.0);
         Assert.assertEquals(-0.021733632865102357, nodeMath.getCForNode(tipIdx), 0.0);
         Assert.assertEquals(0.043467265730204714, nodeMath.getEForNode(tipIdx), 0.0);
-        Assert.assertEquals(-4.973624202525401, nodeMath.getfForNode(tipIdx), 0.0);
+        Assert.assertEquals(-3.561501522879213, nodeMath.getfForNode(tipIdx), EPSILON);
 
-        PruneLikelihoodUtils.populateLmrForTip(nodeMath, traitValuesArrayList, nTraits, tipIdx);
+        PruneLikelihoodUtils.populateLmrForTip(nodeMath, traitValuesArray, nTraits, tipIdx);
         Assert.assertEquals(-0.021733632865102357,nodeMath.getLForNode(tipIdx), 0.0);
-        Assert.assertArrayEquals(new Double[] {0.0, 0.0}, ArrayUtils.toObject(nodeMath.getMVecForNode(tipIdx)));
-        Assert.assertEquals(-4.973624202525401,nodeMath.getRForNode(tipIdx), 0.0);
+        Assert.assertArrayEquals(new Double[] {-0.8331278807826273, -0.7430154496439219}, ArrayUtils.toObject(nodeMath.getMVecForNode(tipIdx)));
+        Assert.assertEquals(-5.2367146815829,nodeMath.getRForNode(tipIdx), EPSILON);
+
+        MatrixUtilsContra.vectorAdd(mVecD, nodeMath.getMVecForNode(tipIdx), mVecD);
 
         // the second node, i.e. tip B
         tipIdx = 1;
         PruneLikelihoodUtils.populateACEf(nodeMath, tree.getNode(tipIdx).getLength(), nTraits, tipIdx);
-        Assert.assertEquals(-0.021733632865102357, nodeMath.getAForNode(tipIdx), 0.0);
-        Assert.assertEquals(-0.021733632865102357, nodeMath.getCForNode(tipIdx), 0.0);
-        Assert.assertEquals(0.043467265730204714, nodeMath.getEForNode(tipIdx), 0.0);
-        Assert.assertEquals(-4.973624202525401, nodeMath.getfForNode(tipIdx), 0.0);
+        Assert.assertEquals(-0.02173363286510235, nodeMath.getAForNode(tipIdx), EPSILON);
+        Assert.assertEquals(-0.02173363286510235, nodeMath.getCForNode(tipIdx), EPSILON);
+        Assert.assertEquals(0.04346726573020471, nodeMath.getEForNode(tipIdx), EPSILON);
+        Assert.assertEquals(-3.561501522879213, nodeMath.getfForNode(tipIdx), EPSILON);
 
-        PruneLikelihoodUtils.populateLmrForTip(nodeMath, traitValuesArrayList, nTraits, tipIdx);
-        Assert.assertEquals(-0.021733632865102357,nodeMath.getLForNode(tipIdx), 0.0);
-        Assert.assertArrayEquals(new Double[] {0.0, 0.0}, ArrayUtils.toObject(nodeMath.getMVecForNode(tipIdx)));
-        Assert.assertEquals(-4.973624202525401,nodeMath.getRForNode(tipIdx), 0.0);
+        PruneLikelihoodUtils.populateLmrForTip(nodeMath, traitValuesArray, nTraits, tipIdx);
+        Assert.assertEquals(-0.021733632865102357,nodeMath.getLForNode(tipIdx), EPSILON);
+        Assert.assertArrayEquals(new Double[] {-0.5799479302276102, -0.5872574081072599}, ArrayUtils.toObject(nodeMath.getMVecForNode(tipIdx)));
+        Assert.assertEquals(-4.467204212412191,nodeMath.getRForNode(tipIdx), EPSILON);
+
+        // the mVector is added up to their parent
+        MatrixUtilsContra.vectorAdd(mVecD, nodeMath.getMVecForNode(tipIdx), mVecD);
 
         // the third node, i.e. internal node that is the parent of A and B
         int internalIdx = 3;
+        // first we need to set the L m r coming from its child nodes
         nodeMath.setLForNode(internalIdx , nodeMath.getLForNode(0) + nodeMath.getLForNode(1));
-        MatrixUtilsContra.vectorAdd(nodeMath.getMVecForNode(0), nodeMath.getMVecForNode(1), nodeMath.getTempVec());
-        nodeMath.setMVecForNode(internalIdx , nodeMath.getTempVec());
-        nodeMath.setRForNode(internalIdx , nodeMath.getRForNode(0) + nodeMath.getRForNode(0));
+        nodeMath.setMVecForNode(internalIdx, mVecD);
+        nodeMath.setRForNode(internalIdx , nodeMath.getRForNode(0) + nodeMath.getRForNode(1));
+        Assert.assertEquals( -0.04346726573020471, nodeMath.getLForNode(internalIdx), EPSILON);
+        Assert.assertArrayEquals(new Double[] {-1.4130758110102375, -1.3302728577511818}, ArrayUtils.toObject(nodeMath.getMVecForNode(internalIdx)));
+        Assert.assertEquals(-9.703918893995091, nodeMath.getRForNode(internalIdx), 0.0);
 
         PruneLikelihoodUtils.populateACEf(nodeMath, tree.getNode(internalIdx).getLength(), nTraits, internalIdx);
-        Assert.assertEquals(-0.034840896606782364, nodeMath.getAForNode(internalIdx), 0.0);
-        Assert.assertEquals(-0.034840896606782364, nodeMath.getCForNode(internalIdx), 0.0);
-        Assert.assertEquals(0.06968179321356473, nodeMath.getEForNode(internalIdx), 0.0);
-        Assert.assertEquals(-4.501693278196102, nodeMath.getfForNode(internalIdx), 0.0);
+        Assert.assertEquals(-0.03484089660678236, nodeMath.getAForNode(internalIdx), EPSILON);
+        Assert.assertEquals(-0.03484089660678236, nodeMath.getCForNode(internalIdx), EPSILON);
+        Assert.assertEquals(0.06968179321356473, nodeMath.getEForNode(internalIdx), EPSILON);
+        Assert.assertEquals(-3.089570598549913, nodeMath.getfForNode(internalIdx), EPSILON);
 
-        PruneLikelihoodUtils.populateLmrForInternalNode(nodeMath, nTraits, tipIdx);
-        Assert.assertEquals(-0.043467265730204714, nodeMath.getLForNode(internalIdx), 0.0);
-        Assert.assertArrayEquals(new Double[] {0.0, 0.0}, ArrayUtils.toObject(nodeMath.getMVecForNode(internalIdx)));
-        Assert.assertEquals(-9.947248405050802, nodeMath.getRForNode(internalIdx), 0.0);
+        PruneLikelihoodUtils.populateLmrForInternalNode(nodeMath, nTraits,internalIdx);
+        Assert.assertEquals(-0.0193394719769881, nodeMath.getLForNode(internalIdx), EPSILON);
+        Assert.assertArrayEquals(new Double[] {-0.6287062134990086, -0.5918654928494784}, ArrayUtils.toObject(nodeMath.getMVecForNode(internalIdx)));
+        Assert.assertEquals(-9.119795872783662, nodeMath.getRForNode(internalIdx), 0.0);
     }
 
     /*
@@ -166,8 +179,9 @@ public class PruneLikelihoodUtilsTest {
                 2.0, 4.0
         );
         traitValues.initByName("value", data, "keys", spNames, "minordimension", nTraits);
-        double[] traitValuesArrayList = new double[3 * nTraits];
-        PruneLikelihoodUtils.populateTraitValuesArr(traitValues, tree, nTraits, traitValuesArrayList);
+
+        RealMatrix traitValuesRM = new Array2DRowRealMatrix(new double[3][nTraits]);
+        PruneLikelihoodUtils.populateTraitValuesMatrix(traitValues, tree, nTraits, traitValuesRM);
 
         // BM model parameters
         // When shrinkage method is used, correlations among traits are estimated in NodeMath
@@ -175,50 +189,68 @@ public class PruneLikelihoodUtilsTest {
         NodeMath nodeMath = new NodeMath();
         nodeMath.initByName("traits", traitValues, "sigmasq", sigmasq, "shrinkage", true, "oneRateOnly", true);
 
-        // the pruning algorithm starts from tips to the root
+        // shrinkage method
+        nodeMath.estimateCorrelations(traitValuesRM);
+        nodeMath.populateShrinkageEstimation(0.25925925925926);
+        nodeMath.populateTraitRateMatrix();
+        nodeMath.populateInverseTraitRateMatrix();
+        nodeMath.populateTransformedTraitValues(traitValuesRM);
+        double[] transformedTraitValues = nodeMath.getTransformedTraitValues();
+
+        // initialize the mVector for parent of A and B
+        double[] mVecD = new double [2];
+
         // the first node, i.e. tip A
         int tipIdx = 0;
         PruneLikelihoodUtils.populateACEf(nodeMath, tree.getNode(tipIdx).getLength(), nTraits, tipIdx);
         Assert.assertEquals(-0.040186380252226275, nodeMath.getAForNode(tipIdx), 0.0);
         Assert.assertEquals(-0.040186380252226275, nodeMath.getCForNode(tipIdx), 0.0);
         Assert.assertEquals(0.08037276050445255, nodeMath.getEForNode(tipIdx), 0.0);
-        Assert.assertEquals(-4.358957026308008, nodeMath.getfForNode(tipIdx), 0.0);
+        Assert.assertEquals(-2.11356981107731, nodeMath.getfForNode(tipIdx), EPSILON);
 
-        PruneLikelihoodUtils.populateLmrForTipWithShrinkage(nodeMath, traitValuesArrayList, nTraits, tipIdx);
-        Assert.assertEquals(-0.040186380252226275,nodeMath.getLForNode(tipIdx), 0.0);
-        Assert.assertArrayEquals(new Double[] {0.08037276050445255, 0.1607455210089051}, ArrayUtils.toObject(nodeMath.getMVecForNode(tipIdx)));
-        Assert.assertEquals(-4.55988892756914,nodeMath.getRForNode(tipIdx), 0.0);
+        PruneLikelihoodUtils.populateLmrForTipWithShrinkage(nodeMath, transformedTraitValues, nTraits, tipIdx);
+        Assert.assertEquals(-0.0401863802522263,nodeMath.getLForNode(tipIdx), EPSILON);
+        Assert.assertArrayEquals(new Double[] {0.20460704078553443, 0.37944671022339144}, ArrayUtils.toObject(nodeMath.getMVecForNode(tipIdx)));
+        Assert.assertEquals(-3.26970682734958,nodeMath.getRForNode(tipIdx), EPSILON);
+
+        MatrixUtilsContra.vectorAdd(mVecD, nodeMath.getMVecForNode(tipIdx), mVecD);
 
         // the second node, i.e. tip B
         tipIdx = 1;
         PruneLikelihoodUtils.populateACEf(nodeMath, tree.getNode(tipIdx).getLength(), nTraits, tipIdx);
-        Assert.assertEquals(-0.040186380252226275, nodeMath.getAForNode(tipIdx), 0.0);
-        Assert.assertEquals(-0.040186380252226275, nodeMath.getCForNode(tipIdx), 0.0);
-        Assert.assertEquals(0.08037276050445255, nodeMath.getEForNode(tipIdx), 0.0);
-        Assert.assertEquals(-4.358957026308008, nodeMath.getfForNode(tipIdx), 0.0);
+        Assert.assertEquals(-0.0401863802522263, nodeMath.getAForNode(tipIdx), EPSILON);
+        Assert.assertEquals(-0.0401863802522263, nodeMath.getCForNode(tipIdx), EPSILON);
+        Assert.assertEquals(0.0803727605044526, nodeMath.getEForNode(tipIdx), EPSILON);
+        Assert.assertEquals(-2.11356981107731, nodeMath.getfForNode(tipIdx), EPSILON);
 
-        PruneLikelihoodUtils.populateLmrForTipWithShrinkage(nodeMath, traitValuesArrayList, nTraits, tipIdx);
-        Assert.assertEquals(-0.040186380252226275, nodeMath.getLForNode(tipIdx), 0.0);
-        Assert.assertArrayEquals(new Double[] {0.24111828151335765, 0.4018638025222627}, ArrayUtils.toObject(nodeMath.getMVecForNode(tipIdx)));
-        Assert.assertEquals(-5.725293954883702, nodeMath.getRForNode(tipIdx), 0.0);
+        PruneLikelihoodUtils.populateLmrForTipWithShrinkage(nodeMath, transformedTraitValues, nTraits, tipIdx);
+        Assert.assertEquals(-0.0401863802522263, nodeMath.getLForNode(tipIdx), EPSILON);
+        Assert.assertArrayEquals(new Double[] {0.6138211223566032, 0.8401752608249581}, ArrayUtils.toObject(nodeMath.getMVecForNode(tipIdx)));
+        Assert.assertEquals(-8.84887933857218, nodeMath.getRForNode(tipIdx), EPSILON);
+
+        // mVector is added up to their parent
+        MatrixUtilsContra.vectorAdd(mVecD, nodeMath.getMVecForNode(tipIdx), mVecD);
 
         // the third node, i.e. internal node that is the parent of A and B
         int internalIdx = 3;
+        // set the L m r coming from its child nodes
         nodeMath.setLForNode(internalIdx , nodeMath.getLForNode(0) + nodeMath.getLForNode(1));
-        MatrixUtilsContra.vectorAdd(nodeMath.getMVecForNode(0), nodeMath.getMVecForNode(1), nodeMath.getTempVec());
-        nodeMath.setMVecForNode(internalIdx , nodeMath.getTempVec());
-        nodeMath.setRForNode(internalIdx , nodeMath.getRForNode(0) + nodeMath.getRForNode(0));
+        nodeMath.setMVecForNode(internalIdx, mVecD);
+        nodeMath.setRForNode(internalIdx , nodeMath.getRForNode(0) + nodeMath.getRForNode(1));
+        Assert.assertEquals( -0.0803727605044526, nodeMath.getLForNode(internalIdx), EPSILON);
+        Assert.assertArrayEquals(new Double[] {0.8184281631421377, 1.2196219710483496}, ArrayUtils.toObject(nodeMath.getMVecForNode(internalIdx)));
+        Assert.assertEquals(-12.1185861659218, nodeMath.getRForNode(internalIdx), EPSILON);
 
         PruneLikelihoodUtils.populateACEf(nodeMath, tree.getNode(internalIdx).getLength(), nTraits, internalIdx);
-        Assert.assertEquals(-0.011648000834630511, nodeMath.getAForNode(internalIdx), 0.0);
-        Assert.assertEquals(-0.011648000834630511, nodeMath.getCForNode(internalIdx), 0.0);
-        Assert.assertEquals(0.023296001669261022, nodeMath.getEForNode(internalIdx), 0.0);
-        Assert.assertEquals(-5.5973506017228045, nodeMath.getfForNode(internalIdx), 0.0);
+        Assert.assertEquals(-0.0116480008346305, nodeMath.getAForNode(internalIdx), EPSILON);
+        Assert.assertEquals(-0.0116480008346305, nodeMath.getCForNode(internalIdx), EPSILON);
+        Assert.assertEquals(0.023296001669261, nodeMath.getEForNode(internalIdx), EPSILON);
+        Assert.assertEquals(-3.3519633864921, nodeMath.getfForNode(internalIdx), EPSILON);
 
-        PruneLikelihoodUtils.populateLmrForInternalNodeWithShrinkage(nodeMath, nTraits, tipIdx);
-        Assert.assertEquals(-0.08037276050445255, nodeMath.getLForNode(internalIdx), 0.0);
-        Assert.assertArrayEquals(new Double[] {0.4822365630267153, 0.8037276050445255}, ArrayUtils.toObject(nodeMath.getMVecForNode(internalIdx)));
-        Assert.assertEquals(-9.11977785513828, nodeMath.getRForNode(internalIdx), 0.0);
+        PruneLikelihoodUtils.populateLmrForInternalNodeWithShrinkage(nodeMath, nTraits, internalIdx);
+        Assert.assertEquals(-0.0101735952606144, nodeMath.getLForNode(internalIdx), EPSILON);
+        Assert.assertArrayEquals(new Double[] {0.10359675130524983, 0.15437991959615796}, ArrayUtils.toObject(nodeMath.getMVecForNode(internalIdx)));
+        Assert.assertEquals(-8.32455362290912, nodeMath.getRForNode(internalIdx), EPSILON);
     }
 
     /*
@@ -237,15 +269,15 @@ public class PruneLikelihoodUtilsTest {
         });
 
         // shrinkage parameter for the population variance
-        double lambda = 0.4;
+        double lambda = 0.574732079259225;
         traitValuesRM = PruneLikelihoodUtils.populateTraitValueMatrixEstimatedPopulationVariance(traitValuesRM, traitValuesRM, nTraits, lambda);
 
         // the first species
-        Assert.assertArrayEquals(new Double[] { -2.42497174189288, -2.5896391144824498 }, ArrayUtils.toObject(traitValuesRM.getRow(0)));
+        Assert.assertArrayEquals(new Double[] { -2.5567665115854, -2.2507927602031303 }, ArrayUtils.toObject(traitValuesRM.getRow(0)));
         // the second species
-        Assert.assertArrayEquals(new Double[] { -1.3921229236433845, -2.6425056912729277 }, ArrayUtils.toObject(traitValuesRM.getRow(1)));
+        Assert.assertArrayEquals(new Double[] { -1.4677834012215858, -2.296741907183215 }, ArrayUtils.toObject(traitValuesRM.getRow(1)));
         // the third species
-        Assert.assertArrayEquals(new Double[] { -0.20863867017988777, -3.496111303366598 }, ArrayUtils.toObject(traitValuesRM.getRow(2)));
+        Assert.assertArrayEquals(new Double[] { -0.21997797158710666, -3.0386558368209258 }, ArrayUtils.toObject(traitValuesRM.getRow(2)));
     }
 
     /*
