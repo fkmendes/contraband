@@ -193,7 +193,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
                         } else {
                             // get the trait values the child node, i.e. the trait values at the sampled ancestor
                             nodeMath.setTraitsVecForSampledAncestor(traitValuesArr, gcSANr);
-
+                            
                             // add up to the likelihood
                             double logPSA = nodeMath.getLForNode(childIdx) *
                                     MatrixUtilsContra.tVecDotMatrixDotVec(
@@ -202,8 +202,9 @@ public abstract class PruneLikelihoodProcess extends Distribution {
                                             nTraits) +
                                     MatrixUtilsContra.vectorDotMultiply(
                                             nodeMath.getSampledAncestorTraitsVec(),
-                                            nodeMath.getTempVec()) +
+                                            nodeMath.getMVecForNode(childIdx)) +
                                     nodeMath.getRForNode(childIdx);
+
                             nodeMath.setLikelihoodForSampledAncestors(
                                     nodeMath.getLikelihoodForSampledAncestors() +
                                             logPSA);
