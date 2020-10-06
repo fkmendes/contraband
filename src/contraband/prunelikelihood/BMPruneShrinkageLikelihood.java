@@ -75,6 +75,7 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
         getNodeMath().populateTraitRateMatrix();
         getNodeMath().populateInverseTraitRateMatrix();
         getNodeMath().populateTransformedTraitValues(traitRM);
+        setTraitValuesArr(getNodeMath().getTransformedTraitValues());
     }
 
     @Override

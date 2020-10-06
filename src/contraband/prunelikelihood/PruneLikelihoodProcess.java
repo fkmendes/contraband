@@ -62,7 +62,6 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         nodeMath = nodeMathInput.get();
         //nodeMath.setNTraits(nTraits);
         //nodeMath.setNSpecies(nSpecies);
-
     }
 
     protected void populateLogP() {
@@ -74,11 +73,9 @@ public abstract class PruneLikelihoodProcess extends Distribution {
 
         // prune the tree by starting from the root
         nodeMath.setLikelihoodForSampledAncestors(0.0);
-        if(nodeMath.useShrinkage()) {
-            pruneNode(tree.getRoot(), nTraits, nodeMath.getTransformedTraitValues(), branchRateModel, nodeMath, popSE);
-        } else {
-            pruneNode(tree.getRoot(), nTraits, traitValuesArr, branchRateModel, nodeMath, popSE);
-        }
+        // if using shrinkage method, 'traitValuesArr' is 'transformedTraitValues'
+        // otherwise, it is original trait values.
+        pruneNode(tree.getRoot(), nTraits, traitValuesArr, branchRateModel, nodeMath, popSE);
 
         // if at some internal node, (aMat + lMat) is singular or -2 * (aMat + lMat) is singular,
         // when calculating (aMat + lMat).inverse and det[-2 * (aMat + lMat)],
@@ -113,6 +110,8 @@ public abstract class PruneLikelihoodProcess extends Distribution {
 
     // setters
     public void setPopSE (boolean value) { popSE = value; }
+
+    public void setTraitValuesArr (double[] values) { traitValuesArr = values; }
 
     public void pruneNode(Node node, int nTraits, double[] traitValuesArr,
                            BranchRateModel.Base pcmc, NodeMath nodeMath, boolean popSE) {
