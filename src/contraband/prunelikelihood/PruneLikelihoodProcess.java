@@ -69,6 +69,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         // reject the tree with a sampled ancestor being the child of root
         if(tree.getRoot().getChild(0).isDirectAncestor() || tree.getRoot().getChild(1).isDirectAncestor()) {
             logP =  Double.NEGATIVE_INFINITY;
+            return;
         }
 
         // prune the tree by starting from the root
@@ -82,6 +83,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         // reject the state
         if (nodeMath.isSingularMatrix()) {
             logP = Double.NEGATIVE_INFINITY;
+            return;
         }
 
         // get L, m and r at the root
