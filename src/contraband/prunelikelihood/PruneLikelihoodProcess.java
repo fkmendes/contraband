@@ -195,17 +195,30 @@ public abstract class PruneLikelihoodProcess extends Distribution {
                             // get the trait values the child node, i.e. the trait values at the sampled ancestor
                             nodeMath.setTraitsVecForSampledAncestor(traitValuesArr, gcSANr);
                             
-                            // add up to the likelihood
-                            double logPSA = nodeMath.getLForNode(childIdx) *
-                                    MatrixUtilsContra.tVecDotMatrixDotVec(
-                                            nodeMath.getSampledAncestorTraitsVec(),
-                                            nodeMath.getTraitRateMatrixInverse(),
-                                            nTraits) +
-                                    MatrixUtilsContra.vectorDotMultiply(
-                                            nodeMath.getSampledAncestorTraitsVec(),
-                                            nodeMath.getMVecForNode(childIdx)) +
-                                    nodeMath.getRForNode(childIdx);
-
+                            // calculate the likelihood rooted at this sampled ancestor
+                            double logPSA; // currently, we use this flag to tell if shrinkage method is used to distinguish the calculation of likelihood
+                            if(popSE) {
+                                logPSA =
+                                        MatrixUtilsContra.vecTransScalarMultiply(
+                                                nodeMath.getSampledAncestorTraitsVec(),
+                                                nodeMath.getLForNode(childIdx),
+                                                nTraits) +
+                                                MatrixUtilsContra.vectorDotMultiply(
+                                                        nodeMath.getSampledAncestorTraitsVec(),
+                                                        nodeMath.getMVecForNode(childIdx)) +
+                                                nodeMath.getRForNode(childIdx);
+                            } else {
+                                logPSA = nodeMath.getLForNode(childIdx) *
+                                        MatrixUtilsContra.tVecDotMatrixDotVec(
+                                                nodeMath.getSampledAncestorTraitsVec(),
+                                                nodeMath.getTraitRateMatrixInverse(),
+                                                nTraits) +
+                                        MatrixUtilsContra.vectorDotMultiply(
+                                                nodeMath.getSampledAncestorTraitsVec(),
+                                                nodeMath.getMVecForNode(childIdx)) +
+                                        nodeMath.getRForNode(childIdx);
+                            }
+                            // add up to the likelihood for sampled ancestors in the tree
                             nodeMath.setLikelihoodForSampledAncestors(
                                     nodeMath.getLikelihoodForSampledAncestors() +
                                             logPSA);
