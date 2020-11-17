@@ -16,8 +16,8 @@ import java.util.Arrays;
 
 public class OUPruneLikelihood extends PruneLikelihoodProcess {
     final public Input<RealParameter> sigmaValuesInput = new Input<>("sigma","Trait rate matrix.", Input.Validate.REQUIRED);
-    final public Input<RealParameter> sigmaeValuesInput = new Input<>("sigmae","Population error..", Input.Validate.OPTIONAL);
-
+    final public Input<RealParameter> sigmaeValuesInput = new Input<>("sigmae","Population error.", Input.Validate.OPTIONAL);
+    final public Input<RealParameter> sigmajValuesInput = new Input<>("sigmaj","Variance matrix of the normal jump distribution.", Input.Validate.OPTIONAL);
     final public Input<RealParameter> alphaInput = new Input<>("alpha","An array of (nTraits * (nTraits - 1) / 2) elements, representing selection strength, off-diagonal elements in Alpha matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> thetaInput = new Input<>("theta","An array of nTraits elements, representing optimum trait values, elements in Theta vector.", Input.Validate.REQUIRED);
 

@@ -1,14 +1,14 @@
 package contraband.prunelikelihood;
 
 import beast.evolution.tree.Node;
-import org.apache.commons.math3.linear.EigenDecomposition;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.FastMath;
+
+import java.util.Arrays;
 
 public class OUPruneUtils {
     private static double LOGTWOPI = FastMath.log(2 * Math.PI);
-
+    static boolean SINGULAR;
     // (1) AbCdEf
     /*
      * For both BM and OU
@@ -172,4 +172,48 @@ public class OUPruneUtils {
 
         return variance;
     }
+
+    public static RealMatrix getInverseVarianceRMForOU (Node node, double[] vcvMatDetArr, RealMatrix sigmaRM, RealMatrix sigmaeRM, RealMatrix pMat, RealMatrix inverseP, EigenDecomposition decompositionH, int nTraits) {
+
+        // variance-covariance matrix
+        RealMatrix varianceRM = getOUVarianceRM(node, sigmaRM, sigmaeRM, pMat, inverseP, decompositionH, nTraits);
+
+
+        // evaluate singularity
+        double[] singularValues = new SingularValueDecomposition(varianceRM).getSingularValues();
+        double min = Arrays.stream(singularValues).min().getAsDouble();
+        double max = Arrays.stream(singularValues).max().getAsDouble();
+
+        EigenDecomposition decomposition = new EigenDecomposition(varianceRM);
+        double[] eValues = decomposition.getRealEigenvalues();
+
+        for (double ei : eValues) {
+            if (ei < 1.0E-5) {
+                SINGULAR = true;
+            }
+        }
+
+        if ((min / max) < 1.0E-6) {
+            SINGULAR = true;
+        }
+
+
+        // inverse of V and determinant of V
+        // V <- V.inverse()
+        try {
+            LUDecomposition VMatLUD = new LUDecomposition(varianceRM);
+            varianceRM = VMatLUD.getSolver().getInverse();
+            vcvMatDetArr[node.getNr()] = VMatLUD.getDeterminant();
+        } catch (SingularMatrixException e) {
+            SINGULAR = true;
+        }
+
+        if (vcvMatDetArr[node.getNr()] == 0.0) {
+            SINGULAR = true;
+        }
+
+        return varianceRM;
+    }
+
+
 }
