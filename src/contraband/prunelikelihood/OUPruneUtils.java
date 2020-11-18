@@ -5,7 +5,6 @@ import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.FastMath;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
-import test.integration.Relaxed16TaxaBMA;
 
 import java.util.Arrays;
 import java.util.List;
@@ -160,7 +159,7 @@ public class OUPruneUtils {
     }
 
     public static double[][] exp(double[][] matrix) {
-        return org.jblas.MatrixFunctions.expm(new org.jblas.DoubleMatrix(matrix)).toArray2();
+        return MatrixFunctions.expm(new DoubleMatrix(matrix)).toArray2();
     }
 
     // (4) matrix operations
