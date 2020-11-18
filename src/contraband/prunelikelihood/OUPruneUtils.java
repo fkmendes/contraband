@@ -3,8 +3,10 @@ package contraband.prunelikelihood;
 import beast.evolution.tree.Node;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.FastMath;
-
+import org.jblas.DoubleMatrix;
+import org.jblas.MatrixFunctions;
 import java.util.Arrays;
+import java.util.List;
 
 public class OUPruneUtils {
     private static double LOGTWOPI = FastMath.log(2 * Math.PI);
@@ -129,7 +131,37 @@ public class OUPruneUtils {
                 - 0.5 * logDetVNode  - 0.25 * mVec.dotProduct(invAPlusLRM.preMultiply(mVec));
     }
 
-    // (3) trait rate matrix and branch length in time
+    // (3) populate omega and phi
+    /*
+     * For OU, this method calculates omegaVec at a node.
+     * I is an identity matrix.
+     *
+     * omega <- (I - e_Ht) %*% Theta
+     */
+    public static RealVector getOmegaVec(RealVector thetaVec, RealMatrix phiMat, RealMatrix identity) {
+        return (identity.subtract(phiMat)).preMultiply(thetaVec);
+    }
+
+    public static RealMatrix getPhiRM(Node aNode, RealMatrix phiMat) {
+
+        double nodeBranchLength = aNode.getLength();
+
+        return exp(phiMat.scalarMultiply(-nodeBranchLength));
+    }
+
+    /*
+     * The following two methods calculate matrix exponential of a RealMatrix,
+     * by using a method in jblas that applies to DoubleMatrix.
+     */
+    public static RealMatrix exp(RealMatrix matrix) {
+        return new Array2DRowRealMatrix(exp(matrix.getData()));
+    }
+
+    public static double[][] exp(double[][] matrix) {
+        return org.jblas.MatrixFunctions.expm(new org.jblas.DoubleMatrix(matrix)).toArray2();
+    }
+
+    // (4) matrix operations
     /*
      * This method calculates variance-covariance matrix
      * at an input internal node
@@ -155,7 +187,7 @@ public class OUPruneUtils {
                     variance.setEntry(i, j, nodeBranchLength * variance.getEntry(i, j));
                 } else {
                     lambda = decompositionH.getRealEigenvalue(i) + decompositionH.getRealEigenvalue(j);
-                    f = 1 - Math.exp(-lambda * nodeBranchLength) / lambda;
+                    f = (1 - Math.exp(-lambda * nodeBranchLength)) / lambda;
                     //fLambdaP_1SigmaP_t[i][j] = f * P_1SigmaP_t.getEntry(i,j);
                     variance.setEntry(i, j, f * variance.getEntry(i, j));
                 }
@@ -167,7 +199,7 @@ public class OUPruneUtils {
 
 
         if (node.isLeaf() && sigmaeRM!=null) {
-            variance = variance.add(sigmaRM.multiply(sigmaRM.transpose()));
+            variance = variance.add(sigmaeRM.multiply(sigmaeRM.transpose()));
         }
 
         return variance;
@@ -215,5 +247,113 @@ public class OUPruneUtils {
         return varianceRM;
     }
 
+    /*
+     * This method calculates the inverse matrix of aMat + lMat, i.e. invAPlusLRM
+     * and returns the product of eMat and invAplusLRM.
+     * It also sets the determinant of -2 * aPlusL in log space.
+     */
+    public static RealMatrix getInvAPlusLRM (Node aNode, double[] negativeTwoAplusLDetArr, RealMatrix aMat, RealMatrix lMat) {
+        RealMatrix AplusL = aMat.add(lMat);
+
+        // ensure symmetry: AplusL <- 0.5 * (AplusL + AplusL.transpose)
+        AplusL = (AplusL.add(AplusL.transpose())).scalarMultiply(0.5);
+
+        try {
+            // log(det(-2*AplusL))
+            negativeTwoAplusLDetArr[aNode.getNr()] = Math.log(new LUDecomposition(AplusL.scalarMultiply(-2)).getDeterminant());
+
+            // inverse of AplusL
+            // AplusL <- AplusL.inverse()
+            AplusL = new LUDecomposition(AplusL).getSolver().getInverse();
+        }
+        catch (SingularMatrixException e) {
+            SINGULAR = true;
+        }
+
+        if (negativeTwoAplusLDetArr[aNode.getNr()] == 0.0) {
+            SINGULAR = true;
+        }
+
+        // AplusL.inverse
+        return AplusL;
+    }
+
+    // (5) PCM pruning algorithm
+    public static void pruneOUPCM (Node node, int nTraits, List<RealVector> traitsValuesList,
+                                   List<RealMatrix> lMatList, List<RealVector> mVecList, double[] rArr,
+                                   RealMatrix sigmaRM, RealMatrix sigmaeRM, RealVector thetaVec, RealMatrix alphaMat,
+                                   RealMatrix pMat, RealMatrix inverseP, EigenDecomposition decompositionH, RealMatrix identity,
+                                   double[] vcvMatDetArr, double[] negativeTwoAplusLDetArr) {
+
+        int thisNodeIdx = node.getNr();
+        RealMatrix thisNodeLMat = lMatList.get(0);
+        RealVector thisNodeMVec = mVecList.get(0);
+        double thisNodeR = rArr[0];
+
+        List<Node> children = node.getChildren();
+
+        for (Node child : children) {
+            int childIdx = child.getNr();
+
+            // For OU, variance matrix, Phi and Omega need to be calculated for this node.
+            // inverse of variance-covariance of this node
+            RealMatrix invVCVMat = getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaeRM, pMat, inverseP, decompositionH, nTraits);
+
+            double varianceRMDet = vcvMatDetArr[childIdx];
+
+            RealMatrix phiRM = getPhiRM(child, alphaMat);
+
+            RealVector omegaVec = getOmegaVec(thetaVec, phiRM, identity);
+
+            // For OU
+            // matrix A, C, E
+            // vector b, d
+            // and value f
+            // need to be calculated
+            // for this node
+            RealMatrix aMat = getAMatForOU(invVCVMat);
+            RealMatrix eMat = getEMatForOU(phiRM, invVCVMat);
+            RealMatrix cMat = getCMatForOU(phiRM, eMat);
+            double f = getFforOU(omegaVec, invVCVMat, varianceRMDet, nTraits);
+            RealVector bVec = getBVecForOU(invVCVMat, omegaVec);
+            RealVector dVec = getDVecForOU(eMat, omegaVec);
+
+            if (child.isLeaf()) {
+                // vector of trait values at this tip
+                RealVector traitsVec = traitsValuesList.get(childIdx);
+
+                // set the L matrix
+                thisNodeLMat = thisNodeLMat.add(getLMatForOULeaf(cMat));
+
+                // set r value
+                thisNodeR += getRForOULeaf(aMat, traitsVec, bVec, f);
+
+                // set m vector
+                thisNodeMVec = thisNodeMVec.add(getMVecForOULeaf(eMat, traitsVec, dVec));
+            } else {
+
+                pruneOUPCM(child, nTraits, traitsValuesList, lMatList, mVecList, rArr, sigmaRM, sigmaeRM, omegaVec, phiRM, pMat, inverseP, decompositionH, identity, vcvMatDetArr, negativeTwoAplusLDetArr);
+
+                // (aMat + lMat).inverse
+                RealMatrix aPlusLInv = getInvAPlusLRM(child, negativeTwoAplusLDetArr, aMat, lMatList.get(childIdx));
+
+                // determinant of -2 * (aMat + lMat)
+                double logDetVNode = negativeTwoAplusLDetArr[childIdx];
+
+                // set r value
+                thisNodeR += getRForOUIntNode(bVec, mVecList.get(childIdx), aPlusLInv, f, rArr[childIdx], nTraits, logDetVNode);
+
+                RealMatrix eAPlusLInv = eMat.multiply(aPlusLInv);
+                // set m vector
+                thisNodeMVec = thisNodeMVec.add(getMVecForOUIntNode(eAPlusLInv, bVec, mVecList.get(childIdx), dVec));
+
+                // set L matrix
+                thisNodeLMat = thisNodeLMat.add(getLMatForOUIntNode(cMat, eMat, eAPlusLInv));
+            }
+        }
+        lMatList.set(thisNodeIdx, thisNodeLMat);
+        mVecList.set(thisNodeIdx, thisNodeMVec);
+        rArr[thisNodeIdx] = thisNodeR;
+    }
 
 }
