@@ -5,6 +5,8 @@ import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.FastMath;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
+import test.integration.Relaxed16TaxaBMA;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -286,9 +288,9 @@ public class OUPruneUtils {
                                    double[] vcvMatDetArr, double[] negativeTwoAplusLDetArr) {
 
         int thisNodeIdx = node.getNr();
-        RealMatrix thisNodeLMat = lMatList.get(0);
-        RealVector thisNodeMVec = mVecList.get(0);
-        double thisNodeR = rArr[0];
+        RealMatrix thisNodeLMat = new Array2DRowRealMatrix(new double [nTraits][nTraits]);
+        RealVector thisNodeMVec = new ArrayRealVector(new double [nTraits]);
+        double thisNodeR = 0;
 
         List<Node> children = node.getChildren();
 
@@ -296,14 +298,14 @@ public class OUPruneUtils {
             int childIdx = child.getNr();
 
             // For OU, variance matrix, Phi and Omega need to be calculated for this node.
+            RealMatrix phiRM = getPhiRM(child, alphaMat);
+
+            RealVector omegaVec = getOmegaVec(thetaVec, phiRM, identity);
+
             // inverse of variance-covariance of this node
             RealMatrix invVCVMat = getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaeRM, pMat, inverseP, decompositionH, nTraits);
 
             double varianceRMDet = vcvMatDetArr[childIdx];
-
-            RealMatrix phiRM = getPhiRM(child, alphaMat);
-
-            RealVector omegaVec = getOmegaVec(thetaVec, phiRM, identity);
 
             // For OU
             // matrix A, C, E
@@ -326,13 +328,14 @@ public class OUPruneUtils {
                 thisNodeLMat = thisNodeLMat.add(getLMatForOULeaf(cMat));
 
                 // set r value
+                double r = getRForOULeaf(aMat, traitsVec, bVec, f);
                 thisNodeR += getRForOULeaf(aMat, traitsVec, bVec, f);
 
                 // set m vector
                 thisNodeMVec = thisNodeMVec.add(getMVecForOULeaf(eMat, traitsVec, dVec));
             } else {
 
-                pruneOUPCM(child, nTraits, traitsValuesList, lMatList, mVecList, rArr, sigmaRM, sigmaeRM, omegaVec, phiRM, pMat, inverseP, decompositionH, identity, vcvMatDetArr, negativeTwoAplusLDetArr);
+                pruneOUPCM(child, nTraits, traitsValuesList, lMatList, mVecList, rArr, sigmaRM, sigmaeRM, thetaVec, alphaMat, pMat, inverseP, decompositionH, identity, vcvMatDetArr, negativeTwoAplusLDetArr);
 
                 // (aMat + lMat).inverse
                 RealMatrix aPlusLInv = getInvAPlusLRM(child, negativeTwoAplusLDetArr, aMat, lMatList.get(childIdx));
@@ -355,5 +358,4 @@ public class OUPruneUtils {
         mVecList.set(thisNodeIdx, thisNodeMVec);
         rArr[thisNodeIdx] = thisNodeR;
     }
-
 }
