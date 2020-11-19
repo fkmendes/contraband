@@ -1,6 +1,7 @@
 package contraband.prunelikelihood;
 
 import beast.evolution.tree.Node;
+import contraband.math.MatrixUtilsContra;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.FastMath;
 import org.jblas.DoubleMatrix;
@@ -282,7 +283,7 @@ public class OUPruneUtils {
     }
 
     // (5) PCM pruning algorithm
-    public static void pruneOUPCM (Node node, int nTraits, List<RealVector> traitsValuesList,
+    public static void pruneOUPCM (Node node, int nTraits, double[] traitValuesArr,
                                    List<RealMatrix> lMatList, List<RealVector> mVecList, double[] rArr,
                                    RealMatrix sigmaRM, RealMatrix sigmaeRM,
                                    RealVector thetaVec, RealMatrix alphaMat,
@@ -326,20 +327,22 @@ public class OUPruneUtils {
 
             if (child.isLeaf()) {
                 // vector of trait values at this tip
-                RealVector traitsVec = traitsValuesList.get(childIdx);
+                //RealVector traitsVec = traitsValuesList.get(childIdx);
+                double[] traitsArr = new double [nTraits];
+                MatrixUtilsContra.getMatrixRow(traitValuesArr, childIdx, nTraits, traitsArr);
+                RealVector traitsVec = new ArrayRealVector(traitsArr);
 
                 // set the L matrix
                 thisNodeLMat = thisNodeLMat.add(getLMatForOULeaf(cMat));
 
                 // set r value
-                double r = getRForOULeaf(aMat, traitsVec, bVec, f);
                 thisNodeR += getRForOULeaf(aMat, traitsVec, bVec, f);
 
                 // set m vector
                 thisNodeMVec = thisNodeMVec.add(getMVecForOULeaf(eMat, traitsVec, dVec));
             } else {
 
-                pruneOUPCM(child, nTraits, traitsValuesList,
+                pruneOUPCM(child, nTraits, traitValuesArr,
                         lMatList, mVecList, rArr,
                         sigmaRM, sigmaeRM,
                         thetaVec, alphaMat, pMat,

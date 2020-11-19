@@ -6,8 +6,11 @@ import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.*;
 import beast.evolution.tree.Tree;
+import contraband.utils.PruneLikelihoodUtils;
 import contraband.valuewrappers.OneValueContTraits;
 import org.apache.commons.math3.linear.*;
+import outercore.parameter.KeyRealParameter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -22,7 +25,7 @@ public class OUPruneLikelihood extends Distribution {
     final public Input<RealParameter> sigmaeValuesInput = new Input<>("sigmae","Population error.", Input.Validate.OPTIONAL);
     final public Input<RealParameter> alphaInput = new Input<>("alpha","An array of (nTraits * (nTraits - 1) / 2) elements, representing selection strength, off-diagonal elements in Alpha matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> thetaInput = new Input<>("theta","An array of nTraits elements, representing optimum trait values, elements in Theta vector.", Input.Validate.REQUIRED);
-    final public Input<OneValueContTraits> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+    final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     final public Input<RealParameter> rootValuesInput = new Input<>("root","Trait values at the root.");
 
     private RealMatrix sigmaRM;
@@ -40,7 +43,7 @@ public class OUPruneLikelihood extends Distribution {
     private Tree tree;
     private int nTraits;
 
-    private List<RealVector> traitsValuesList;
+    private double[] traitValuesArr;
     private List<RealMatrix> lMatList;
     private List<RealVector>  mVecList;
     private double [] rArr;
@@ -52,14 +55,15 @@ public class OUPruneLikelihood extends Distribution {
     public void initAndValidate() {
         //super.initAndValidate();
         tree = treeInput.get();
-        int nSpecies = tree.getLeafNodeCount();
         int nodeCount = tree.getNodeCount();
 
-        OneValueContTraits traitValues = traitsValuesInput.get();
-        traitsValuesList = new ArrayList<>(nSpecies);
-        populateTraitsValuesList(traitValues, tree, traitsValuesList);
+        KeyRealParameter traitsValues = traitsValuesInput.get();
 
-        nTraits = traitValues.getNTraits();
+        nTraits = traitsValues.getMinorDimension1();
+        int nSpecies = traitsValues.getMinorDimension2();
+
+        traitValuesArr = new double[nSpecies * nTraits];
+        PruneLikelihoodUtils.populateTraitValuesArr(traitsValues, tree, nTraits, traitValuesArr);
 
         sigmaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         populateSigmaMatrix(sigmaRM, sigmaValuesInput.get().getDoubleValues());
@@ -103,7 +107,7 @@ public class OUPruneLikelihood extends Distribution {
         RealMatrix pMat = decompositionH.getV();
         RealMatrix inverseP = new LUDecomposition(pMat).getSolver().getInverse();
 
-        OUPruneUtils.pruneOUPCM(tree.getRoot(), nTraits, traitsValuesList,
+        OUPruneUtils.pruneOUPCM(tree.getRoot(), nTraits, traitValuesArr,
                 lMatList,  mVecList,  rArr,
                 sigmaRM, sigmaERM,
                 thetaVec, alphaRM,

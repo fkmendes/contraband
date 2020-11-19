@@ -2,14 +2,18 @@ package testdrivers;
 
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
+import contraband.math.MatrixUtilsContra;
 import contraband.prunelikelihood.OUPruneLikelihood;
 import contraband.prunelikelihood.OUPruneUtils;
 import contraband.utils.GeneralUtils;
+import contraband.utils.PruneLikelihoodUtils;
 import contraband.valuewrappers.OneValueContTraits;
 import org.apache.commons.math3.linear.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import beast.evolution.tree.Node;
+import outercore.parameter.KeyRealParameter;
 
 public class OUPruneLikelihoodTestDriver3 {
     public static void main(String[] args) {
@@ -17,15 +21,22 @@ public class OUPruneLikelihoodTestDriver3 {
         TreeParser tree = new TreeParser(treeStr, false, false, true, 0);
 
         int nTraits = 2;
-
+       List<Double> data = Arrays.asList(
+               0.131394584822684, -0.19269144948362,
+               -0.65643500381027,-0.373259036803319,
+               -0.17399894787897, 1.27056761078824
+        );
+       /*
         RealParameter data = new RealParameter(new Double[] {
                 0.131394584822684, -0.65643500381027,
                 -0.17399894787897, -0.19269144948362,
                 -0.373259036803319, 1.27056761078824
         });
-        String spNames = "A,B,C";
-        OneValueContTraits traitValues = new OneValueContTraits();
-        traitValues.initByName("nTraits", nTraits, "spNames", spNames, "traitValues", data);
+
+        */
+        String spNames = "A B C";
+        KeyRealParameter traitValues = new KeyRealParameter();
+        traitValues.initByName("value", data, "keys", spNames, "minordimension", nTraits);
 
         // OU model parameters
         RealParameter rootValues = new RealParameter(new Double[] {0.2, 1.3});
@@ -44,8 +55,9 @@ public class OUPruneLikelihoodTestDriver3 {
         int nSpecies = tree.getLeafNodeCount();
         int nodeCount = tree.getNodeCount();
 
-        List<RealVector> traitsValuesList = new ArrayList<>(nSpecies);
-        pcm.populateTraitsValuesList(traitValues, tree, traitsValuesList);
+
+        double[] traitValuesArr = new double[nSpecies * nTraits];
+        PruneLikelihoodUtils.populateTraitValuesArr(traitValues, tree, nTraits, traitValuesArr);
 
         RealMatrix sigmaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         pcm.populateSigmaMatrix(sigmaRM, sigma.getDoubleValues());
@@ -145,7 +157,9 @@ public class OUPruneLikelihoodTestDriver3 {
         //-7.555822679177356E-4
         System.out.println("Display f = " + f);
         //-2.2078597649235796
-        RealVector traitsVec = traitsValuesList.get(childIdx);
+        double[] traitsArr = new double [nTraits];
+        MatrixUtilsContra.getMatrixRow(traitValuesArr, childIdx, nTraits, traitsArr);
+        RealVector traitsVec = new ArrayRealVector(traitsArr);
         // 0.1313945848; -0.1926914495
         // set the L matrix
         RealMatrix lMat = OUPruneUtils.getLMatForOULeaf(cMat);
@@ -220,7 +234,8 @@ public class OUPruneLikelihoodTestDriver3 {
         //-7.555822679177356E-4
         System.out.println("Display f = " + f);
         //-2.2078597649235796
-        traitsVec = traitsValuesList.get(childIdx);
+        MatrixUtilsContra.getMatrixRow(traitValuesArr, childIdx, nTraits, traitsArr);
+        traitsVec = new ArrayRealVector(traitsArr);
 
         // set the L matrix
         lMat = OUPruneUtils.getLMatForOULeaf(cMat);
@@ -303,7 +318,8 @@ public class OUPruneLikelihoodTestDriver3 {
         //-1.2593845489022425E-7
         System.out.println("Display f = " + f);
         //-2.2085477045971365
-        traitsVec = traitsValuesList.get(childIdx);
+        MatrixUtilsContra.getMatrixRow(traitValuesArr, childIdx, nTraits, traitsArr);
+        traitsVec = new ArrayRealVector(traitsArr);
 
         // set the L matrix
         lMat = OUPruneUtils.getLMatForOULeaf(cMat);
@@ -441,7 +457,7 @@ public class OUPruneLikelihoodTestDriver3 {
         // expected: -7.58111239313721
 
         // TEST2: pruneOUPCM()
-        OUPruneUtils.pruneOUPCM(tree.getRoot(), nTraits, traitsValuesList, lMatList,  mVecList,  rArr, sigmaRM,  sigmaERM, thetaVec, alphaRM, pMat, inverseP, decompositionH, identity, vcvMatDetArr,  negativeTwoAplusLDetArr);
+        OUPruneUtils.pruneOUPCM(tree.getRoot(), nTraits, traitValuesArr, lMatList,  mVecList,  rArr, sigmaRM,  sigmaERM, thetaVec, alphaRM, pMat, inverseP, decompositionH, identity, vcvMatDetArr,  negativeTwoAplusLDetArr);
         RealMatrix l0Mat = lMatList.get(tree.getRoot().getNr());
         RealVector m0Vec = mVecList.get(tree.getRoot().getNr());
         double r0 = rArr[tree.getRoot().getNr()];
