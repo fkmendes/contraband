@@ -1,5 +1,6 @@
 package testdrivers;
 
+import beast.core.parameter.BooleanParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.prunelikelihood.OUPruneLikelihood;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import beast.evolution.tree.Node;
 
-public class OUPruneLikelihoodTestDriver3 {
+public class OUPruneLikelihoodTestDriver4 {
     public static void main(String[] args) {
         String treeStr = "((A:3.0058179,B:3.0058179):4.350951,C:7.3567689);";
         TreeParser tree = new TreeParser(treeStr, false, false, true, 0);
@@ -34,11 +35,13 @@ public class OUPruneLikelihoodTestDriver3 {
 
         RealParameter sigmae = new RealParameter(new Double[] {1.0, 0.3, 1.0});
 
+        RealParameter sigmaj = new RealParameter(new Double[] {1.0, 0.25, 1.0});
+
         RealParameter alpha = new RealParameter(new Double[] {2.0, 0.0, 0.0, 2.0});
 
         RealParameter theta = new RealParameter(new Double[] {0.5, 0.5});
 
-        Boolean[] indicators = new Boolean[] {false, false, false, false};
+        BooleanParameter indicators = new BooleanParameter(new Boolean[] {false, false, true, false});
 
         OUPruneLikelihood pcm = new OUPruneLikelihood();
         int nSpecies = tree.getLeafNodeCount();
@@ -59,7 +62,8 @@ public class OUPruneLikelihoodTestDriver3 {
         RealMatrix sigmaERM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         pcm.populateSigmaMatrix(sigmaERM, sigmae.getDoubleValues());
 
-        RealMatrix sigmaJRM = null;
+        RealMatrix sigmaJRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
+        pcm.populateSigmaMatrix(sigmaJRM, sigmaj.getDoubleValues());
 
         List<RealMatrix> lMatList = new ArrayList<>(nodeCount);
         List<RealVector> mVecList = new ArrayList<>(nodeCount);
@@ -85,7 +89,7 @@ public class OUPruneLikelihoodTestDriver3 {
         RealMatrix inverseP = new LUDecomposition(pMat).getSolver().getInverse();
         //System.out.println("Display H :");
         //GeneralUtils.displayRealMatrix(alphaRM);
-
+/*
         // TEST1: pruning process
         // at Node A
         System.out.println("At Node A :");
@@ -107,13 +111,13 @@ public class OUPruneLikelihoodTestDriver3 {
         // 0.498775
         // 0.498775
 
-        RealMatrix varianceRM = OUPruneUtils.getOUVarianceRM(child, sigmaRM, sigmaERM, pMat, inverseP, decompositionH, nTraits);
+        RealMatrix varianceRM = OUPruneUtils.getOUVarianceRM(child, sigmaRM, sigmaERM, sigmaJRM, indicators, alphaRM, pMat, inverseP, decompositionH, nTraits);
         System.out.println("Display varianceRM :");
         GeneralUtils.displayRealMatrix(varianceRM );
         // 1.4299980 0.4499991
         // 0.4499991 1.2499985
 
-        RealMatrix invVCVMat = OUPruneUtils.getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaERM, pMat, inverseP, decompositionH, nTraits);
+        RealMatrix invVCVMat = OUPruneUtils.getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaERM, sigmaJRM, indicators, alphaRM, pMat, inverseP, decompositionH, nTraits);
         double varianceRMDet = vcvMatDetArr[childIdx];
 
         RealMatrix aMat = OUPruneUtils.getAMatForOU(invVCVMat);
@@ -183,12 +187,12 @@ public class OUPruneLikelihoodTestDriver3 {
         GeneralUtils.displayRealVector(omegaVec);
         //0.49877496146772277
         //0.49877496146772277
-        varianceRM = OUPruneUtils.getOUVarianceRM(child, sigmaRM, sigmaERM, pMat, inverseP, decompositionH, nTraits);
+        varianceRM = OUPruneUtils.getOUVarianceRM(child, sigmaRM, sigmaERM, sigmaJRM, indicators, alphaRM, pMat, inverseP, decompositionH, nTraits);
         System.out.println("Display varianceRM :");
         GeneralUtils.displayRealMatrix(varianceRM );
         //1.4299979590216085 0.44999909956835665
         //0.44999909956835665 1.2499984992805944
-        invVCVMat = OUPruneUtils.getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaERM, pMat, inverseP, decompositionH, nTraits);
+        invVCVMat = OUPruneUtils.getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaERM, sigmaJRM, indicators, alphaRM, pMat, inverseP, decompositionH, nTraits);
         varianceRMDet = vcvMatDetArr[childIdx];
 
         aMat = OUPruneUtils.getAMatForOU(invVCVMat);
@@ -266,12 +270,12 @@ public class OUPruneLikelihoodTestDriver3 {
         GeneralUtils.displayRealVector(omegaVec);
         //0.49999979631374253
         //0.49999979631374253
-        varianceRM = OUPruneUtils.getOUVarianceRM(child, sigmaRM, sigmaERM, pMat, inverseP, decompositionH, nTraits);
+        varianceRM = OUPruneUtils.getOUVarianceRM(child, sigmaRM, sigmaERM, sigmaJRM, indicators, alphaRM, pMat, inverseP, decompositionH, nTraits);
         System.out.println("Display varianceRM :");
         GeneralUtils.displayRealMatrix(varianceRM );
         //1.4299999999999435 0.4499999999999751
         //0.4499999999999751 1.2499999999999585
-        invVCVMat = OUPruneUtils.getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaERM, pMat, inverseP, decompositionH, nTraits);
+        invVCVMat = OUPruneUtils.getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaERM, sigmaJRM, indicators, alphaRM, pMat, inverseP, decompositionH, nTraits);
         varianceRMDet = vcvMatDetArr[childIdx];
 
         aMat = OUPruneUtils.getAMatForOU(invVCVMat);
@@ -341,12 +345,12 @@ public class OUPruneLikelihoodTestDriver3 {
         GeneralUtils.displayRealVector(omegaVec);
         //0.49991686536704755
         //0.49991686536704755
-        varianceRM = OUPruneUtils.getOUVarianceRM(child, sigmaRM, sigmaERM, pMat, inverseP, decompositionH, nTraits);
+        varianceRM = OUPruneUtils.getOUVarianceRM(child, sigmaRM, sigmaERM, sigmaJRM, indicators, alphaRM, pMat, inverseP, decompositionH, nTraits);
         System.out.println("Display varianceRM :");
         GeneralUtils.displayRealMatrix(varianceRM );
         //0.3399999906005406 0.14999999585317966
         //0.14999999585317966 0.2499999930886328
-        invVCVMat = OUPruneUtils.getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaERM, pMat, inverseP, decompositionH, nTraits);
+        invVCVMat = OUPruneUtils.getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaERM, sigmaJRM, indicators, alphaRM, pMat, inverseP, decompositionH, nTraits);
         varianceRMDet = vcvMatDetArr[childIdx];
 
         aMat = OUPruneUtils.getAMatForOU(invVCVMat);
@@ -439,9 +443,10 @@ public class OUPruneLikelihoodTestDriver3 {
         double loglik1 = lE.preMultiply(rootValuesVec).dotProduct(rootValuesVec) + rootValuesVec.dotProduct(mE) + rE;
         System.out.println("Log likelihood1 = " + loglik1);
         // expected: -7.58111239313721
-
+*/
+/*
         // TEST2: pruneOUPCM()
-        OUPruneUtils.pruneOUPCM(tree.getRoot(), nTraits, traitsValuesList, lMatList,  mVecList,  rArr, sigmaRM,  sigmaERM, thetaVec, alphaRM, pMat, inverseP, decompositionH, identity, vcvMatDetArr,  negativeTwoAplusLDetArr);
+        OUPruneUtils.pruneOUPCM(tree.getRoot(), nTraits, traitsValuesList, lMatList,  mVecList,  rArr, sigmaRM,  sigmaERM, sigmaJRM, indicators, thetaVec, alphaRM, pMat, inverseP, decompositionH, identity, vcvMatDetArr,  negativeTwoAplusLDetArr);
         RealMatrix l0Mat = lMatList.get(tree.getRoot().getNr());
         RealVector m0Vec = mVecList.get(tree.getRoot().getNr());
         double r0 = rArr[tree.getRoot().getNr()];
@@ -459,12 +464,13 @@ public class OUPruneLikelihoodTestDriver3 {
 
         double loglik2 = l0Mat.preMultiply(rootValuesVec).dotProduct(rootValuesVec) + rootValuesVec.dotProduct(m0Vec) + r0;
         System.out.println("Log likelihood2 = " + loglik2);
-        // expected: -7.58111239313721
+        // expected:
 
         // TEST3: calculateLogP()
-        pcm.initByName("tree", tree, "traits", traitValues, "alpha", alpha, "theta", theta, "sigma", sigma, "sigmae", sigmae, "root", rootValues);
+        pcm.initByName("tree", tree, "traits", traitValues, "alpha", alpha, "theta", theta, "sigma", sigma, "sigmae", sigmae, "sigmaj", sigmaj, "jump", indicators,"root", rootValues);
         double logP = pcm.calculateLogP();
         System.out.println("Log likelihood3 = " + logP);
-        // expected: -7.58111239313721
+        // expected:
+*/
     }
 }

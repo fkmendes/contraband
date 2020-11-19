@@ -170,7 +170,8 @@ public class OUPruneUtils {
      * simgaRM is the evolutionary rate matrix
      * sigmaeRM is used for measurement error matrix of observed values at tips
      */
-    public static RealMatrix getOUVarianceRM (Node node, RealMatrix sigmaRM, RealMatrix sigmaeRM, RealMatrix pMat, RealMatrix inverseP, EigenDecomposition decompositionH, int nTraits) {
+    public static RealMatrix getOUVarianceRM (Node node, RealMatrix sigmaRM, RealMatrix sigmaeRM,
+                                              RealMatrix pMat, RealMatrix inverseP, EigenDecomposition decompositionH, int nTraits) {
         double nodeBranchLength = node.getLength();
         // Sigma
         RealMatrix variance = sigmaRM.multiply(sigmaRM.transpose());
@@ -198,7 +199,6 @@ public class OUPruneUtils {
         // variance matrix = P * (fLambda * P_1SigmaP_t) * t(P)
         variance = pMat.multiply(variance).multiply(pMat.transpose());
 
-
         if (node.isLeaf() && sigmaeRM!=null) {
             variance = variance.add(sigmaeRM.multiply(sigmaeRM.transpose()));
         }
@@ -206,7 +206,9 @@ public class OUPruneUtils {
         return variance;
     }
 
-    public static RealMatrix getInverseVarianceRMForOU (Node node, double[] vcvMatDetArr, RealMatrix sigmaRM, RealMatrix sigmaeRM, RealMatrix pMat, RealMatrix inverseP, EigenDecomposition decompositionH, int nTraits) {
+    public static RealMatrix getInverseVarianceRMForOU (Node node, double[] vcvMatDetArr,
+                                                        RealMatrix sigmaRM, RealMatrix sigmaeRM,
+                                                        RealMatrix pMat, RealMatrix inverseP, EigenDecomposition decompositionH, int nTraits) {
 
         // variance-covariance matrix
         RealMatrix varianceRM = getOUVarianceRM(node, sigmaRM, sigmaeRM, pMat, inverseP, decompositionH, nTraits);
@@ -282,7 +284,8 @@ public class OUPruneUtils {
     // (5) PCM pruning algorithm
     public static void pruneOUPCM (Node node, int nTraits, List<RealVector> traitsValuesList,
                                    List<RealMatrix> lMatList, List<RealVector> mVecList, double[] rArr,
-                                   RealMatrix sigmaRM, RealMatrix sigmaeRM, RealVector thetaVec, RealMatrix alphaMat,
+                                   RealMatrix sigmaRM, RealMatrix sigmaeRM,
+                                   RealVector thetaVec, RealMatrix alphaMat,
                                    RealMatrix pMat, RealMatrix inverseP, EigenDecomposition decompositionH, RealMatrix identity,
                                    double[] vcvMatDetArr, double[] negativeTwoAplusLDetArr) {
 
@@ -302,7 +305,9 @@ public class OUPruneUtils {
             RealVector omegaVec = getOmegaVec(thetaVec, phiRM, identity);
 
             // inverse of variance-covariance of this node
-            RealMatrix invVCVMat = getInverseVarianceRMForOU(child, vcvMatDetArr, sigmaRM, sigmaeRM, pMat, inverseP, decompositionH, nTraits);
+            RealMatrix invVCVMat = getInverseVarianceRMForOU(child, vcvMatDetArr,
+                    sigmaRM, sigmaeRM,
+                    pMat, inverseP, decompositionH, nTraits);
 
             double varianceRMDet = vcvMatDetArr[childIdx];
 
@@ -334,7 +339,12 @@ public class OUPruneUtils {
                 thisNodeMVec = thisNodeMVec.add(getMVecForOULeaf(eMat, traitsVec, dVec));
             } else {
 
-                pruneOUPCM(child, nTraits, traitsValuesList, lMatList, mVecList, rArr, sigmaRM, sigmaeRM, thetaVec, alphaMat, pMat, inverseP, decompositionH, identity, vcvMatDetArr, negativeTwoAplusLDetArr);
+                pruneOUPCM(child, nTraits, traitsValuesList,
+                        lMatList, mVecList, rArr,
+                        sigmaRM, sigmaeRM,
+                        thetaVec, alphaMat, pMat,
+                        inverseP, decompositionH,
+                        identity, vcvMatDetArr, negativeTwoAplusLDetArr);
 
                 // (aMat + lMat).inverse
                 RealMatrix aPlusLInv = getInvAPlusLRM(child, negativeTwoAplusLDetArr, aMat, lMatList.get(childIdx));

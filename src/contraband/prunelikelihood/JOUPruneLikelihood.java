@@ -16,7 +16,7 @@ import java.util.Random;
         "The calculation uses Venelin's PCM likelihood.")
 
 
-public class OUPruneLikelihood extends Distribution {
+public class JOUPruneLikelihood extends Distribution {
     final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Input.Validate.REQUIRED);
     final public Input<RealParameter> sigmaValuesInput = new Input<>("sigma","Trait rate matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> sigmaeValuesInput = new Input<>("sigmae","Population error.", Input.Validate.OPTIONAL);
@@ -24,9 +24,13 @@ public class OUPruneLikelihood extends Distribution {
     final public Input<RealParameter> thetaInput = new Input<>("theta","An array of nTraits elements, representing optimum trait values, elements in Theta vector.", Input.Validate.REQUIRED);
     final public Input<OneValueContTraits> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     final public Input<RealParameter> rootValuesInput = new Input<>("root","Trait values at the root.");
+    final public Input<RealParameter> sigmajValuesInput = new Input<>("sigmaj","Values in variance matrix of the normal jump distribution.", Input.Validate.OPTIONAL);
+    final public Input<BooleanParameter> jumpIndicatorsInput = new Input<>("jump","An array of boolean parameters corresponding to each branch in the tree. TRUE \n" +
+            "indicates that a jump takes place at the beginning of the branch.", Input.Validate.OPTIONAL);
 
     private RealMatrix sigmaRM;
     private RealMatrix sigmaERM;
+    private RealMatrix sigmaJRM;
     private RealMatrix alphaRM;
     private RealVector thetaVec;
     private RealVector rootValuesVec;
@@ -36,6 +40,7 @@ public class OUPruneLikelihood extends Distribution {
     private double [] sigmae;
     private double[] alpha;
     private double[] theta;
+    private Boolean[] jumpIndicators;
 
     private Tree tree;
     private int nTraits;
@@ -74,6 +79,12 @@ public class OUPruneLikelihood extends Distribution {
             sigmaERM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
             populateSigmaMatrix(sigmaERM, sigmaeValuesInput.get().getDoubleValues());
         }
+        if (sigmajValuesInput.get() != null) {
+            sigmaJRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
+            populateSigmaMatrix(sigmaJRM, sigmajValuesInput.get().getDoubleValues());
+            jumpIndicators = new Boolean[nodeCount];
+            jumpIndicators = jumpIndicatorsInput.get().getValues();
+        }
 
         lMatList = new ArrayList<>(nodeCount);
         mVecList = new ArrayList<>(nodeCount);
@@ -102,14 +113,14 @@ public class OUPruneLikelihood extends Distribution {
         EigenDecomposition decompositionH = new EigenDecomposition(alphaRM);
         RealMatrix pMat = decompositionH.getV();
         RealMatrix inverseP = new LUDecomposition(pMat).getSolver().getInverse();
-
+/*
         OUPruneUtils.pruneOUPCM(tree.getRoot(), nTraits, traitsValuesList,
                 lMatList,  mVecList,  rArr,
-                sigmaRM, sigmaERM,
+                sigmaRM, sigmaERM, sigmaJRM, jumpIndicators,
                 thetaVec, alphaRM,
                 pMat, inverseP, decompositionH,
                 identity, vcvMatDetArr,  negativeTwoAplusLDetArr);
-
+*/
         RealMatrix l0Mat = lMatList.get(tree.getRoot().getNr());
         RealVector m0Vec = mVecList.get(tree.getRoot().getNr());
         double r0 = rArr[tree.getRoot().getNr()];
