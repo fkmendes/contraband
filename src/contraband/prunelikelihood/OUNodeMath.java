@@ -11,7 +11,6 @@ import java.util.List;
 
 public class OUNodeMath extends CalculationNode {
     final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
-
     final public Input<RealParameter> sigmaValuesInput = new Input<>("sigma","Trait rate matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> sigmaeValuesInput = new Input<>("sigmae","Population error.", Input.Validate.OPTIONAL);
     final public Input<RealParameter> alphaInput = new Input<>("alpha","An array of (nTraits * (nTraits - 1) / 2) elements, representing selection strength, off-diagonal elements in Alpha matrix.", Input.Validate.REQUIRED);
@@ -28,7 +27,6 @@ public class OUNodeMath extends CalculationNode {
     private int nSpecies;
     private int nodeNr;
 
-    private double[] traitValuesArr;
     private List<RealMatrix> lMatList;
     private List<RealVector>  mVecList;
     private double [] rArr;
@@ -41,6 +39,11 @@ public class OUNodeMath extends CalculationNode {
 
     private RealMatrix iniMatrix;
     private RealVector iniVec;
+
+    private RealMatrix invVCVMat;
+    private double varianceRMDet;
+    private RealMatrix aPlusLInv;
+    private double logDetVNode;
 
     @Override
     public void initAndValidate() {
@@ -92,18 +95,17 @@ public class OUNodeMath extends CalculationNode {
 
     public RealVector getIniVec () {return iniVec;}
 
-    public RealMatrix getInverseVarianceMatrix () {return null;}
+    public RealMatrix getInverseVarianceMatrix () {return invVCVMat;}
 
+    public double getDetVarianceMatrix () {return varianceRMDet ;}
 
-    public double getDetVarianceMatrix () {return 1.0;}
+    public RealMatrix getLMatForNode (int nodeIdx) {return lMatList.get(nodeIdx); }
 
-    public RealMatrix getLMat () {return null;}
+    public RealVector getMVecForNode(int nodeIdx) {return mVecList.get(nodeIdx); }
 
-    public RealVector getMVec () {return null; }
+    public double getRForNode (int nodeIdx) { return rArr[nodeIdx]; }
 
-    public double getR () { return 1.0; }
-
-    public RealVector getRootValuesVec () { return null; }
+    public RealVector getRootValuesVec () { return rootValuesVec; }
 
     public RealMatrix getAlphaMatrix () {return alphaRM; }
 
@@ -111,7 +113,16 @@ public class OUNodeMath extends CalculationNode {
 
     public RealMatrix getIdentityMatrix ( ) {return identity; }
 
+    public RealMatrix getAPlusLInv() { return aPlusLInv; }
+
+    public double getNegativeTwoAPlusLDet() { return logDetVNode; }
+
     // setters
+    public void setLMatForNode (int nodeIdx, RealMatrix value) { lMatList.set(nodeIdx,value); }
+
+    public void setMVecForNode (int nodeIdx, RealVector value) { mVecList.set(nodeIdx, value); }
+
+    public void setRForNode (int nodeIdx, double value) { rArr[nodeIdx] = value; }
 
 
     public void populateAlphaMatrix() {
@@ -125,7 +136,18 @@ public class OUNodeMath extends CalculationNode {
     }
 
     public void populateVarianceCovarianceMatrix(Node node){
+        invVCVMat = OUPruneUtils.getInverseVarianceRMForOU(node, vcvMatDetArr,
+                sigmaRM, sigmaERM,
+                pMat, inverseP, decompositionH, nTraits);
+        varianceRMDet = vcvMatDetArr[node.getNr()];
+    }
 
+    public void performAPlusOperations (Node aNode, RealMatrix aMatrix) {
+        // (aMat + lMat).inverse
+        aPlusLInv = OUPruneUtils.getInvAPlusLRM(aNode, negativeTwoAplusLDetArr, aMatrix, lMatList.get(aNode.getNr()));
+
+        // determinant of -2 * (aMat + lMat)
+       logDetVNode = negativeTwoAplusLDetArr[aNode.getNr()];
     }
 
 }

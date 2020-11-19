@@ -3,6 +3,7 @@ package testdrivers;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.math.MatrixUtilsContra;
+import contraband.prunelikelihood.OUNodeMath;
 import contraband.prunelikelihood.OUPruneLikelihood;
 import contraband.prunelikelihood.OUPruneUtils;
 import contraband.utils.GeneralUtils;
@@ -26,14 +27,7 @@ public class OUPruneLikelihoodTestDriver3 {
                -0.65643500381027,-0.373259036803319,
                -0.17399894787897, 1.27056761078824
         );
-       /*
-        RealParameter data = new RealParameter(new Double[] {
-                0.131394584822684, -0.65643500381027,
-                -0.17399894787897, -0.19269144948362,
-                -0.373259036803319, 1.27056761078824
-        });
 
-        */
         String spNames = "A B C";
         KeyRealParameter traitValues = new KeyRealParameter();
         traitValues.initByName("value", data, "keys", spNames, "minordimension", nTraits);
@@ -49,12 +43,10 @@ public class OUPruneLikelihoodTestDriver3 {
 
         RealParameter theta = new RealParameter(new Double[] {0.5, 0.5});
 
-        Boolean[] indicators = new Boolean[] {false, false, false, false};
-
         OUPruneLikelihood pcm = new OUPruneLikelihood();
+       /*
         int nSpecies = tree.getLeafNodeCount();
         int nodeCount = tree.getNodeCount();
-
 
         double[] traitValuesArr = new double[nSpecies * nTraits];
         PruneLikelihoodUtils.populateTraitValuesArr(traitValues, tree, nTraits, traitValuesArr);
@@ -476,9 +468,12 @@ public class OUPruneLikelihoodTestDriver3 {
         double loglik2 = l0Mat.preMultiply(rootValuesVec).dotProduct(rootValuesVec) + rootValuesVec.dotProduct(m0Vec) + r0;
         System.out.println("Log likelihood2 = " + loglik2);
         // expected: -7.58111239313721
-
+*/
         // TEST3: calculateLogP()
-        pcm.initByName("tree", tree, "traits", traitValues, "alpha", alpha, "theta", theta, "sigma", sigma, "sigmae", sigmae, "root", rootValues);
+        OUNodeMath nodeMath = new OUNodeMath();
+        nodeMath.initByName("traits", traitValues, "alpha", alpha, "theta", theta, "sigma", sigma, "sigmae", sigmae, "root", rootValues);
+
+        pcm.initByName("tree", tree, "traits", traitValues, "nodeMath", nodeMath);
         double logP = pcm.calculateLogP();
         System.out.println("Log likelihood3 = " + logP);
         // expected: -7.58111239313721

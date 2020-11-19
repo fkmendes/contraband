@@ -4,16 +4,13 @@ import beast.core.Description;
 import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.State;
-import beast.core.parameter.*;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.Node;
 import contraband.math.MatrixUtilsContra;
 import contraband.utils.PruneLikelihoodUtils;
-import contraband.valuewrappers.OneValueContTraits;
 import org.apache.commons.math3.linear.*;
 import outercore.parameter.KeyRealParameter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -33,7 +30,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
 
     @Override
     public void initAndValidate() {
-        //super.initAndValidate();
+        super.initAndValidate();
         tree = treeInput.get();
 
         KeyRealParameter traitsValues = traitsValuesInput.get();
@@ -50,15 +47,15 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
     protected void populateLogP() {
 
         nodeMath.populateAlphaMatrix();
-
         nodeMath.performAlphaDecompostion();
-
 
         pruneOU(tree.getRoot(), nodeMath);
 
-        RealMatrix l0Mat = nodeMath.getLMat();
-        RealVector m0Vec = nodeMath.getMVec();
-        double r0 = nodeMath.getR();
+
+        int rootIdx = tree.getRoot().getNr();
+        RealMatrix l0Mat = nodeMath.getLMatForNode(rootIdx);
+        RealVector m0Vec = nodeMath.getMVecForNode(rootIdx);
+        double r0 = nodeMath.getRForNode(rootIdx);
 
         RealVector rootValuesVec = nodeMath.getRootValuesVec();
 
@@ -85,22 +82,11 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
                 int childIdx = child.getNr();
 
                 // For OU, variance matrix, Phi and Omega need to be calculated for this node.
-                //RealMatrix phiRM = getPhiRM(child, alphaMat);
                 RealMatrix phiRM = calculatePhiMatrix(child, nodeMath);
-
-                //RealVector omegaVec = getOmegaVec(thetaVec, phiRM, identity);
                 RealVector omegaVec = calculateOmegaVector(nodeMath, phiRM);
 
                 // inverse of variance-covariance of this node
-                /*
-                RealMatrix invVCVMat = getInverseVarianceRMForOU(child, vcvMatDetArr,
-                        sigmaRM, sigmaeRM,
-                        pMat, inverseP, decompositionH, nTraits);
-                 double varianceRMDet = vcvMatDetArr[childIdx];
-                 */
                 nodeMath.populateVarianceCovarianceMatrix(child);
-
-
 
                 // For OU
                 // matrix A, C, E
@@ -117,7 +103,6 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
 
                 if (child.isLeaf()) {
                     // vector of trait values at this tip
-                    //RealVector traitsVec = traitsValuesList.get(childIdx);
                     double[] traitsArr = new double [nTraits];
                     MatrixUtilsContra.getMatrixRow(traitValuesArr, childIdx, nTraits, traitsArr);
                     RealVector traitsVec = new ArrayRealVector(traitsArr);
@@ -134,26 +119,28 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
 
                     pruneOU(child, nodeMath);
 
+                    nodeMath.performAPlusOperations(child, aMat);
                     // (aMat + lMat).inverse
-                    //RealMatrix aPlusLInv = OUPruneUtils.getInvAPlusLRM(child, negativeTwoAplusLDetArr, aMat, lMatList.get(childIdx));
-
-                    // determinant of -2 * (aMat + lMat)
-                    //double logDetVNode = OUPruneUtils.negativeTwoAplusLDetArr[childIdx];
+                    RealMatrix aPlusLInv = nodeMath.getAPlusLInv();
+                    // determinant of -2 * (aMat + lMat) in log space
+                    double logDetVNode = nodeMath.getNegativeTwoAPlusLDet();
 
                     // set r value
                     //thisNodeR += OUPruneUtils.getRForOUIntNode(bVec, mVecList.get(childIdx), aPlusLInv, f, rArr[childIdx], nTraits, logDetVNode);
+                    thisNodeR += OUPruneUtils.getRForOUIntNode(bVec, nodeMath.getMVecForNode(childIdx), aPlusLInv, f, nodeMath.getRForNode(childIdx), nTraits, logDetVNode);
 
-                    //RealMatrix eAPlusLInv = eMat.multiply(aPlusLInv);
+                    RealMatrix eAPlusLInv = eMat.multiply(aPlusLInv);
                     // set m vector
                     //thisNodeMVec = thisNodeMVec.add(OUPruneUtils.getMVecForOUIntNode(eAPlusLInv, bVec, mVecList.get(childIdx), dVec));
+                    thisNodeMVec = thisNodeMVec.add(OUPruneUtils.getMVecForOUIntNode(eAPlusLInv, bVec, nodeMath.getMVecForNode(childIdx), dVec));
 
                     // set L matrix
-                    //thisNodeLMat = thisNodeLMat.add(OUPruneUtils.getLMatForOUIntNode(cMat, eMat, eAPlusLInv));
+                    thisNodeLMat = thisNodeLMat.add(OUPruneUtils.getLMatForOUIntNode(cMat, eMat, eAPlusLInv));
                 }
             }
-            //lMatList.set(thisNodeIdx, thisNodeLMat);
-            //mVecList.set(thisNodeIdx, thisNodeMVec);
-            //rArr[thisNodeIdx] = thisNodeR;
+            nodeMath.setLMatForNode(thisNodeIdx, thisNodeLMat);
+            nodeMath.setMVecForNode(thisNodeIdx, thisNodeMVec);
+            nodeMath.setRForNode(thisNodeIdx, thisNodeR);
     }
 
     protected RealMatrix calculatePhiMatrix (Node node, OUNodeMath nodeMath) { return null;}
