@@ -27,7 +27,7 @@ public class OUPruneLikelihoodTestDriver4 {
         String spNames = "A,B,C";
         OneValueContTraits traitValues = new OneValueContTraits();
         traitValues.initByName("nTraits", nTraits, "spNames", spNames, "traitValues", data);
-
+/*
         // OU model parameters
         RealParameter rootValues = new RealParameter(new Double[] {0.2, 1.3});
 
@@ -89,6 +89,7 @@ public class OUPruneLikelihoodTestDriver4 {
         RealMatrix inverseP = new LUDecomposition(pMat).getSolver().getInverse();
         //System.out.println("Display H :");
         //GeneralUtils.displayRealMatrix(alphaRM);
+ */
 /*
         // TEST1: pruning process
         // at Node A

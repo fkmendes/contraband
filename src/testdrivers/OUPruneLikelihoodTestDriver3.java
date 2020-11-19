@@ -60,16 +60,16 @@ public class OUPruneLikelihoodTestDriver3 {
         PruneLikelihoodUtils.populateTraitValuesArr(traitValues, tree, nTraits, traitValuesArr);
 
         RealMatrix sigmaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
-        pcm.populateSigmaMatrix(sigmaRM, sigma.getDoubleValues());
+        //pcm.populateSigmaMatrix(sigmaRM, sigma.getDoubleValues());
 
         RealMatrix alphaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
-        pcm.populateAlphaMatrix(alphaRM, alpha.getDoubleValues());
+        //pcm.populateAlphaMatrix(alphaRM, alpha.getDoubleValues());
 
         RealVector thetaVec = new ArrayRealVector(new double[nTraits]);
-        pcm.populateRealVector(thetaVec, theta.getDoubleValues());
+        //pcm.populateRealVector(thetaVec, theta.getDoubleValues());
 
         RealMatrix sigmaERM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
-        pcm.populateSigmaMatrix(sigmaERM, sigmae.getDoubleValues());
+        //pcm.populateSigmaMatrix(sigmaERM, sigmae.getDoubleValues());
 
         RealMatrix sigmaJRM = null;
 

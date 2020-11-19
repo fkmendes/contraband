@@ -6,7 +6,6 @@ import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.FastMath;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -369,5 +368,32 @@ public class OUPruneUtils {
         lMatList.set(thisNodeIdx, thisNodeLMat);
         mVecList.set(thisNodeIdx, thisNodeMVec);
         rArr[thisNodeIdx] = thisNodeR;
+    }
+
+    // populate matrix
+    public static void populateSigmaMatrix(RealMatrix rm, double[] values) {
+        int k = 0;
+        for (int i = 0; i < rm.getColumnDimension(); i++) {
+            for (int j = i; j < rm.getColumnDimension(); j++) {
+                rm.setEntry(i, j, values[k]);
+                k++;
+            }
+        }
+    }
+
+    public static void populateAlphaMatrix(RealMatrix rm, double[] values) {
+        int k = 0;
+        for (int i = 0; i < rm.getColumnDimension(); i++) {
+            for (int j = 0; j < rm.getColumnDimension(); j++) {
+                rm.setEntry(i, j, values[k]);
+                k++;
+            }
+        }
+    }
+
+    public static void populateRealVector(RealVector vec, double[] values) {
+        for (int i = 0; i < values.length; i ++) {
+            vec.setEntry(i, values[i]);
+        }
     }
 }
