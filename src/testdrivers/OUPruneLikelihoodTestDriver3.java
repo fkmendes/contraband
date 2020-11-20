@@ -43,8 +43,12 @@ public class OUPruneLikelihoodTestDriver3 {
 
         RealParameter theta = new RealParameter(new Double[] {0.5, 0.5});
 
+        OUNodeMath nodeMath = new OUNodeMath();
+        nodeMath.initByName("traits", traitValues, "alpha", alpha, "theta", theta, "sigma", sigma, "sigmae", sigmae, "root", rootValues);
+
         OUPruneLikelihood pcm = new OUPruneLikelihood();
-       /*
+        pcm.initByName("tree", tree, "traits", traitValues, "nodeMath", nodeMath);
+/*
         int nSpecies = tree.getLeafNodeCount();
         int nodeCount = tree.getNodeCount();
 
@@ -52,7 +56,8 @@ public class OUPruneLikelihoodTestDriver3 {
         PruneLikelihoodUtils.populateTraitValuesArr(traitValues, tree, nTraits, traitValuesArr);
 
         RealMatrix sigmaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
-        //pcm.populateSigmaMatrix(sigmaRM, sigma.getDoubleValues());
+        OUPruneUtils.populateSigmaMatrix(sigmaRM, sigma.getDoubleValues());
+        sigmaRM = sigmaRM.multiply(sigmaRM.transpose());
 
         RealMatrix alphaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         //pcm.populateAlphaMatrix(alphaRM, alpha.getDoubleValues());
@@ -447,15 +452,16 @@ public class OUPruneLikelihoodTestDriver3 {
         double loglik1 = lE.preMultiply(rootValuesVec).dotProduct(rootValuesVec) + rootValuesVec.dotProduct(mE) + rE;
         System.out.println("Log likelihood1 = " + loglik1);
         // expected: -7.58111239313721
-
+*/
         // TEST2: pruneOUPCM()
-        OUPruneUtils.pruneOUPCM(tree.getRoot(), nTraits, traitValuesArr, lMatList,  mVecList,  rArr, sigmaRM,  sigmaERM, thetaVec, alphaRM, pMat, inverseP, decompositionH, identity, vcvMatDetArr,  negativeTwoAplusLDetArr);
-        RealMatrix l0Mat = lMatList.get(tree.getRoot().getNr());
-        RealVector m0Vec = mVecList.get(tree.getRoot().getNr());
-        double r0 = rArr[tree.getRoot().getNr()];
+        nodeMath.populateAlphaMatrix();
+        nodeMath.performAlphaDecompostion();
 
+        nodeMath.setSingularMatrix(false);
+        pcm.pruneOU(tree.getRoot(), nodeMath);
+/*
         System.out.println("Display LD:");
-        GeneralUtils.displayRealMatrix(lMatList.get(3));
+        GeneralUtils.displayRealMatrix();
         System.out.println("Display LE:");
         GeneralUtils.displayRealMatrix(l0Mat);
         System.out.println("Display mD:");
@@ -464,18 +470,13 @@ public class OUPruneLikelihoodTestDriver3 {
         GeneralUtils.displayRealVector(m0Vec);
         System.out.println("Display rD = " + rArr[3]);
         System.out.println("Display rE = " + r0);
-
-        double loglik2 = l0Mat.preMultiply(rootValuesVec).dotProduct(rootValuesVec) + rootValuesVec.dotProduct(m0Vec) + r0;
-        System.out.println("Log likelihood2 = " + loglik2);
-        // expected: -7.58111239313721
 */
-        // TEST3: calculateLogP()
-        OUNodeMath nodeMath = new OUNodeMath();
-        nodeMath.initByName("traits", traitValues, "alpha", alpha, "theta", theta, "sigma", sigma, "sigmae", sigmae, "root", rootValues);
 
-        pcm.initByName("tree", tree, "traits", traitValues, "nodeMath", nodeMath);
-        double logP = pcm.calculateLogP();
+
+        // TEST3: calculateLogP()
+        double logP = pcm.getLogP();
         System.out.println("Log likelihood3 = " + logP);
         // expected: -7.58111239313721
+
     }
 }

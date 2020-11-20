@@ -11,6 +11,7 @@ import contraband.utils.PruneLikelihoodUtils;
 import org.apache.commons.math3.linear.*;
 import outercore.parameter.KeyRealParameter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -24,7 +25,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
 
     private Tree tree;
     private int nTraits;
-    private double[] traitValuesArr;
+    private List<RealVector>  traitValuesList;
     private OUNodeMath nodeMath;
 
 
@@ -38,8 +39,8 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
         nTraits = traitsValues.getMinorDimension1();
         int nSpecies = traitsValues.getMinorDimension2();
 
-        traitValuesArr = new double[nSpecies * nTraits];
-        PruneLikelihoodUtils.populateTraitValuesArr(traitsValues, tree, nTraits, traitValuesArr);
+        traitValuesList = new ArrayList<>(nSpecies);
+        populateTraitValuesList(traitsValues, tree, traitValuesList);
 
         nodeMath = nodeMathInput.get();
     }
@@ -49,7 +50,16 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
         nodeMath.populateAlphaMatrix();
         nodeMath.performAlphaDecompostion();
 
+        nodeMath.setSingularMatrix(false);
+
         pruneOU(tree.getRoot(), nodeMath);
+    }
+
+    // getters
+    public double getLogP () {
+        if (nodeMath.getSingularMatrix()) {
+            logP = Double.NEGATIVE_INFINITY;
+        }
 
 
         int rootIdx = tree.getRoot().getNr();
@@ -62,10 +72,9 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
         // calculate likelihood
         // loglik <- X0 * L0 * X0+ m0 * X0 + r0
         logP = l0Mat.preMultiply(rootValuesVec).dotProduct(rootValuesVec) + rootValuesVec.dotProduct(m0Vec) + r0;
-    }
 
-    // getters
-    public double getLogP () { return logP; }
+        return logP;
+    }
 
 
     public void pruneOU (Node node, OUNodeMath nodeMath) {
@@ -97,23 +106,21 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
                 RealMatrix aMat = OUPruneUtils.getAMatForOU(nodeMath.getInverseVarianceMatrix());
                 RealMatrix eMat = OUPruneUtils.getEMatForOU(phiRM, nodeMath.getInverseVarianceMatrix());
                 RealMatrix cMat = OUPruneUtils.getCMatForOU(phiRM, eMat);
-                double f = OUPruneUtils.getFforOU(omegaVec, nodeMath.getInverseVarianceMatrix(), nodeMath.getDetVarianceMatrix(), nTraits);
+                double f = OUPruneUtils.getFforOU(omegaVec, nodeMath.getInverseVarianceMatrix(), nodeMath.getVCVMatDet(), nTraits);
                 RealVector bVec = OUPruneUtils.getBVecForOU(nodeMath.getInverseVarianceMatrix(), omegaVec);
                 RealVector dVec = OUPruneUtils.getDVecForOU(eMat, omegaVec);
 
                 if (child.isLeaf()) {
                     // vector of trait values at this tip
-                    double[] traitsArr = new double [nTraits];
-                    MatrixUtilsContra.getMatrixRow(traitValuesArr, childIdx, nTraits, traitsArr);
-                    RealVector traitsVec = new ArrayRealVector(traitsArr);
+                    RealVector traitsVec = traitValuesList.get(childIdx);
 
-                    // set the L matrix
+                    // add up L matrix
                     thisNodeLMat = thisNodeLMat.add(OUPruneUtils.getLMatForOULeaf(cMat));
 
-                    // set r value
+                    // add up r value
                     thisNodeR += OUPruneUtils.getRForOULeaf(aMat, traitsVec, bVec, f);
 
-                    // set m vector
+                    // add up m vector
                     thisNodeMVec = thisNodeMVec.add(OUPruneUtils.getMVecForOULeaf(eMat, traitsVec, dVec));
                 } else {
 
@@ -125,19 +132,19 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
                     // determinant of -2 * (aMat + lMat) in log space
                     double logDetVNode = nodeMath.getNegativeTwoAPlusLDet();
 
-                    // set r value
-                    //thisNodeR += OUPruneUtils.getRForOUIntNode(bVec, mVecList.get(childIdx), aPlusLInv, f, rArr[childIdx], nTraits, logDetVNode);
+                    // add up r value
                     thisNodeR += OUPruneUtils.getRForOUIntNode(bVec, nodeMath.getMVecForNode(childIdx), aPlusLInv, f, nodeMath.getRForNode(childIdx), nTraits, logDetVNode);
 
                     RealMatrix eAPlusLInv = eMat.multiply(aPlusLInv);
-                    // set m vector
-                    //thisNodeMVec = thisNodeMVec.add(OUPruneUtils.getMVecForOUIntNode(eAPlusLInv, bVec, mVecList.get(childIdx), dVec));
+
+                    // add up m vector
                     thisNodeMVec = thisNodeMVec.add(OUPruneUtils.getMVecForOUIntNode(eAPlusLInv, bVec, nodeMath.getMVecForNode(childIdx), dVec));
 
-                    // set L matrix
+                    // add up L matrix
                     thisNodeLMat = thisNodeLMat.add(OUPruneUtils.getLMatForOUIntNode(cMat, eMat, eAPlusLInv));
                 }
             }
+            // set L, m , r for this node
             nodeMath.setLMatForNode(thisNodeIdx, thisNodeLMat);
             nodeMath.setMVecForNode(thisNodeIdx, thisNodeMVec);
             nodeMath.setRForNode(thisNodeIdx, thisNodeR);
@@ -146,6 +153,15 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
     protected RealMatrix calculatePhiMatrix (Node node, OUNodeMath nodeMath) { return null;}
 
     protected RealVector calculateOmegaVector (OUNodeMath nodeMath, RealMatrix PhiMat) { return null;}
+
+    private void populateTraitValuesList(KeyRealParameter traitValues, Tree tree, List<RealVector> traitValuesList) {
+        // according to node number of tips
+        for (int i = 0; i < tree.getLeafNodeCount(); i ++) {
+            // get all traits values for this species
+            Double[] traitForSpecies = traitValues.getRowValues(tree.getNode(i).getID());
+            traitValuesList.add(i, new ArrayRealVector(traitForSpecies));
+        }
+    }
 
     @Override
     public List<String> getArguments() {
