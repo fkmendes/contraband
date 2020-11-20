@@ -21,6 +21,10 @@ public class OUPruneUtils {
         return invVarianceRM.scalarMultiply(-0.5);
     }
 
+    public static void getAMatForOU (double[] invVarianceRM, double[] aMat, int nTraits) {
+        MatrixUtilsContra.matrixScalarMultiply(invVarianceRM, -0.5, nTraits, aMat);
+    }
+
     /*
      * For OU
      * bVec = V.inverse * omegaVec
@@ -29,12 +33,19 @@ public class OUPruneUtils {
         return invVarainceRM.preMultiply(omegaVec);
     }
 
+    public static void getBVecForOU (double[] invVarainceRM, double[] omegaVec, int nCol, int nRow,double[] bVec) {
+        MatrixUtilsContra.matrixPreMultiply(omegaVec, invVarainceRM, nCol, nRow, bVec);
+    }
+
     /*
      * For OU
-     * cMat = Phi.transpose * V_
+     * cMat = -0.5 * Phi.transpose * V_ * Phi
      */
     public static RealMatrix getCMatForOU (RealMatrix phiMat, RealMatrix eMat) {
         return eMat.multiply(phiMat).scalarMultiply(-0.5);
+    }
+    public static void getCMatForOU (double[] phiMat, double[] eMat, int nCol, int nRow, double[] cMat) {
+       MatrixUtilsContra.matrixMultiplyScalar(eMat, phiMat, -0.5, nCol, nRow, cMat);
     }
 
     /*
@@ -45,12 +56,19 @@ public class OUPruneUtils {
         return eMat.preMultiply(omegaVec).mapMultiply(-1);
     }
 
+    public static void getDVecForOU (double[] eMat, double[] omegaVec, int nCol, int nRow, double[] dVec) {
+        MatrixUtilsContra.matrixPreMapMultiply(omegaVec, eMat, -1, nCol, nRow, dVec);
+    }
+
     /*
      * For OU
      * eMat = Phi.transpose * V_
      */
     public static RealMatrix getEMatForOU (RealMatrix phiMat, RealMatrix invVarianceRM) {
         return phiMat.transpose().multiply(invVarianceRM);
+    }
+    public static void getEMatForOU (double[] phiMat, double[] invVarianceRM, int nRow, int nCol, double[] eMat) {
+        MatrixUtilsContra.matrixTransMultiply(phiMat, invVarianceRM, nRow, nCol, eMat);
     }
 
     /*
@@ -62,6 +80,10 @@ public class OUPruneUtils {
         return -0.5 * (varianceRM.preMultiply(omegaVec).dotProduct(omegaVec) + nTraits * LOGTWOPI +  Math.log(varianceRMDet));
     }
 
+    public static double getFforOU (double[] omegaVec, double[] varianceRM, double varianceRMDet, int nTraits) {
+        return -0.5 * (MatrixUtilsContra.tVecDotMatrixDotVec(omegaVec, varianceRM, nTraits) + nTraits * LOGTWOPI +  Math.log(varianceRMDet));
+    }
+
     // (2) Lmr for leaf node
     /*
      * For both BM and OU
@@ -70,6 +92,9 @@ public class OUPruneUtils {
      */
     public static RealMatrix getLMatForOULeaf (RealMatrix cMat){
         return  cMat.add(cMat.transpose()).scalarMultiply(0.5);
+    }
+    public static void getLMatForOULeaf (double[] cMat, int nTraits, double[] lMat) {
+        MatrixUtilsContra.matrixTransAddScalar(cMat, 0.5, nTraits, lMat);
     }
 
     /*
@@ -81,6 +106,9 @@ public class OUPruneUtils {
     public static RealVector getMVecForOULeaf (RealMatrix eMat, RealVector traitsValues, RealVector dVec) {
         return eMat.preMultiply(traitsValues).add(dVec);
     }
+    public static void getMVecForOULeaf (double[] eMat, double[] traitsValues, double[] dVec, int nCol, int nRow, double[] lMat) {
+        MatrixUtilsContra.matrixPreMultiplyAddVector(traitsValues, eMat, dVec, nCol, nRow, lMat);
+    }
 
     /*
      * For OU
@@ -91,6 +119,9 @@ public class OUPruneUtils {
     public static double getRForOULeaf (RealMatrix aMat, RealVector traitsValues, RealVector bVec, double f) {
         return aMat.preMultiply(traitsValues).dotProduct(traitsValues) + traitsValues.dotProduct(bVec) + f;
     }
+    public static double getRForOULeaf (double[] aMat, double[] traitsValues, double[] bVec, double f, int nTraits) {
+        return MatrixUtilsContra.tVecDotMatrixDotVec(traitsValues, aMat, nTraits) + MatrixUtilsContra.vectorDotMultiply(traitsValues, bVec) + f;
+    }
 
     // (3) Lmr for internal node
     /*
@@ -100,6 +131,11 @@ public class OUPruneUtils {
      */
     public static RealMatrix getLMatForOUIntNode (RealMatrix cMat, RealMatrix eMat, RealMatrix eAPlusLInv) {
         return cMat.subtract(eAPlusLInv.multiply(eMat.transpose().scalarMultiply(0.25)));
+    }
+    public static void getLMatForOUIntNode (double[] cMat, double[] eMat, double[] eMatTransScalar, double[] cToSubtract,double[] eAPlusLInv, int nTraits, double[] lMat) {
+        MatrixUtilsContra.matrixTransScalar(eMat, 0.25, nTraits, eMatTransScalar);
+        MatrixUtilsContra.matrixMultiply(eAPlusLInv, eMatTransScalar, nTraits, nTraits, cToSubtract);
+        MatrixUtilsContra.matrixSubtract(cMat, cToSubtract, nTraits, lMat);
     }
 
     /*
@@ -113,6 +149,13 @@ public class OUPruneUtils {
         mVec = bVec.add(mVec);
 
         return dVec.subtract(eAPlusLInv.transpose().preMultiply(mVec).mapMultiply(0.5));
+    }
+
+    public static void getMVecForOUIntNode (double[] eAPlusLInv, double[] bVec, double[] mCVec, double[] dToSubtract, int nTraits, double[] dVec, double[] mVec) {
+        // m <- b + m
+        MatrixUtilsContra.vectorAdd(bVec, mCVec, mCVec);
+        MatrixUtilsContra.matrixTransPreMapMultiply(mCVec, eAPlusLInv,0.5, nTraits, nTraits, dToSubtract);
+        MatrixUtilsContra.vectorSubtract(dVec, dToSubtract, mVec);
     }
 
     /*
@@ -132,6 +175,14 @@ public class OUPruneUtils {
                 - 0.5 * logDetVNode  - 0.25 * mVec.dotProduct(invAPlusLRM.preMultiply(mVec));
     }
 
+    public static double getRForOUIntNode (double[] bVec, double[] mVec, double[] invAPlusLRM, double f, double r, int nTraits, double logDetVNode) {
+        // m <- b + m
+        MatrixUtilsContra.vectorAdd(bVec, mVec, mVec);
+
+        return r + f + 0.5 * nTraits* LOGTWOPI
+                - 0.5 * logDetVNode  - 0.25 * MatrixUtilsContra.tVecDotMatrixDotVec(mVec, invAPlusLRM, nTraits);
+    }
+
     // (3) populate omega and phi
     /*
      * For OU, this method calculates omegaVec at a node.
@@ -143,11 +194,20 @@ public class OUPruneUtils {
         return (identity.subtract(phiMat)).preMultiply(thetaVec);
     }
 
+    public static void getOmegaVec(double[] thetaVec, double[] phiMat, double[] identity, double[] minusPhiMat, int nTraits, double[] omega) {
+        MatrixUtilsContra.matrixSubtract(identity, phiMat, nTraits, minusPhiMat);
+        MatrixUtilsContra.matrixPreMultiply(thetaVec, minusPhiMat, nTraits, nTraits, omega);
+    }
+
     public static RealMatrix getPhiRM(Node aNode, RealMatrix phiMat) {
-
         double nodeBranchLength = aNode.getLength();
-
         return exp(phiMat.scalarMultiply(-nodeBranchLength));
+    }
+
+    public static void getPhiMatArr(Node aNode, RealMatrix phiMat, int nTraits, double[] phi) {
+        double nodeBranchLength = aNode.getLength();
+        RealMatrix phiRM = exp(phiMat.scalarMultiply(-nodeBranchLength));
+        MatrixUtilsContra.populateMatrixArray(phiRM, nTraits, nTraits, phi);
     }
 
     /*

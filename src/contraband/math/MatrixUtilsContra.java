@@ -433,4 +433,196 @@ public class MatrixUtilsContra {
 
         return resMat;
     }
+
+    /*
+     * This method multiplies matrix inRM by a double scalar.
+     */
+    public static double [] matrixScalarMultiply(double[] inArr, double scalar, int nColInMat, double[] resArr) {
+
+        for (int i = 0; i < nColInMat; i++) {
+            for (int j = 0; j < nColInMat; j++) {
+                setMatrixEntry(resArr, i, j, getMatrixEntry(inArr, i, j, nColInMat) * scalar, nColInMat);
+            }
+        }
+        return resArr;
+    }
+
+    /*
+     * This method calculates
+     * (1) product of inMat and matToMultiply.
+     * (2) multiplication of the product and the scalar
+     * The code that calls this function should already have verified
+     * that (nColInMat == nRowMatToMultiply) is true.
+     *
+     * Also, note that nColInMat = nColResMat in matrix multiplication.
+     */
+    public static double[] matrixMultiplyScalar (double[] inMat, double[] matToMultiply, double scalar, int nRowInMat, int nColInMat, double[] resMat) {
+        for (int i = 0; i < nRowInMat; i ++) {
+            for (int j = 0; j < nColInMat; j ++) {
+                double sumTemp = 0.0;
+
+                for (int k = 0; k < nColInMat; k++) {
+                    sumTemp += getMatrixEntry(inMat, i, k, nColInMat) * getMatrixEntry(matToMultiply, k, j, nColInMat);
+                }
+
+                setMatrixEntry(resMat, i, j, sumTemp * scalar, nColInMat);
+            }
+        }
+
+        return resMat;
+    }
+
+    /*
+     * This method calculates
+     * (1) a row vector-matrix product,
+     * (2) map multiply of the row vector,
+     * i.e.,
+     * resVec <- scalar * inVec * inRM
+     *
+     * Populates and returns resArr.
+     */
+    public static double[] matrixPreMapMultiply(double[] inArr, double[] inMatArr, double scalar, int nCol, int nRow, double[] resArr) {
+        for (int i = 0; i < nCol; i++) {
+            double sum = 0.0;
+
+            for (int j = 0; j < nRow; j++) {
+                sum = sum + inArr[j] * inMatArr[j * nCol + i];
+            }
+
+            resArr[i] = sum * scalar;
+        }
+
+        return resArr;
+    }
+
+    /*
+     * This method calculates
+     * (1) transpose of inMat
+     * (1) a row vector-matrix product,
+     * (2) map multiply of the row vector,
+     * i.e.,
+     * resVec <- scalar * inVec * inRM.transpose
+     *
+     * Populates and returns resArr.
+     */
+    public static double[] matrixTransPreMapMultiply(double[] inArr, double[] inMatArr, double scalar, int nCol, int nRow, double[] resArr) {
+        for (int i = 0; i < nCol; i++) {
+            double sum = 0.0;
+
+            for (int j = 0; j < nRow; j++) {
+                sum = sum + inArr[j] * inMatArr[i * nCol + j];
+            }
+
+            resArr[i] = sum * scalar;
+        }
+
+        return resArr;
+    }
+
+    /*
+     * This methods calculates
+     * (1) transpose of inMat
+     * (2) product of inMat.transpose and matToMultiply.
+     * i.e. inMat.transpose %*% matToMultiply
+     * The code that calls this function should already have verified
+     * that (nColInMat == nRowMatToMultiply) is true.
+     *
+     * Also, note that nColInMat = nColResMat in matrix multiplication.
+     */
+    public static double[] matrixTransMultiply (double[] inMat, double[] matToMultiply, int nRowInMat, int nColInMat, double[] resMat) {
+        for (int i = 0; i < nRowInMat; i ++) {
+            for (int j = 0; j < nColInMat; j ++) {
+                double sumTemp = 0.0;
+
+                for (int k = 0; k < nColInMat; k++) {
+                    sumTemp += getMatrixEntry(inMat, k, i, nColInMat) * getMatrixEntry(matToMultiply, k, j, nColInMat);
+                }
+
+                setMatrixEntry(resMat, i, j, sumTemp, nColInMat);
+            }
+        }
+
+        return resMat;
+    }
+
+    /*
+     * This method calculates
+     * scalar * (inMat + inMat.transpose)
+     */
+    public static double[] matrixTransAddScalar(double[] inMat, double scalar, int dim, double[] resMat) {
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                setMatrixEntry(resMat, i, j, (getMatrixEntry(inMat, i, j, dim) + getMatrixEntry(inMat, j, i, dim)) * scalar, dim);
+            }
+        }
+        return resMat;
+    }
+
+    /*
+     * This method calculates a row vector-matrix product, i.e.,
+     * resVec <- inVec * inRM + vecToAdd
+     *
+     * Populates and returns resArr.
+     */
+    public static double[] matrixPreMultiplyAddVector (double[] inVec, double[] inMatArr, double[] vecToAdd, int nCol, int nRow, double[] resArr) {
+        for (int i = 0; i < nCol; i++) {
+            double sum = 0.0;
+
+            for (int j = 0; j < nRow; j++) {
+                sum = sum + inVec[j] * inMatArr[j * nCol + i];
+            }
+
+            resArr[i] = sum + vecToAdd[i];
+        }
+
+        return resArr;
+    }
+
+    /*
+     * This method calculates
+     * (1) transpose of inMat
+     * (2) scalar product
+     * i.e.
+     * scalar * inMat.transpose
+     */
+    public static double[] matrixTransScalar(double[] inMat, double scalar, int dim, double[] resMat) {
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                setMatrixEntry(resMat, i, j, getMatrixEntry(inMat, j, i, dim) * scalar, dim);
+            }
+        }
+        return resMat;
+    }
+
+    /*
+     * This method subtract matrix rmToSub from inMat.
+     *
+     */
+    public static double [] matrixSubtract(double[] inArr, double[] arrToSubtract, int dim, double[] resArr) {
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                setMatrixEntry(resArr, i, j, getMatrixEntry(inArr, i, j, dim) - getMatrixEntry(arrToSubtract, i, j, dim), dim);
+            }
+        }
+
+        return resArr;
+    }
+
+    /*
+     * This method subtracts vecToSub from inVec, i.e.
+     * resVec <- inVec - vecToAdd
+     */
+    public static double[] vectorSubtract (double[] inVec, double[] vecToSub, double[] resVec) {
+        for (int i = 0; i < inVec.length; i++) {
+            resVec[i] = inVec[i] - vecToSub[i];
+        }
+        return resVec;
+    }
+
+    public static void populateMatrixArray(RealMatrix matrix, int nCol, int nRow, double[] array){
+        for (int i = 0; i < nRow; i ++){
+            System.arraycopy(matrix.getRow(i), 0, array, i * nCol, nCol);
+        }
+    }
+
 }
