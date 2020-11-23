@@ -1,6 +1,7 @@
 package contraband.prunelikelihood;
 
 import beast.core.Description;
+import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.tree.Node;
 import org.apache.commons.math3.linear.*;
 
@@ -28,8 +29,8 @@ public class OUPruneLikelihood extends OUPruneLikelihoodProcess {
     }
 
     @Override
-    protected RealVector calculateOmegaVector (OUNodeMath nodeMath, RealMatrix phiRM) {
-        return OUPruneUtils.getOmegaVec(nodeMath.getThetaVec(), phiRM, nodeMath.getIdentityMatrix());
+    protected RealVector calculateOmegaVector (Node node, OUNodeMath nodeMath, RealMatrix phiRM) {
+        return OUPruneUtils.getOmegaVec(nodeMath.getThetaForNode(node.getNr()), phiRM, nodeMath.getIdentityMatrix());
     }
 
 

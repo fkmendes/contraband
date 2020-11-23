@@ -4,8 +4,10 @@ import beast.core.Description;
 import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.State;
+import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.Node;
+import contraband.clock.RateCategoryClockModel;
 import contraband.math.MatrixUtilsContra;
 import contraband.utils.PruneLikelihoodUtils;
 import org.apache.commons.math3.linear.*;
@@ -92,7 +94,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
 
                 // For OU, variance matrix, Phi and Omega need to be calculated for this node.
                 RealMatrix phiRM = calculatePhiMatrix(child, nodeMath);
-                RealVector omegaVec = calculateOmegaVector(nodeMath, phiRM);
+                RealVector omegaVec = calculateOmegaVector(child, nodeMath, phiRM);
 
                 // inverse of variance-covariance of this node
                 nodeMath.populateVarianceCovarianceMatrix(child);
@@ -152,7 +154,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
 
     protected RealMatrix calculatePhiMatrix (Node node, OUNodeMath nodeMath) { return null;}
 
-    protected RealVector calculateOmegaVector (OUNodeMath nodeMath, RealMatrix PhiMat) { return null;}
+    protected RealVector calculateOmegaVector (Node node, OUNodeMath nodeMath, RealMatrix PhiMat) { return null;}
 
     private void populateTraitValuesList(KeyRealParameter traitValues, Tree tree, List<RealVector> traitValuesList) {
         // according to node number of tips

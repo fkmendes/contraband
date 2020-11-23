@@ -2,6 +2,7 @@ package contraband.prunelikelihood;
 
 import beast.core.CalculationNode;
 import beast.core.Input;
+import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import org.apache.commons.math3.linear.*;
 import outercore.parameter.KeyRealParameter;
@@ -12,12 +13,17 @@ import java.util.List;
 
 public class OUNodeMath extends CalculationNode {
     final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+    final public Input<Boolean> useUpperMatrixInput = new Input<>("upperMatrix", "TRUE, if sigmasq and correlations are from upper matrix", true);
     final public Input<RealParameter> sigmaValuesInput = new Input<>("sigma","Trait rate matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> sigmaeValuesInput = new Input<>("sigmae","Population error.", Input.Validate.OPTIONAL);
     final public Input<RealParameter> alphaInput = new Input<>("alpha","An array of (nTraits * (nTraits - 1) / 2) elements, representing selection strength, off-diagonal elements in Alpha matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> thetaInput = new Input<>("theta","An array of nTraits elements, representing optimum trait values, elements in Theta vector.", Input.Validate.REQUIRED);
     final public Input<RealParameter> rootValuesInput = new Input<>("root","Trait values at the root.");
 
+    final public Input<Integer> optNrInput = new Input<>("optNr","Number of theta (vectors).");
+    final public Input<IntegerParameter> optAssignInput = new Input<>("optAssign", "the opt assignment for each node in the tree.");
+
+    private Boolean useUpperMatrix;
     private RealMatrix sigmaRM;
     private RealMatrix sigmaERM;
     private RealMatrix alphaRM;
@@ -41,10 +47,11 @@ public class OUNodeMath extends CalculationNode {
     private RealVector iniVec;
     private boolean singularMatrix;
     private RealMatrix invVCVMat;
-    private double varianceRMDet;
     private RealMatrix aPlusLInv;
     private double logDetVNode;
 
+    private int optNr;
+    private List<RealVector> thetaVecList;
     @Override
     public void initAndValidate() {
         // collect trait information
@@ -54,15 +61,38 @@ public class OUNodeMath extends CalculationNode {
 
         nodeNr = 2 * nSpecies - 1;
 
+        useUpperMatrix = useUpperMatrixInput.get();
+
         sigmaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
-        OUPruneUtils.populateSigmaMatrix(sigmaRM, sigmaValuesInput.get().getDoubleValues());
-        sigmaRM = sigmaRM.multiply(sigmaRM.transpose());
+        if (useUpperMatrix) {
+            OUPruneUtils.populateSigmaMatrix(sigmaRM, sigmaValuesInput.get().getDoubleValues());
+            sigmaRM = sigmaRM.multiply(sigmaRM.transpose());
+        } else {
+            double[] sigmas = sigmaValuesInput.get().getDoubleValues();
+            int k = 0;
+            for (int i = 0; i < nTraits; i++) {
+                for (int j = i; j < nTraits; j++) {
+                    sigmaRM.setEntry(i, j, sigmas[k]);
+                    sigmaRM.setEntry(j, i, sigmas[k]);
+                    k++;
+                }
+            }
+        }
 
         alphaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         OUPruneUtils.populateAlphaMatrix(alphaRM, alphaInput.get().getDoubleValues());
 
         thetaVec = new ArrayRealVector(new double[nTraits]);
-        OUPruneUtils.populateRealVector(thetaVec, thetaInput.get().getDoubleValues());
+        optNr = optNrInput.get();
+        thetaVecList = new ArrayList<>(optNr);
+        for (int j = 0; j < optNr; j ++) {
+            //OUPruneUtils.populateRealVector(thetaVec, i, thetaInput.get().getDoubleValues());
+            RealVector nodeTheta = new ArrayRealVector(new double[nTraits]);
+            for (int i = 0; i < nTraits; i ++) {
+                nodeTheta.setEntry(i, thetaInput.get().getDoubleValues()[j*nTraits + i]);
+            }
+            thetaVecList.add(j, nodeTheta);
+        }
 
         if (sigmaeValuesInput.get() != null) {
             sigmaERM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
@@ -116,6 +146,10 @@ public class OUNodeMath extends CalculationNode {
     public double getNegativeTwoAPlusLDet () { return logDetVNode; }
 
     public boolean getSingularMatrix() { return singularMatrix; }
+
+    public RealVector getThetaForNode(int nodeIdx) {
+        return thetaVecList.get(optAssignInput.get().getValues()[nodeIdx]);
+    }
 
     // setters
     public void setLMatForNode (int nodeIdx, RealMatrix value) { lMatList.set(nodeIdx,value); }

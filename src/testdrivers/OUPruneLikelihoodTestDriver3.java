@@ -1,7 +1,9 @@
 package testdrivers;
 
+import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
+import contraband.clock.RateCategoryClockModel;
 import contraband.math.MatrixUtilsContra;
 import contraband.prunelikelihood.OUNodeMath;
 import contraband.prunelikelihood.OUPruneLikelihood;
@@ -45,6 +47,11 @@ public class OUPruneLikelihoodTestDriver3 {
 
         OUNodeMath nodeMath = new OUNodeMath();
         nodeMath.initByName("traits", traitValues, "alpha", alpha, "theta", theta, "sigma", sigma, "sigmae", sigmae, "root", rootValues);
+
+        RealParameter colorValues = new RealParameter(new Double[]{ 1.0 });
+        IntegerParameter colorAssignments = new IntegerParameter(new Integer[]{ 0 });
+        RateCategoryClockModel rcc = new RateCategoryClockModel();
+        rcc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
 
         OUPruneLikelihood pcm = new OUPruneLikelihood();
         pcm.initByName("tree", tree, "traits", traitValues, "nodeMath", nodeMath);

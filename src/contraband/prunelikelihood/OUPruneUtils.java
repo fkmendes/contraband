@@ -451,9 +451,10 @@ public class OUPruneUtils {
         }
     }
 
-    public static void populateRealVector(RealVector vec, double[] values) {
-        for (int i = 0; i < values.length; i ++) {
-            vec.setEntry(i, values[i]);
+    public static void populateRealVector(RealVector vec, int j, double[] values) {
+        int nTraits = vec.getDimension();
+        for (int i = 0; i < nTraits; i ++) {
+            vec.setEntry(i, values[j*nTraits + i]);
         }
     }
 }
