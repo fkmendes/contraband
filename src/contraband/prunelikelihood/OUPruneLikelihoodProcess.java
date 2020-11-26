@@ -60,7 +60,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
     // getters
     public double getLogP () {
         if (nodeMath.getSingularMatrix()) {
-            logP = Double.NEGATIVE_INFINITY;
+            return logP = Double.NEGATIVE_INFINITY;
         }
 
 
