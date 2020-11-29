@@ -3,6 +3,7 @@ package test;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import contraband.prunelikelihood.OUPruneLikelihood;
+import contraband.prunelikelihood.OUPruneUtils;
 import org.apache.commons.math3.linear.*;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
@@ -10,55 +11,120 @@ import contraband.prunelikelihood.OUNodeMath;
 import org.junit.Assert;
 import org.junit.Test;
 import outercore.parameter.KeyRealParameter;
-
 import java.util.Arrays;
 import java.util.List;
 
 public class OUNodeMathTest {
     final static double EPSILON = 1e-7;
 
-    Tree tree;
-    String treeStr;
-    String spNames;
-    int nTraits;
-    List<Double> oneTraitValues;
-    KeyRealParameter oneTraitData;
+    String treeStr = "((A:3.0058179,B:3.0058179):4.350951,C:7.3567689);";
+    Tree tree = new TreeParser(treeStr, false, false, true, 0);
+    String spNames= "A B C";
 
-    OUNodeMath nodeMath;
-    RealParameter rootValues;
-    RealParameter sigma;
-    RealParameter sigmae;
-    RealParameter alpha;
-    RealParameter theta;
-    OUPruneLikelihood pcm;
-    IntegerParameter colorAssignments;
+    int nTraits = 2;
+    List<Double> oneTraitValues = Arrays.asList(
+            4.53371989048144, 4.39037816144705,
+            4.64369804601356, 4.50915779102972,
+            6.22349219457299, 6.60199054481913
+    );
+
+    KeyRealParameter oneTraitData = new KeyRealParameter();
+
+    OUNodeMath nodeMath = new OUNodeMath();
+    RealParameter rootValues = new RealParameter(new Double[] {0.2, 1.3});
+    RealParameter sigma = new RealParameter(new Double[] {1.36, 0.6, 1.0});
+    RealParameter sigmae = new RealParameter(new Double[] {1.0, 0.3, 1.0});
+    RealParameter alpha = new RealParameter(new Double[] {1.0, 3.0, 2.0, 4.0});
+    RealParameter theta = new RealParameter(new Double[] {0.5, 0.5});
+    OUPruneLikelihood pcm = new OUPruneLikelihood();
+    IntegerParameter colorAssignments = new IntegerParameter(new Integer[]{ 0, 0, 0, 0, 0, 0 });
+
+    @Test
+    public void testPhi(){
+        RealMatrix alpha = new Array2DRowRealMatrix(new double[][] {
+                {1.0, 3.0},
+                {2.0, 4.0}
+        });
+        RealMatrix phiRM = OUPruneUtils.getPhiRM(tree.getNode(0), alpha);
+        Double[] phiMat = new Double[] {2.3304025231210455, -1.5989838625030328, -1.0659892416686882, 0.7314186606180133};
+        Double[] phiRMDouble = new Double[] {phiRM.getEntry(0,0), phiRM.getEntry(0,1), phiRM.getEntry(1,0), phiRM.getEntry(1,1)};
+        Assert.assertArrayEquals(phiMat, phiRMDouble);
+    }
+
+    @Test
+    public void testOmega(){
+        RealVector theta = new ArrayRealVector(new double[] {0.5, 0.5});
+        RealMatrix identity = MatrixUtils.createRealIdentityMatrix(nTraits);
+        RealMatrix phiRM = new Array2DRowRealMatrix(new double[][]{
+                {2.33040252312105, -1.59898386250303},
+                {-1.06598924166869, 0.731418660618013}
+        });
+        RealVector omegaVec = OUPruneUtils.getOmegaVec(theta, phiRM, identity);
+        Double[] omega = new Double[] {0.13429066969099002, 0.6672852905253386};
+        Double[] omegaVecDouble = new Double[] {omegaVec.getEntry(0), omegaVec.getEntry(1)};
+        Assert.assertArrayEquals(omega, omegaVecDouble);
+    }
+
+    @Test
+    public void testAMatForOU(){
+
+    }
+
+    @Test
+    public void testbVecForOU(){
+        RealVector omega = new ArrayRealVector(new double[] {0.134290669690993, 0.667285290525338});
+        RealMatrix invVariance = new Array2DRowRealMatrix(new double[][] {
+                {0.201407810205287, 0.215606098670895,},
+                {0.215606098670895, 0.64139862656716}
+        });
+        RealVector bVec = OUPruneUtils.getBVecForOU(invVariance, omega);
+        Double[] b = new Double[] {0.17091796790410727, 0.4569497562513969};
+        Double[] bVecDouble = new Double[] {bVec.getEntry(0), bVec.getEntry(1)};
+        Assert.assertArrayEquals(b, bVecDouble);
+    }
+
+    @Test
+    public void testCMatForOU(){
+
+    }
+
+    @Test
+    public void testdVecForOU(){
+
+    }
+
+    @Test
+    public void testEMatForOU(){
+        RealMatrix phiMat = new Array2DRowRealMatrix(new double[][]{
+                {11.7731179787193, -8.07801495941958},
+                {-5.38534330627972, 3.69510301929973}});
+        RealMatrix inverseMat = new Array2DRowRealMatrix(new double[][]{
+                {0.128000066004857, 0.271161285503333,},
+                {0.271161285503333, 0.599354305254683}
+        });
+
+        RealMatrix eRM = OUPruneUtils.getEMatForOU(phiMat,inverseMat);
+        Double[] eMat = new Double[] {0.04666326455146064, -0.03531489040131186, -0.03201756321336657, 0.024230982265503354};
+        Double[] eRMDouble = new Double[] {eRM.getEntry(0,0), eRM.getEntry(0,1), eRM.getEntry(1,0), eRM.getEntry(1,1)};
+        Assert.assertArrayEquals(eMat, eRMDouble);
+    }
+
+    @Test
+    public void testfForOU(){
+        RealVector omega = new ArrayRealVector(new double[] {0.134290669690993, 0.667285290525338});
+        RealMatrix invVariance = new Array2DRowRealMatrix(new double[][] {
+                {0.201407810205287, 0.215606098670895,},
+                {0.215606098670895, 0.64139862656716}
+        });
+        double detVariance = 12.0923805058647;
+        double f = OUPruneUtils.getFforOU(omega, invVariance, detVariance, nTraits);
+        Assert.assertEquals(-3.24809910801962,f, EPSILON);
+    }
 
     @Test
     public void testParameterInSolvedExample() {
-        treeStr = "((A:3.0058179,B:3.0058179):4.350951,C:7.3567689);";
-        tree = new TreeParser(treeStr, false, false, true, 0);
-        spNames = "A B C";
-
-        nTraits = 2;
-        oneTraitValues = Arrays.asList(
-                4.53371989048144, 4.39037816144705,
-                4.64369804601356, 4.50915779102972,
-                6.22349219457299, 6.60199054481913
-        );
-        oneTraitData = new KeyRealParameter();
         oneTraitData.initByName("value", oneTraitValues, "keys", spNames, "minordimension", nTraits);
 
-        // OU model parameters
-        rootValues = new RealParameter(new Double[] {0.2, 1.3});
-        sigma = new RealParameter(new Double[] {1.36, 0.6, 1.0});
-        sigmae = new RealParameter(new Double[] {1.0, 0.3, 1.0});
-        alpha = new RealParameter(new Double[] {1.0, 3.0, 2.0, 4.0});
-        theta = new RealParameter(new Double[] {0.5, 0.5});
-
-        colorAssignments = new IntegerParameter();
-        colorAssignments = new IntegerParameter(new Integer[]{ 0, 0, 0, 0, 0, 0 });
-
-        nodeMath = new OUNodeMath();
         nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta,
                 "sigma", sigma, "sigmae", sigmae,
                 "root", rootValues,"optNr", 1, "optAssign", colorAssignments,
@@ -67,6 +133,7 @@ public class OUNodeMathTest {
         pcm = new OUPruneLikelihood();
         pcm.initByName("tree", tree, "traits", oneTraitData, "nodeMath", nodeMath);
 
+        // log likelihood
         double logP = pcm.calculateLogP();
         Assert.assertEquals(-56.447173900514, logP, EPSILON);
 
@@ -197,10 +264,10 @@ public class OUNodeMathTest {
         Double[] l3RMDouble = new Double[] {l3RM.getEntry(0,0), l3RM.getEntry(0,1), l3RM.getEntry(1,1)};
         Assert.assertArrayEquals(l3Mat, l3RMDouble);
 
-        //RealMatrix l4RM = nodeMath.getLMatForNode(3);
-        //Double[] l4Mat = new Double[] {-0.746824771165506, 0.51242684261254, -0.351596892829451};
-        //Double[] l4RMDouble = new Double[] {l4RM.getEntry(0,0), l4RM.getEntry(0,1), l4RM.getEntry(1,1)};
-        //Assert.assertArrayEquals(l4Mat, l4RMDouble);
+        RealMatrix l4RM = nodeMath.getLMatForNode(3);
+        Double[] l4Mat = new Double[] {-0.37704730742990944, 0.2587074889874676, -0.17750972766366385};
+        Double[] l4RMDouble = new Double[] {l4RM.getEntry(0,0), l4RM.getEntry(0,1), l4RM.getEntry(1,1)};
+        Assert.assertArrayEquals(l4Mat, l4RMDouble);
 
         RealMatrix l5RM = nodeMath.getLMatForNode(4);
         Double[] l5Mat = new Double[] {-0.7468247711655002, 0.5124268426125358, -0.3515968928294475};
@@ -223,10 +290,10 @@ public class OUNodeMathTest {
         Double[] m3Double = new Double[] {m3Vec.getEntry(0), m3Vec.getEntry(1)};
         Assert.assertArrayEquals(m3, m3Double);
 
-        //RealVector m4Vec = nodeMath.getMVecForNode(3);
-        //Double[] m4 = new Double[] {0.170655395969879, -0.117093606302271};
-        //Double[] m4Double = new Double[] {m4Vec.getEntry(0), m4Vec.getEntry(1)};
-        //Assert.assertArrayEquals(m4, m4Double);
+        RealVector m4Vec = nodeMath.getMVecForNode(3);
+        Double[] m4 = new Double[] {0.17065539596987703, -0.11709360630227071};
+        Double[] m4Double = new Double[] {m4Vec.getEntry(0), m4Vec.getEntry(1)};
+        Assert.assertArrayEquals(m4, m4Double);
 
         RealVector m5Vec = nodeMath.getMVecForNode(4);
         Double[] m5 = new Double[] {0.3382992091938595, -0.23212084322670018};
@@ -236,10 +303,8 @@ public class OUNodeMathTest {
         Assert.assertEquals(-13.0101512466986, nodeMath.getRForNode(0), EPSILON);
         Assert.assertEquals(-13.6007534562081, nodeMath.getRForNode(1), EPSILON);
         Assert.assertEquals(-27.4541381503069, nodeMath.getRForNode(2), EPSILON);
-        //Assert.assertEquals(-28.4013287142813, nodeMath.getRForNode(3), EPSILON);
+        Assert.assertEquals(-28.4013287142813, nodeMath.getRForNode(3), EPSILON);
         Assert.assertEquals(-55.8554668645882, nodeMath.getRForNode(4), EPSILON);
-
-
     }
 
 }

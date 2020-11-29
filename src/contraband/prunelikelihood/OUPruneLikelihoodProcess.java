@@ -139,15 +139,21 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
                     double logDetVNode = nodeMath.getNegativeTwoAPlusLDet();
 
                     // add up r value
-                    thisNodeR += OUPruneUtils.getRForOUIntNode(bVec, nodeMath.getMVecForNode(childIdx), aPlusLInv, f, nodeMath.getRForNode(childIdx), nTraits, logDetVNode);
+                    double r = OUPruneUtils.getRForOUIntNode(bVec, nodeMath.getMVecForNode(childIdx), aPlusLInv, f, nodeMath.getRForNode(childIdx), nTraits, logDetVNode);
+                    nodeMath.setRForNode(childIdx, r);
+                    thisNodeR += r;
 
                     RealMatrix eAPlusLInv = eMat.multiply(aPlusLInv);
 
                     // add up m vector
-                    thisNodeMVec = thisNodeMVec.add(OUPruneUtils.getMVecForOUIntNode(eAPlusLInv, bVec, nodeMath.getMVecForNode(childIdx), dVec));
+                    RealVector m = OUPruneUtils.getMVecForOUIntNode(eAPlusLInv, bVec, nodeMath.getMVecForNode(childIdx), dVec);
+                    nodeMath.setMVecForNode(childIdx, m);
+                    thisNodeMVec = thisNodeMVec.add(m);
 
                     // add up L matrix
-                    thisNodeLMat = thisNodeLMat.add(OUPruneUtils.getLMatForOUIntNode(cMat, eMat, eAPlusLInv));
+                    RealMatrix l = OUPruneUtils.getLMatForOUIntNode(cMat, eMat, eAPlusLInv);
+                    nodeMath.setLMatForNode(childIdx, l);
+                    thisNodeLMat = thisNodeLMat.add(l);
                 }
             }
             // set L, m , r for this node

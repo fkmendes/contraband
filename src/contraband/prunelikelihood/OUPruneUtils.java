@@ -135,7 +135,7 @@ public class OUPruneUtils {
      * C - 0.25 * E * (A + L).inverse * E.transpose
      */
     public static RealMatrix getLMatForOUIntNode (RealMatrix cMat, RealMatrix eMat, RealMatrix eAPlusLInv) {
-        return cMat.subtract(eAPlusLInv.multiply(eMat.transpose().scalarMultiply(0.25)));
+        return cMat.subtract(eAPlusLInv.multiply(eMat.transpose()).scalarMultiply(0.25));
     }
     public static void getLMatForOUIntNode (double[] cMat, double[] eMat, double[] eMatTransScalar, double[] cToSubtract,double[] eAPlusLInv, int nTraits, double[] lMat) {
         MatrixUtilsContra.matrixTransScalar(eMat, 0.25, nTraits, eMatTransScalar);
@@ -196,9 +196,7 @@ public class OUPruneUtils {
      * omega <- (I - e_Ht) %*% Theta
      */
     public static RealVector getOmegaVec(RealVector thetaVec, RealMatrix phiMat, RealMatrix identity) {
-       RealMatrix a = identity.subtract(phiMat);
-       RealVector b = a.transpose().preMultiply(thetaVec);
-        return b;
+        return identity.subtract(phiMat).transpose().preMultiply(thetaVec);
     }
 
     public static void getOmegaVec(double[] thetaVec, double[] phiMat, double[] identity, double[] minusPhiMat, int nTraits, double[] omega) {
