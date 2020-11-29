@@ -76,39 +76,39 @@ public class OUPruneLikelihoodTest {
     }
 
     /*
-     * (2) Tree with 4 taxa, 2 continuous traits, 2 optimum
+     * (2) Tree with 4 taxa, 3 continuous traits, 1 optimum
      */
     @Test
-    public void testOUPruneLkSmallTreeTwoTraitsTwoOpt() {
+    public void testOUPruneLkSmallTreeThreeTraitsOneOpt() {
         treeStr = "(((sp1:1.0,sp2:1.0):1.0,sp3:2.0):1.0,sp4:3.0);";
         tree = new TreeParser(treeStr, false, false, true, 0);
         spNames = "sp1 sp2 sp3 sp4";
 
-        nTraits = 2;
+        nTraits = 3;
         oneTraitValues = Arrays.asList(
-                4.42405690237626, 0.938169328873373,
-                4.42704842757782, 1.53111980007289,
-                5.67788522345756, 2.13666365045869,
-                5.0769172526609, 0.852707712612575
+                2.90115170364898, 2.14268145872343, 3.2824264362529,
+                2.62770319717086, 1.97031352144559, 4.28940778474205,
+                3.96814434248716, 3.19423412470143, 3.49323574837925,
+                8.88546166300816, 9.77485338099449, -3.65830173123419
         );
         oneTraitData = new KeyRealParameter();
         oneTraitData.initByName("value", oneTraitValues, "keys", spNames, "minordimension", nTraits);
 
-        rootValues = new RealParameter(new Double[] {0.5672267, 0.400851});
-        sigma = new RealParameter(new Double[] {0.431551, 0.1392510, 0.9591347});
-        alpha = new RealParameter(new Double[] { 4.331205, -4.834127, -4.834127 , 7.755559});
-        theta = new RealParameter(new Double[] {5.2980456, 1.008976, 5.1418253, 1.746496});
+        rootValues = new RealParameter(new Double[] {2.2, 1.3, 0.5});
+        sigma = new RealParameter(new Double[] {0.35, 0.06, 0.06, 0.2, 0.4, 0.8});
+        alpha = new RealParameter(new Double[] {1.8, -0.9, 1.2, -0.9, 1.0, 1.4, 1.2, 1.4, 1.6});
+        theta = new RealParameter(new Double[] {5.0, 4.8, 1.2});
         nodeMath = new OUNodeMath();
         colorAssignments = new IntegerParameter();
-        colorAssignments = new IntegerParameter(new Integer[]{ 0, 0, 0, 0, 1, 1 });
+        colorAssignments = new IntegerParameter(new Integer[]{ 0, 0, 0, 0, 0, 0});
 
         nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "sigmae", sigmae, "root", rootValues,
-                "optNr", 2, "optAssign", colorAssignments , "upperMatrix", false);
+                "optNr", 1, "optAssign", colorAssignments);
         pcm = new OUPruneLikelihood();
         pcm.initByName("tree", tree, "traits", oneTraitData, "nodeMath", nodeMath);
 
         double logP = pcm.calculateLogP();
-        //Assert.assertEquals(-7.58111239313721, logP, EPSILON);
+        Assert.assertEquals(-260.827821834006, logP, EPSILON);
     }
 
 
