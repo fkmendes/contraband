@@ -4,7 +4,9 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
+import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.linear.*;
+import org.apache.commons.math3.util.FastMath;
 import outercore.parameter.KeyRealParameter;
 import beast.evolution.tree.Node;
 import java.util.ArrayList;
@@ -37,6 +39,20 @@ public class OUNodeMath extends CalculationNode {
     private List<RealMatrix> lMatList;
     private List<RealVector>  mVecList;
     private double [] rArr;
+
+    private List<RealMatrix> AMatList;
+    private List<RealMatrix> CMatList;
+    private List<RealMatrix> EMatList;
+    private List<RealVector>  bVecList;
+    private List<RealVector>  dVecList;
+    private double [] fArr;
+
+    private List<RealMatrix> PhiMatList;
+    private List<RealVector>  omegaList;
+
+    private List<RealMatrix> VCVMatList;
+    private List<RealMatrix> invVCVMatList;
+
     private double vcvMatDet;
 
     private RealMatrix pMat;
@@ -44,6 +60,7 @@ public class OUNodeMath extends CalculationNode {
     private EigenDecomposition decompositionH;
 
     private RealMatrix iniMatrix;
+    private RealMatrix variance;
     private RealVector iniVec;
     private boolean singularMatrix;
     private RealMatrix invVCVMat;
@@ -104,18 +121,36 @@ public class OUNodeMath extends CalculationNode {
         mVecList = new ArrayList<>(nodeNr);
         rArr = new double[nodeNr];
         rootValuesVec = new ArrayRealVector(rootValuesInput.get().getDoubleValues());
-
+        fArr = new double[nodeNr];
+        AMatList = new ArrayList<>(nodeNr);
+        CMatList = new ArrayList<>(nodeNr);
+        EMatList = new ArrayList<>(nodeNr);
+        PhiMatList = new ArrayList<>(nodeNr);
+        VCVMatList = new ArrayList<>(nodeNr);
+        invVCVMatList = new ArrayList<>(nodeNr);
+        bVecList = new ArrayList<>(nodeNr);
+        dVecList = new ArrayList<>(nodeNr);
+        omegaList = new ArrayList<>(nodeNr);
         // initiate
         iniMatrix = new Array2DRowRealMatrix(new double [nTraits][nTraits]);
         iniVec = new ArrayRealVector(new double [nTraits]);
         for (int i= 0; i < nodeNr; i ++) {
             lMatList.add(i, iniMatrix);
             mVecList.add(i, iniVec);
-            rArr[i] = 0;
-
+            AMatList.add(i, iniMatrix);
+            CMatList.add(i, iniMatrix);
+            EMatList.add(i, iniMatrix);
+            bVecList.add(i, iniVec);
+            dVecList.add(i, iniVec);
+            PhiMatList.add(i, iniMatrix);
+            omegaList.add(i, iniVec);
+            VCVMatList.add(i, iniMatrix);
+            invVCVMatList.add(i, iniMatrix);
         }
 
         identity = MatrixUtils.createRealIdentityMatrix(nTraits);
+        variance = new Array2DRowRealMatrix(new double [nTraits][nTraits]);
+        pMat= new Array2DRowRealMatrix(new double [nTraits][nTraits]);
     }
 
     // getters
@@ -151,6 +186,23 @@ public class OUNodeMath extends CalculationNode {
         return thetaVecList.get(optAssignInput.get().getValues()[nodeIdx]);
     }
 
+    public RealMatrix getAMatForNode (int nodeIdx) {return AMatList.get(nodeIdx);}
+    public RealMatrix getCMatForNode (int nodeIdx) {return CMatList.get(nodeIdx);}
+    public RealMatrix getEMatForNode (int nodeIdx) {return EMatList.get(nodeIdx);}
+    public RealMatrix getPhiForNode (int nodeIdx) {return PhiMatList.get(nodeIdx);}
+    public RealVector getbVecForNode (int nodeIdx) {return bVecList.get(nodeIdx);}
+    public RealVector getdVecForNode (int nodeIdx) {return dVecList.get(nodeIdx);}
+    public RealVector getOmegaForNode (int nodeIdx) {return omegaList.get(nodeIdx);}
+    public double getfForNode(int nodeIdx) {return fArr[nodeIdx];}
+
+    public RealMatrix getPMat () {return pMat;}
+
+    public RealMatrix getInverseP () {return inverseP;}
+
+    public EigenDecomposition getAlphaDecomposition() {return decompositionH;}
+
+    public RealMatrix getVarianceMatrix() {return variance; }
+
     // setters
     public void setLMatForNode (int nodeIdx, RealMatrix value) { lMatList.set(nodeIdx,value); }
 
@@ -160,6 +212,18 @@ public class OUNodeMath extends CalculationNode {
 
     public void setSingularMatrix(boolean value) { singularMatrix = value; }
 
+    public void setAbCdEfOmegaPhiForNode (int nodeIdx, RealMatrix A, RealVector b, RealMatrix C, RealVector d, RealMatrix E, double f, RealVector omega, RealMatrix Phi) {
+        AMatList.set(nodeIdx,A);
+        CMatList.set(nodeIdx,C);
+        EMatList.set(nodeIdx,E);
+        PhiMatList.set(nodeIdx,Phi);
+        bVecList.set(nodeIdx, b);
+        dVecList.set(nodeIdx, d);
+        omegaList.set(nodeIdx, omega);
+        fArr[nodeIdx] = f;
+
+    }
+
 
     public void populateAlphaMatrix() {
         OUPruneUtils.populateAlphaMatrix(alphaRM, alphaInput.get().getDoubleValues());
@@ -167,7 +231,17 @@ public class OUNodeMath extends CalculationNode {
 
     public void performAlphaDecompostion () {
         decompositionH = new EigenDecomposition(alphaRM);
-        pMat = decompositionH.getV();
+        // normalize eigen vectors
+        // NOTE: in R, eigen() returns vectors in decreasing order according to eigen values
+        for (int i = 0; i < nTraits; i ++) {
+            RealVector v = decompositionH.getEigenvector(i);
+            double sum = 0.0;
+            for (int j = 0; j < nTraits; j++){
+                sum += (v.getEntry(j) * v.getEntry(j));
+            }
+            pMat.setColumnVector(i,v.mapMultiply(1.0/FastMath.sqrt(sum)));
+        }
+
         inverseP = new LUDecomposition(pMat).getSolver().getInverse();
     }
 
@@ -176,16 +250,19 @@ public class OUNodeMath extends CalculationNode {
         int nodeIdx = node.getNr();
 
         // variance-covariance matrix
-        RealMatrix variance = calculateVarianceForNode(branchLength);
+        variance = calculateVarianceForNode(branchLength);
 
         // considering population variances
         if (node.isLeaf() && sigmaERM!=null) {
             variance = variance.add(sigmaERM);
         }
+        // set variance
+        VCVMatList.set(nodeIdx, variance);
 
         // calculate the inverse of variance-covariance matrix
         // and determinant of variance covariance matrix
         populateInverseVarianceCovarianceMatrix(variance);
+        invVCVMatList.set(nodeIdx, invVCVMat);
     }
 
     public void performAPlusOperations (Node aNode, RealMatrix aMat) {
@@ -218,22 +295,23 @@ public class OUNodeMath extends CalculationNode {
         RealMatrix P_1SigmaP_t = inverseP.multiply(sigmaRM).multiply(inverseP.transpose());
 
         // fLambda_ij(t) * P_1SigmaP_t
+        RealMatrix fLambdaP_1SigmaP_t = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         for (int i = 0; i < nTraits; i++) {
             for (int j = 0; j < nTraits; j++) {
-                if (decompositionH.getRealEigenvalue(i) == 0.0 && decompositionH.getRealEigenvalue(j) == 0.0) {
+                double lambda = decompositionH.getRealEigenvalue(i) + decompositionH.getRealEigenvalue(j);
+                if (Math.abs(lambda) < 1e-8) {
                     //fLambdaP_1SigmaP_t[i][j] = nodeHeight * P_1SigmaP_t.getEntry(i,j);
-                    P_1SigmaP_t.setEntry(i, j, nodeBranchLength * P_1SigmaP_t.getEntry(i, j));
+                    fLambdaP_1SigmaP_t.setEntry(j, i, P_1SigmaP_t.getEntry(i,j) * nodeBranchLength);
                 } else {
-                    double lambda = decompositionH.getRealEigenvalue(i) + decompositionH.getRealEigenvalue(j);
                     double f = (1 - Math.exp(-lambda * nodeBranchLength)) / lambda;
                     //fLambdaP_1SigmaP_t[i][j] = f * P_1SigmaP_t.getEntry(i,j);
-                    P_1SigmaP_t.setEntry(i, j, f * P_1SigmaP_t.getEntry(i, j));
+                    fLambdaP_1SigmaP_t.setEntry(j, i, f * P_1SigmaP_t.getEntry(i,j));
                 }
             }
         }
 
         // variance matrix = P * (fLambda * P_1SigmaP_t) * t(P)
-        return pMat.multiply(P_1SigmaP_t).multiply(pMat.transpose());
+        return pMat.multiply(fLambdaP_1SigmaP_t).multiply(pMat.transpose());
     }
 
     private void populateInverseVarianceCovarianceMatrix(RealMatrix variance){

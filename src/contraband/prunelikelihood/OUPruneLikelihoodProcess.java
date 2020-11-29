@@ -111,18 +111,22 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
                 double f = OUPruneUtils.getFforOU(omegaVec, nodeMath.getInverseVarianceMatrix(), nodeMath.getVCVMatDet(), nTraits);
                 RealVector bVec = OUPruneUtils.getBVecForOU(nodeMath.getInverseVarianceMatrix(), omegaVec);
                 RealVector dVec = OUPruneUtils.getDVecForOU(eMat, omegaVec);
+                nodeMath.setAbCdEfOmegaPhiForNode(childIdx, aMat, bVec, cMat, dVec, eMat, f, omegaVec, phiRM);
 
                 if (child.isLeaf()) {
                     // vector of trait values at this tip
                     RealVector traitsVec = traitValuesList.get(childIdx);
 
                     // add up L matrix
+                    nodeMath.setLMatForNode(childIdx, OUPruneUtils.getLMatForOULeaf(cMat));
                     thisNodeLMat = thisNodeLMat.add(OUPruneUtils.getLMatForOULeaf(cMat));
 
                     // add up r value
+                    nodeMath.setRForNode(childIdx, OUPruneUtils.getRForOULeaf(aMat, traitsVec, bVec, f));
                     thisNodeR += OUPruneUtils.getRForOULeaf(aMat, traitsVec, bVec, f);
 
                     // add up m vector
+                    nodeMath.setMVecForNode(childIdx, OUPruneUtils.getMVecForOULeaf(eMat, traitsVec, dVec));
                     thisNodeMVec = thisNodeMVec.add(OUPruneUtils.getMVecForOULeaf(eMat, traitsVec, dVec));
                 } else {
 

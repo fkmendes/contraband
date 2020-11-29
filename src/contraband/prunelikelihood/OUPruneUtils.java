@@ -53,7 +53,12 @@ public class OUPruneUtils {
      * dVec = - eMat * omegaVec
      */
     public static RealVector getDVecForOU (RealMatrix eMat, RealVector omegaVec) {
-        return eMat.preMultiply(omegaVec).mapMultiply(-1);
+        RealVector a = eMat.preMultiply(omegaVec);
+        RealVector b = a.mapMultiply(-1);
+        RealMatrix c = eMat.scalarMultiply(-1);
+        RealVector d = c.preMultiply(omegaVec);
+        RealVector e = eMat.transpose().preMultiply(omegaVec).mapMultiply(-1);
+        return eMat.transpose().preMultiply(omegaVec).mapMultiply(-1);
     }
 
     public static void getDVecForOU (double[] eMat, double[] omegaVec, int nCol, int nRow, double[] dVec) {
@@ -104,7 +109,7 @@ public class OUPruneUtils {
      *
      */
     public static RealVector getMVecForOULeaf (RealMatrix eMat, RealVector traitsValues, RealVector dVec) {
-        return eMat.preMultiply(traitsValues).add(dVec);
+        return eMat.transpose().preMultiply(traitsValues).add(dVec);
     }
     public static void getMVecForOULeaf (double[] eMat, double[] traitsValues, double[] dVec, int nCol, int nRow, double[] lMat) {
         MatrixUtilsContra.matrixPreMultiplyAddVector(traitsValues, eMat, dVec, nCol, nRow, lMat);
@@ -191,7 +196,9 @@ public class OUPruneUtils {
      * omega <- (I - e_Ht) %*% Theta
      */
     public static RealVector getOmegaVec(RealVector thetaVec, RealMatrix phiMat, RealMatrix identity) {
-        return (identity.subtract(phiMat)).preMultiply(thetaVec);
+       RealMatrix a = identity.subtract(phiMat);
+       RealVector b = a.transpose().preMultiply(thetaVec);
+        return b;
     }
 
     public static void getOmegaVec(double[] thetaVec, double[] phiMat, double[] identity, double[] minusPhiMat, int nTraits, double[] omega) {
