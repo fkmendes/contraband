@@ -4,18 +4,12 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.clock.RateCategoryClockModel;
-import contraband.math.MatrixUtilsContra;
 import contraband.prunelikelihood.OUNodeMath;
 import contraband.prunelikelihood.OUPruneLikelihood;
-import contraband.prunelikelihood.OUPruneUtils;
-import contraband.utils.GeneralUtils;
-import contraband.utils.PruneLikelihoodUtils;
-import contraband.valuewrappers.OneValueContTraits;
-import org.apache.commons.math3.linear.*;
-import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
-import beast.evolution.tree.Node;
+
 import outercore.parameter.KeyRealParameter;
 
 public class OUPruneLikelihoodTestDriver3 {
@@ -462,7 +456,7 @@ public class OUPruneLikelihoodTestDriver3 {
 */
         // TEST2: pruneOUPCM()
         nodeMath.populateAlphaMatrix();
-        nodeMath.performAlphaDecompostion();
+        nodeMath.performAlphaDecomposition();
 
         nodeMath.setSingularMatrix(false);
         pcm.pruneOU(tree.getRoot(), nodeMath);

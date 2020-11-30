@@ -4,12 +4,8 @@ import beast.core.Description;
 import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.State;
-import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.Node;
-import contraband.clock.RateCategoryClockModel;
-import contraband.math.MatrixUtilsContra;
-import contraband.utils.PruneLikelihoodUtils;
 import org.apache.commons.math3.linear.*;
 import outercore.parameter.KeyRealParameter;
 
@@ -50,7 +46,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
     protected void populateLogP() {
 
         nodeMath.populateAlphaMatrix();
-        nodeMath.performAlphaDecompostion();
+        nodeMath.performAlphaDecomposition();
 
         nodeMath.setSingularMatrix(false);
 

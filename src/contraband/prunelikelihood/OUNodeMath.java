@@ -200,6 +200,8 @@ public class OUNodeMath extends CalculationNode {
     public RealVector getdVecForNode (int nodeIdx) {return dVecList.get(nodeIdx);}
     public RealVector getOmegaForNode (int nodeIdx) {return omegaList.get(nodeIdx);}
     public double getfForNode(int nodeIdx) {return fArr[nodeIdx];}
+    public RealMatrix getVCVMatForNode(int nodeIdx) { return VCVMatList.get(nodeIdx);}
+    public RealMatrix getInvVCVMatForNode (int nodeIdx) {return invVCVMatList.get(nodeIdx); }
 
     public RealMatrix getPMat () {return pMat;}
 
@@ -235,7 +237,7 @@ public class OUNodeMath extends CalculationNode {
         OUPruneUtils.populateAlphaMatrix(alphaRM, alphaInput.get().getDoubleValues());
     }
 
-    public void performAlphaDecompostion () {
+    public void performAlphaDecomposition() {
         decompositionH = new EigenDecomposition(alphaRM);
         // normalize eigen vectors
         // NOTE: in R, eigen() returns vectors in decreasing order according to eigen values
