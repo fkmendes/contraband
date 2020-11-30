@@ -151,6 +151,12 @@ public class OUNodeMath extends CalculationNode {
         identity = MatrixUtils.createRealIdentityMatrix(nTraits);
         variance = new Array2DRowRealMatrix(new double [nTraits][nTraits]);
         pMat= new Array2DRowRealMatrix(new double [nTraits][nTraits]);
+
+        IntegerParameter rateCategories = optAssignInput.get();
+        if(optAssignInput.get().getDimension() != nodeNr) {
+            rateCategories.setDimension(nodeNr);
+        }
+
     }
 
     // getters
