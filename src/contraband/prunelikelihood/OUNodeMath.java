@@ -249,8 +249,13 @@ public class OUNodeMath extends CalculationNode {
             }
             pMat.setColumnVector(i,v.mapMultiply(1.0/FastMath.sqrt(sum)));
         }
-
-        inverseP = new LUDecomposition(pMat).getSolver().getInverse();
+        // calculate the inverse matrix of pMat
+        try {
+            inverseP = new LUDecomposition(pMat).getSolver().getInverse();
+        }
+        catch (SingularMatrixException e) {
+            singularMatrix = true;
+        }
     }
 
     public void populateVarianceCovarianceMatrix(Node node){
