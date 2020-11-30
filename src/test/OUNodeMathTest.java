@@ -257,6 +257,7 @@ public class OUNodeMathTest {
         Double[] m5Double = new Double[] {m5Vec.getEntry(0), m5Vec.getEntry(1)};
         Assert.assertArrayEquals(m5, m5Double);
 
+        // double value r
         Assert.assertEquals(-13.0101512466986, nodeMath.getRForNode(0), EPSILON);
         Assert.assertEquals(-13.6007534562081, nodeMath.getRForNode(1), EPSILON);
         Assert.assertEquals(-27.4541381503069, nodeMath.getRForNode(2), EPSILON);
@@ -273,14 +274,18 @@ public class OUNodeMathTest {
                 "root", rootValues,"optNr", 1, "optAssign", colorAssignments,
                 "upperMatrix", false);
 
-        RealMatrix aMat = new Array2DRowRealMatrix(new double[][] {{-0.06400003300242779, -0.1355806427516654}, {-0.1355806427516654, -0.29967715262733896}});
-        RealMatrix lMat = new Array2DRowRealMatrix(new double[][] {{-0.36977746373559073, 0.25371935362506814}, {0.25371935362506814, -0.17408716516578368}});
+        RealMatrix aMat = new Array2DRowRealMatrix(new double[][] {{-0.100703905102644, -0.107803049335448}, {-0.107803049335447, -0.32069931328358}});
+        RealMatrix lMat = new Array2DRowRealMatrix(new double[][] {{-0.375716351348188, 0.257794266722209}, {0.257794266722209, -0.176883129297864}});
         nodeMath.setLMatForNode(3, lMat);
         nodeMath.performAPlusOperations(tree.getNode(3), aMat);
 
         RealMatrix aPlusLInv = nodeMath.getAPlusLInv();
-        double logVNode = nodeMath.getNegativeTwoAPlusLDet();
+        Double[] Mat = new Double[] {-2.319072276339816, -0.6990609880274522, -2.220442109833866};
+        Double[] RMDouble = new Double[] {aPlusLInv.getEntry(0,0), aPlusLInv.getEntry(0,1), aPlusLInv.getEntry(1,1)};
+        Assert.assertArrayEquals(Mat, RMDouble);
 
+        double logVNode = nodeMath.getNegativeTwoAPlusLDet();
+        Assert.assertEquals(-0.152866886077582, logVNode, EPSILON);
     }
 
 }

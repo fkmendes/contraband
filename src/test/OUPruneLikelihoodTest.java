@@ -109,7 +109,7 @@ public class OUPruneLikelihoodTest {
 
     /*
      * (3) Ultrametric tree with 4 taxa, 1 continuous trait, 3 optima
-     * testOUMVNLkOneTraitSmallTree3optCondOnRVEstimateRV()
+     * i.e. (1) testOUMVNLkOneTraitSmallTree3optCondOnRVEstimateRV in 'OUMVNLikelihoodOneTraitTest'
      *
      */
     @Test
