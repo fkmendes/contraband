@@ -144,7 +144,7 @@ public class OUPruneLikelihoodTest {
     }
 
     /*
-     * (4) Non-ultrametric tree with 17 taxa, 2 continuous trait, 1 optima
+     * (4) Non-ultrametric tree with 17 taxa, 2 continuous traits, 1 optima
      */
     @Test
     public void testOUPruneLkNonUltraTreeTwoTraitsOneOpt(){
@@ -192,7 +192,7 @@ public class OUPruneLikelihoodTest {
     }
 
     /*
-     * (5) Ultrametric tree with 4 taxa, 2 continuous trait, 2 optima
+     * (5) Ultrametric tree with 4 taxa, 2 continuous traits, 2 optima
      */
     @Test
     public void testOUPruneLkSmallTreeTwoTraitsTwoOpt(){
@@ -225,5 +225,40 @@ public class OUPruneLikelihoodTest {
         Assert.assertEquals(-95.4784626512006, logP, EPSILON);
     }
 
+    /*
+     * (6) Non-ultrametric tree with 5 taxa, 1 continuous trait, 1 optima
+     *     Having 1 sampled ancestor
+     */
+    /*
+    @Test
+    public void testOUPruneLkSATreeThreeTraitsOneOpt(){
+        treeStr = "((t1:1.0,t2:0.0):2.0,t3:3.0);";
+        tree = new TreeParser(treeStr, false, false, true, 0);
+        spNames = "t1 t2 t3";
 
+        nTraits = 1;
+        oneTraitValues = Arrays.asList(
+                0.735789246422011, 0.793446047540599, 1.73244219768237
+        );
+        oneTraitData = new KeyRealParameter();
+        oneTraitData.initByName("value", oneTraitValues, "keys", spNames, "minordimension", nTraits);
+
+        // OU model parameters
+        rootValues = new RealParameter(new Double[] {0.908763274179301});
+        sigma = new RealParameter(new Double[] {0.0551858804629736});
+        alpha = new RealParameter(new Double[] {5.86615612063902e-12});
+        theta = new RealParameter(new Double[] {18487533048.7273});
+
+        nodeMath = new OUNodeMath();
+        colorAssignments = new IntegerParameter(new Integer[]{0});
+        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "root", rootValues,
+                "optNr", 1, "optAssign", colorAssignments, "upperMatrix", false);
+
+        pcm = new OUPruneLikelihood();
+        pcm.initByName("tree", tree, "traits", oneTraitData, "nodeMath", nodeMath);
+
+        double logP = pcm.calculateLogP();
+        Assert.assertEquals(-0.8070789215538116678772, logP, EPSILON);
+    }
+    */
 }

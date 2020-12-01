@@ -4,7 +4,6 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
-import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.FastMath;
 import outercore.parameter.KeyRealParameter;
@@ -66,6 +65,7 @@ public class OUNodeMath extends CalculationNode {
     private RealMatrix invVCVMat;
     private RealMatrix aPlusLInv;
     private double logDetVNode;
+    private double likForSA;
 
     private int optNr;
     private List<RealVector> thetaVecList;
@@ -211,6 +211,8 @@ public class OUNodeMath extends CalculationNode {
 
     public RealMatrix getVarianceMatrix() {return variance; }
 
+    public double getLikelihoodForSA() {return likForSA;}
+
     // setters
     public void setLMatForNode (int nodeIdx, RealMatrix value) { lMatList.set(nodeIdx,value); }
 
@@ -231,6 +233,7 @@ public class OUNodeMath extends CalculationNode {
         fArr[nodeIdx] = f;
 
     }
+    public void setLikelihoodForSA (double value) { likForSA = value; }
 
 
     public void populateAlphaMatrix() {
@@ -260,6 +263,9 @@ public class OUNodeMath extends CalculationNode {
 
     public void populateVarianceCovarianceMatrix(Node node){
         double branchLength = node.getLength();
+        if(branchLength == 0.0){
+            branchLength = node.getParent().getLength();
+        }
         int nodeIdx = node.getNr();
 
         // variance-covariance matrix

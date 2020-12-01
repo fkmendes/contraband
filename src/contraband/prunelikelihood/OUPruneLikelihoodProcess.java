@@ -6,6 +6,9 @@ import beast.core.Input;
 import beast.core.State;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.Node;
+import contraband.math.MatrixUtilsContra;
+import contraband.math.NodeMath;
+import contraband.utils.PruneLikelihoodUtils;
 import org.apache.commons.math3.linear.*;
 import outercore.parameter.KeyRealParameter;
 
@@ -49,6 +52,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
         nodeMath.performAlphaDecomposition();
 
         nodeMath.setSingularMatrix(false);
+        nodeMath.setLikelihoodForSA(0.0);
 
         pruneOU(tree.getRoot(), nodeMath);
     }
@@ -69,7 +73,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
 
         // calculate likelihood
         // loglik <- X0 * L0 * X0+ m0 * X0 + r0
-        logP = l0Mat.preMultiply(rootValuesVec).dotProduct(rootValuesVec) + rootValuesVec.dotProduct(m0Vec) + r0;
+        logP = l0Mat.preMultiply(rootValuesVec).dotProduct(rootValuesVec) + rootValuesVec.dotProduct(m0Vec) + r0 + nodeMath.getLikelihoodForSA();
 
         return logP;
     }
@@ -86,70 +90,83 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
             List<Node> children = node.getChildren();
 
             for (Node child : children) {
+
                 int childIdx = child.getNr();
 
-                // For OU, variance matrix, Phi and Omega need to be calculated for this node.
-                RealMatrix phiRM = calculatePhiMatrix(child, nodeMath);
-                RealVector omegaVec = calculateOmegaVector(child, nodeMath, phiRM);
-
-                // inverse of variance-covariance of this node
-                nodeMath.populateVarianceCovarianceMatrix(child);
-
-                // For OU
-                // matrix A, C, E
-                // vector b, d
-                // and value f
-                // need to be calculated
-                // for this node
-                RealMatrix aMat = OUPruneUtils.getAMatForOU(nodeMath.getInverseVarianceMatrix());
-                RealMatrix eMat = OUPruneUtils.getEMatForOU(phiRM, nodeMath.getInverseVarianceMatrix());
-                RealMatrix cMat = OUPruneUtils.getCMatForOU(phiRM, eMat);
-                double f = OUPruneUtils.getFforOU(omegaVec, nodeMath.getInverseVarianceMatrix(), nodeMath.getVCVMatDet(), nTraits);
-                RealVector bVec = OUPruneUtils.getBVecForOU(nodeMath.getInverseVarianceMatrix(), omegaVec);
-                RealVector dVec = OUPruneUtils.getDVecForOU(eMat, omegaVec);
-                nodeMath.setAbCdEfOmegaPhiForNode(childIdx, aMat, bVec, cMat, dVec, eMat, f, omegaVec, phiRM);
-
-                if (child.isLeaf()) {
+                if (child.isLeaf() && child.getLength() != 0.0) {
                     // vector of trait values at this tip
                     RealVector traitsVec = traitValuesList.get(childIdx);
 
+                    // For OU, matrix A, C, E, vector b, d and value f need to be calculated for this node
+                    populateAbCdEf(nodeMath, child, childIdx);
+
+                    calculateLmrForTipNodes(nodeMath, traitsVec, childIdx);
+
                     // add up L matrix
-                    nodeMath.setLMatForNode(childIdx, OUPruneUtils.getLMatForOULeaf(cMat));
-                    thisNodeLMat = thisNodeLMat.add(OUPruneUtils.getLMatForOULeaf(cMat));
-
+                    thisNodeLMat = thisNodeLMat.add(nodeMath.getLMatForNode(childIdx));
                     // add up r value
-                    nodeMath.setRForNode(childIdx, OUPruneUtils.getRForOULeaf(aMat, traitsVec, bVec, f));
-                    thisNodeR += OUPruneUtils.getRForOULeaf(aMat, traitsVec, bVec, f);
-
+                    thisNodeR += nodeMath.getRForNode(childIdx);
                     // add up m vector
-                    nodeMath.setMVecForNode(childIdx, OUPruneUtils.getMVecForOULeaf(eMat, traitsVec, dVec));
-                    thisNodeMVec = thisNodeMVec.add(OUPruneUtils.getMVecForOULeaf(eMat, traitsVec, dVec));
+                    thisNodeMVec = thisNodeMVec.add(nodeMath.getMVecForNode(childIdx));
+
                 } else {
+                    // if child is an sampled ancestor
+                    // it will not be included
+                    if (!child.isDirectAncestor()) {
 
-                    pruneOU(child, nodeMath);
+                        // (2) child is a normal internal node, i.e. child does not have a sampled ancestor
+                        if (!child.getChild(0).isDirectAncestor() && !child.getChild(1).isDirectAncestor()) {
+                            // For OU, matrix A, C, E, vector b, d and value f need to be calculated for this node
+                            populateAbCdEf(nodeMath, child, childIdx);
 
-                    nodeMath.performAPlusOperations(child, aMat);
-                    // (aMat + lMat).inverse
-                    RealMatrix aPlusLInv = nodeMath.getAPlusLInv();
-                    // determinant of -2 * (aMat + lMat) in log space
-                    double logDetVNode = nodeMath.getNegativeTwoAPlusLDet();
+                            pruneOU(child, nodeMath);
 
-                    // add up r value
-                    double r = OUPruneUtils.getRForOUIntNode(bVec, nodeMath.getMVecForNode(childIdx), aPlusLInv, f, nodeMath.getRForNode(childIdx), nTraits, logDetVNode);
-                    nodeMath.setRForNode(childIdx, r);
-                    thisNodeR += r;
+                            calculateLmrForIntNode(child, nodeMath, childIdx);
 
-                    RealMatrix eAPlusLInv = eMat.multiply(aPlusLInv);
+                            // add up r value
+                            thisNodeR += nodeMath.getRForNode(childIdx);
+                            // add up m vector
+                            thisNodeMVec = thisNodeMVec.add(nodeMath.getMVecForNode(childIdx));
+                            // add up L matrix
+                            thisNodeLMat = thisNodeLMat.add(nodeMath.getLMatForNode(childIdx));
+                        }
+                        /*else {
+                            // (3) child is an internal node and has a sampled ancestor below
+                            // child will be used as a normal tip
+                            // trait values of the sampled ancestor will used to calculate AbCdEf and Lmr
+                            Node gcSA = child.getChild(0);
+                            if(child.getChild(1).isDirectAncestor()) {
+                                gcSA = child.getChild(1);
+                            }
+                            int gcSANr = gcSA.getNr();
 
-                    // add up m vector
-                    RealVector m = OUPruneUtils.getMVecForOUIntNode(eAPlusLInv, bVec, nodeMath.getMVecForNode(childIdx), dVec);
-                    nodeMath.setMVecForNode(childIdx, m);
-                    thisNodeMVec = thisNodeMVec.add(m);
+                            populateAbCdEf(nodeMath, gcSA, gcSANr);
 
-                    // add up L matrix
-                    RealMatrix l = OUPruneUtils.getLMatForOUIntNode(cMat, eMat, eAPlusLInv);
-                    nodeMath.setLMatForNode(childIdx, l);
-                    thisNodeLMat = thisNodeLMat.add(l);
+                            // vector of trait values at this tip
+                            RealVector saTraitsVec = traitValuesList.get(gcSANr);
+
+                            calculateLmrForTipNodes(nodeMath, saTraitsVec, gcSANr);
+
+                            // add up to this node
+                            thisNodeLMat = thisNodeLMat.add(nodeMath.getLMatForNode(gcSANr));
+                            thisNodeR += nodeMath.getRForNode(gcSANr);
+                            thisNodeMVec = thisNodeMVec.add(nodeMath.getMVecForNode(gcSANr));
+
+                            // prune the subtree rooted at the child node
+                            pruneOU(child, nodeMath);
+                            if (nodeMath.getSingularMatrix()) {
+                                nodeMath.setLikelihoodForSA(Double.NEGATIVE_INFINITY);
+                            } else {
+                                // calculate the likelihood rooted at this sampled ancestor
+                                double logPSA = nodeMath.getLMatForNode(childIdx).preMultiply(saTraitsVec).dotProduct(saTraitsVec) + saTraitsVec.dotProduct(nodeMath.getMVecForNode(childIdx)) + nodeMath.getRForNode(childIdx);
+
+                                // add up to the likelihood for sampled ancestors in the tree
+                                nodeMath.setLikelihoodForSA(
+                                        nodeMath.getLikelihoodForSA() +
+                                                logPSA);
+                            }
+                        }*/
+                    }
                 }
             }
             // set L, m , r for this node
@@ -169,6 +186,63 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
             Double[] traitForSpecies = traitValues.getRowValues(tree.getNode(i).getID());
             traitValuesList.add(i, new ArrayRealVector(traitForSpecies));
         }
+    }
+    protected void populateAbCdEf (OUNodeMath nodeMath, Node node, int nodeIdx) {
+        // For OU, variance matrix, Phi and Omega need to be calculated for this node.
+        RealMatrix phiRM = calculatePhiMatrix(node, nodeMath);
+        RealVector omegaVec = calculateOmegaVector(node, nodeMath, phiRM);
+
+        // inverse of variance-covariance of this node
+        nodeMath.populateVarianceCovarianceMatrix(node);
+
+        RealMatrix aMat = OUPruneUtils.getAMatForOU(nodeMath.getInverseVarianceMatrix());
+        RealMatrix eMat = OUPruneUtils.getEMatForOU(phiRM, nodeMath.getInverseVarianceMatrix());
+        RealMatrix cMat = OUPruneUtils.getCMatForOU(phiRM, eMat);
+        double f = OUPruneUtils.getFforOU(omegaVec, nodeMath.getInverseVarianceMatrix(), nodeMath.getVCVMatDet(), nTraits);
+        RealVector bVec = OUPruneUtils.getBVecForOU(nodeMath.getInverseVarianceMatrix(), omegaVec);
+        RealVector dVec = OUPruneUtils.getDVecForOU(eMat, omegaVec);
+
+        nodeMath.setAbCdEfOmegaPhiForNode(nodeIdx, aMat, bVec, cMat, dVec, eMat, f, omegaVec, phiRM);
+    }
+
+    protected void calculateLmrForTipNodes(OUNodeMath nodeMath, RealVector traitsVec, int nodeIdx) {
+        RealMatrix aMat = nodeMath.getAMatForNode(nodeIdx);
+        RealMatrix cMat = nodeMath.getCMatForNode(nodeIdx);
+        RealMatrix eMat = nodeMath.getEMatForNode(nodeIdx);
+        RealVector bVec = nodeMath.getbVecForNode(nodeIdx);
+        RealVector dVec = nodeMath.getdVecForNode(nodeIdx);
+        double f = nodeMath.getfForNode(nodeIdx);
+
+        // add up L matrix
+        nodeMath.setLMatForNode(nodeIdx, OUPruneUtils.getLMatForOULeaf(cMat));
+        //thisNodeLMat = thisNodeLMat.add(OUPruneUtils.getLMatForOULeaf(cMat));
+
+        // add up r value
+        nodeMath.setRForNode(nodeIdx, OUPruneUtils.getRForOULeaf(aMat, traitsVec, bVec, f));
+        //thisNodeR += OUPruneUtils.getRForOULeaf(aMat, traitsVec, bVec, f);
+
+        // add up m vector
+        nodeMath.setMVecForNode(nodeIdx, OUPruneUtils.getMVecForOULeaf(eMat, traitsVec, dVec));
+        //thisNodeMVec = thisNodeMVec.add(OUPruneUtils.getMVecForOULeaf(eMat, traitsVec, dVec));
+    }
+
+    protected void calculateLmrForIntNode(Node child, OUNodeMath nodeMath, int childIdx){
+        nodeMath.performAPlusOperations(child, nodeMath.getAMatForNode(childIdx));
+        // (aMat + lMat).inverse
+        RealMatrix aPlusLInv = nodeMath.getAPlusLInv();
+        // determinant of -2 * (aMat + lMat) in log space
+        double logDetVNode = nodeMath.getNegativeTwoAPlusLDet();
+        // eMat * (aMat + lMat).inverse
+        RealMatrix eAPlusLInv = nodeMath.getEMatForNode(childIdx).multiply(aPlusLInv);
+
+        double r = OUPruneUtils.getRForOUIntNode(nodeMath.getbVecForNode(childIdx), nodeMath.getMVecForNode(childIdx), aPlusLInv, nodeMath.getfForNode(childIdx), nodeMath.getRForNode(childIdx), nTraits, logDetVNode);
+        nodeMath.setRForNode(childIdx, r);
+
+        RealVector m = OUPruneUtils.getMVecForOUIntNode(eAPlusLInv, nodeMath.getbVecForNode(childIdx), nodeMath.getMVecForNode(childIdx), nodeMath.getdVecForNode(childIdx));
+        nodeMath.setMVecForNode(childIdx, m);
+
+        RealMatrix l = OUPruneUtils.getLMatForOUIntNode(nodeMath.getCMatForNode(childIdx), nodeMath.getEMatForNode(childIdx), eAPlusLInv);
+        nodeMath.setLMatForNode(childIdx, l);
     }
 
     @Override
