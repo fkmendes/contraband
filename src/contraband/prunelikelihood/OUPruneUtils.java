@@ -206,6 +206,9 @@ public class OUPruneUtils {
 
     public static RealMatrix getPhiRM(Node aNode, RealMatrix phiMat) {
         double nodeBranchLength = aNode.getLength();
+        if(nodeBranchLength == 0.0) {
+            nodeBranchLength = aNode.getParent().getLength();
+        }
         return exp(phiMat.scalarMultiply(-nodeBranchLength));
     }
 

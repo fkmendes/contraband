@@ -130,7 +130,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
                             // add up L matrix
                             thisNodeLMat = thisNodeLMat.add(nodeMath.getLMatForNode(childIdx));
                         }
-                        /*else {
+                        else {
                             // (3) child is an internal node and has a sampled ancestor below
                             // child will be used as a normal tip
                             // trait values of the sampled ancestor will used to calculate AbCdEf and Lmr
@@ -165,7 +165,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
                                         nodeMath.getLikelihoodForSA() +
                                                 logPSA);
                             }
-                        }*/
+                        }
                     }
                 }
             }
