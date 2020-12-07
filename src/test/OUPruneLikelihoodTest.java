@@ -260,27 +260,27 @@ public class OUPruneLikelihoodTest {
     }
 
     /*
-     * (6) Non-ultrametric tree with 5 taxa, 1 continuous trait, 1 optima
+     * (6) Non-ultrametric tree with 3 taxa, 1 continuous trait, 1 optima
      *     Having 1 sampled ancestor
      */
     @Test
-    public void testOUPruneLkSATreeThreeTraitsOneOpt(){
-        treeStr = "((t1:1.0,t2:0.0):2.0,t3:3.0);";
+    public void testOUPruneLkSATreeOneTraitOneOpt(){
+        treeStr = "((t1:2.0, t2:0.0):1.0,t3:3.0);";
         tree = new TreeParser(treeStr, false, false, true, 0);
         spNames = "t1 t2 t3";
 
         nTraits = 1;
         oneTraitValues = Arrays.asList(
-                -0.308951846464196, -0.26148600105784, 2.3106757274761
+                5.0, 0.562109760940075, 7.84838088788092
         );
         oneTraitData = new KeyRealParameter();
         oneTraitData.initByName("value", oneTraitValues, "keys", spNames, "minordimension", nTraits);
 
         // OU model parameters
-        rootValues = new RealParameter(new Double[] {2.0});
-        sigma = new RealParameter(new Double[] {0.4});
-        alpha = new RealParameter(new Double[] {4.0});
-        theta = new RealParameter(new Double[] {1.6});
+        rootValues = new RealParameter(new Double[] {-1194.98457395788});
+        sigma = new RealParameter(new Double[] {14.3957703541466});
+        alpha = new RealParameter(new Double[] {5.32272760292688});
+        theta = new RealParameter(new Double[] {6.42433001557558});
 
         nodeMath = new OUNodeMath();
         colorAssignments = new IntegerParameter(new Integer[]{0});
@@ -291,6 +291,41 @@ public class OUPruneLikelihoodTest {
         pcm.initByName("tree", tree, "traits", oneTraitData, "nodeMath", nodeMath);
 
         double logP = pcm.calculateLogP();
-        Assert.assertEquals(-73.1326191771973, logP, EPSILON);
+        Assert.assertEquals(-4.7094166635812, logP, EPSILON);
+    }
+
+    /*
+     * (6) Non-ultrametric tree with 10 taxa, 2 continuous trait, 1 optima
+     *     Having 1 sampled ancestor
+     */
+    @Test
+    public void testOUPruneLkSATreeTwoTraitsOneOpt(){
+        treeStr = "(((t3:1.209461463,t4:0.0):0.6659547705,(t9:0.841016425,t10:0.841016425):1.034399809):1.561956365,(((t2:1.602817551,(t5:1.164343725,t6:1.164343725):0.4384738261):0.6643605462,t1:2.267178098):0.7120187616,(t7:1.115655119,t8:1.115655119):1.86354174):0.458175739);";
+        tree = new TreeParser(treeStr, false, false, true, 0);
+        spNames = "t3 t4 t9 t10 t2 t5 t6 t1 t7 t8";
+
+        nTraits = 2;
+        oneTraitValues = Arrays.asList(
+                -0.508635648090195, -0.279620384230921, -0.890439381916328, -0.0389259110017274, -1.60403656615896, -0.152064627988708, -1.78355663933205, 0.0876041569681547, -4.55402786822282, 1.72033772810441, -1.866891946151, 0.499459863055851, -2.78627660312175, 3.17287179990728, -7.70315227205359, 3.79277958924578, -4.23115951625136, 1.99156992779389, -4.99358298983542, 4.48463339235722
+        );
+        oneTraitData = new KeyRealParameter();
+        oneTraitData.initByName("value", oneTraitValues, "keys", spNames, "minordimension", nTraits);
+
+        // OU model parameters
+        rootValues = new RealParameter(new Double[] {479.701057745291, 860.744522346309});
+        sigma = new RealParameter(new Double[] {0.000623020788861537, 0.0440561576525885, 7.8185676755921});
+        alpha = new RealParameter(new Double[] {0.903659679354104, 1.61416481463754, 1.61416481463754, 2.88331082048443});
+        theta = new RealParameter(new Double[] {-525940.712324216, 294437.489034769});
+
+        nodeMath = new OUNodeMath();
+        colorAssignments = new IntegerParameter(new Integer[]{0});
+        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "root", rootValues,
+                "optNr", 1, "optAssign", colorAssignments, "upperMatrix", false);
+
+        pcm = new OUPruneLikelihood();
+        pcm.initByName("tree", tree, "traits", oneTraitData, "nodeMath", nodeMath);
+
+        double logP = pcm.calculateLogP();
+        Assert.assertEquals(-32.1041358768315, logP, EPSILON);
     }
 }

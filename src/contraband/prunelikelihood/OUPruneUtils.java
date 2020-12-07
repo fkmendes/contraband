@@ -439,15 +439,27 @@ public class OUPruneUtils {
     }
 
     // populate matrix
-    public static void populateSigmaMatrix(RealMatrix rm, double[] values) {
+    public static void populateUpperSigmaMatrix(RealMatrix rm, double[] values, int nTraits) {
         int k = 0;
-        for (int i = 0; i < rm.getColumnDimension(); i++) {
-            for (int j = i; j < rm.getColumnDimension(); j++) {
+        for (int i = 0; i < nTraits; i++) {
+            for (int j = i; j < nTraits; j++) {
                 rm.setEntry(i, j, values[k]);
                 k++;
             }
         }
     }
+
+    public static void populateSigmaMatrix(RealMatrix rm, double[] values, int nTraits) {
+        int k = 0;
+        for (int i = 0; i < nTraits; i++) {
+            for (int j = i; j < nTraits; j++) {
+                rm.setEntry(i, j, values[k]);
+                rm.setEntry(j, i, values[k]);
+                k++;
+            }
+        }
+    }
+
 
     public static void populateAlphaMatrix(RealMatrix rm, double[] values) {
         int k = 0;
