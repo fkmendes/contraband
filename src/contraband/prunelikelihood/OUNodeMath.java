@@ -282,7 +282,8 @@ public class OUNodeMath extends CalculationNode {
 
     public void populateVarianceCovarianceMatrix(Node node){
         double branchLength = node.getLength();
-        if(branchLength == 0.0){
+        // deal with zero branch length node
+        if(branchLength < 1e-6){
             branchLength = node.getParent().getLength();
         }
         int nodeIdx = node.getNr();
