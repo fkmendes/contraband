@@ -15,11 +15,17 @@ import java.util.List;
 public class OUNodeMath extends CalculationNode {
     final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     final public Input<Boolean> useUpperMatrixInput = new Input<>("upperMatrix", "TRUE, if sigmasq and correlations are from upper matrix", true);
-    final public Input<RealParameter> sigmaValuesInput = new Input<>("sigma","Trait rate matrix.", Input.Validate.REQUIRED);
-    final public Input<RealParameter> sigmaeValuesInput = new Input<>("sigmae","Population error.", Input.Validate.OPTIONAL);
+    
     final public Input<RealParameter> alphaInput = new Input<>("alpha","An array of (nTraits * (nTraits - 1) / 2) elements, representing selection strength, off-diagonal elements in Alpha matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> thetaInput = new Input<>("theta","An array of nTraits elements, representing optimum trait values, elements in Theta vector.", Input.Validate.REQUIRED);
     final public Input<RealParameter> rootValuesInput = new Input<>("root","Trait values at the root.");
+
+    final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Evolutionary rates of traits. Diagonal elements in rate matrix.");
+    final public Input<RealParameter> rhoInput = new Input<>("correlation", "Correlations of traits. Off-diagonal elements in rate matrix.");
+    final public Input<RealParameter> covarianceInput = new Input<>("covariance", "cov_ij = sigma_i * sigma_j * rho_ij.");
+
+    final public Input<RealParameter> popVarInput = new Input<>("popVar", "Variance within population. Diagonal elements in SigmaE matrix.");
+    final public Input<RealParameter> popCovInput = new Input<>("popCov", "Covariance within population. Off-diagonal elements in SigmaE matrix.");
 
     final public Input<Integer> optNrInput = new Input<>("optNr","Number of theta (vectors).");
     final public Input<IntegerParameter> optAssignInput = new Input<>("optAssign", "the opt assignment for each node in the tree.");
@@ -86,26 +92,53 @@ public class OUNodeMath extends CalculationNode {
 
         // Sigma matrix has trait evolutionary rates and traits correlations
         sigmaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
-        // check dimension
-        if (sigmaValuesInput.get().getDimension() != nTraits * (nTraits + 1) / 2){
-            sigmaValuesInput.get().setDimension(nTraits * (nTraits + 1) / 2);
-        }
-        if (useUpperMatrix) {
-            OUPruneUtils.populateUpperSigmaMatrix(sigmaRM, sigmaValuesInput.get().getDoubleValues(), nTraits);
-            sigmaRM = sigmaRM.multiply(sigmaRM.transpose());
+        if(nTraits == 1) {
+            sigmaRM.setEntry(0, 0, sigmasqInput.get().getValue());
         } else {
-            OUPruneUtils.populateSigmaMatrix(sigmaRM, sigmaValuesInput.get().getDoubleValues(), nTraits);
-        }
+            // check dimension
+            if (sigmasqInput.get().getDimension() != nTraits) {
+                sigmasqInput.get().setDimension(nTraits);
+            }
+            if (rhoInput.get() == null && covarianceInput.get() != null) {
+                if (covarianceInput.get().getDimension() != nTraits * (nTraits - 1) / 2) {
+                    covarianceInput.get().setDimension(nTraits * (nTraits - 1) / 2);
+                }
 
-        // considering population variance
-        // SigmaE = sigmae %*% t(sigmae)
-        if (sigmaeValuesInput.get() != null) {
-            sigmaERM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
-            sigmaeValuesInput.get().setDimension(nTraits * (nTraits + 1) / 2);
-            OUPruneUtils.populateUpperSigmaMatrix(sigmaERM, sigmaeValuesInput.get().getDoubleValues(), nTraits);
-            sigmaERM = sigmaERM.multiply(sigmaERM.transpose());
-        }
+                if (useUpperMatrix) {
+                    OUPruneUtils.populateUpperSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), covarianceInput.get().getDoubleValues(), nTraits);
+                    sigmaRM = sigmaRM.multiply(sigmaRM.transpose());
+                } else {
+                    OUPruneUtils.populateDirectSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), covarianceInput.get().getDoubleValues(), nTraits);
+                }
+            }
 
+            if (rhoInput.get() != null && covarianceInput.get() == null) {
+                if (rhoInput.get().getDimension() != nTraits * (nTraits - 1) / 2) {
+                    rhoInput.get().setDimension(nTraits * (nTraits - 1) / 2);
+                }
+                if (useUpperMatrix) {
+                    OUPruneUtils.populateUpperSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), rhoInput.get().getDoubleValues(), nTraits);
+                    sigmaRM = sigmaRM.multiply(sigmaRM.transpose());
+                } else {
+                    OUPruneUtils.populateSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), rhoInput.get().getDoubleValues(), nTraits);
+                }
+            }
+
+            // considering population variance
+            // SigmaE = sigmae %*% t(sigmae)
+            if (popVarInput.get() != null) {
+                sigmaERM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
+                // check dimensions
+                if (popVarInput.get().getDimension() != nSpecies) {
+                    popVarInput.get().setDimension(nTraits);
+                }
+                if (popCovInput.get().getDimension() != nTraits * (nTraits - 1) / 2) {
+                    popCovInput.get().setDimension(nTraits * (nTraits - 1) / 2);
+                }
+                OUPruneUtils.populateUpperSigmaMatrix(sigmaERM, popVarInput.get().getDoubleValues(), popCovInput.get().getDoubleValues(), nTraits);
+                sigmaERM = sigmaERM.multiply(sigmaERM.transpose());
+            }
+        }
         // alpha matrix is specified by nTraits * nTraits elements
         alphaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         if (alphaInput.get().getDimension() != nTraits * nTraits){

@@ -2,6 +2,7 @@ package test;
 
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
+import contraband.prunelikelihood.OUPruneLikelihood;
 import contraband.prunelikelihood.OUPruneUtils;
 import org.apache.commons.math3.linear.*;
 import org.junit.Assert;
@@ -105,6 +106,40 @@ public class OUPruneUtilsTest {
         double detVariance = 12.0923805058647;
         double f = OUPruneUtils.getFforOU(omega, invVariance, detVariance, nTraits);
         Assert.assertEquals(-3.24809910801962,f, EPSILON);
+    }
+
+    @Test
+    public void testPopulateUpperSigmaMatrix(){
+        int nTraits = 3;
+        RealMatrix sigmaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
+        double[] varValues = new double[]{3.6, 1.6, 2.5};
+        double[] covValues = new double[] {0.2, 0.1, -0.5};
+        OUPruneUtils.populateUpperSigmaMatrix(sigmaRM, varValues, covValues, nTraits);
+
+        Double[] sigmaMat = new Double[] {3.6, 0.2, 0.1,
+                                          0.0, 1.6, -0.5,
+                                          0.0, 0.0, 2.5};
+        Double[] sigmaRMDouble = new Double[] {sigmaRM.getEntry(0,0), sigmaRM.getEntry(0,1), sigmaRM.getEntry(0,2),
+                                               sigmaRM.getEntry(1,0), sigmaRM.getEntry(1,1), sigmaRM.getEntry(1,2),
+                                               sigmaRM.getEntry(2,0), sigmaRM.getEntry(2,1), sigmaRM.getEntry(2,2)};
+        Assert.assertArrayEquals(sigmaMat, sigmaRMDouble);
+    }
+
+    @Test
+    public void testPopulateSigmaMatrix () {
+        int nTraits = 3;
+        RealMatrix sigmaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
+        double[] sigmaValues = new double[]{3.6, 1.6, 2.5};
+        double[] rhoValues = new double[] {0.2, 0.1, -0.5};
+        OUPruneUtils.populateSigmaMatrix(sigmaRM, sigmaValues, rhoValues, nTraits);
+
+        Double[] sigmaMat = new Double[] {3.6,                 0.48, 0.30000000000000004,
+                                          0.48,                1.6,  -1.0,
+                                          0.30000000000000004, -1.0,  2.5};
+        Double[] sigmaRMDouble = new Double[] {sigmaRM.getEntry(0,0), sigmaRM.getEntry(0,1), sigmaRM.getEntry(0,2),
+                                               sigmaRM.getEntry(1,0), sigmaRM.getEntry(1,1), sigmaRM.getEntry(1,2),
+                                               sigmaRM.getEntry(2,0), sigmaRM.getEntry(2,1), sigmaRM.getEntry(2,2)};
+        Assert.assertArrayEquals(sigmaMat, sigmaRMDouble);
     }
 
 }

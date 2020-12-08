@@ -439,22 +439,37 @@ public class OUPruneUtils {
     }
 
     // populate matrix
-    public static void populateUpperSigmaMatrix(RealMatrix rm, double[] values, int nTraits) {
+    public static void populateUpperSigmaMatrix(RealMatrix rm, double[] diagValues, double[] offDiagValues, int nTraits) {
         int k = 0;
         for (int i = 0; i < nTraits; i++) {
-            for (int j = i; j < nTraits; j++) {
-                rm.setEntry(i, j, values[k]);
+            rm.setEntry(i, i, diagValues[i]);
+            for (int j = i+1; j < nTraits; j++) {
+                rm.setEntry(i, j, offDiagValues[k]);
                 k++;
             }
         }
     }
 
-    public static void populateSigmaMatrix(RealMatrix rm, double[] values, int nTraits) {
+    public static void populateSigmaMatrix(RealMatrix rm,  double[] diagValues, double[] offDiagValues, int nTraits) {
         int k = 0;
         for (int i = 0; i < nTraits; i++) {
-            for (int j = i; j < nTraits; j++) {
-                rm.setEntry(i, j, values[k]);
-                rm.setEntry(j, i, values[k]);
+            rm.setEntry(i, i, diagValues[i]);
+            for (int j = i + 1; j < nTraits; j++) {
+                double value = FastMath.sqrt(diagValues[i]) * FastMath.sqrt(diagValues[j]) * offDiagValues[k];
+                rm.setEntry(i, j, value);
+                rm.setEntry(j, i, value);
+                k++;
+            }
+        }
+    }
+
+    public static void populateDirectSigmaMatrix(RealMatrix rm,  double[] diagValues, double[] offDiagValues, int nTraits) {
+        int k = 0;
+        for (int i = 0; i < nTraits; i++) {
+            rm.setEntry(i, i, diagValues[i]);
+            for (int j = i + 1; j < nTraits; j++) {
+                rm.setEntry(i, j, offDiagValues[k]);
+                rm.setEntry(j, i, offDiagValues[k]);
                 k++;
             }
         }

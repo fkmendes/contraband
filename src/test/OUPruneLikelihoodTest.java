@@ -4,7 +4,6 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
-import contraband.clock.RateCategoryClockModel;
 import contraband.prunelikelihood.OUNodeMath;
 import contraband.prunelikelihood.OUPruneLikelihood;
 import org.junit.Assert;
@@ -25,8 +24,10 @@ public class OUPruneLikelihoodTest {
 
     OUNodeMath nodeMath;
     RealParameter rootValues;
-    RealParameter sigma;
-    RealParameter sigmae;
+    RealParameter sigmasq;
+    RealParameter covariance;
+    RealParameter popVar;
+    RealParameter popCov;
     RealParameter alpha;
     RealParameter theta;
 
@@ -53,15 +54,18 @@ public class OUPruneLikelihoodTest {
 
         // OU model parameters
         rootValues = new RealParameter(new Double[] {0.2, 1.3});
-        sigma = new RealParameter(new Double[] {1.0, 0.6, 1.0});
-        sigmae = new RealParameter(new Double[] {1.0, 0.3, 1.0});
+        sigmasq = new RealParameter(new Double[] {1.0, 1.0});
+        covariance = new RealParameter(new Double[] {0.6});
+        popVar = new RealParameter(new Double[] {1.0, 1.0});
+        popCov = new RealParameter(new Double[] {0.3});
         alpha = new RealParameter(new Double[] {2.0, 0.0, 0.0, 2.0});
         theta = new RealParameter(new Double[] {0.5, 0.5});
 
         nodeMath = new OUNodeMath();
         colorAssignments = new IntegerParameter();
-        colorAssignments = new IntegerParameter(new Integer[]{ 0, 0, 0, 0, 0, 0 });
-        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "sigmae", sigmae, "root", rootValues,
+        colorAssignments = new IntegerParameter(new Integer[]{ 0 });
+        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta,
+                "sigmasq", sigmasq, "covariance", covariance, "popVar", popVar, "popCov", popCov, "root", rootValues,
                 "optNr", 1, "optAssign", colorAssignments);
 
         pcm = new OUPruneLikelihood();
@@ -91,14 +95,16 @@ public class OUPruneLikelihoodTest {
         oneTraitData.initByName("value", oneTraitValues, "keys", spNames, "minordimension", nTraits);
 
         rootValues = new RealParameter(new Double[] {2.2, 1.3, 0.5});
-        sigma = new RealParameter(new Double[] {0.35, 0.06, 0.06, 0.2, 0.4, 0.8});
+        sigmasq = new RealParameter(new Double[] {0.35, 0.2, 0.8});
+        covariance = new RealParameter(new Double[] {0.06, 0.06, 0.4});
         alpha = new RealParameter(new Double[] {1.8, -0.9, 1.2, -0.9, 1.0, 1.4, 1.2, 1.4, 1.6});
         theta = new RealParameter(new Double[] {5.0, 4.8, 1.2});
         nodeMath = new OUNodeMath();
         colorAssignments = new IntegerParameter();
         colorAssignments = new IntegerParameter(new Integer[]{ 0, 0, 0, 0, 0, 0});
 
-        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "sigmae", sigmae, "root", rootValues,
+        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta,
+                "sigmasq", sigmasq, "covariance", covariance, "root", rootValues,
                 "optNr", 1, "optAssign", colorAssignments);
         pcm = new OUPruneLikelihood();
         pcm.initByName("tree", tree, "traits", oneTraitData, "nodeMath", nodeMath);
@@ -126,15 +132,16 @@ public class OUPruneLikelihoodTest {
         oneTraitData = new KeyRealParameter();
         oneTraitData.initByName("value", oneTraitValues, "keys", spNames);
 
-        sigma = new RealParameter(new Double[]{ 0.006082604 });
+        sigmasq = new RealParameter(new Double[]{ 0.006082604 });
         alpha = new RealParameter(new Double[]{ 7.390366 });
         rootValues = new RealParameter(new Double[]{ 3.182460e-10 });
         theta  = new RealParameter(new Double[]{ 0.206222932117995, 0.26633408087427, 0.88122539543514 });
 
         nodeMath = new OUNodeMath();
         colorAssignments = new IntegerParameter(new Integer[]{ 1, 1, 2, 0, 1, 0, 0 });
-        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "root", rootValues,
-                "optNr", 3, "optAssign", colorAssignments, "upperMatrix", false);
+        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta,
+                "sigmasq", sigmasq, "root", rootValues,
+                "optNr", 3, "optAssign", colorAssignments);
 
         pcm = new OUPruneLikelihood();
         pcm.initByName("tree", tree, "traits", oneTraitData, "nodeMath", nodeMath);
@@ -174,14 +181,16 @@ public class OUPruneLikelihoodTest {
         oneTraitData = new KeyRealParameter();
         oneTraitData.initByName("value", oneTraitValues, "keys", spNames, "minordimension", nTraits);
 
-        sigma = new RealParameter(new Double[]{ 0.299127897384494, 0.0402696667094893, 0.363185292789432 });
+        sigmasq = new RealParameter(new Double[]{ 0.299127897384494, 0.363185292789432 });
+        covariance = new RealParameter(new Double[]{ 0.0402696667094893});
         alpha = new RealParameter(new Double[]{ 2.37692446163834, -1.6037269282734, -1.6037269282734, 2.00156092469912 });
         rootValues = new RealParameter(new Double[]{ 3.27435707319454, 10.4770161810953 });
         theta  = new RealParameter(new Double[]{ 4.9056017367667, 4.48321528780333 });
 
         nodeMath = new OUNodeMath();
         colorAssignments = new IntegerParameter(new Integer[]{ 0 });
-        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "root", rootValues,
+        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta,
+                "sigmasq", sigmasq, "covariance", covariance, "root", rootValues,
                 "optNr", 1, "optAssign", colorAssignments, "upperMatrix", false);
 
         pcm = new OUPruneLikelihood();
@@ -209,13 +218,15 @@ public class OUPruneLikelihoodTest {
 
         // OU model parameters
         rootValues = new RealParameter(new Double[] {0.2, 1.3});
-        sigma = new RealParameter(new Double[] {1.0, 0.6, 1.0});
+        sigmasq = new RealParameter(new Double[] {1.0, 1.0});
+        covariance = new RealParameter(new Double[] {0.6});
         alpha = new RealParameter(new Double[] {1.0, 1.2, 1.2, 1.0});
         theta = new RealParameter(new Double[] {4.2, 3.8, 1.0, 2.0});
 
         nodeMath = new OUNodeMath();
         colorAssignments = new IntegerParameter(new Integer[]{ 1, 1, 0, 0, 0, 0, 0});
-        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "root", rootValues,
+        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta,
+                "sigmasq", sigmasq, "covariance", covariance, "root", rootValues,
                 "optNr", 2, "optAssign", colorAssignments);
 
         pcm = new OUPruneLikelihood();
@@ -243,13 +254,17 @@ public class OUPruneLikelihoodTest {
 
         // OU model parameters
         rootValues = new RealParameter(new Double[] {14.9423638086769, -12.8322451408723, -2.12734808227883, 3.0060006335114});
-        sigma = new RealParameter(new Double[] {1.91889428979701, -1.69303813349868, 1.31414017941805, 0.768091892963974, 6.69847612212845, 2.42053441234052, -1.25999352981913, 4.8862486730982, -1.26372726667469, 1.80310998971464});
+        sigmasq = new RealParameter(new Double[] {1.91889428979701, 6.69847612212845, 4.8862486730982, 1.80310998971464});
+        covariance = new RealParameter(new Double[] {-1.69303813349868, 1.31414017941805, 0.768091892963974,
+                                                                        2.42053441234052, -1.25999352981913,
+                                                                                          -1.26372726667469});
         alpha = new RealParameter(new Double[] {4.81019687857697, -0.572364908034288, -0.991173642257948, 2.14994820449264, -0.572364908034288, 2.5803246133496, 0.198641987350996, 0.348045384424873, -0.991173642257948, 0.198641987350996, 2.27914049120142, -0.882649865495069, 2.14994820449264, 0.348045384424873, -0.882649865495069, 1.36599586002177});
         theta = new RealParameter(new Double[] {-1.0121752938941, -1.02906717423969, 1.29288300684234, 5.62202767021494});
 
         nodeMath = new OUNodeMath();
         colorAssignments = new IntegerParameter(new Integer[]{ 0});
-        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "root", rootValues,
+        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta,
+                "sigmasq", sigmasq, "covariance", covariance, "root", rootValues,
                 "optNr", 1, "optAssign", colorAssignments, "upperMatrix", false);
 
         pcm = new OUPruneLikelihood();
@@ -278,14 +293,14 @@ public class OUPruneLikelihoodTest {
 
         // OU model parameters
         rootValues = new RealParameter(new Double[] {-1194.98457395788});
-        sigma = new RealParameter(new Double[] {14.3957703541466});
+        sigmasq = new RealParameter(new Double[] {14.3957703541466});
         alpha = new RealParameter(new Double[] {5.32272760292688});
         theta = new RealParameter(new Double[] {6.42433001557558});
 
         nodeMath = new OUNodeMath();
         colorAssignments = new IntegerParameter(new Integer[]{0});
-        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "root", rootValues,
-                "optNr", 1, "optAssign", colorAssignments, "upperMatrix", false);
+        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigmasq", sigmasq, "root", rootValues,
+                "optNr", 1, "optAssign", colorAssignments);
 
         pcm = new OUPruneLikelihood();
         pcm.initByName("tree", tree, "traits", oneTraitData, "nodeMath", nodeMath);
@@ -313,13 +328,15 @@ public class OUPruneLikelihoodTest {
 
         // OU model parameters
         rootValues = new RealParameter(new Double[] {479.701057745291, 860.744522346309});
-        sigma = new RealParameter(new Double[] {0.000623020788861537, 0.0440561576525885, 7.8185676755921});
+        sigmasq = new RealParameter(new Double[] {0.000623020788861537, 7.8185676755921});
+        covariance = new RealParameter(new Double[] {0.0440561576525885});
         alpha = new RealParameter(new Double[] {0.903659679354104, 1.61416481463754, 1.61416481463754, 2.88331082048443});
         theta = new RealParameter(new Double[] {-525940.712324216, 294437.489034769});
 
         nodeMath = new OUNodeMath();
         colorAssignments = new IntegerParameter(new Integer[]{0});
-        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta, "sigma", sigma, "root", rootValues,
+        nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta,
+                "sigmasq", sigmasq, "covariance", covariance, "root", rootValues,
                 "optNr", 1, "optAssign", colorAssignments, "upperMatrix", false);
 
         pcm = new OUPruneLikelihood();
