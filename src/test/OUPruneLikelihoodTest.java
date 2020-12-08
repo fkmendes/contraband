@@ -275,7 +275,7 @@ public class OUPruneLikelihoodTest {
     }
 
     /*
-     * (6) Non-ultrametric tree with 3 taxa, 1 continuous trait, 1 optima
+     * (7) Non-ultrametric tree with 3 taxa, 1 continuous trait, 1 optima
      *     Having 1 sampled ancestor
      */
     @Test
@@ -310,7 +310,7 @@ public class OUPruneLikelihoodTest {
     }
 
     /*
-     * (6) Non-ultrametric tree with 10 taxa, 2 continuous trait, 1 optima
+     * (8) Non-ultrametric tree with 10 taxa, 2 continuous trait, 1 optima
      *     Having 1 sampled ancestor
      */
     @Test

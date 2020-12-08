@@ -2,7 +2,6 @@ package test;
 
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
-import contraband.prunelikelihood.OUPruneLikelihood;
 import contraband.prunelikelihood.OUPruneUtils;
 import org.apache.commons.math3.linear.*;
 import org.junit.Assert;
@@ -72,12 +71,27 @@ public class OUPruneUtilsTest {
 
     @Test
     public void testCMatForOU(){
+        RealMatrix eMat = new Array2DRowRealMatrix(new double[][] {{0.239527487457355, -0.181275039198727}, {-0.164349514389387, 0.124380251933988}});
+        RealMatrix phiMat = new Array2DRowRealMatrix(new double[][]{{2.33040252312105, -1.59898386250303}, {-1.06598924166869, 0.731418660618013}});
+
+        RealMatrix cRM = OUPruneUtils.getCMatForOU(phiMat, eMat);
+
+        Double[] cMat = new Double[] {-0.3757163513481894, 0.2577942667222091, -0.17688312929786393};
+        Double[] cRMDouble = new Double[] {cRM.getEntry(0,0), cRM.getEntry(0,1), cRM.getEntry(1,1)};
+        Assert.assertArrayEquals(cMat, cRMDouble);
 
     }
 
     @Test
     public void testdVecForOU(){
+        RealMatrix eMat = new Array2DRowRealMatrix(new double[][]{{0.239527487457355, -0.181275039198727}, {-0.164349514389387, 0.124380251933988}});
+        RealVector omega = new ArrayRealVector(new double[] {0.134290669690993, 0.667285290525338});
 
+        RealVector dVec = OUPruneUtils.getDVecForOU(eMat, omega);
+
+        Double[] d = new Double[] {0.08879586049666546, -0.06092650619664564};
+        Double[] dVecDouble = new Double[] {dVec.getEntry(0), dVec.getEntry(1)};
+        Assert.assertArrayEquals(d, dVecDouble);
     }
 
     @Test
@@ -106,6 +120,85 @@ public class OUPruneUtilsTest {
         double detVariance = 12.0923805058647;
         double f = OUPruneUtils.getFforOU(omega, invVariance, detVariance, nTraits);
         Assert.assertEquals(-3.24809910801962,f, EPSILON);
+    }
+
+    @Test
+    public void testOULMatForTips(){
+        RealMatrix cMat = new Array2DRowRealMatrix(new double[][] {{-0.375716351348188, 0.257794266722209}, {0.257794266722209, -0.176883129297864}});
+
+        RealMatrix lRM = OUPruneUtils.getLMatForOULeaf(cMat);
+
+        Double[] lMat = new Double[] {-0.375716351348188, 0.257794266722209, -0.176883129297864};
+        Double[] lRMDouble = new Double[] {lRM.getEntry(0, 0), lRM.getEntry(0, 1), lRM.getEntry(1, 1)};
+
+        Assert.assertArrayEquals(lMat, lRMDouble);
+    }
+
+    @Test
+    public void testOUMVecForTips(){
+        RealVector dVec = new ArrayRealVector(new double[]{0.0887958604966654, -0.0609265061966458});
+        RealMatrix eMat = new Array2DRowRealMatrix(new double[][]{{0.239527487457355, -0.181275039198727}, {-0.164349514389387, 0.124380251933988}});
+        RealVector traitVec = new ArrayRealVector(new double[]{4.53371989048144, 4.39037816144705});
+
+        RealVector mVec = OUPruneUtils.getMVecForOULeaf(eMat, traitVec, dVec);
+
+        Double[] m = new Double[] {0.3788804213855705, -0.25996482676851224};
+        Double[] mVecDouble = new Double[] {mVec.getEntry(0), mVec.getEntry(1)};
+
+        Assert.assertArrayEquals(m, mVecDouble);
+    }
+
+    @Test
+    public void testOURForTips(){
+        RealVector traitVec = new ArrayRealVector(new double[]{4.53371989048144, 4.39037816144705});
+        RealMatrix aMat = new Array2DRowRealMatrix(new double[][]{{-0.100703905102644, -0.107803049335448}, {-0.107803049335447, -0.32069931328358}});
+        RealVector bVec = new ArrayRealVector(new double[]{0.170917967904107, 0.456949756251397});
+        double f = -3.24809910801962;
+
+        double r = OUPruneUtils.getRForOULeaf(aMat, traitVec, bVec, f);
+        Assert.assertEquals(-13.0101512466986, r, EPSILON);
+    }
+
+    @Test
+    public void testOULMatForIntNode(){
+        RealMatrix EAplusL_1 = new Array2DRowRealMatrix(new double[][]{{-0.428759247576708, 0.235066408456966}, {0.294189020642262, -0.161288815115095}});
+        RealMatrix cMat = new Array2DRowRealMatrix(new double[][]{{-0.375716351348188, 0.257794266722209}, {0.257794266722209, -0.176883129297864}});
+        RealMatrix eMat = new Array2DRowRealMatrix(new double[][]{{0.239527487457355, -0.181275039198727}, {-0.164349514389387, 0.124380251933988}});
+
+        RealMatrix lRM = OUPruneUtils.getLMatForOUIntNode(cMat, eMat, EAplusL_1);
+
+        Double[] lMat = new Double[] {-0.33938852692231414, 0.2328682684136375, -0.15978038776301526};
+        Double[] lRMDouble = new Double[] {lRM.getEntry(0, 0), lRM.getEntry(0, 1), lRM.getEntry(1, 1)};
+
+        Assert.assertArrayEquals(lMat, lRMDouble);
+    }
+
+    @Test
+    public void testOUMVecForIntNode(){
+        RealMatrix EAplusL_1 = new Array2DRowRealMatrix(new double[][]{{-0.428759247576708, 0.235066408456966}, {0.294189020642262, -0.161288815115095}});
+        RealVector dVec = new ArrayRealVector(new double[]{0.0887958604966654, -0.0609265061966458});
+        RealVector bVec = new ArrayRealVector(new double[]{0.170917967904107, 0.456949756251397});
+        RealVector mChild = new ArrayRealVector(new double[] {0.378880421385571, -0.259964826768511});
+
+        RealVector mVec = OUPruneUtils.getMVecForOUIntNode(EAplusL_1, bVec, mChild, dVec);
+
+        Double[] m = new Double[] {0.1835091624051842, -0.12591309810864493};
+        Double[] mVecDouble = new Double[] {mVec.getEntry(0), mVec.getEntry(1)};
+
+        Assert.assertArrayEquals(m, mVecDouble);
+    }
+
+    @Test
+    public void testOURForIntNode(){
+        double rChild = -13.0101512466986;
+        double f = -3.24809910801962;
+        double logVNode = -0.152866886077582;
+        RealMatrix AplusL_1 = new Array2DRowRealMatrix(new double[][]{{2.31907227633982, -0.699060988027452}, {-0.699060988027452, -2.22044210983387}});
+        RealVector bVec = new ArrayRealVector(new double[]{0.170917967904107, 0.456949756251397});
+        RealVector mChild = new ArrayRealVector(new double[] {0.378880421385571, -0.259964826768511});
+
+        double r = OUPruneUtils.getRForOUIntNode(bVec, mChild, AplusL_1, f, rChild, 2, logVNode);
+        Assert.assertEquals(-14.4597962945821, r, EPSILON);
     }
 
     @Test
