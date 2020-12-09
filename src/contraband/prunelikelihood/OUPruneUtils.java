@@ -203,6 +203,17 @@ public class OUPruneUtils {
         MatrixUtilsContra.matrixPreMultiply(thetaVec, minusPhiMat, nTraits, nTraits, omega);
     }
 
+    /*
+     * if(is.null(e_Ht)) {
+     *   e_Ht <- expm(-t*H)
+     *  }
+     * I <- diag(nrow(H))
+     * xi[edgeIndex] * e_Ht%*%mj +  (I-e_Ht)%*%Theta
+     */
+    public static RealVector getOmegaVec(RealVector mj, RealMatrix phiMat, RealVector iMinusPhiTheta) {
+        return phiMat.preMultiply(mj).add(iMinusPhiTheta);
+    }
+
     public static RealMatrix getPhiRM(Node aNode, RealMatrix phiMat) {
         double nodeBranchLength = aNode.getLength();
         if(nodeBranchLength == 0.0) {

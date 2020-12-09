@@ -2,6 +2,7 @@ package contraband.prunelikelihood;
 
 import beast.core.CalculationNode;
 import beast.core.Input;
+import beast.core.parameter.BooleanParameter;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import org.apache.commons.math3.linear.*;
@@ -16,7 +17,7 @@ public class OUNodeMath extends CalculationNode {
     final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     final public Input<Boolean> useUpperMatrixInput = new Input<>("upperMatrix", "TRUE, if sigmasq and correlations are from upper matrix", true);
     
-    final public Input<RealParameter> alphaInput = new Input<>("alpha","An array of (nTraits * (nTraits - 1) / 2) elements, representing selection strength, off-diagonal elements in Alpha matrix.", Input.Validate.REQUIRED);
+    final public Input<RealParameter> alphaInput = new Input<>("alpha","An array of (nTraits * nTraits) elements, representing selection strength.", Input.Validate.REQUIRED);
     final public Input<RealParameter> thetaInput = new Input<>("theta","An array of nTraits elements, representing optimum trait values, elements in Theta vector.", Input.Validate.REQUIRED);
     final public Input<RealParameter> rootValuesInput = new Input<>("root","Trait values at the root.");
 
@@ -30,11 +31,25 @@ public class OUNodeMath extends CalculationNode {
     final public Input<Integer> optNrInput = new Input<>("optNr","Number of theta (vectors).");
     final public Input<IntegerParameter> optAssignInput = new Input<>("optAssign", "the opt assignment for each node in the tree.");
 
+    // JOU model
+    final public Input<RealParameter> jumpVarInput = new Input<>("jumpVar","Diagonal values in variance matrix of the normal jump distribution.");
+    final public Input<RealParameter> jumpCovInput = new Input<>("jumpCov","Off diagonal values in variance matrix of the normal jump distribution.");
+    final public Input<RealParameter> jumpMeanValuesInput = new Input<>("jumpMean", "jump mean vector");
+    final public Input<IntegerParameter> jumpIndicatorsInput = new Input<>("jump","An array of boolean parameters corresponding to each branch in the tree. TRUE \n" +
+            "indicates that a jump takes place at the beginning of the branch.");
+
+    // DOU model
+    final public Input<RealParameter> dAlphaInput = new Input<>("dAlpha","An array of (nTraits * nTraits) elements in decorrelation rate matrix.");
+
+
     private Boolean useUpperMatrix;
     private RealMatrix sigmaRM;
     private RealMatrix sigmaERM;
+    private RealMatrix sigmaJRM;
     private RealMatrix alphaRM;
+    private RealMatrix dAlphaRM;
     private RealVector thetaVec;
+    private RealVector jumpMeanVec;
     private RealVector rootValuesVec;
     private RealMatrix identity;
     private int nTraits;
@@ -75,6 +90,8 @@ public class OUNodeMath extends CalculationNode {
 
     private int optNr;
     private List<RealVector> thetaVecList;
+    private Integer[] jumpIndicators;
+
     @Override
     public void initAndValidate() {
         // collect trait information
@@ -114,7 +131,7 @@ public class OUNodeMath extends CalculationNode {
         if (popVarInput.get() != null) {
             sigmaERM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
             // check dimensions
-            if (popVarInput.get().getDimension() != nSpecies) {
+            if (popVarInput.get().getDimension() != nTraits) {
                 popVarInput.get().setDimension(nTraits);
             }
             if (popCovInput.get().getDimension() != nTraits * (nTraits - 1) / 2) {
@@ -247,6 +264,10 @@ public class OUNodeMath extends CalculationNode {
 
     public double getLikelihoodForSA() {return likForSA;}
 
+    public int getJumpForNode(int nodeIdx) { return jumpIndicators[nodeIdx]; }
+
+    public RealVector getJumpMeanVec() {return jumpMeanVec;}
+
     // setters
     public void setLMatForNode (int nodeIdx, RealMatrix value) { lMatList.set(nodeIdx,value); }
 
@@ -269,6 +290,37 @@ public class OUNodeMath extends CalculationNode {
     }
     public void setLikelihoodForSA (double value) { likForSA = value; }
 
+    /*
+     * Initiate and validate inputs for JOU model
+     */
+    public void initValidateJOU(){
+        sigmaJRM = new Array2DRowRealMatrix(new double [nTraits][nTraits]);
+        jumpMeanVec = new ArrayRealVector(new double[nTraits]);
+        // check dimensions
+        if (jumpVarInput.get().getDimension() != nTraits) {
+            jumpVarInput.get().setDimension(nTraits);
+        }
+        if (jumpCovInput.get().getDimension() != nTraits * (nTraits - 1) / 2) {
+            jumpCovInput.get().setDimension(nTraits * (nTraits - 1) / 2);
+        }
+        if(jumpMeanValuesInput.get().getDimension() != nTraits) {
+            jumpMeanValuesInput.get().setDimension(nTraits);
+        }
+        jumpIndicators = new Integer[nodeNr];
+        if(jumpIndicatorsInput.get().getDimension() != nodeNr) {
+            jumpIndicatorsInput.get().setDimension(nodeNr);
+        }
+    }
+
+    /*
+     * Initiate and validate inputs for DOU model
+     */
+    public void initValidateDOU(){
+        dAlphaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
+        if (dAlphaInput.get().getDimension() != nTraits * nTraits){
+            dAlphaInput.get().setDimension(nTraits * nTraits);
+        }
+    }
 
     public void populateAlphaMatrix() {
         OUPruneUtils.populateAlphaMatrix(alphaRM, alphaInput.get().getDoubleValues());
@@ -445,5 +497,22 @@ public class OUNodeMath extends CalculationNode {
 
     public void updateRootValues(){
         OUPruneUtils.populateRealVector(rootValuesVec, nTraits, rootValuesInput.get().getDoubleValues());
+    }
+
+    public void updateJOUParameters(){
+        jumpIndicators = jumpIndicatorsInput.get().getValues();
+
+        OUPruneUtils.populateUpperSigmaMatrix(sigmaJRM, jumpVarInput.get().getDoubleValues(), jumpCovInput.get().getDoubleValues(), nTraits);
+        sigmaJRM = sigmaJRM.multiply(sigmaJRM.transpose());
+
+        OUPruneUtils.populateRealVector(jumpMeanVec, nTraits, jumpMeanValuesInput.get().getDoubleValues());
+
+        //V <- PCMCondVOU(H, Sigma, Sigmae, Sigmaj, xi, threshold.Lambda_ij = metaI$PCMBase.Threshold.Lambda_ij)
+    }
+
+    public void updateDOUParameters(){
+        OUPruneUtils.populateAlphaMatrix(dAlphaRM, dAlphaInput.get().getDoubleValues());
+
+        //V <- PCMCondVOU(H2, Sigma, Sigmae, threshold.Lambda_ij = metaI$PCMBase.Threshold.Lambda_ij)
     }
 }
