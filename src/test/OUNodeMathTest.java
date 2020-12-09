@@ -35,8 +35,10 @@ public class OUNodeMathTest {
 
     OUNodeMath nodeMath = new OUNodeMath();
     RealParameter rootValues = new RealParameter(new Double[] {0.2, 1.3});
-    RealParameter sigma = new RealParameter(new Double[] {1.36, 0.6, 1.0});
-    RealParameter sigmae = new RealParameter(new Double[] {1.0, 0.3, 1.0});
+    RealParameter sigmasq = new RealParameter(new Double[] {1.36, 1.0});
+    RealParameter covariance = new RealParameter(new Double[] {0.6});
+    RealParameter popVar = new RealParameter(new Double[] {1.0, 1.0});
+    RealParameter popCov = new RealParameter(new Double[] {0.3});
     RealParameter alpha = new RealParameter(new Double[] {1.0, 3.0, 2.0, 4.0});
     RealParameter theta = new RealParameter(new Double[] {0.5, 0.5});
     OUPruneLikelihood pcm = new OUPruneLikelihood();
@@ -48,7 +50,7 @@ public class OUNodeMathTest {
         oneTraitData.initByName("value", oneTraitValues, "keys", spNames, "minordimension", nTraits);
 
         nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta,
-                "sigma", sigma, "sigmae", sigmae,
+                "sigmasq", sigmasq, "covariance", covariance,  "popVar", popVar, "popCov", popCov,
                 "root", rootValues,"optNr", 1, "optAssign", colorAssignments,
                 "upperMatrix", false);
 
@@ -270,7 +272,7 @@ public class OUNodeMathTest {
         oneTraitData.initByName("value", oneTraitValues, "keys", spNames, "minordimension", nTraits);
 
         nodeMath.initByName("traits", oneTraitData, "alpha", alpha, "theta", theta,
-                "sigma", sigma, "sigmae", sigmae,
+                "sigmasq", sigmasq, "covariance", covariance, "popVar", popVar, "popCov", popCov,
                 "root", rootValues,"optNr", 1, "optAssign", colorAssignments,
                 "upperMatrix", false);
 
