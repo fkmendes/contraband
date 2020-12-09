@@ -204,14 +204,11 @@ public class OUPruneUtils {
     }
 
     /*
-     * if(is.null(e_Ht)) {
-     *   e_Ht <- expm(-t*H)
-     *  }
-     * I <- diag(nrow(H))
-     * xi[edgeIndex] * e_Ht%*%mj +  (I-e_Ht)%*%Theta
+     * OU model with jumps
+     * omega <- e_Ht%*%mj +  (I-e_Ht)%*%Theta
      */
     public static RealVector getOmegaVec(RealVector mj, RealMatrix phiMat, RealVector iMinusPhiTheta) {
-        return phiMat.preMultiply(mj).add(iMinusPhiTheta);
+        return phiMat.transpose().preMultiply(mj).add(iMinusPhiTheta);
     }
 
     public static RealMatrix getPhiRM(Node aNode, RealMatrix phiMat) {

@@ -229,6 +229,8 @@ public class OUNodeMath extends CalculationNode {
 
     public RealMatrix getAlphaMatrix () {return alphaRM; }
 
+    public RealMatrix getDAlphaMatrix () {return dAlphaRM; }
+
     public RealVector getThetaVec () {return thetaVec; }
 
     public RealMatrix getIdentityMatrix ( ) {return identity; }
@@ -290,6 +292,9 @@ public class OUNodeMath extends CalculationNode {
     }
     public void setLikelihoodForSA (double value) { likForSA = value; }
 
+    public void setPhiMatForNode(int nodeIdx, RealMatrix phiMat){
+        PhiMatList.set(nodeIdx,phiMat);
+    }
     /*
      * Initiate and validate inputs for JOU model
      */
@@ -326,8 +331,8 @@ public class OUNodeMath extends CalculationNode {
         OUPruneUtils.populateAlphaMatrix(alphaRM, alphaInput.get().getDoubleValues());
     }
 
-    public void performAlphaDecomposition() {
-        decompositionH = new EigenDecomposition(alphaRM);
+    public void performAlphaDecomposition(RealMatrix alpha) {
+        decompositionH = new EigenDecomposition(alpha);
         // normalize eigen vectors
         // NOTE: in R, eigen() returns vectors in decreasing order according to eigen values
         for (int i = 0; i < nTraits; i ++) {
@@ -353,11 +358,12 @@ public class OUNodeMath extends CalculationNode {
         if(branchLength < 1e-6){
             branchLength = node.getParent().getLength();
         }
-        int nodeIdx = node.getNr();
 
         // variance-covariance matrix
         variance = calculateVarianceForNode(branchLength);
+    }
 
+    public void setVarianceCovarianceMatrix(Node node, int nodeIdx){
         // considering population variances
         if (node.isLeaf() && sigmaERM!=null) {
             variance = variance.add(sigmaERM);
@@ -370,6 +376,7 @@ public class OUNodeMath extends CalculationNode {
         populateInverseVarianceCovarianceMatrix(variance);
         invVCVMatList.set(nodeIdx, invVCVMat);
     }
+
 
     public void performAPlusOperations (Node aNode, RealMatrix aMat) {
         // (aMat + lMat).inverse
@@ -506,8 +513,14 @@ public class OUNodeMath extends CalculationNode {
         sigmaJRM = sigmaJRM.multiply(sigmaJRM.transpose());
 
         OUPruneUtils.populateRealVector(jumpMeanVec, nTraits, jumpMeanValuesInput.get().getDoubleValues());
+    }
 
-        //V <- PCMCondVOU(H, Sigma, Sigmae, Sigmaj, xi, threshold.Lambda_ij = metaI$PCMBase.Threshold.Lambda_ij)
+    // res <- res + xi[edgeIndex]*(e_Ht %*% Sigmaj %*% t(e_Ht))
+    public void populateVarianceCovarianceMatrixForJOU (int nodeIdx) {
+        if(jumpIndicators[nodeIdx] == 1) {
+            RealMatrix phiRM = PhiMatList.get(nodeIdx);
+            variance = phiRM.multiply(sigmaJRM).multiply(phiRM.transpose()).add(variance);
+        }
     }
 
     public void updateDOUParameters(){

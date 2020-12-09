@@ -27,7 +27,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
     private Tree tree;
     private int nTraits;
     private List<RealVector>  traitValuesList;
-    private OUNodeMath nodeMath;
+    protected OUNodeMath nodeMath;
 
 
     @Override
@@ -50,9 +50,6 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
         nodeMath.updateSigmaMatrix();
         nodeMath.updateThetaVectors();
         nodeMath.updateRootValues();
-
-        nodeMath.populateAlphaMatrix();
-        nodeMath.performAlphaDecomposition();
 
         nodeMath.setSingularMatrix(false);
         nodeMath.setLikelihoodForSA(0.0);
@@ -178,10 +175,13 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
             nodeMath.setRForNode(thisNodeIdx, thisNodeR);
     }
 
-    protected RealMatrix calculatePhiMatrix (Node node, OUNodeMath nodeMath) { return null;}
+    protected RealMatrix calculatePhiMatrix (Node node, OUNodeMath nodeMath) {
+        return OUPruneUtils.getPhiRM(node, nodeMath.getAlphaMatrix());
+    }
 
-    protected RealVector calculateOmegaVector (Node node, OUNodeMath nodeMath, RealMatrix PhiMat) { return null;}
-
+    protected RealVector calculateOmegaVector (Node node, OUNodeMath nodeMath, RealMatrix phiRM) {
+        return OUPruneUtils.getOmegaVec(nodeMath.getThetaForNode(node.getNr()), phiRM, nodeMath.getIdentityMatrix());
+    }
     private void populateTraitValuesList(KeyRealParameter traitValues, Tree tree, List<RealVector> traitValuesList) {
         // according to node number of tips
         for (int i = 0; i < tree.getLeafNodeCount(); i ++) {
@@ -197,6 +197,7 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
 
         // inverse of variance-covariance of this node
         nodeMath.populateVarianceCovarianceMatrix(node);
+        nodeMath.setVarianceCovarianceMatrix(node, nodeIdx);
 
         RealMatrix aMat = OUPruneUtils.getAMatForOU(nodeMath.getInverseVarianceMatrix());
         RealMatrix eMat = OUPruneUtils.getEMatForOU(phiRM, nodeMath.getInverseVarianceMatrix());

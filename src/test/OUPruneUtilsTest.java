@@ -18,6 +18,9 @@ public class OUPruneUtilsTest {
 
     int nTraits = 2;
 
+    /*
+     * (1)
+     */
     @Test
     public void testPhi(){
         RealMatrix alpha = new Array2DRowRealMatrix(new double[][] {
@@ -30,6 +33,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(phiMat, phiRMDouble);
     }
 
+    /*
+     * (2)
+     */
     @Test
     public void testOmega(){
         RealVector theta = new ArrayRealVector(new double[] {0.5, 0.5});
@@ -44,6 +50,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(omega, omegaVecDouble);
     }
 
+    /*
+     * (3)
+     */
     @Test
     public void testAMatForOU(){
         RealMatrix inverseVarianceRM = new Array2DRowRealMatrix(new double[][]{
@@ -56,6 +65,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(aMat, aRMDouble);
     }
 
+    /*
+     * (4)
+     */
     @Test
     public void testbVecForOU(){
         RealVector omega = new ArrayRealVector(new double[] {0.134290669690993, 0.667285290525338});
@@ -69,6 +81,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(b, bVecDouble);
     }
 
+    /*
+     * (5)
+     */
     @Test
     public void testCMatForOU(){
         RealMatrix eMat = new Array2DRowRealMatrix(new double[][] {{0.239527487457355, -0.181275039198727}, {-0.164349514389387, 0.124380251933988}});
@@ -82,6 +97,9 @@ public class OUPruneUtilsTest {
 
     }
 
+    /*
+     * (6)
+     */
     @Test
     public void testdVecForOU(){
         RealMatrix eMat = new Array2DRowRealMatrix(new double[][]{{0.239527487457355, -0.181275039198727}, {-0.164349514389387, 0.124380251933988}});
@@ -94,6 +112,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(d, dVecDouble);
     }
 
+    /*
+     * (7)
+     */
     @Test
     public void testEMatForOU(){
         RealMatrix phiMat = new Array2DRowRealMatrix(new double[][]{
@@ -110,6 +131,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(eMat, eRMDouble);
     }
 
+    /*
+     * (8)
+     */
     @Test
     public void testfForOU(){
         RealVector omega = new ArrayRealVector(new double[] {0.134290669690993, 0.667285290525338});
@@ -122,6 +146,9 @@ public class OUPruneUtilsTest {
         Assert.assertEquals(-3.24809910801962,f, EPSILON);
     }
 
+    /*
+     * (9)
+     */
     @Test
     public void testOULMatForTips(){
         RealMatrix cMat = new Array2DRowRealMatrix(new double[][] {{-0.375716351348188, 0.257794266722209}, {0.257794266722209, -0.176883129297864}});
@@ -134,6 +161,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(lMat, lRMDouble);
     }
 
+    /*
+     * (10)
+     */
     @Test
     public void testOUMVecForTips(){
         RealVector dVec = new ArrayRealVector(new double[]{0.0887958604966654, -0.0609265061966458});
@@ -148,6 +178,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(m, mVecDouble);
     }
 
+    /*
+     * (11)
+     */
     @Test
     public void testOURForTips(){
         RealVector traitVec = new ArrayRealVector(new double[]{4.53371989048144, 4.39037816144705});
@@ -159,6 +192,9 @@ public class OUPruneUtilsTest {
         Assert.assertEquals(-13.0101512466986, r, EPSILON);
     }
 
+    /*
+     * (12)
+     */
     @Test
     public void testOULMatForIntNode(){
         RealMatrix EAplusL_1 = new Array2DRowRealMatrix(new double[][]{{-0.428759247576708, 0.235066408456966}, {0.294189020642262, -0.161288815115095}});
@@ -173,6 +209,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(lMat, lRMDouble);
     }
 
+    /*
+     * (13)
+     */
     @Test
     public void testOUMVecForIntNode(){
         RealMatrix EAplusL_1 = new Array2DRowRealMatrix(new double[][]{{-0.428759247576708, 0.235066408456966}, {0.294189020642262, -0.161288815115095}});
@@ -188,6 +227,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(m, mVecDouble);
     }
 
+    /*
+     * (14)
+     */
     @Test
     public void testOURForIntNode(){
         double rChild = -13.0101512466986;
@@ -201,6 +243,9 @@ public class OUPruneUtilsTest {
         Assert.assertEquals(-14.4597962945821, r, EPSILON);
     }
 
+    /*
+     * (15)
+     */
     @Test
     public void testPopulateUpperSigmaMatrix(){
         int nTraits = 3;
@@ -218,6 +263,9 @@ public class OUPruneUtilsTest {
         Assert.assertArrayEquals(sigmaMat, sigmaRMDouble);
     }
 
+    /*
+     * (16)
+     */
     @Test
     public void testPopulateSigmaMatrix () {
         int nTraits = 3;
@@ -233,6 +281,28 @@ public class OUPruneUtilsTest {
                                                sigmaRM.getEntry(1,0), sigmaRM.getEntry(1,1), sigmaRM.getEntry(1,2),
                                                sigmaRM.getEntry(2,0), sigmaRM.getEntry(2,1), sigmaRM.getEntry(2,2)};
         Assert.assertArrayEquals(sigmaMat, sigmaRMDouble);
+    }
+
+    /*
+     * (17)
+     */
+    @Test
+    public void testOmegaForJOU() {
+        RealVector theta = new ArrayRealVector(new double[] {0.4, 0.6});
+        RealMatrix identity = MatrixUtils.createRealIdentityMatrix(nTraits);
+        RealMatrix phiRM = new Array2DRowRealMatrix(new double[][]{
+                {2.33040252312105, -1.59898386250303},
+                {-1.06598924166869, 0.731418660618013}
+        });
+        RealVector mj = new ArrayRealVector(new double[] {0.2, 0.8});
+        RealVector iMinusPhiTheta = OUPruneUtils.getOmegaVec(theta, phiRM, identity);
+
+        RealVector omegaVec = OUPruneUtils.getOmegaVec(mj, phiRM, iMinusPhiTheta);
+
+        Double[] omega = new Double[] {-0.3858772771248161, 0.9594815804573406};
+        Double[] omegaVecDouble = new Double[] {omegaVec.getEntry(0), omegaVec.getEntry(1)};
+
+        Assert.assertArrayEquals(omega, omegaVecDouble);
     }
 
 }

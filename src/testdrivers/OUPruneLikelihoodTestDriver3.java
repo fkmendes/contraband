@@ -456,7 +456,7 @@ public class OUPruneLikelihoodTestDriver3 {
 */
         // TEST2: pruneOUPCM()
         nodeMath.populateAlphaMatrix();
-        nodeMath.performAlphaDecomposition();
+        nodeMath.performAlphaDecomposition(nodeMath.getAlphaMatrix());
 
         nodeMath.setSingularMatrix(false);
         pcm.pruneOU(tree.getRoot(), nodeMath);

@@ -18,20 +18,11 @@ public class OUPruneLikelihood extends OUPruneLikelihoodProcess {
 
     @Override
     public double calculateLogP() {
+        nodeMath.populateAlphaMatrix();
+        nodeMath.performAlphaDecomposition(nodeMath.getAlphaMatrix());
+
         super.populateLogP();
 
         return getLogP();
     }
-
-    @Override
-    protected RealMatrix calculatePhiMatrix (Node node, OUNodeMath nodeMath) {
-        return OUPruneUtils.getPhiRM(node, nodeMath.getAlphaMatrix());
-    }
-
-    @Override
-    protected RealVector calculateOmegaVector (Node node, OUNodeMath nodeMath, RealMatrix phiRM) {
-        return OUPruneUtils.getOmegaVec(nodeMath.getThetaForNode(node.getNr()), phiRM, nodeMath.getIdentityMatrix());
-    }
-
-
 }
