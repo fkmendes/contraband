@@ -6,8 +6,7 @@ import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.FastMath;
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
-import java.util.Arrays;
-import java.util.List;
+
 
 public class OUPruneUtils {
     private static double LOGTWOPI = FastMath.log(2 * Math.PI);
@@ -230,18 +229,22 @@ public class OUPruneUtils {
         return MatrixFunctions.expm(new DoubleMatrix(matrix)).toArray2();
     }
 
-    // populate matrix
+    // populate Sigma matrix
+    // this method populates an upper diagonal matrix with diagonal values and off-diagonal values
+    // i.e. variance and covariance
     public static void populateUpperSigmaMatrix(RealMatrix rm, double[] diagValues, double[] offDiagValues, int nTraits) {
         int k = 0;
         for (int i = 0; i < nTraits; i++) {
             rm.setEntry(i, i, diagValues[i]);
             for (int j = i+1; j < nTraits; j++) {
                 rm.setEntry(i, j, offDiagValues[k]);
+                rm.setEntry(j, i, 0);
                 k++;
             }
         }
     }
 
+    // this method populates a complete matrix with evolutionary rates and correlations
     public static void populateSigmaMatrix(RealMatrix rm,  double[] diagValues, double[] offDiagValues, int nTraits) {
         int k = 0;
         for (int i = 0; i < nTraits; i++) {
@@ -255,6 +258,22 @@ public class OUPruneUtils {
         }
     }
 
+    // this method populates a upper diagonal matrix with evolutionary rates and correlations
+    public static void populateUpperRhoSigmaMatrix(RealMatrix rm,  double[] diagValues, double[] offDiagValues, int nTraits) {
+        int k = 0;
+        for (int i = 0; i < nTraits; i++) {
+            rm.setEntry(i, i, diagValues[i]);
+            for (int j = i + 1; j < nTraits; j++) {
+                double value = FastMath.sqrt(diagValues[i]) * FastMath.sqrt(diagValues[j]) * offDiagValues[k];
+                rm.setEntry(i, j, value);
+                rm.setEntry(j, i, 0);
+                k++;
+            }
+        }
+    }
+
+    // this method populates a complete diagonal matrix with diagonal values and off-diagonal values
+    // i.e. variance and covariance
     public static void populateDirectSigmaMatrix(RealMatrix rm,  double[] diagValues, double[] offDiagValues, int nTraits) {
         int k = 0;
         for (int i = 0; i < nTraits; i++) {
@@ -278,10 +297,9 @@ public class OUPruneUtils {
         }
     }
 
-    public static void populateRealVector(RealVector vec, int j, double[] values) {
-        int nTraits = vec.getDimension();
+    public static void populateRealVector(RealVector vec, int nTraits, double[] values) {
         for (int i = 0; i < nTraits; i ++) {
-            vec.setEntry(i, values[j*nTraits + i]);
+            vec.setEntry(i, values[i]);
         }
     }
 }

@@ -92,23 +92,14 @@ public class OUNodeMath extends CalculationNode {
 
         // Sigma matrix has trait evolutionary rates and traits correlations
         sigmaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
-        if(nTraits == 1) {
-            sigmaRM.setEntry(0, 0, sigmasqInput.get().getValue());
-        } else {
-            // check dimension
-            if (sigmasqInput.get().getDimension() != nTraits) {
-                sigmasqInput.get().setDimension(nTraits);
-            }
+        // check dimension
+        if (sigmasqInput.get().getDimension() != nTraits) {
+            sigmasqInput.get().setDimension(nTraits);
+        }
+        if(nTraits > 1) {
             if (rhoInput.get() == null && covarianceInput.get() != null) {
                 if (covarianceInput.get().getDimension() != nTraits * (nTraits - 1) / 2) {
                     covarianceInput.get().setDimension(nTraits * (nTraits - 1) / 2);
-                }
-
-                if (useUpperMatrix) {
-                    OUPruneUtils.populateUpperSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), covarianceInput.get().getDoubleValues(), nTraits);
-                    sigmaRM = sigmaRM.multiply(sigmaRM.transpose());
-                } else {
-                    OUPruneUtils.populateDirectSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), covarianceInput.get().getDoubleValues(), nTraits);
                 }
             }
 
@@ -116,35 +107,26 @@ public class OUNodeMath extends CalculationNode {
                 if (rhoInput.get().getDimension() != nTraits * (nTraits - 1) / 2) {
                     rhoInput.get().setDimension(nTraits * (nTraits - 1) / 2);
                 }
-                if (useUpperMatrix) {
-                    OUPruneUtils.populateUpperSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), rhoInput.get().getDoubleValues(), nTraits);
-                    sigmaRM = sigmaRM.multiply(sigmaRM.transpose());
-                } else {
-                    OUPruneUtils.populateSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), rhoInput.get().getDoubleValues(), nTraits);
-                }
-            }
-
-            // considering population variance
-            // SigmaE = sigmae %*% t(sigmae)
-            if (popVarInput.get() != null) {
-                sigmaERM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
-                // check dimensions
-                if (popVarInput.get().getDimension() != nSpecies) {
-                    popVarInput.get().setDimension(nTraits);
-                }
-                if (popCovInput.get().getDimension() != nTraits * (nTraits - 1) / 2) {
-                    popCovInput.get().setDimension(nTraits * (nTraits - 1) / 2);
-                }
-                OUPruneUtils.populateUpperSigmaMatrix(sigmaERM, popVarInput.get().getDoubleValues(), popCovInput.get().getDoubleValues(), nTraits);
-                sigmaERM = sigmaERM.multiply(sigmaERM.transpose());
             }
         }
+        // considering population variance
+        // SigmaE = sigmae %*% t(sigmae)
+        if (popVarInput.get() != null) {
+            sigmaERM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
+            // check dimensions
+            if (popVarInput.get().getDimension() != nSpecies) {
+                popVarInput.get().setDimension(nTraits);
+            }
+            if (popCovInput.get().getDimension() != nTraits * (nTraits - 1) / 2) {
+                popCovInput.get().setDimension(nTraits * (nTraits - 1) / 2);
+            }
+        }
+
         // alpha matrix is specified by nTraits * nTraits elements
         alphaRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         if (alphaInput.get().getDimension() != nTraits * nTraits){
             alphaInput.get().setDimension(nTraits * nTraits);
         }
-        OUPruneUtils.populateAlphaMatrix(alphaRM, alphaInput.get().getDoubleValues());
 
         /*
          *  One global theta vector for the tree
@@ -174,7 +156,7 @@ public class OUNodeMath extends CalculationNode {
 
         // traits values at the root
         rootValuesInput.get().setDimension(nTraits);
-        rootValuesVec = new ArrayRealVector(rootValuesInput.get().getDoubleValues());
+        rootValuesVec = new ArrayRealVector(new double[nTraits]);
 
         // initialize lists
         iniMatrix = new Array2DRowRealMatrix(new double [nTraits][nTraits]);
@@ -421,4 +403,47 @@ public class OUNodeMath extends CalculationNode {
         }
     }
 
+    public void updateSigmaMatrix(){
+        if(nTraits == 1) {
+            sigmaRM.setEntry(0, 0, sigmasqInput.get().getValue());
+        } else {
+            if (rhoInput.get() == null && covarianceInput.get() != null) {
+                if (useUpperMatrix) {
+                    OUPruneUtils.populateUpperSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), covarianceInput.get().getDoubleValues(), nTraits);
+                    sigmaRM = sigmaRM.multiply(sigmaRM.transpose());
+                } else {
+                    OUPruneUtils.populateDirectSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), covarianceInput.get().getDoubleValues(), nTraits);
+                }
+            }
+
+            if (rhoInput.get() != null && covarianceInput.get() == null) {
+                if (useUpperMatrix) {
+                    OUPruneUtils.populateUpperRhoSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), rhoInput.get().getDoubleValues(), nTraits);
+                    sigmaRM = sigmaRM.multiply(sigmaRM.transpose());
+                } else {
+                    OUPruneUtils.populateSigmaMatrix(sigmaRM, sigmasqInput.get().getDoubleValues(), rhoInput.get().getDoubleValues(), nTraits);
+                }
+            }
+            // considering population variance
+            // SigmaE = sigmae %*% t(sigmae)
+            if (popVarInput.get() != null) {
+                OUPruneUtils.populateUpperSigmaMatrix(sigmaERM, popVarInput.get().getDoubleValues(), popCovInput.get().getDoubleValues(), nTraits);
+                sigmaERM = sigmaERM.multiply(sigmaERM.transpose());
+            }
+        }
+    }
+
+    public void updateThetaVectors(){
+        for (int j = 0; j < optNr; j ++) {
+            RealVector nodeTheta = new ArrayRealVector(new double[nTraits]);
+            for (int i = 0; i < nTraits; i ++) {
+                nodeTheta.setEntry(i, thetaInput.get().getDoubleValues()[j*nTraits + i]);
+            }
+            thetaVecList.set(j, nodeTheta);
+        }
+    }
+
+    public void updateRootValues(){
+        OUPruneUtils.populateRealVector(rootValuesVec, nTraits, rootValuesInput.get().getDoubleValues());
+    }
 }

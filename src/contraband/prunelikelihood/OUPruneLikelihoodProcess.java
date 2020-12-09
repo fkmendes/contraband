@@ -47,6 +47,9 @@ public abstract class OUPruneLikelihoodProcess extends Distribution {
     }
 
     protected void populateLogP() {
+        nodeMath.updateSigmaMatrix();
+        nodeMath.updateThetaVectors();
+        nodeMath.updateRootValues();
 
         nodeMath.populateAlphaMatrix();
         nodeMath.performAlphaDecomposition();
