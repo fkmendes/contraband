@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.branchratemodel:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
+
+<map name="Uniform" >beast.math.distributions.Uniform</map>
+<map name="Exponential" >beast.math.distributions.Exponential</map>
+<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+<map name="Normal" >beast.math.distributions.Normal</map>
+<map name="Beta" >beast.math.distributions.Beta</map>
+<map name="Gamma" >beast.math.distributions.Gamma</map>
+<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+<map name="prior" >beast.math.distributions.Prior</map>
+<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+<map name="Dirichlet" >beast.math.distributions.Dirichlet</map>
+
+
+<run id="mcmc" spec="MCMC" chainLength="5000000">
+	<state id="state" storeEvery="5000">
+		<tree id="TheTree" name="stateNode" spec='beast.util.TreeParser' 
+					newick="(((t5:1.817200834,((t8:1.198100152,t9:1.198100152):0.09647591001,t7:1.294576062):0.5226247715):2.81691287,t1:0.4510475033):0.8478545584,(((t10:1.050371982,t11:1.050371982):2.196178377,((t4:0.6664595291,((t12:0.7960935013,((t14:0.3280377964,t15:0.3280377964):0.224131159,t13:0.5521689553):0.243924546):0.6327198567,t6:0.9193027238):0.4303386926):0.7483262819,t3:1.389940135):0.6390720264):1.359214975,t2:1.16800625):0.8762029283);" 
+					IsLabelledNewick="true">
+	            <taxonset id="TaxonSet" spec="TaxonSet">
+                <taxon id="t5" spec="Taxon"/>
+                  <taxon id="t8" spec="Taxon"/>
+                  <taxon id="t9" spec="Taxon"/>
+                  <taxon id="t7" spec="Taxon"/>
+                  <taxon id="t1" spec="Taxon"/>
+                  <taxon id="t10" spec="Taxon"/>
+                  <taxon id="t11" spec="Taxon"/>
+                  <taxon id="t4" spec="Taxon"/>
+                  <taxon id="t12" spec="Taxon"/>
+                  <taxon id="t14" spec="Taxon"/>
+                  <taxon id="t15" spec="Taxon"/>
+                  <taxon id="t13" spec="Taxon"/>
+                  <taxon id="t6" spec="Taxon"/>
+                  <taxon id="t3" spec="Taxon"/>
+                  <taxon id="t2" spec="Taxon"/>
+	            </taxonset>
+
+                <trait id="FossilSet" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
+					t1=4.1830662007,
+                    t4=1.1926925217,
+                    t6=0.509510634399999,
+                    t3=1.2175381977,
+                    t2=3.4377590841
+                    <taxa idref="TaxonSet"/>
+                </trait>
+        </tree>       
+        <stateNode idref="sigmasq"/>
+        <stateNode idref="rho"/>
+        <stateNode idref="popVar"/>
+        <stateNode idref="popCov"/>
+        <stateNode idref="alpha"/>
+        <stateNode idref="dAlpha"/>
+        <stateNode idref="theta"/>
+        <stateNode idref="rootValues"/>
+	</state>
+
+	<distribution id="posterior" spec="util.CompoundDistribution">
+    <!-- START prior -->
+    <distribution id="prior" spec="util.CompoundDistribution">
+        <!-- tree prior -->
+        <distribution id="BDTree" spec="beast.evolution.speciation.BirthDeathGernhard08Model" tree="@TheTree" relativeDeathRate="0.3333333" birthDiffRate="0.4"/>
+
+        <!-- OU prior -->
+        <distribution id="sigmasqPrior" spec="beast.math.distributions.Prior" x="@sigmasq">
+            <distr id="LogNormal.sigmasq" spec="beast.math.distributions.LogNormalDistributionModel" S="0.3" M="1.0"/>
+        </distribution>
+        
+        <distribution id="CorrelationPrior" spec="beast.math.distributions.Prior" x="@rho">
+            <distr id="Uniform.correlation" spec="beast.math.distributions.Uniform" upper="1.0" lower="-1.0"/>
+        </distribution>
+
+        <distribution id="popVarPrior" spec="beast.math.distributions.Prior" x="@popVar">
+            <distr id="LogNormal.popVar" spec="beast.math.distributions.LogNormalDistributionModel" S="0.1" M="0.2"/>
+        </distribution>
+        
+        <distribution id="popCovPrior" spec="beast.math.distributions.Prior" x="@popCov">
+            <distr id="Normal.popCov" spec="beast.math.distributions.Normal" mean="0.0" sigma="0.2"/>
+        </distribution>
+
+        <distribution id="alphaPrior" spec="beast.math.distributions.Prior" x="@alpha">
+            <distr id="Normal.alpha" spec="beast.math.distributions.Normal" mean="1.0" sigma="0.3"/>
+        </distribution>
+
+        <distribution id="dAlphaPrior" spec="beast.math.distributions.Prior" x="@dAlpha">
+            <distr id="Normal.dAlpha" spec="beast.math.distributions.Normal" mean="1.0" sigma="0.3"/>
+        </distribution>
+
+        <distribution id="thetaPrior" spec="beast.math.distributions.Prior" x="@theta">
+            <distr id="Normal.theta" spec="beast.math.distributions.Normal" mean="1.0" sigma="0.3"/>
+        </distribution>
+
+        <distribution id="rootValuesPrior" spec="beast.math.distributions.Prior" x="@rootValues">
+            <distr id="Normal.root" spec="beast.math.distributions.Normal" mean="0.0" sigma="1.0"/>
+        </distribution>
+               
+    </distribution>
+    <!-- END prior -->
+
+    <!-- START likelihood -->
+    <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+     <!-- START Morphological likleihood-->
+        <distribution id="PCMLikelihood" spec="contraband.prunelikelihood.DOUPruneLikelihood">
+            <tree idref="TheTree"/>
+
+            <traits id="oneTraitData" spec="outercore.parameter.KeyRealParameter" minordimension="2" keys="t5 t8 t9 t7 t1 t10 t11 t4 t12 t14 t15 t13 t6 t3 t2">
+                -4.56476609232863 -3.16165488505799 -1.40338986968771 -0.822126090285236 2.10304801095364 -2.16218704308891 1.33290989606665 -2.384911638075 -1.99492466823506 -1.82414705353239 3.68544626723392 0.421489490950953 4.54219843717531 0.227955010827931 -1.06769129938773 -3.60820462850146 -3.76459530736917 -1.7451914072727 -0.719928352346218 0.960765212775828 -2.27998665350301 -1.17842005306175 -0.274012911177437 -1.15577307887937 -1.64670996296602 -0.591605525823844 -1.56055206715654 -2.63021409647081 -0.31673777010901 0.716414598215453
+            </traits>
+
+            <nodeMath id="pcmNodeMath" spec="contraband.prunelikelihood.OUNodeMath" traits="@oneTraitData" optNr="1">
+            	<sigmasq id="sigmasq" spec="parameter.RealParameter">1.0</sigmasq>
+                <correlation id="rho" spec="parameter.RealParameter">0.0</correlation>
+            	<popVar id="popVar" spec="parameter.RealParameter">1.0</popVar>
+                <popCov id="popCov" spec="parameter.RealParameter">0.0</popCov>
+                <alpha id="alpha" spec="parameter.RealParameter">1.0</alpha>
+                <dAlpha id="dAlpha" spec="parameter.RealParameter">1.0</dAlpha>
+                <theta id="theta" spec="parameter.RealParameter">1.0</theta>
+                <root id="rootValues" spec="parameter.RealParameter">0.0</root>
+                <optAssign id="optAssignment" spec="parameter.IntegerParameter">0</optAssign>
+            </nodeMath>
+        </distribution>
+        <!-- END Morphological likleihood -->
+	</distribution> 
+	<!-- END Likelihood -->
+	</distribution> 
+	<!-- END Posterior -->
+
+    <!-- OU parameters -->
+    <operator id="SigmasqScaler" spec="ScaleOperator" parameter="@sigmasq" scaleFactor="0.75" weight="6.0"/>
+    <operator id="CorrelationScaler" spec="RealRandomWalkOperator" parameter="@rho" windowSize="0.75" weight="6.0"/>
+    <operator id="popVarScaler" spec="ScaleOperator" parameter="@popVar" scaleFactor="0.75" weight="6.0"/>
+    <operator id="popCovScaler" spec="RealRandomWalkOperator" parameter="@popCov" windowSize="0.75" weight="6.0"/>
+    <operator id="AlphaScaler" spec="RealRandomWalkOperator" parameter="@alpha" windowSize="0.75" weight="6.0"/>
+    <operator id="dAlphaScaler" spec="RealRandomWalkOperator" parameter="@dAlpha" windowSize="0.75" weight="6.0"/>
+    <operator id="ThetaScaler" spec="RealRandomWalkOperator" parameter="@theta" windowSize="0.75" weight="6.0"/>
+    <operator id="rootValueScaler" spec="RealRandomWalkOperator" parameter="@rootValues" windowSize="0.75" weight="6.0"/>
+
+    <!-- tree operators -->
+    <operator id="UniformOperator" spec="Uniform" tree="@TheTree" weight="20.0"/>
+    <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@TheTree" weight="1.0"/>
+    <operator id="TreeScaler" spec="ScaleOperator" scaleFactor="0.95" tree="@TheTree" weight="3.0"/>
+    
+    <logger id="tracelog" fileName="DOUPruneLikelihood.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+      <log idref="posterior"/>
+      <log idref="likelihood"/>
+      <log idref="prior"/>
+      <log id="TreeStats" spec="beast.evolution.tree.TreeStatLogger" tree="@TheTree"/>
+      <log idref="sigmasq"/>
+      <log idref="rho"/>
+      <log idref="popVar"/>
+      <log idref="popCov"/>
+      <log idref="theta"/>
+      <log idref="alpha"/>
+      <log idref="dAlpha"/>
+      <log idref="rootValues"/>
+    </logger>
+
+    <logger id="screenlog" logEvery="5000">
+        <log idref="posterior"/>
+        <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+    </logger>
+
+    <logger id="treelog" fileName="DOUPruneLikelihood.trees" logEvery="5000" mode="tree">
+        <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
+    </logger>
+  </run>
+</beast>
