@@ -525,7 +525,5 @@ public class OUNodeMath extends CalculationNode {
 
     public void updateDOUParameters(){
         OUPruneUtils.populateAlphaMatrix(dAlphaRM, dAlphaInput.get().getDoubleValues());
-
-        //V <- PCMCondVOU(H2, Sigma, Sigmae, threshold.Lambda_ij = metaI$PCMBase.Threshold.Lambda_ij)
     }
 }
