@@ -586,6 +586,9 @@ public class NodeMath extends CalculationNode {
     // X.transpose * V.inverse * X ---> Z.transpose * Z
     public void populateTransformedTraitValues(RealMatrix traitMat) {
         CholeskyDecomposition corrMatChol = new CholeskyDecomposition(traitRateRM);
+        // in R, chol() returns upper-diagonal matrix
+        // appache.commons CholeskyDecomposition() returns lower-diagonal matrix
+        // so we getLT()
         RealMatrix upperMat = corrMatChol.getLT();
         LUDecomposition upperMatLUD = new LUDecomposition(upperMat);
         RealMatrix dataTransformMat = upperMatLUD.getSolver().getInverse();
