@@ -1,7 +1,7 @@
 package contraband.utils;
 
 import org.apache.commons.math3.linear.*;
-import sun.security.krb5.Realm;
+import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,53 +50,45 @@ public class ShrinkageUtils {
         //xswsvd = fast.svd(xsw)
         // TO DO: this part currently only applies to the cases where nTraits and nSpecies are approximately the same.
         // For other cases, we need to implement fast.svd or get the delta from corpcor library.
-        SingularValueDecomposition xswsvd = new SingularValueDecomposition(xsw);
-        double[] svdSingularValues = xswsvd.getSingularValues();
-        RealMatrix leftSingular = xswsvd.getU();
-        RealMatrix rightSingularTranspose = xswsvd.getVT();
-        double max = Arrays.stream(svdSingularValues).max().getAsDouble();
-        double tol = Math.max(n, p) * max * machineEps;
-        int validNr = 0;
-        for (int i = 0; i < svdSingularValues.length; i++) {
-            if (svdSingularValues[i] > tol) {
-                validNr += 1;
-            }
-        }
-/*
+        SingularValueDecomposition xswsvd;
+
         // start fast svd
+        List<Double> singularValues = new ArrayList<>();
+        List<Integer> validIndex = new ArrayList<>();
+        RealMatrix vMat; RealMatrix uMat;
         if (n > edgeRatio * p) {
             //psmall.svd
             xswsvd = pSmallSVD(xsw);
+            populateSingularValues(xswsvd, p, singularValues, validIndex);
+            populateSqrtSingularValues(singularValues);
+            vMat = getValidVMatrix(xswsvd.getVT(), validIndex);
+            uMat = getUMatForPSmall(xsw, vMat, singularValues);
         } else if (edgeRatio * n < p) {
             //nsmall.svd
             xswsvd = nSmallSVD(xsw);
+            populateSingularValues(xswsvd, n, singularValues, validIndex);
+            populateSqrtSingularValues(singularValues);
+            uMat = getValidUMatrix(xswsvd.getU(), validIndex);
+            vMat = getVMatForNSmall(xsw, uMat, singularValues);
         } else{
             //positive.svd
             xswsvd = positiveSVD(xsw);
+            populateSingularValues(xswsvd, Math.max(n, p), singularValues, validIndex);
+            uMat = getValidUMatrix(xswsvd.getU(), validIndex);
+            vMat = getValidVMatrix(xswsvd.getVT(), validIndex);
         }
-*/
+
 
         // sweep(xswsvd$u, 2, xswsvd$d^3, "*")
-        RealMatrix aMat = new Array2DRowRealMatrix(new double [n][validNr]);
-        int k = 0;
-        for (int j = 0; j < svdSingularValues.length; j ++) {
-            if(svdSingularValues[j] > tol) {
+        RealMatrix aMat = new Array2DRowRealMatrix(new double [n][singularValues.size()]);
+        for (int j = 0; j < singularValues.size(); j ++) {
                 for (int i = 0; i < n; i++) {
-                    aMat.setEntry(i, k, leftSingular.getEntry(i, j) * Math.pow(svdSingularValues[k], 3));
+                    aMat.setEntry(i, j, uMat.getEntry(i, j) * Math.pow(singularValues.get(j), 3));
                 }
-                k ++;
-            }
         }
+
         // (sweep(xswsvd$u, 2, xswsvd$d^3, "*") %*% t(xswsvd$v))
-        RealMatrix dMat = new Array2DRowRealMatrix(new double[validNr][p]);
-        k = 0;
-        for (int j = 0; j < svdSingularValues.length; j ++) {
-            if (svdSingularValues[j] > tol) {
-                dMat.setRow(k, rightSingularTranspose.getRow(k));
-                k ++;
-            }
-        }
-        RealMatrix bMat = aMat.multiply(dMat);
+        RealMatrix bMat = aMat.multiply(vMat);
 
         // xsw * (sweep(xswsvd$u, 2, xswsvd$d^3, "*") %*% t(xswsvd$v))
         RealMatrix cMat = new Array2DRowRealMatrix(new double [n][p]);
@@ -114,7 +106,6 @@ public class ShrinkageUtils {
             double sum3 = 0.0;
             for (int i = 0; i < n; i ++) {
                 sum1 += cMat.getEntry(i, j);
-                //sum1 += bMat.getEntry(i, j) * xsw.getEntry(i, j);
                 sum3 += xsw.getEntry(i, j) * xsw.getEntry(i, j);
             }
             sum2 += sum3 * sum3;
@@ -122,7 +113,6 @@ public class ShrinkageUtils {
         double denominator = sum1 - sum2;
 
         // sweep(xs^2, MARGIN = 1, STATS = sw, FUN = "*")
-        //RealMatrix xsSq = xs.preMultiply(xs);
         RealMatrix xs2w = new Array2DRowRealMatrix(new double [n][p]);
         for (int j = 0; j < p; j ++) {
             for (int i = 0; i < n; i ++) {
@@ -150,13 +140,11 @@ public class ShrinkageUtils {
                 xs2wPartial2.setEntry(i, j, cumSum);
             }
         }
-
-
+        
         //xs2wPartial2 = xs2wPartial2.transpose();
         double sum4 = 0.0;
         for (int i = 0; i < n; i ++) {
             for (int j = 0; j < (p - 1); j++){
-                //sum4 += dMat.getEntry(i,j);
                 sum4 += xs2wPartial1.getEntry(i,j) * xs2wPartial2.getEntry(i,j);
             }
         }
@@ -239,40 +227,95 @@ public class ShrinkageUtils {
         }
     }
 
+    // s = svd(m)
     public static SingularValueDecomposition positiveSVD(RealMatrix m){
         return new SingularValueDecomposition(m);
     }
 
+    // B = m %*% t(m)     # nxn matrix
+    // s = svd(B,nv=0)
     public static SingularValueDecomposition nSmallSVD (RealMatrix m){
         RealMatrix bMat = m.multiply(m.transpose());
         return new SingularValueDecomposition(bMat);
-
-        //v = crossprod(m, u) %*% diag(1/d, nrow=length(d))
-        // crossprod(m, u) = t(m) %*% u
     }
 
+    // B = crossprod(m)   # pxp matrix
+    // s = svd(B,nu=0)
     public static SingularValueDecomposition pSmallSVD (RealMatrix m){
         RealMatrix bMat = m.transpose().multiply(m);
         return new SingularValueDecomposition(bMat);
     }
 
-    public static List<Double> pSmallSingularValues (SingularValueDecomposition svd, int p){
+
+    //   tol = dim(B)[1]*max(s$d)*.Machine$double.eps
+    //   Positive = s$d > tol
+    //   For pSmall dim(B)[1] = p
+    //   For nSmall dim(B)[1] = n
+    public static void populateSingularValues(SingularValueDecomposition svd, int p, List<Double> values, List<Integer> index){
         double[] svdSingularValues = svd.getSingularValues();
         double max = Arrays.stream(svdSingularValues).max().getAsDouble();
         double tol = p * max * machineEps;
-        return getValidSingularValues(svdSingularValues, tol);
+        populateValidSingularValues(svdSingularValues, tol, values, index);
     }
 
-    public static List<Double> getValidSingularValues(double[] singularValues, double tol){
-        List<Double> valid = new ArrayList<>();
+    public static void populateValidSingularValues(double[] singularValues, double tol, List<Double> values, List<Integer> index){
         int j = 0;
-        for (double value : singularValues) {
+        for (int i = 0; i < singularValues.length; i++) {
+            double value = singularValues[i];
             if (value > tol) {
-                valid.add(j, value);
+                values.add(j, value);
+                index.add(j, i);
                 j++;
             }
         }
-        return valid;
+    }
+
+    // For both pSmall and nSmall
+    // d = sqrt(s$d[Positive])
+    public static void populateSqrtSingularValues(List<Double> singularValues){
+        for(int i = 0; i < singularValues.size(); i++){
+            singularValues.set(i, FastMath.sqrt(singularValues.get(i)));
+        }
+    }
+
+    // For pSmall v = s$v[, Positive, drop=FALSE]
+    // For nSmall u = s$u[, Positive, drop=FALSE]
+    public static RealMatrix getValidUMatrix(RealMatrix aMat, List<Integer> index){
+        int nRow = aMat.getRowDimension();
+        int nCol = index.size();
+        RealMatrix resMat = new Array2DRowRealMatrix(new double[nRow][nCol]);
+        for(int i = 0; i < nCol; i ++){
+            resMat.setColumn(i, aMat.getColumn(index.get(i)));
+        }
+        return resMat;
+    }
+
+    public static RealMatrix getValidVMatrix(RealMatrix aMat, List<Integer> index){
+        int nCol = aMat.getColumnDimension();
+        int nRow = index.size();
+        RealMatrix resMat = new Array2DRowRealMatrix(new double[nRow][nCol]);
+        for(int i = 0; i < nRow; i ++){
+            resMat.setRow(i, aMat.getRow(index.get(i)));
+        }
+        return resMat;
+    }
+
+    // u = m %*% v %*% diag(1/d, nrow=length(d))
+    public static RealMatrix getUMatForPSmall(RealMatrix m, RealMatrix v, List<Double> d){
+        RealMatrix diag = MatrixUtils.createRealIdentityMatrix(d.size());
+        for(int i = 0; i < d.size(); i++){
+            diag.setEntry(i, i, 1/d.get(i));
+        }
+        return m.multiply(v).multiply(diag);
+    }
+
+    //  v = crossprod(m, u) %*% diag(1/d, nrow=length(d))
+    public static RealMatrix getVMatForNSmall(RealMatrix m, RealMatrix u, List<Double> d){
+        RealMatrix diag = MatrixUtils.createRealIdentityMatrix(d.size());
+        for(int i = 0; i < d.size(); i++){
+            diag.setEntry(i, i, 1/d.get(i));
+        }
+        return m.transpose().multiply(u).multiply(diag);
     }
 
 
