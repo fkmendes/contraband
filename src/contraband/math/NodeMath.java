@@ -174,14 +174,14 @@ public class NodeMath extends CalculationNode {
         traitVecForSA = new double [nTraits];
 
         useShrinkage = useShrinkageInput.get();
+        rhoValues = new double[(nTraits * (nTraits - 1) / 2)];
+        storedRhoValues = new double[(nTraits * (nTraits - 1) / 2)];
         if (!useShrinkage && !coEstimate) {
             if (rhoInput.get() == null) {
                 throw new RuntimeException("NodeMath::If shrinkage method is not used, either correlation or covariance is required.");
             } else {
                 Log.warning.println("NodeMath::Setting dimension of rho values to " + (nTraits * (nTraits - 1) / 2));
                 rhoInput.get().setDimension((nTraits * (nTraits - 1) / 2));
-                rhoValues = new double[(nTraits * (nTraits - 1) / 2)];
-                storedRhoValues = new double[(nTraits * (nTraits - 1) / 2)];
                 rhoValues = rhoInput.get().getDoubleValues();
             }
         }
