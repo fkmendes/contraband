@@ -8,8 +8,6 @@ import beast.evolution.datatype.UserDataType;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import contraband.prunelikelihood.BinaryDiscreteTraits;
-import contraband.prunelikelihood.ThresholdModel;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,8 +48,5 @@ public class ThresholdModelTestDriver {
 
         BinaryDiscreteTraits discreteTraits = new BinaryDiscreteTraits();
         discreteTraits.initByName("liability", liabilities, "data", data, "tree", tree);
-
-        discreteTraits.initAndValidate();
-
     }
 }
