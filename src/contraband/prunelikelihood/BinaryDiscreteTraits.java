@@ -17,8 +17,7 @@ public class BinaryDiscreteTraits extends ThresholdModel{
         if (liabilitiesInput.get().getDimension() != nSpecies * nTraits){
             liabilitiesInput.get().setDimension(nSpecies * nTraits);
         }
-
-
+        initiateLiabilities();
     }
 
     @Override
@@ -26,7 +25,7 @@ public class BinaryDiscreteTraits extends ThresholdModel{
 
         for (int i = 0; i < nSpecies; i++){
             for (int j = 0; j < nTraits; j ++){
-                int traitValue = getDateForSpecies(i, j);
+                int traitValue = getTraitDataForSpecies(i, j);
                 double liability = liabilitiesInput.get().getArrayValue(nTraits * i + j);
                 if (traitValue == 1 && liability > 0.0){
                     //  present trait data and positive liability value
@@ -42,5 +41,20 @@ public class BinaryDiscreteTraits extends ThresholdModel{
         return logP;
     }
 
+    @Override
+    protected void initiateLiabilities(){
+        for (int i = 0; i < nSpecies; i++) {
+            for (int j = 0; j < nTraits; j++) {
+                int traitValue = getTraitDataForSpecies(i, j);
+                if (traitValue == 1) {
+                    //  the trait is present
+                    liabilitiesInput.get().setValue(nTraits * i + j, 1.0);
+                } else if (traitValue == 0) {
+                    //  the trait is absent
+                    liabilitiesInput.get().setValue(nTraits * i + j, -1.0);
+                }
+            }
+        }
+    }
 
 }

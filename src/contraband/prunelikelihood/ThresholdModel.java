@@ -34,7 +34,7 @@ public abstract class ThresholdModel extends Distribution {
         nrOfTraits = data.getSiteCount();
         dataType = data.getDataType();
         List<Integer> d = data.getStateCounts();
-        
+
         Tree tree = treeInput.get();
         nrOfSpecies = tree.getLeafNodeCount();
 
@@ -43,7 +43,7 @@ public abstract class ThresholdModel extends Distribution {
         populateDiscreteDataArray(tree, discreteDataArr);
     }
 
-    private int [] getDataForSpecies(String species){
+    public int[] getAllDataForSpecies(String species){
         for (int i = 0; i < nrOfSpecies; i++) {
             if (taxaNames.get(i).equals(species)) {
                 List<Integer> values = sequenceList.get(i).getSequence(dataType);
@@ -59,7 +59,7 @@ public abstract class ThresholdModel extends Distribution {
 
     private void populateDiscreteDataArray (Tree tree, int[] arr){
         for (int i = 0; i < nrOfSpecies; i ++) {
-            int[] values = getDataForSpecies(tree.getNode(i).getID());
+            int[] values = getAllDataForSpecies(tree.getNode(i).getID());
             System.arraycopy(values, 0, arr, i * nrOfTraits, nrOfTraits);
         }
     }
@@ -69,11 +69,21 @@ public abstract class ThresholdModel extends Distribution {
 
     public int getTraitNr () { return nrOfTraits; }
 
-    public int getDateForSpecies (int speciesIndex, int traitIdx) {
+    public int getTraitDataForSpecies(int speciesIndex, int traitIdx) {
         return discreteDataArr[speciesIndex * nrOfTraits + traitIdx];
     }
 
+    protected void initiateLiabilities() {}
 
+    public double[] getLiabilities () {
+        return liabilitiesInput.get().getDoubleValues();
+    }
+
+    public int[] getDiscreteDataArr() {
+        return discreteDataArr;
+    }
+
+    public double getLogP() { return logP; }
 
     @Override
     public List<String> getArguments() {
