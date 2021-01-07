@@ -3,7 +3,6 @@ package contraband.prunelikelihood;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
-import contraband.utils.PruneLikelihoodUtils;
 import outercore.parameter.KeyRealParameter;
 
 // This class implements likelihood of combined morphological data which has been transformed to continuous variables.
@@ -56,11 +55,25 @@ public class LiabilityLikelihood extends BMPruneLikelihood{
         setNTraits(totalTraitNr);
 
         super.initAndValidate();
+
+        setTraitValuesArr(traitValuesArr);
     }
 
     private void populateCombinedTraitValuesArr(double[] liabilities, double[] traitValuesArr, int index, int traitNr, int totalNr, int speciesNr){
         for (int i = 0; i < speciesNr; i++) {
             System.arraycopy(liabilities, i * traitNr, traitValuesArr, i * totalNr + index, traitNr);
+        }
+    }
+
+    private void populateContTraitArr(KeyRealParameter traitValues, Tree tree, int contTraitNr, int totalTraitNr, double[] traitValuesArr) {
+        // according to node number of tips
+        for (int i = 0; i < tree.getLeafNodeCount(); i ++) {
+            // get all traits values for this species
+            Double[] traitForSpecies = traitValues.getRowValues(tree.getNode(i).getID());
+            for (int j= 0; j < contTraitNr; j ++) {
+                // populate the traits one by one in an array
+                traitValuesArr[i*totalTraitNr + j] = traitForSpecies[j];
+            }
         }
     }
 
@@ -73,7 +86,7 @@ public class LiabilityLikelihood extends BMPruneLikelihood{
         int index = 0;
         // (1) populate continuous trait values
         if(traitsValuesInput.get() != null) {
-            PruneLikelihoodUtils.populateTraitValuesArr(contTraits, tree, contTraitNr, traitValuesArr);
+            populateContTraitArr(contTraits, tree, contTraitNr, totalTraitNr, traitValuesArr);
             index += contTraitNr;
         }
         // (2) populate binary discrete trait values
@@ -87,4 +100,6 @@ public class LiabilityLikelihood extends BMPruneLikelihood{
             index += orderedTraitNr;
         }
     }
+
+    public double[] getCombinedTraitDataArr() { return traitValuesArr; }
 }

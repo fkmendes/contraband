@@ -12,7 +12,9 @@ import org.apache.commons.math3.util.FastMath;
 import outercore.parameter.KeyRealParameter;
 
 public class NodeMath extends CalculationNode {
-    final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+    final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.");
+    final public Input<Integer> traitNrInput = new Input<>("nTraits", "Number of all traits.");
+    final public Input<Integer> speciesNrInput = new Input<>("nSpecies", "Number of species.");
     final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Evolutionary rates of traits. Diagonal elements in rate matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> rhoInput = new Input<>("correlation", "Correlations of traits. Off-diagonal elements in rate matrix.");
     final public Input<Boolean> oneRateOnlyInput = new Input<>("oneRateOnly", "TRUE, if all traits share one evolutionary rate.", false);
@@ -104,9 +106,14 @@ public class NodeMath extends CalculationNode {
     @Override
     public void initAndValidate() {
         // collect trait information
-        KeyRealParameter traitsValues = traitsValuesInput.get();
-        nTraits = traitsValues.getMinorDimension1();
-        nSpecies = traitsValues.getMinorDimension2();
+        if (traitsValuesInput.get() != null) {
+            KeyRealParameter traitsValues = traitsValuesInput.get();
+            nTraits = traitsValues.getMinorDimension1();
+            nSpecies = traitsValues.getMinorDimension2();
+        } else {
+            nTraits = traitNrInput.get();
+            nSpecies = speciesNrInput.get();
+        }
 
         // TRUE, if sigmasq and rho are in variance-covariance parameterization.
         if (covarianceInput.get() == null) {
