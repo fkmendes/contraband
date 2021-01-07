@@ -40,20 +40,13 @@ public abstract class PruneLikelihoodProcess extends Distribution {
 
         // get the tree
         tree = treeInput.get();
+        nSpecies = tree.getLeafNodeCount();
 
         // get clock model
         branchRateModel = branchRateModelInput.get();
 
-        // get the trait values for tips
-        // and make a list of real vectors
-        traitsValues = traitsValuesInput.get();
-        nTraits = traitsValues.getMinorDimension1();
-        nSpecies = traitsValues.getMinorDimension2();
-        traitValuesArr = new double[nSpecies * nTraits];
-
-        // populate the trait values in an array
-        // each species has nTraits in the array
-        PruneLikelihoodUtils.populateTraitValuesArr(traitsValues, tree, nTraits, traitValuesArr);
+        //
+        populateTraitData();
 
         // check input
         if (nodeMathInput.get() == null) {
@@ -114,6 +107,10 @@ public abstract class PruneLikelihoodProcess extends Distribution {
     public void setPopSE (boolean value) { popSE = value; }
 
     public void setTraitValuesArr (double[] values) { traitValuesArr = values; }
+
+    public void setNSpecies (int n) { nSpecies = n; }
+
+    public void setNTraits (int n) { nTraits = n; }
 
     public void pruneNode(Node node, int nTraits, double[] traitValuesArr,
                            BranchRateModel.Base pcmc, NodeMath nodeMath, boolean popSE) {
@@ -245,6 +242,19 @@ public abstract class PruneLikelihoodProcess extends Distribution {
     protected void calculateLmrForInternalNodes(NodeMath nodeMath, int nTraits, int nodeIdx) {}
 
     protected double calculateLikelihood(NodeMath nodeMath, double l0, double[] m0, double r0, int rootIdx) {return 1.0;}
+
+    protected void populateTraitData(){
+        // get the trait values for tips
+        // and make a list of real vectors
+        traitsValues = traitsValuesInput.get();
+        nTraits = traitsValues.getMinorDimension1();
+        //nSpecies = traitsValues.getMinorDimension2();
+        traitValuesArr = new double[nSpecies * nTraits];
+
+        // populate the trait values in an array
+        // each species has nTraits in the array
+        PruneLikelihoodUtils.populateTraitValuesArr(traitsValues, tree, nTraits, traitValuesArr);
+    }
 
     @Override
     public List<String> getArguments() {
