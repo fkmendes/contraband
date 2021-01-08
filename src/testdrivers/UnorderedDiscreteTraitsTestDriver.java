@@ -54,8 +54,11 @@ public class UnorderedDiscreteTraitsTestDriver {
         int[] discreteDataArr = unorderedDiscreteTraits.getDiscreteDataArr();
         System.out.println("Array of trait data for all species " + Arrays.toString(discreteDataArr));
 
-
         double[] initLiabilities = unorderedDiscreteTraits.getLiabilities();
         System.out.println("Initiated liabilities " + Arrays.toString(initLiabilities));
+
+        unorderedDiscreteTraits.calculateLogP();
+        double lnLik = unorderedDiscreteTraits.getLogP();
+        System.out.println("Initial log likelihood = " + lnLik);
     }
 }
