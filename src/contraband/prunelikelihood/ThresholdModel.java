@@ -79,8 +79,30 @@ public abstract class ThresholdModel extends Distribution {
     protected void populateTraitStates(int[] states, int traitNr) {
         for(int i = 0; i < traitNr; i++) {
             int[] traitValues = getAllTraitData(i);
+            // NOTE: the maximum value is the largest trait value
+            // the actual number of states should be the maximum trait value + 1
+            // here
+            // we simply take this largest trait value to count the number of thresholds or liabilities.
             states[i] = Arrays.stream(traitValues).max().getAsInt();
         }
+    }
+
+    protected int getParameterDimension(int[] states) {
+        int sum = 0;
+        for (int i : states){
+            sum += i;
+        }
+        return sum;
+    }
+
+    protected int[] getParameterIndex(int[] states, int traitNr){
+        int[] index = new int[traitNr];
+        int sum = 0;
+        for(int i = 0; i < traitNr; i++){
+            index[i] = sum;
+            sum += states[i];
+        }
+        return index;
     }
 
     // getters

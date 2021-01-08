@@ -2,7 +2,7 @@ package contraband.prunelikelihood;
 
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
-import beast.util.Randomizer;
+
 import java.util.Arrays;
 
 
@@ -13,7 +13,6 @@ public class OrderedDiscreteTraits extends ThresholdModel {
     private int nTraits;
     private int[] nrOfStates;
     private int[] thresholdIndex;
-
 
     @Override
     public void initAndValidate() {
@@ -30,8 +29,8 @@ public class OrderedDiscreteTraits extends ThresholdModel {
 
         initiateLiabilities();
 
-        thresholdsInput.get().setDimension(getThresholdDimension(nrOfStates));
-        thresholdIndex = getThresholdIndex(nrOfStates);
+        thresholdsInput.get().setDimension(getParameterDimension(nrOfStates));
+        thresholdIndex = getParameterIndex(nrOfStates, nTraits);
         initiateThresholds();
     }
 
@@ -98,24 +97,6 @@ public class OrderedDiscreteTraits extends ThresholdModel {
 
 
         return logP;
-    }
-
-    private int getThresholdDimension(int[] states) {
-        int sum = 0;
-        for (int i : states){
-            sum += i;
-        }
-        return sum;
-    }
-
-    private int[] getThresholdIndex(int[] states){
-        int[] index = new int[nTraits];
-        int sum = 0;
-        for(int i = 0; i < nTraits; i++){
-            index[i] = sum;
-            sum += states[i];
-        }
-        return index;
     }
 
     private void initiateThresholds() {
