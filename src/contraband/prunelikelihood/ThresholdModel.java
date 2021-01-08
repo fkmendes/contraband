@@ -33,7 +33,6 @@ public abstract class ThresholdModel extends Distribution {
         taxaNames = data.getTaxaNames();
         nrOfTraits = data.getSiteCount();
         dataType = data.getDataType();
-        List<Integer> d = data.getStateCounts();
 
         Tree tree = treeInput.get();
         nrOfSpecies = tree.getLeafNodeCount();
@@ -43,6 +42,7 @@ public abstract class ThresholdModel extends Distribution {
         populateDiscreteDataArray(tree, discreteDataArr);
     }
 
+    // this method return an array of discrete trait values for species
     public int[] getAllDataForSpecies(String species){
         for (int i = 0; i < nrOfSpecies; i++) {
             if (taxaNames.get(i).equals(species)) {
@@ -57,6 +57,16 @@ public abstract class ThresholdModel extends Distribution {
         return null;
     }
 
+    // this method return an array of traitIndex-th discrete trait values for all species
+    public int[] getAllTraitData (int traitIndex) {
+        int[] iThTraitValues = new int[nrOfSpecies];
+        for (int i = 0; i < nrOfSpecies; i++) {
+            List<Integer> values = sequenceList.get(i).getSequence(dataType);
+            iThTraitValues[i] = values.get(traitIndex).intValue();
+        }
+        return iThTraitValues;
+    }
+
     private void populateDiscreteDataArray (Tree tree, int[] arr){
         for (int i = 0; i < nrOfSpecies; i ++) {
             int[] values = getAllDataForSpecies(tree.getNode(i).getID());
@@ -69,8 +79,9 @@ public abstract class ThresholdModel extends Distribution {
 
     public int getTraitNr () { return nrOfTraits; }
 
-    public int getTraitDataForSpecies(int speciesIndex, int traitIdx) {
-        return discreteDataArr[speciesIndex * nrOfTraits + traitIdx];
+    // get traitIdx-th trait values for speciesIdx-th species
+    public int getTraitDataForSpecies(int speciesIdx, int traitIdx) {
+        return discreteDataArr[speciesIdx * nrOfTraits + traitIdx];
     }
 
     protected void initiateLiabilities() {}
