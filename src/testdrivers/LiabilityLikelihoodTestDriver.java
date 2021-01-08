@@ -26,17 +26,29 @@ public class LiabilityLikelihoodTestDriver {
         // for example, first five elements are liabilities of node 0 which corresponds to species t1
         // and second five elements are liabilities of node 1 which corresponds to species t10
         // and third five elements are liabilities of node 2 which corresponds to species t2
-        RealParameter liabilities = new RealParameter(new Double[] {
-                -2.16553733680629, -0.093001131322756, -3.32603366513231, 1.53951108454289, -2.64755502918416,
-                3.3252839398938, -4.21928449405138, 0.150249836685309, -4.97807077472762, 1.03044047843148,
-                0.345250157267404, -0.749225468028548, -3.41701294175762, 0.994478698194049, -3.44063534931992,
-                3.60403255588672, 1.3112428586143, -0.732024175817608, -3.42667016024356, 2.3074920977748,
-                4.09620039236067, -5.17365781499908, 0.0830324263435673, -3.92697498145996, 1.23323556462526,
-                1.77512813315887, 6.02316315859529, -2.73207211765912, -3.7025682293389, -0.571614944120547,
-                2.25231513022396, 3.09693981602772, -1.64956110239375, -2.18351165272075, 2.14200618566428,
-                8.90155578270267, 0.0936214074138489, -3.00924775897672, -2.18342919122651, 1.66729459543154,
-                6.47320619083183, 3.74483134602231, -3.62473323746156, -5.92016122137718, 3.14670114612779,
-                2.99774158156863, 3.65399830020205, -1.69746045226351, -5.82006681351925, 0.84039105047492
+        RealParameter binaryLiabilities = new RealParameter(new Double[] {
+                -2.16553733680629, -0.093001131322756, -3.32603366513231,
+                3.3252839398938, -4.21928449405138, 0.150249836685309,
+                0.345250157267404, -0.749225468028548, -3.41701294175762,
+                3.60403255588672, 1.3112428586143, -0.732024175817608,
+                4.09620039236067, -5.17365781499908, 0.0830324263435673,
+                1.77512813315887, 6.02316315859529, -2.73207211765912,
+                2.25231513022396, 3.09693981602772, -1.64956110239375,
+                8.90155578270267, 0.0936214074138489, -3.00924775897672,
+                6.47320619083183, 3.74483134602231, -3.62473323746156,
+                2.99774158156863, 3.65399830020205, -1.69746045226351
+        });
+        RealParameter orderedLiabilities = new RealParameter(new Double[] {
+                1.53951108454289, -2.64755502918416,
+                -4.97807077472762, 1.03044047843148,
+                0.994478698194049, -3.44063534931992,
+                -3.42667016024356, 2.3074920977748,
+                -3.92697498145996, 1.23323556462526,
+                -3.7025682293389, -0.571614944120547,
+                -2.18351165272075, 2.14200618566428,
+                -2.18342919122651, 1.66729459543154,
+                -5.92016122137718, 3.14670114612779,
+                -5.82006681351925, 0.84039105047492
         });
 
         // continuous trait values
@@ -64,7 +76,7 @@ public class LiabilityLikelihoodTestDriver {
         lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
 
         LiabilityLikelihood liabilityLikelihood = new LiabilityLikelihood();
-        liabilityLikelihood.initByName("binaryLiability", liabilities, "traits", contTrait,
+        liabilityLikelihood.initByName("binaryLiability", binaryLiabilities, "orderedLiability", orderedLiabilities, "traits", contTrait,
                 "tree", tree, "nodeMath", nodeMath, "branchRateModel", lsc);
 
         double[] combinedDataArr = liabilityLikelihood.getCombinedTraitDataArr();
