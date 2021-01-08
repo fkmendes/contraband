@@ -8,6 +8,8 @@ import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.Sequence;
 import beast.evolution.datatype.DataType;
 import beast.evolution.tree.Tree;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -71,6 +73,13 @@ public abstract class ThresholdModel extends Distribution {
         for (int i = 0; i < nrOfSpecies; i ++) {
             int[] values = getAllDataForSpecies(tree.getNode(i).getID());
             System.arraycopy(values, 0, arr, i * nrOfTraits, nrOfTraits);
+        }
+    }
+
+    protected void populateTraitStates(int[] states, int traitNr) {
+        for(int i = 0; i < traitNr; i++) {
+            int[] traitValues = getAllTraitData(i);
+            states[i] = Arrays.stream(traitValues).max().getAsInt();
         }
     }
 

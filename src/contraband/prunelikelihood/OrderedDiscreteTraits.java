@@ -100,13 +100,6 @@ public class OrderedDiscreteTraits extends ThresholdModel {
         return logP;
     }
 
-    private void populateTraitStates(int[] states, int traitNr) {
-        for(int i = 0; i < traitNr; i++) {
-            int[] traitValues = getAllTraitData(i);
-            states[i] = Arrays.stream(traitValues).max().getAsInt();
-        }
-    }
-
     private int getThresholdDimension(int[] states) {
         int sum = 0;
         for (int i : states){
