@@ -15,7 +15,7 @@ public class UnorderedDiscreteTraits extends ThresholdModel {
     public void initAndValidate() {
         super.initAndValidate();
         nSpecies = getSpeciesNr();
-        nTraits = getTraitNr();
+        nTraits = getLiabilityNr();
 
         nrOfStates = new int[nTraits];
         populateTraitStates(nrOfStates, nTraits);

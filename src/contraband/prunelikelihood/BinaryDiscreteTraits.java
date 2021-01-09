@@ -13,7 +13,7 @@ public class BinaryDiscreteTraits extends ThresholdModel{
         super.initAndValidate();
 
         nSpecies = getSpeciesNr();
-        nTraits = getTraitNr();
+        nTraits = getLiabilityNr();
         if (liabilitiesInput.get().getDimension() != nSpecies * nTraits){
             liabilitiesInput.get().setDimension(nSpecies * nTraits);
         }

@@ -20,7 +20,8 @@ public abstract class ThresholdModel extends Distribution {
     final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Input.Validate.REQUIRED);
 
     private int[] discreteDataArr;
-    private List<Sequence> sequenceList;
+    //private List<Sequence> sequenceList;
+    private List<List<Integer>> sequenceList;
     private List<String> taxaNames;
     private int nrOfSpecies;
     private DataType dataType;
@@ -30,7 +31,8 @@ public abstract class ThresholdModel extends Distribution {
     public void initAndValidate() {
 
         Alignment data = dataInput.get();
-        sequenceList = data.sequenceInput.get();
+        //sequenceList = data.sequenceInput.get();
+        sequenceList = data.getCounts();
 
         taxaNames = data.getTaxaNames();
         nrOfTraits = data.getSiteCount();
@@ -45,6 +47,7 @@ public abstract class ThresholdModel extends Distribution {
     }
 
     // this method return an array of discrete trait values for species
+    /*
     public int[] getAllDataForSpecies(String species){
         for (int i = 0; i < nrOfSpecies; i++) {
             if (taxaNames.get(i).equals(species)) {
@@ -58,12 +61,28 @@ public abstract class ThresholdModel extends Distribution {
         }
         return null;
     }
+     */
+    public int[] getAllDataForSpecies(String species){
+        for (int i = 0; i < nrOfSpecies; i++) {
+            if (taxaNames.get(i).equals(species)) {
+                List<Integer> values = sequenceList.get(i);
+                int[] valuesArr = new int[nrOfTraits];
+                for(int j = 0; j < nrOfTraits; j ++) {
+                    valuesArr[j] = values.get(j).intValue();
+                }
+                return valuesArr;
+            }
+        }
+        return null;
+    }
+
 
     // this method return an array of traitIndex-th discrete trait values for all species
     public int[] getAllTraitData (int traitIndex) {
         int[] iThTraitValues = new int[nrOfSpecies];
         for (int i = 0; i < nrOfSpecies; i++) {
-            List<Integer> values = sequenceList.get(i).getSequence(dataType);
+            //List<Integer> values = sequenceList.get(i).getSequence(dataType);
+            List<Integer> values = sequenceList.get(i);
             iThTraitValues[i] = values.get(traitIndex).intValue();
         }
         return iThTraitValues;
@@ -108,7 +127,7 @@ public abstract class ThresholdModel extends Distribution {
     // getters
     public int getSpeciesNr () { return nrOfSpecies; }
 
-    public int getTraitNr () { return nrOfTraits; }
+    public int getLiabilityNr() { return nrOfTraits; }
 
     // get traitIdx-th trait values for speciesIdx-th species
     public int getTraitDataForSpecies(int speciesIdx, int traitIdx) {

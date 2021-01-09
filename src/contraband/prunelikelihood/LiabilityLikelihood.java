@@ -1,14 +1,13 @@
 package contraband.prunelikelihood;
 
 import beast.core.Input;
-import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import outercore.parameter.KeyRealParameter;
 
 // This class implements likelihood of combined morphological data which has been transformed to continuous variables.
 public class LiabilityLikelihood extends BMPruneLikelihood{
-    final public Input<RealParameter> binaryLiabilitiesInput = new Input<>("binaryLiability", "Continuous random variables for  binary discrete traits.");
-    final public Input<RealParameter> orderedLiabilitiesInput = new Input<>("orderedLiability", "Continuous random variables for ordered discrete traits.");
+    final public Input<BinaryDiscreteTraits> binaryDiscreteTraitsInput = new Input<>("binaryDiscreteTraits", "Object for binary discrete traits.");
+    final public Input<OrderedDiscreteTraits> orderedDiscreteTraitsInput = new Input<>("orderedDiscreteTraits", "Object for ordered discrete traits.");
     final public Input<UnorderedDiscreteTraits> unorderedDiscreteTraitsInput = new Input<>("unorderedDiscreteTraits", "Object for unordered discrete traits.");
 
     private Tree tree;
@@ -19,7 +18,6 @@ public class LiabilityLikelihood extends BMPruneLikelihood{
     private int totalTraitNr;
 
     private int nSpecies;
-    private KeyRealParameter contTraits;
     private double[] traitValuesArr;
 
     private int binaryTraitIndex;
@@ -32,22 +30,20 @@ public class LiabilityLikelihood extends BMPruneLikelihood{
         tree = treeInput.get();
         nSpecies = treeInput.get().getLeafNodeCount();
 
-        // get liabilities for discrete traits
-        if(binaryLiabilitiesInput.get() != null) {
-            binaryTraitNr = binaryLiabilitiesInput.get().getDimension() / nSpecies;
+        // get number of liabilities for discrete traits
+        if(binaryDiscreteTraitsInput.get() != null){
+            binaryTraitNr = binaryDiscreteTraitsInput.get().getLiabilityNr();
         }
-        if(orderedLiabilitiesInput.get() != null) {
-            orderedTraitNr = orderedLiabilitiesInput.get().getDimension() / nSpecies;
+        if(orderedDiscreteTraitsInput.get() != null){
+            orderedTraitNr = orderedDiscreteTraitsInput.get().getLiabilityNr();
         }
         if(unorderedDiscreteTraitsInput.get() != null){
             UnorderedDiscreteTraits unorderedDiscreteTraits = unorderedDiscreteTraitsInput.get();
             unorderedLiabilityNr = unorderedDiscreteTraits.getNrOfLiabilities();
         }
-
-        // get continuous trait values
+        // get number of continuous traits
         if(traitsValuesInput.get() != null) {
-            contTraits = traitsValuesInput.get();
-            contTraitNr = contTraits.getMinorDimension1();
+            contTraitNr = traitsValuesInput.get().getMinorDimension1();
         }
 
         // get total number of traits
@@ -91,26 +87,28 @@ public class LiabilityLikelihood extends BMPruneLikelihood{
         int index = 0;
         // (1) populate continuous trait values
         if(traitsValuesInput.get() != null) {
-            populateContTraitArr(contTraits, tree, contTraitNr, totalTraitNr, traitValuesArr);
+            populateContTraitArr(traitsValuesInput.get(), tree, contTraitNr, totalTraitNr, traitValuesArr);
             index += contTraitNr;
         }
         binaryTraitIndex = index;
 
-        // (2) populate binary discrete trait values
-        if(binaryLiabilitiesInput.get() != null){
-            populateCombinedTraitValuesArr(binaryLiabilitiesInput.get().getDoubleValues(), traitValuesArr, index, binaryTraitNr, totalTraitNr, nSpecies);
+        // (2) populate liabilities for binary discrete trait values
+        if(binaryDiscreteTraitsInput.get() != null){
+            double[] binaryLiabilities = binaryDiscreteTraitsInput.get().getLiabilities();
+            populateCombinedTraitValuesArr(binaryLiabilities, traitValuesArr, index, binaryTraitNr, totalTraitNr, nSpecies);
             index += binaryTraitNr;
         }
         orderedTraitIndex = index;
 
-        // (3) populate ordered discrete trait values
-        if(orderedLiabilitiesInput.get() != null) {
-            populateCombinedTraitValuesArr(orderedLiabilitiesInput.get().getDoubleValues(), traitValuesArr, index, orderedTraitNr, totalTraitNr, nSpecies);
+        // (3) populate liabilities for ordered discrete trait values
+        if(orderedDiscreteTraitsInput.get() != null) {
+            double[] orderedLiabilities = orderedDiscreteTraitsInput.get().getLiabilities();
+            populateCombinedTraitValuesArr(orderedLiabilities , traitValuesArr, index, orderedTraitNr, totalTraitNr, nSpecies);
             index += orderedTraitNr;
         }
         unorderedLiabilityIndex = index;
 
-        // (4) populate unordered discrete trait values
+        // (4) populate liabilities for unordered discrete trait values
         if(unorderedDiscreteTraitsInput.get() != null){
             double[] unorderedLiabilities = unorderedDiscreteTraitsInput.get().getLiabilities();
             populateCombinedTraitValuesArr(unorderedLiabilities, traitValuesArr, index, unorderedLiabilityNr, totalTraitNr, nSpecies);
@@ -130,17 +128,19 @@ public class LiabilityLikelihood extends BMPruneLikelihood{
     }
 
     private void updateTraitValuesArr(){
-        // (1) update binary discrete trait values
-        if(binaryLiabilitiesInput.get() != null){
-            populateCombinedTraitValuesArr(binaryLiabilitiesInput.get().getDoubleValues(), traitValuesArr, binaryTraitIndex, binaryTraitNr, totalTraitNr, nSpecies);
+        // (1) update liabilities for binary discrete trait values
+        if(binaryDiscreteTraitsInput.get() != null){
+            double[] binaryLiabilities = binaryDiscreteTraitsInput.get().getLiabilities();
+            populateCombinedTraitValuesArr(binaryLiabilities, traitValuesArr, binaryTraitIndex, binaryTraitNr, totalTraitNr, nSpecies);
         }
 
-        // (2) update ordered discrete trait values
-        if(orderedLiabilitiesInput.get() != null) {
-            populateCombinedTraitValuesArr(orderedLiabilitiesInput.get().getDoubleValues(), traitValuesArr, orderedTraitIndex, orderedTraitNr, totalTraitNr, nSpecies);
+        // (2) update liabilities for ordered discrete trait values
+        if(orderedDiscreteTraitsInput.get() != null) {
+            double[] orderedLiabilities = orderedDiscreteTraitsInput.get().getLiabilities();
+            populateCombinedTraitValuesArr(orderedLiabilities, traitValuesArr, orderedTraitIndex, orderedTraitNr, totalTraitNr, nSpecies);
         }
 
-        // (3) update unordered discrete trait values
+        // (3) update liabilities for unordered discrete trait values
         if(unorderedDiscreteTraitsInput.get() != null){
             double[] unorderedLiabilities = unorderedDiscreteTraitsInput.get().getLiabilities();
             populateCombinedTraitValuesArr(unorderedLiabilities, traitValuesArr, unorderedLiabilityIndex, unorderedLiabilityNr, totalTraitNr, nSpecies);
