@@ -2,13 +2,20 @@ package testdrivers;
 
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
+import beast.evolution.alignment.Alignment;
+import beast.evolution.alignment.Sequence;
+import beast.evolution.datatype.StandardData;
+import beast.evolution.datatype.UserDataType;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import contraband.clock.RateCategoryClockModel;
 import contraband.math.MatrixUtilsContra;
 import contraband.math.NodeMath;
 import contraband.prunelikelihood.LiabilityLikelihood;
+import contraband.prunelikelihood.UnorderedDiscreteTraits;
 import outercore.parameter.KeyRealParameter;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,6 +58,49 @@ public class LiabilityLikelihoodTestDriver {
                 -5.82006681351925, 0.84039105047492
         });
 
+
+        RealParameter unorderedLiabilities  = new RealParameter(new Double[] {0.0});
+
+        List<Sequence> sequenceList = new ArrayList<>(10);
+        Sequence sp1 = new Sequence("t4", "101");
+        Sequence sp2 = new Sequence("t10", "243");
+        Sequence sp3 = new Sequence("t2", "032");
+        Sequence sp4 = new Sequence("t1", "120");
+        Sequence sp5 = new Sequence("t9", "110");
+        Sequence sp6 = new Sequence("t5", "110");
+        Sequence sp7 = new Sequence("t3", "002");
+        Sequence sp8 = new Sequence("t6", "202");
+        Sequence sp9 = new Sequence("t7", "041");
+        Sequence sp10 = new Sequence("t8", "211");
+        sequenceList.add(0, sp1);
+        sequenceList.add(1, sp2);
+        sequenceList.add(2, sp3);
+        sequenceList.add(3, sp4);
+        sequenceList.add(4, sp5);
+        sequenceList.add(5, sp6);
+        sequenceList.add(6, sp7);
+        sequenceList.add(7, sp8);
+        sequenceList.add(8, sp9);
+        sequenceList.add(9, sp10);
+
+        UserDataType userDataType1 = new UserDataType();
+        userDataType1.initByName("characterName", "ch1","codeMap", "0=0, 1=1, 2=2", "states", 3, "value", "0 red, 1 blue, 2 yellow");
+        UserDataType userDataType2 = new UserDataType();
+        userDataType2.initByName("characterName", "ch2","codeMap", "0=0, 1=1, 2=2, 3=3, 4=4", "states", 5, "value", "0 round, 1 triangular, 3 square, 4 rectangular");
+        UserDataType userDataType3 = new UserDataType();
+        userDataType3.initByName("characterName", "ch3","codeMap", "0=0, 1=1, 2=2, 3=3", "states", 4, "value", "0 two wings, 1 four legs, 2 six paws, 3 two forelimbs");
+        List<UserDataType> charStateLabels= new ArrayList<>(3);
+        charStateLabels.add(0, userDataType1);
+        charStateLabels.add(1, userDataType2);
+        charStateLabels.add(2, userDataType3);
+        StandardData standardData = new StandardData();
+        standardData.initByName("charstatelabels", charStateLabels);
+        Alignment data = new Alignment();
+        data.initByName("sequence", sequenceList, "userDataType", standardData);
+
+        UnorderedDiscreteTraits unorderedDiscreteTraits = new UnorderedDiscreteTraits();
+        unorderedDiscreteTraits.initByName("liability", unorderedLiabilities, "data", data, "tree", tree);
+
         // continuous trait values
         // two traits for each of the three species
         int contTraitNr = 5;
@@ -63,12 +113,12 @@ public class LiabilityLikelihoodTestDriver {
         // model parameters
         NodeMath nodeMath = new NodeMath();
         RealParameter sigmasq = new RealParameter(new Double[]{
-                3.92444342735533, 3.02812661102414, 3.06556360045831, 2.81005713192123, 2.30077876608194, 4.64631271741818, 3.15615698487533, 1.50684016606037, 3.3548490285494, 2.35882255622108
+                2.35882255622108, 1.97319269488477, 2.54621393782772, 1.99810386929218, 2.18438130143428, 2.25350823993028, 1.63884546108462, 3.49500956814383, 2.84627731546465, 1.93200614977075, 3.95960580579731, 3.08928374542405, 2.48799845800124, 3.55564932692539, 3.5375699840826, 3.47805880846592, 3.34207568397888, 3.20969300681193, 2.66825976585302
         });
         RealParameter correlation = new RealParameter(new Double[]{
-                -0.714399955235422, -0.170907328370959, -0.172551347408444, -0.262309098150581, -0.695110504515469, -0.722387873101979, -0.533931801095605, -0.0680750994943082, -0.468054719269276, 0.715655430685729, -0.908337666653097, -0.11559985158965, 0.597849691286683, -0.75620148004964, 0.121895967517048, -0.58693722076714, -0.744936699513346, 0.506615728605539, 0.790090718306601, -0.251074448227882, 0.33023038925603, -0.810318678151816, -0.232060724403709, -0.451232710853219, 0.629280077759176, -0.102967317216098, 0.620128706097603, 0.624779019039124, 0.588684642221779, -0.120336624793708, 0.508950317278504, 0.258442263118923, 0.420364802703261, -0.998750453349203, -0.0493668518029153, -0.55976222967729, -0.24036692455411, 0.225542006548494, -0.296404181513935, -0.777729151304811, -0.512761054560542, 0.336111174896359, -0.164706440642476, 0.576391668058932, -0.794270711485296
+                -0.24036692455411, 0.225542006548494, -0.296404181513935, -0.777729151304811, -0.512761054560542, 0.336111174896359, -0.164706440642476, 0.576391668058932, -0.794270711485296, -0.130214517004788, 0.969913959968835, 0.786102228797972, 0.772938121575862, -0.649894699454308, -0.738608616869897, 0.306203850079328, -0.312967055477202, 0.313516255933791, -0.359253515023738, -0.624617761466652, 0.564588602632284, -0.81281002657488, -0.06644191686064, 0.0230109198018909, 0.19997791852802, -0.334352919366211, -0.0227739326655865, 0.908947654999793, -0.0341952056623995, 0.780700444243848, 0.828876373823732, 0.217469964642078, -0.178620446939021, -0.705810618121177, 0.870599606540054, -0.397542200051248, -0.878558856900781, 0.895453880075365, 0.441192546859384, -0.715411408804357, 0.098569312132895, 0.908182477112859, 0.170966706238687, -0.190979436505586, 0.29578695865348, -0.360358765814453, -0.384559978265315, -0.560464737471193, -0.261022268328816, 0.96843840694055, -0.691595398355275, -0.817912000231445, -0.716186184436083, 0.380014203023165, 0.238512966781855, 0.782788234297186, 0.345998185221106, 0.474155475851148, 0.0422714515589178, 0.31967689935118, 0.643610920291394, 0.572563103400171, 0.959643834736198, -0.121136927511543, -0.376595595851541, -0.181050094775856, -0.979065776336938, -0.63230095198378, 0.685458637773991, -0.537676435895264, -0.521800088696182, -0.846617669332772, -0.508552643936127, 0.46427041105926, 0.694906330201775, -0.00494546582922339, -0.224181940313429, -0.507102011702955, -0.777807077392936, -0.220011129509658, 0.143870627973229, -0.566214474383742, -0.110463995952159, -0.564018662553281, 0.00459912652149796, -0.292190856300294, 0.29997031763196, -0.250572086777538, -0.289109238423407, 0.0673758909106255, 0.480668720789254, -0.557794124353677, -0.1745077627711, -0.468626626301557, 0.259946106933057, -0.632343018427491, 0.727288222871721, 0.493136008270085, 0.336569299455732, 0.236035746522248, -0.255523879546672, 0.0596713717095554, 0.749364685732871, 0.163500199560076, 0.679535529576242, -0.375103670172393, 0.416580644436181, -0.469964387826622, 0.188686388079077, -0.0374203990213573, -0.46993453707546, 0.129180869553238, 0.826376446057111, 0.803748778998852, -0.451666756998748, -0.357034487184137, 0.971281768754125, 0.239986620377749, 0.874628178309649, -0.0669345953501761, -0.186334813479334, 0.318460648413748, -0.695306766312569, 0.145734116435051, -0.522547946311533, 0.924717872869223, 0.202731451950967, 0.0300594544969499, -0.194853315595537, 0.760493082460016, -0.271816270425916, -0.423521438613534, -0.658709529787302, -0.655656507238746, -0.0359147889539599, -0.494070142973214, -0.5674904207699, 0.348752776160836, -0.904672745149583, 0.401706174947321, -0.296222723089159, -0.182112004142255, 0.641902647912502, 0.83771469630301, -0.434943339787424, 0.922209587413818, 0.45678885653615, 0.372750164009631, -0.894312114454806, -0.209559730719775, -0.0443092403002083, 0.120506527367979, 0.396523189730942, 0.831367076840252, 0.236702454742044, -0.143156982492656, 0.0841607344336808, -0.883043022826314, -0.478286285884678, -0.205696093384176, -0.604510526638478, 0.663855125661939, -0.694225554354489, 0.606837084051222, 0.0936523131094873, 0.324635284021497, -0.656603012233973, 0.266110719647259, -0.376260506454855, 0.44910869281739, -0.202120350673795
         });
-        nodeMath.initByName( "nTraits", 10, "nSpecies", 10, "sigmasq", sigmasq, "correlation", correlation, "upperMatrix", true);
+        nodeMath.initByName( "nTraits", 19, "nSpecies", 19, "sigmasq", sigmasq, "correlation", correlation, "upperMatrix", true);
 
         RateCategoryClockModel lsc = new RateCategoryClockModel();
         IntegerParameter colorAssignments = new IntegerParameter(new Integer[] {0});
@@ -76,15 +126,18 @@ public class LiabilityLikelihoodTestDriver {
         lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
 
         LiabilityLikelihood liabilityLikelihood = new LiabilityLikelihood();
-        liabilityLikelihood.initByName("binaryLiability", binaryLiabilities, "orderedLiability", orderedLiabilities, "traits", contTrait,
+        liabilityLikelihood.initByName("binaryLiability", binaryLiabilities,
+                "orderedLiability", orderedLiabilities,
+                "traits", contTrait,
+                "unorderedDiscreteTraits", unorderedDiscreteTraits,
                 "tree", tree, "nodeMath", nodeMath, "branchRateModel", lsc);
 
         double[] combinedDataArr = liabilityLikelihood.getCombinedTraitDataArr();
         System.out.println("Array of combined trait values: " + "\n" + Arrays.toString(combinedDataArr));
 
         double lik = liabilityLikelihood.calculateLogP();
-        System.out.println("Log likelihood"+ lik);
-        // expected: -205.515395500167
+        System.out.println("Log likelihood"+ lik);// --> -3833.8587327251885
+        // expected: -3833.85873272509
     }
 
 }

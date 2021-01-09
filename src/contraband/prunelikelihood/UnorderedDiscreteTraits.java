@@ -78,5 +78,7 @@ public class UnorderedDiscreteTraits extends ThresholdModel {
         return logP;
     }
 
+    public int getNrOfLiabilities(){ return nrOfLiabilities; }
+
 
 }

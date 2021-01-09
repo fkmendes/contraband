@@ -4,6 +4,9 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
+import contraband.prunelikelihood.BinaryDiscreteTraits;
+import contraband.prunelikelihood.OrderedDiscreteTraits;
+import contraband.prunelikelihood.UnorderedDiscreteTraits;
 import contraband.utils.NodeMathUtils;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -13,6 +16,9 @@ import outercore.parameter.KeyRealParameter;
 
 public class NodeMath extends CalculationNode {
     final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.");
+    final public Input<BinaryDiscreteTraits> binaryDiscreteTraitsInput = new Input<>("binaryDiscreteTraits", "Object for binary discrete traits.");
+    final public Input<OrderedDiscreteTraits> orderedDiscreteTraitsInput = new Input<>("orderedDiscreteTraits", "Object for ordered discrete traits.");
+    final public Input<UnorderedDiscreteTraits> unorderedDiscreteTraitsInput = new Input<>("unorderedDiscreteTraits", "Object for unordered discrete traits.");
     final public Input<Integer> traitNrInput = new Input<>("nTraits", "Number of all traits.");
     final public Input<Integer> speciesNrInput = new Input<>("nSpecies", "Number of species.");
     final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Evolutionary rates of traits. Diagonal elements in rate matrix.", Input.Validate.REQUIRED);
@@ -106,13 +112,27 @@ public class NodeMath extends CalculationNode {
     @Override
     public void initAndValidate() {
         // collect trait information
-        if (traitsValuesInput.get() != null) {
-            KeyRealParameter traitsValues = traitsValuesInput.get();
-            nTraits = traitsValues.getMinorDimension1();
-            nSpecies = traitsValues.getMinorDimension2();
-        } else {
+        if (traitNrInput.get() != null && speciesNrInput.get() != null) {
             nTraits = traitNrInput.get();
             nSpecies = speciesNrInput.get();
+        } else {
+            if (traitsValuesInput.get() != null) {
+                KeyRealParameter traitsValues = traitsValuesInput.get();
+                nTraits += traitsValues.getMinorDimension1();
+                nSpecies = traitsValues.getMinorDimension2();
+            }
+            if(binaryDiscreteTraitsInput.get() != null) {
+                nTraits += binaryDiscreteTraitsInput.get().getTraitNr();
+                nSpecies = binaryDiscreteTraitsInput.get().getSpeciesNr();
+            }
+            if(orderedDiscreteTraitsInput.get() != null) {
+                nTraits += orderedDiscreteTraitsInput.get().getTraitNr();
+                nSpecies = orderedDiscreteTraitsInput.get().getSpeciesNr();
+            }
+            if(unorderedDiscreteTraitsInput.get() != null){
+                nTraits += unorderedDiscreteTraitsInput.get().getNrOfLiabilities();
+                nSpecies = unorderedDiscreteTraitsInput.get().getSpeciesNr();
+            }
         }
 
         // TRUE, if sigmasq and rho are in variance-covariance parameterization.
