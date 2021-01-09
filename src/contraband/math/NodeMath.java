@@ -29,7 +29,7 @@ public class NodeMath extends CalculationNode {
     final public Input<Boolean> useShrinkageInput = new Input<>("shrinkage", "TRUE, if shrinkage method is used to estimate the trait correlations.", false);
     final public Input<RealParameter> covarianceInput = new Input<>("covariance", "cov_ij = sigma_i * sigma_j * rho_ij.");
 
-    private Integer nTraits;
+    private Integer nTraits = 0;
     private Integer nSpecies;
     private Boolean oneRateOnly;
     private Boolean useUpperMatrix;
@@ -122,11 +122,11 @@ public class NodeMath extends CalculationNode {
                 nSpecies = traitsValues.getMinorDimension2();
             }
             if(binaryDiscreteTraitsInput.get() != null) {
-                nTraits += binaryDiscreteTraitsInput.get().getTraitNr();
+                nTraits += binaryDiscreteTraitsInput.get().getLiabilityNr();
                 nSpecies = binaryDiscreteTraitsInput.get().getSpeciesNr();
             }
             if(orderedDiscreteTraitsInput.get() != null) {
-                nTraits += orderedDiscreteTraitsInput.get().getTraitNr();
+                nTraits += orderedDiscreteTraitsInput.get().getLiabilityNr();
                 nSpecies = orderedDiscreteTraitsInput.get().getSpeciesNr();
             }
             if(unorderedDiscreteTraitsInput.get() != null){
