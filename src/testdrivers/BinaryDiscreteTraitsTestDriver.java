@@ -16,11 +16,13 @@ public class BinaryDiscreteTraitsTestDriver {
 
     public static void main(String[] args) {
         // tree
+        // there are three species in the phylogeny
         String treeStr = "((Dog:1.0,Bear:1.0):1.0,Cat:2.0);";
         Tree tree = new TreeParser(treeStr, false, false, true, 0);
 
         RealParameter liabilities  = new RealParameter(new Double[] {0.0});
 
+        // each species has four binary discrete traits
         List<Sequence> sequenceList = new ArrayList<>(3);
         Sequence sp1 = new Sequence("Dog", "1100");
         Sequence sp2 = new Sequence("Cat", "0111");
@@ -30,16 +32,19 @@ public class BinaryDiscreteTraitsTestDriver {
         sequenceList.add(2, sp3);
 
         UserDataType userDataType1 = new UserDataType();
-        userDataType1.initByName("characterName", "ch1","codeMap", "0=0, 1=1", "states", 2, "value", "0 Present, 1 absent");
+        userDataType1.initByName("characterName", "ch1","codeMap", "0=0, 1=1", "states", 2, "value", "0 Present, 1 Absent");
         UserDataType userDataType2 = new UserDataType();
         userDataType2.initByName("characterName", "ch2","codeMap", "0=0, 1=1", "states", 2, "value", "0 Round, 1 Square");
         UserDataType userDataType3 = new UserDataType();
         userDataType3.initByName("characterName", "ch3","codeMap", "0=0, 1=1", "states", 2, "value", "0 Enlarged, 1 Reduced");
+        UserDataType userDataType4 = new UserDataType();
+        userDataType4.initByName("characterName", "ch4","codeMap", "0=0, 1=1", "states", 2, "value", "0 Lower teeth, 1 Upper teeth");
 
-        List<UserDataType> charStateLabels= new ArrayList<>(3);
+        List<UserDataType> charStateLabels= new ArrayList<>(4);
         charStateLabels.add(0, userDataType1);
         charStateLabels.add(1, userDataType2);
         charStateLabels.add(2, userDataType3);
+        charStateLabels.add(3, userDataType4);
 
         StandardData standardData = new StandardData();
         standardData.initByName("charstatelabels", charStateLabels);
