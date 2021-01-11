@@ -18,7 +18,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
     final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Input.Validate.REQUIRED);
     final public Input<BranchRateModel.Base> branchRateModelInput = new Input<>("branchRateModel", "the rate or optimum on each branch");
     final public Input<NodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.", Input.Validate.REQUIRED);
-    final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+    final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.");
 
     private Tree tree;
     private int nTraits;

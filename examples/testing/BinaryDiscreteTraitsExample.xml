@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.branchratemodel:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
+
+<map name="Uniform" >beast.math.distributions.Uniform</map>
+<map name="Exponential" >beast.math.distributions.Exponential</map>
+<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+<map name="Normal" >beast.math.distributions.Normal</map>
+<map name="Beta" >beast.math.distributions.Beta</map>
+<map name="Gamma" >beast.math.distributions.Gamma</map>
+<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+<map name="prior" >beast.math.distributions.Prior</map>
+<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+<map name="Dirichlet" >beast.math.distributions.Dirichlet</map>
+
+    <data id="discrete_traits" dataType="standard">
+        <sequence id="seq_t1" taxon="t1" totalcount="3" value="010110101"/>
+        <sequence id="seq_t2" taxon="t2" totalcount="3" value="010011101"/>
+        <sequence id="seq_t7" taxon="t7" totalcount="3" value="001011110"/>
+        <sequence id="seq_t8" taxon="t8" totalcount="3" value="001001010"/>
+        <sequence id="seq_t3" taxon="t3" totalcount="3" value="010011010"/>
+        <sequence id="seq_t4" taxon="t4" totalcount="3" value="010011101"/>
+        <sequence id="seq_t5" taxon="t5" totalcount="3" value="011011000"/>
+        <sequence id="seq_t6" taxon="t6" totalcount="3" value="110011101"/>
+        <sequence id="seq_t15" taxon="t15" totalcount="3" value="010011101"/>
+        <sequence id="seq_t16" taxon="t16" totalcount="3" value="010011111"/>
+        <sequence id="seq_t13" taxon="t13" totalcount="3" value="010011101"/>
+        <sequence id="seq_t11" taxon="t11" totalcount="3" value="101001000"/>
+        <sequence id="seq_t12" taxon="t12" totalcount="3" value="101101000"/>
+        <sequence id="seq_t9" taxon="t9" totalcount="3" value="001101000"/>
+        <sequence id="seq_t10" taxon="t10" totalcount="3" value="101101000"/>
+        <sequence id="seq_t19" taxon="t19" totalcount="3" value="000111000"/>
+        <sequence id="seq_t20" taxon="t20" totalcount="3" value="000111100"/>
+        <sequence id="seq_t14" taxon="t14" totalcount="3" value="100011110"/>
+        <sequence id="seq_t17" taxon="t17" totalcount="3" value="000111100"/>
+        <sequence id="seq_t18" taxon="t18" totalcount="3" value="001001110"/>
+    </data>
+
+<run id="mcmc" spec="MCMC" chainLength="100000000">
+	<state id="state" storeEvery="5000">
+		<tree id="TheTree" name="stateNode" spec='beast.util.TreeParser'
+					newick="(((t1:3.204783812,t2:3.204783812):1.199443095,((t7:1.321123361,t8:1.321123361):1.828368984,(t3:2.756666159,(t4:1.969360899,((t5:1.541006809,t6:1.541006809):0.3636678964,((t15:0.6222802646,t16:0.6222802646):0.2303157481,t13:0.8525960127):1.052078692):0.06468619396):0.78730526):0.3928261865):1.254734562):1.515540644,(((t11:0.8934298139,t12:0.8934298139):0.2914845583,(t9:1.155972574,t10:1.155972574):0.0289417978):2.019120136,((t19:0.1428394258,t20:0.1428394258):2.81794442,(t14:0.8000420536,(t17:0.515191512,t18:0.515191512):0.2848505416):2.160741792):0.2432506626):2.715733044);"
+					IsLabelledNewick="true">
+	            <taxonset id="TaxonSet" spec="TaxonSet">
+                    <taxon id="t1" spec="Taxon"/>
+                    <taxon id="t2" spec="Taxon"/>
+                    <taxon id="t7" spec="Taxon"/>
+                    <taxon id="t8" spec="Taxon"/>
+                    <taxon id="t3" spec="Taxon"/>
+                    <taxon id="t4" spec="Taxon"/>
+                    <taxon id="t5" spec="Taxon"/>
+                    <taxon id="t6" spec="Taxon"/>
+                    <taxon id="t15" spec="Taxon"/>
+                    <taxon id="t16" spec="Taxon"/>
+                    <taxon id="t13" spec="Taxon"/>
+                    <taxon id="t11" spec="Taxon"/>
+                    <taxon id="t12" spec="Taxon"/>
+                    <taxon id="t9" spec="Taxon"/>
+                    <taxon id="t10" spec="Taxon"/>
+                    <taxon id="t19" spec="Taxon"/>
+                    <taxon id="t20" spec="Taxon"/>
+                    <taxon id="t14" spec="Taxon"/>
+                    <taxon id="t17" spec="Taxon"/>
+                    <taxon id="t18" spec="Taxon"/>
+	            </taxonset>
+        </tree>
+        <stateNode idref="varValues"/>
+		<stateNode idref="rootValues"/>
+		<stateNode idref="covValues"/>
+        <stateNode idref="BirthRate"/>
+        <stateNode idref="binaryLiabilities"/>
+	</state>
+
+	<distribution id="posterior" spec="util.CompoundDistribution">
+    <!-- START prior -->
+    <distribution id="prior" spec="util.CompoundDistribution">
+        <!-- tree prior -->
+        <distribution id="YuleModel.prior" spec="beast.evolution.speciation.YuleModel" tree="@TheTree">
+            <birthDiffRate id="BirthRate" spec="parameter.RealParameter">0.4</birthDiffRate>
+        </distribution>
+        <prior id="birthRatePrior" name="distribution" x="@BirthRate">
+            <distr id="LogNormal.0" spec="beast.math.distributions.LogNormalDistributionModel" S="0.5" M="1.0" meanInRealSpace="true"/>
+        </prior>
+
+        <!-- BM model prior -->
+        <distribution id="varValuesPrior" spec="beast.math.distributions.Prior" x="@varValues">
+	        <distr id="LogNormal.varValues" spec="beast.math.distributions.LogNormalDistributionModel" S="0.3" M="1.0"/>
+        </distribution>
+        
+        <distribution id="covValuesPrior" spec="beast.math.distributions.Prior" x="@covValues">
+	        <distr id="Uniform.correlation" spec="beast.math.distributions.Uniform" lower="-1.0" upper="1.0"/>
+        </distribution>
+
+        <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@rootValues">
+	        <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+        </distribution>
+    </distribution>
+    <!-- END prior -->
+
+    <!-- START likelihood -->
+    <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+     <!-- START Morphological likleihood-->
+        <distribution id="BinaryDiscreteLikelihood" spec="contraband.prunelikelihood.BinaryDiscreteTraits" tree="@TheTree">
+            <liability id="binaryLiabilities" spec="parameter.RealParameter">1.0</liability>
+            <data id="binaryData" spec="FilteredAlignment" data="@discrete_traits" filter="1,2,3,4,5,6,7,8,9"/>
+        </distribution>
+
+        <distribution id="LiabilityLikelihood" spec="contraband.prunelikelihood.LiabilityLikelihood">
+			<tree idref="TheTree"/>
+
+            <binaryDiscreteTraits idref="BinaryDiscreteLikelihood"/>
+            
+			<branchRateModel id="rateCatClock" spec="contraband.clock.RateCategoryClockModel" nCat="1">
+                <rates id="rateValues" spec="parameter.RealParameter">1</rates>
+                <rateCatAssign id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0</rateCatAssign>
+                <tree idref="TheTree"/>
+            </branchRateModel>
+
+            <nodeMath id="pcmNodeMath" spec="contraband.math.NodeMath" upperMatrix="true">
+                <binaryDiscreteTraits idref="BinaryDiscreteLikelihood"/>
+            	<sigmasq id="varValues" spec="parameter.RealParameter">2.3507158564172 2.66227667007179 2.20966842720569 2.11002191297893 1.61422965852104 2.58457129146232 3.91435405887788 2.60372957962664 2.79702452569234
+                </sigmasq>
+                <correlation id="covValues" spec="parameter.RealParameter">0.27778143202886 0.0660130502656102 0.910042922012508 0.280713468324393 -0.813190890476108 -0.170288223773241 0.21812632214278 0.34162478800863 -0.733936252538115 -0.946017393376678 -0.956537198740989 -0.446550567634404 0.130933821666986 -0.541316248010844 0.63397478684783 -0.316864557098597 -0.982065211981535 0.00890665221959352 0.462614243384451 0.123961980454624 -0.910350260790437 0.685061785858124 0.771601050160825 -0.170975271146744 -0.927930962760001 0.948474865872413 0.631917849648744 0.278877999633551 -0.0909213675186038 0.922941674478352 0.796023333445191 0.380548865068704 -0.313655803445727 0.146587574388832 0.0552729135379195 -0.250463518314064
+                </correlation>
+                <rootValues id="rootValues" spec="parameter.RealParameter">-1.31182051126447 -0.796390609414387 -1.03865930034857 -0.365156841726213 3.2082932703863 2.11840315103411 -2.81201838085849 -5.50880297764075 1.30917837730245
+                </rootValues>
+            </nodeMath>
+        </distribution>
+        <!-- END Morphological likleihood -->
+	</distribution> 
+	<!-- END Likelihood -->
+	</distribution> 
+	<!-- END Posterior -->
+<!--
+	<operator id="VarValueScaler" spec="ScaleOperator" parameter="@varValues" scaleFactor="0.75" weight="6.0"/>
+    <operator id="CoValueRandomWalk" spec="RealRandomWalkOperator" parameter="@covValues" windowSize="1.0" weight="10.0"/>
+    <operator id="MeanRandomWalk" spec="RealRandomWalkOperator" parameter="@rootValues" windowSize="1.0" weight="6.0"/>
+-->
+
+    <operator id="YuleTreeScaler" spec="ScaleOperator" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
+    <operator id="YuleTreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
+    <operator id="YuleUniformOperator" spec="Uniform" tree="@TheTree" weight="30.0"/>
+
+    <operator id="YuleSubtreeSlide" spec="SubtreeSlide" tree="@TheTree" weight="3.0"/>
+    <operator id="YuleNarrows" spec="Exchange" tree="@TheTree" weight="3.0"/>
+    <operator id="YuleWide" spec="Exchange" isNarrow="false" tree="@TheTree" weight="3.0"/>
+    <operator id="YuleWilsonBalding" spec="WilsonBalding" tree="@TheTree" weight="3.0"/>
+
+    <operator id="BirthRateScaler" spec="ScaleOperator" parameter="@BirthRate" weight="3.0"/>
+
+    <operator id="BinaryLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@binaryLiabilities" windowSize="1.0" weight="5.0"/>
+    <operator id="BinaryLiabilityScaler" spec="ScaleOperator" parameter="@binaryLiabilities" weight="5.0"/>
+
+    <logger id="tracelog" fileName="BinaryDiscreteTraitsExample.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+      <log idref="posterior"/>
+      <log idref="likelihood"/>
+      <!--
+      <log idref="BinaryDiscreteLikelihood"/>
+      -->
+      <log idref="prior"/>
+      <log id="TreeStats" spec="beast.evolution.tree.TreeStatLogger" tree="@TheTree"/>
+      <log idref="BirthRate"/>
+      <log idref="binaryLiabilities"/>
+
+	  <!--
+      <log idref="varValues"/>
+      <log idref="covValues"/>
+      <log idref="rootValues"/>
+      -->
+    </logger>
+
+    <logger id="screenlog" logEvery="10000">
+        <log idref="posterior"/>
+        <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+    </logger>
+
+    <logger id="treelog" fileName="BinaryDiscreteTraitsExample.trees" logEvery="5000" mode="tree">
+        <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
+    </logger>
+  </run>
+</beast>
