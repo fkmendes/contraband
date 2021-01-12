@@ -83,8 +83,9 @@
             <distr id="LogNormal.0" spec="beast.math.distributions.LogNormalDistributionModel" S="0.5" M="1.0" meanInRealSpace="true"/>
         </prior>
 
-        <distribution id="thresholdsPrior" spec="beast.math.distributions.Prior" x="@thresholds">
-            <distr id="Normal.thresholds" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+        <distribution id="thresholdsPrior" spec="beast.math.distributions.Prior">
+            <x id="thrsholdDifference" spec="contraband.prunelikelihood.ThresholdDifference" trait="@OrderedDiscreteLikelihood"/>
+            <distr id="Exponential.thresholds" spec="beast.math.distributions.Exponential" mean="2.0"/>
         </distribution>
 
         <!-- BM model prior -->
@@ -150,9 +151,8 @@
     <operator id="YuleWilsonBalding" spec="WilsonBalding" tree="@TheTree" weight="3.0"/>
 
     <operator id="BirthRateScaler" spec="ScaleOperator" parameter="@BirthRate" weight="3.0"/>
-<!--
+
     <operator id="ThresholdsRandomWalk" spec="RealRandomWalkOperator" parameter="@thresholds" windowSize="1.0" weight="3.0"/>
--->
     <operator id="OrderedLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@orderedLiabilities" windowSize="1.0" weight="5.0"/>
     <operator id="OrderedLiabilityScaler" spec="ScaleOperator" parameter="@orderedLiabilities" weight="5.0"/>
 

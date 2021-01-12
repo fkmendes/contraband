@@ -115,7 +115,7 @@ public class OrderedDiscreteTraits extends ThresholdModel {
         return thresholdsInput.get().getDoubleValues();
     }
 
-    private double[] getThresholdsForTrait (int traitIdx, double[] thresholds){
+    public double[] getThresholdsForTrait (int traitIdx, double[] thresholds){
         int nr = nrOfStates[traitIdx];
         double[] res = new double[nr];
         if (nr >= 0) System.arraycopy(thresholds, thresholdIndex[traitIdx], res, 0, nr);
