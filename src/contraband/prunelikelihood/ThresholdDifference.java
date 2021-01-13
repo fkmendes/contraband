@@ -57,9 +57,15 @@ public class ThresholdDifference extends CalculationNode implements Function, Lo
         double[] thresholds = traits.getThresholds();
         for(int i = 0; i < nrOfTraits; i++){
             double[] thresholdsForTrait = traitsInput.get().getThresholdsForTrait(i, thresholds);
-            for(int j = 0; j < thresholdsForTrait.length - 1; j++){
-                difference[index] = thresholdsForTrait[j+1] - thresholdsForTrait[j];
+            if(thresholds.length == 1){
+                // in case where the trait has only two states and therefore there is only one threshold for it
+                difference[index] = thresholdsForTrait[0];
                 index ++;
+            } else {
+                for (int j = 0; j < thresholdsForTrait.length - 1; j++) {
+                    difference[index] = thresholdsForTrait[j + 1] - thresholdsForTrait[j];
+                    index++;
+                }
             }
         }
         needsRecompute = false;

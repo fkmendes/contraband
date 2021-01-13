@@ -86,6 +86,20 @@ public abstract class ThresholdModel extends Distribution {
         }
     }
 
+    // get the dimension of parameter, i.e. thresholds or liabilities, according to the number of states of traits
+    // for ordered traits:
+    // s1 = {0, 1, 2} s2 = {0, 1, 2, 3}
+    // --> thresholds a1 = {0.5, 1.5}, a2 = {0.5, 1.5, 2.5}
+    // --> states = {2, 3}
+    // --> dimension of thresholds = 2 + 3 = 5
+    // for unordered traits:
+    // s1 = {0, 1, 2} s2 = {0, 1, 2, 3}
+    // liabilities l1 = {y1, y2}, l2 = {y1, y2, y3}
+    // --> dimension of thresholds = 2 + 3 = 5
+    /*
+     * The input is an array for the number of states corresponding to each trait
+     * e.g. states[2] is the number of states for the 3rd trait
+     */
     protected int getParameterDimension(int[] states) {
         int sum = 0;
         for (int i : states){
@@ -94,6 +108,18 @@ public abstract class ThresholdModel extends Distribution {
         return sum;
     }
 
+    // return the start index of a parameter corresponding to each trait in an array
+    // for example: s1 = {0, 1, 2} s2 = {0, 1, 2, 3}
+    // states = {3, 4} traitNr = 2
+    // thresholds = {0.5, 1.5, 0.5, 1.5, 2.5}
+    // index = {0, 2}
+    // 0: the threshold for the first trait starts at the first element
+    // 2: the threshold for the second trait starts at the third element
+    /*
+     * Inputs:
+     * (1) states[]: an array for the number of states corresponding to each trait
+     * (2) traitNr: number of this kind of traits
+     */
     protected int[] getParameterIndex(int[] states, int traitNr){
         int[] index = new int[traitNr];
         int sum = 0;

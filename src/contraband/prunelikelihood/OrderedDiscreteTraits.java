@@ -99,6 +99,10 @@ public class OrderedDiscreteTraits extends ThresholdModel {
         return logP;
     }
 
+    // for a trait with k states
+    // there are k - 1 thresholds
+    // the initial value is equal to the average of the two neighbour states
+    // for example, for state s = {0, 1, 2, 3}, initial thresholds will be a = {0.5, 1.5, 2.5}
     private void initiateThresholds() {
         int idx = 0;
         for (int i = 0; i < nTraits; i++){
