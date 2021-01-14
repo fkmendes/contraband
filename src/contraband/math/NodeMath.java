@@ -259,8 +259,6 @@ public class NodeMath extends CalculationNode {
 
     public double[] getRateMatrixRow () { return rateMatRow; }
 
-    public double getVarianceForNode (int nodeIdx) { return nodeVariance[nodeIdx]; }
-
     public double [] getTransformedTraitValues () { return transformedTraitValues; }
 
     public boolean useShrinkage () { return useShrinkage; }
@@ -272,6 +270,22 @@ public class NodeMath extends CalculationNode {
     public double getDetShrinkageRho () { return detRhoMatrix; }
 
     public double getDetInvShrinkageRho () { return detInvRhoMatrix; }
+
+    /*
+     * variance of a tip --> branch length
+     * variance of an internal node --> branch length + (v1 * v2 / (v1 + v2))
+     */
+    public double getVarianceForNode (int nodeIdx) { return nodeVariance[nodeIdx]; }
+
+    /*
+     * expectation of a tip --> observed trait values
+     * expectation of an internal node (MLE) --> (m1 * v2 + m2 * v2) / (v1 + v2)
+     */
+    public double[] getExpectationForNode (int nodeIdx) {
+        double[] exp = new double[nTraits];
+        MatrixUtilsContra.getMatrixRow(nodeExpectation, nodeIdx, nTraits, exp);
+        return exp;
+    }
 
     //setters
     public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
