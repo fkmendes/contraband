@@ -300,6 +300,11 @@ public class NodeMath extends CalculationNode {
 
     public double getDetInvShrinkageRho () { return detInvRhoMatrix; }
 
+    public int getNTraits () { return nTraits; }
+
+    public int getNSpecies () { return nSpecies; }
+
+
     //setters
     public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
 
@@ -350,9 +355,9 @@ public class NodeMath extends CalculationNode {
         MatrixUtilsContra.setMatrixRow(nodeExpectation, expectp, parentIdx, nTraits);
     }
 
-    public void setNTraits (int value) { nTraits = value; }
+    public void setTraitRateMatrixInverse (double[] values) { invTraitRateMatrix = values; }
 
-    public void setNSpecies (int value) { nSpecies = value; }
+    public void setTraitRateMatrixDeterminant (double value) { detTraitRateMat = value; }
 
     private void initializeAbCdEfArray() {
         // A C E f are single double values for each node
@@ -454,7 +459,7 @@ public class NodeMath extends CalculationNode {
      * Note: trait rate matrix is not populated by shrinkage method.
      */
 
-    private void operateOnInvTraitRateMatrix() {
+    protected void operateOnInvTraitRateMatrix() {
         // LUDecomposition
         LUDecompositionForArray.ArrayLUDecomposition(invTraitRateMatrix, lu, pivot, evensingular, nTraits);
 
