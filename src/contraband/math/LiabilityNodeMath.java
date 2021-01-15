@@ -5,11 +5,12 @@ import beast.core.parameter.RealParameter;
 import org.apache.commons.math3.util.FastMath;
 
 public class LiabilityNodeMath extends NodeMath{
-    final public Input<RealParameter> inverseMatrixInput = new Input<>("inverseMatrix", "Inverse of trait correlation matrix when using Gibbs sampling.");
+    final public Input<RealParameter> inverseRhoInput = new Input<>("inverseMatrix", "Inverse of trait correlation matrix when using Gibbs sampling.");
 
-    private double[] inverseMatrix;
+    private double[] inverseRho;
     private double[] inverseTraitRateMatrix;
     private double[] traitRateMatrix;
+    private double[] rhoMatrix;
 
     // for doing LUDecompostion
     private double[] lu;
@@ -19,11 +20,13 @@ public class LiabilityNodeMath extends NodeMath{
 
     private int nTraits;
     private int matDim;
+    private double detInvRhoMatrix;
+    private double detRhoMatrix;
 
     private double [] storedInvTraitRateMatrix;
-    private double [] storedTraitRateMatrix;
+    private double [] storedRhoMatrix;
     private double[] storedInverseMatrix;
-
+    private double [] storedTraitRateMatrix;
 
     @Override
     public void initAndValidate() {
@@ -31,14 +34,15 @@ public class LiabilityNodeMath extends NodeMath{
         nTraits = getNTraits();
         matDim = nTraits * nTraits;
 
-        inverseMatrix = new double[matDim];
+        inverseRho = new double[matDim];
         inverseTraitRateMatrix = new double[matDim];
         traitRateMatrix = new double[matDim];
+        rhoMatrix = new double[matDim];
 
         storedInvTraitRateMatrix = new double[matDim];
-        storedTraitRateMatrix = new double[matDim];
+        storedRhoMatrix = new double[matDim];
         storedInverseMatrix = new double[matDim];
-
+        storedTraitRateMatrix = new double[matDim];
         lu = new double [matDim];
         pivot = new int[nTraits];
         evenSingular = new boolean[2];
@@ -49,19 +53,19 @@ public class LiabilityNodeMath extends NodeMath{
             MatrixUtilsContra.setMatrixEntry(identityMatrix, i, i, 1.0, nTraits);
         }
 
-        if(inverseMatrixInput.get().getDimension() != matDim) {
-            inverseMatrixInput.get().setDimension(matDim);
+        if(inverseRhoInput.get().getDimension() != matDim) {
+            inverseRhoInput.get().setDimension(matDim);
             // initiate an identity matrix
             for (int i = 0; i < matDim; i++){
                 if(i % (nTraits + 1) == 0) {
-                    inverseMatrixInput.get().setValue(i, 1.0);
+                    inverseRhoInput.get().setValue(i, 1.0);
                 } else {
-                    inverseMatrixInput.get().setValue(i, 0.0);
+                    inverseRhoInput.get().setValue(i, 0.0);
                 }
             }
         } else {
             // get from input
-            inverseMatrix = inverseMatrixInput.get().getDoubleValues();
+            inverseRho = inverseRhoInput.get().getDoubleValues();
         }
 
     }
@@ -70,29 +74,56 @@ public class LiabilityNodeMath extends NodeMath{
     public void populateTraitRateMatrix() {
         // since we sampling the inverse matrix
         // we only need to get the inverse matrix
-        inverseMatrix = inverseMatrixInput.get().getDoubleValues();
+        inverseRho = inverseRhoInput.get().getDoubleValues();
 
-        // then populate the inverse matrix of trait rate matrix
-        double sigmaSq = getSigmaValue();
-        MatrixUtilsContra.vectorMapMultiply(inverseMatrix, 1/sigmaSq, inverseTraitRateMatrix);
-        setTraitRateMatrixInverse(inverseTraitRateMatrix);
+        boolean singularMatrix = false;
+        // to get the original rho matrix because it will be used when calculating r parameter
+        LUDecompositionForArray.ArrayLUDecomposition(inverseRho, lu, pivot, evenSingular, nTraits);
+        detInvRhoMatrix = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
+         try {
+            LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evenSingular[1], nTraits, rhoMatrix);
+        } catch (RuntimeException e) {
+            singularMatrix = true;
+        }
+        setSingularMatrix(singularMatrix);
 
-        LUDecompositionForArray.ArrayLUDecomposition(inverseTraitRateMatrix, lu, pivot, evenSingular, nTraits);
-        // to get the original trait rate matrix because it will be used when calculating r parameter
-       LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evenSingular[1], nTraits, traitRateMatrix);
-       setTraitRateMatrix(traitRateMatrix);
+        if(isOneRateOnly()) {
+            double sigmaSq = getSigmaValue();
+            MatrixUtilsContra.vectorMapMultiply(rhoMatrix, sigmaSq, traitRateMatrix);
+        } else {
+            double[] sigmaSqs = getSigmaValues();
+            for(int i = 0; i < nTraits; i++){
+                for(int j = 0; j < nTraits; j++){
+                   traitRateMatrix[i * nTraits + j] = FastMath.sqrt(sigmaSqs[i]) * FastMath.sqrt(sigmaSqs[j]) * rhoMatrix[i * nTraits + j];
+                }
+            }
+        }
+        setTraitRateMatrix(traitRateMatrix);
+
     }
 
     @Override
     public void performMatrixOperations() {
-        // perform LUDecomposition and get the determinant of the inverse matrix
-        operateOnInvTraitRateMatrix();
-        double detInv = getTraitRateMatrixInverseDeterminant();
+        if(isOneRateOnly()){
+            // populate the inverse matrix of trait rate matrix
+            double sigmaSq = getSigmaValue();
 
-        // the determinant of original trait rate matrix is the reciprocal of the determinant of the inverse matrix
-        double logDet = FastMath.log(1/detInv);
+            MatrixUtilsContra.vectorMapMultiply(inverseRho, 1/ sigmaSq, inverseTraitRateMatrix);
+            setInvTraitRateMatrix(inverseTraitRateMatrix);
 
-        setTraitRateMatrixDeterminant(logDet);
+            // the determinant of original trait rate matrix is the reciprocal of the determinant of the inverse matrix
+            detRhoMatrix = (1.0 / sigmaSq) * detInvRhoMatrix;
+
+            double detInvTraitRateMat = detRhoMatrix * FastMath.pow(1/sigmaSq, nTraits);
+            setInvTraitRateMatrixDeterminant(detInvTraitRateMat);
+
+            double logDetTraitRateMat = FastMath.log(detRhoMatrix) + nTraits * FastMath.log(sigmaSq);
+            setTraitRateMatrixDeterminant(logDetTraitRateMat);
+        } else {
+            // for multiple trait evolutionary rates
+            // we will need to LUDecomposition and get the determinant of the matrix
+            super.performMatrixOperations();
+        }
     }
 
     /*
@@ -103,7 +134,7 @@ public class LiabilityNodeMath extends NodeMath{
     public boolean updateParameters() {
         boolean updateInverseMatrix = false;
         boolean others = super.updateParameters();
-        if(inverseMatrixInput.isDirty()){
+        if(inverseRhoInput.isDirty()){
             updateInverseMatrix = true;
         }
         return others || updateInverseMatrix;
@@ -119,26 +150,30 @@ public class LiabilityNodeMath extends NodeMath{
     @Override
     public void store() {
         super.store();
-
         System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, matDim);
+        System.arraycopy(rhoMatrix, 0, storedRhoMatrix, 0, matDim);
         System.arraycopy(inverseTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, matDim);
-        System.arraycopy(inverseMatrix, 0, storedInverseMatrix, 0, matDim);
+        System.arraycopy(inverseRho, 0, storedInverseMatrix, 0, matDim);
     }
 
     @Override
     public void restore() {
         super.restore();
 
-        double[] tempTraitRateMatrix = traitRateMatrix;
-        traitRateMatrix = storedTraitRateMatrix;
-        storedTraitRateMatrix = tempTraitRateMatrix;
+        double[] tempRhoMatrix = rhoMatrix;
+        rhoMatrix = storedRhoMatrix;
+        storedRhoMatrix = tempRhoMatrix;
 
         double[] tempInvTraitRateMatrix = inverseTraitRateMatrix;
         inverseTraitRateMatrix = storedInvTraitRateMatrix;
         storedInvTraitRateMatrix = tempInvTraitRateMatrix;
 
-        double[] tempInverseMatrix = inverseMatrix;
-        inverseMatrix = storedInverseMatrix;
+        double[] tempInverseMatrix = inverseRho;
+        inverseRho = storedInverseMatrix;
         storedInverseMatrix = tempInverseMatrix;
+
+        double[] tempTraitRateMatrix = traitRateMatrix;
+        traitRateMatrix = storedTraitRateMatrix;
+        storedTraitRateMatrix = tempTraitRateMatrix;
     }
 }

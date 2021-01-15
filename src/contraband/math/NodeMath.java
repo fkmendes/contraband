@@ -215,7 +215,7 @@ public class NodeMath extends CalculationNode {
             sigmaValues = new double[nTraits];
             storedSigmaValues = new double[nTraits];
             sigmaValues = sigmasqInput.get().getDoubleValues();
-            populateTraitRateMatrixForMultipleRates();
+            //populateTraitRateMatrixForMultipleRates();
         }
 
         // check root values dimension
@@ -310,6 +310,10 @@ public class NodeMath extends CalculationNode {
 
     public double getSigmaValue () { return sigmaValue; }
 
+    public double[] getSigmaValues() {return sigmaValues; }
+
+    public boolean isOneRateOnly() { return oneRateOnly; }
+
 
     //setters
     public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
@@ -363,9 +367,15 @@ public class NodeMath extends CalculationNode {
 
     public void setTraitRateMatrix (double[] values ) { traitRateMatrix = values; }
 
-    public void setTraitRateMatrixInverse (double[] values) { invTraitRateMatrix = values; }
+    public void setInvTraitRateMatrix (double[] values) { invTraitRateMatrix = values; }
+
+    public void setInvTraitRateMatrixDeterminant (double values) { detInvTraitRateMat = values; }
 
     public void setTraitRateMatrixDeterminant (double value) { detTraitRateMat = value; }
+
+    public void setRhoValues(double[] values) { rhoValues = values; }
+
+    public void setSingularMatrix(boolean value) { singularMatrix = value; }
 
     private void initializeAbCdEfArray() {
         // A C E f are single double values for each node
