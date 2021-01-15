@@ -2,6 +2,8 @@ package contraband.math;
 
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
+import beast.math.matrixalgebra.CholeskyDecomposition;
+import beast.math.matrixalgebra.IllegalDimension;
 import org.apache.commons.math3.util.FastMath;
 
 public class LiabilityNodeMath extends NodeMath{
@@ -19,9 +21,17 @@ public class LiabilityNodeMath extends NodeMath{
     private double [] identityMatrix;
 
     private int nTraits;
+    private int nSpecies;
     private int matDim;
     private double detInvRhoMatrix;
     private double detRhoMatrix;
+    private double[][] cholesky;
+    private double[] choleskyArray;
+
+    private double[] upperMatrix;
+    private double[][] lowerMatrix;
+    private double[] dataTransformMatA;
+    private double[] transformedTraitsMatArr;
 
     private double [] storedInvTraitRateMatrix;
     private double [] storedRhoMatrix;
@@ -32,7 +42,15 @@ public class LiabilityNodeMath extends NodeMath{
     public void initAndValidate() {
         super.initAndValidate();
         nTraits = getNTraits();
+        nSpecies = getNSpecies();
         matDim = nTraits * nTraits;
+        cholesky = new double[nSpecies][nTraits];
+        choleskyArray = new double[nSpecies * nTraits];
+
+        upperMatrix = new double[matDim];
+        lowerMatrix = new double[nSpecies][nTraits];
+        dataTransformMatA = new double[matDim];
+        transformedTraitsMatArr = new double[nSpecies * nTraits];
 
         inverseRho = new double[matDim];
         inverseTraitRateMatrix = new double[matDim];
@@ -145,6 +163,44 @@ public class LiabilityNodeMath extends NodeMath{
      */
     @Override
     protected void initiateRhoInput(){ }
+
+    // This method transforms original data set so that traits are independent of each other
+    // X.transpose * V.inverse * X ---> Z.transpose * Z
+    public void populateTransformedLiabilities (double[] liabilities) {
+        // copy to a 2D array
+        for(int i = 0; i < nSpecies; i++){
+           //for (int j = 0; j < nTraits; j ++){
+               //cholesky[i][j] = MatrixUtilsContra.getMatrixEntry(liabilities, i, j, nTraits);
+           //}
+           System.arraycopy(liabilities, i * nTraits, cholesky[i], 0, nTraits);
+        }
+
+        try {
+            lowerMatrix = (new CholeskyDecomposition(cholesky)).getL();
+            // caution: this returns the lower triangular form
+        } catch (IllegalDimension illegalDimension) {
+            throw new RuntimeException("Numerical exception in WishartDistribution");
+        }
+
+        //LUDecomposition upperMatLUD = new LUDecomposition(upperMat);
+        //RealMatrix dataTransformMat = upperMatLUD.getSolver().getInverse();
+        /*
+         * TO DO
+         */
+        choleskyArray = new double[matDim];
+        double [] dataTransformMat = new double[matDim];
+        LUDecompositionForArray.ArrayLUDecomposition(choleskyArray, lu, pivot, evenSingular, nTraits);
+        try {
+            LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evenSingular[1], nTraits, dataTransformMat);
+        } catch (RuntimeException e) {
+            setSingularMatrix(true);
+        }
+
+        //RealMatrix transformedTraitsMat = traitMat.multiply(dataTransformMat);
+        double[] transformedTraitsMat = new double[nSpecies * nTraits];
+        MatrixUtilsContra.matrixMultiply(liabilities, dataTransformMat, nSpecies, nTraits, transformedTraitsMat);
+    }
+
 
 
     @Override
