@@ -5,11 +5,8 @@ import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.clock.RateCategoryClockModel;
 import contraband.math.LiabilityNodeMath;
-import contraband.prunelikelihood.BMPruneLikelihood;
 import contraband.prunelikelihood.LiabilityLikelihood;
-import org.junit.Assert;
 import outercore.parameter.KeyRealParameter;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,16 +21,16 @@ public class LiabilityNodeMathTestDriver {
         // trait values
         int nTraits = 4;
         List<Double> data = Arrays.asList(
-                -6.42193809335608, -1.65989756061141, 5.15759789266981, -6.56062921109306,
-                -5.03724385041298, 0.93007037382525, 4.41105696963357, -5.84790423473936,
-                -6.15578318250413, -3.89561377661385, 3.84425761908253, -4.58575554859401,
-                -5.17432423006894, -2.53719420891046, 5.03090939175046, -0.79379415322876,
-                -5.61743143702448, -6.50421680550017, 3.57379452807292, 6.3680803136263,
-                -4.1755649321327, -6.22257127540476, 3.20155065335743, 4.7549882614031,
-                -5.49557642294037, -12.4500805740433, 3.6241593165236, 3.17971650657134,
-                -3.2290412841014, -9.31768106789294, 5.31489864149079, -2.96128941493352,
-                -5.11812017566976, -9.33547489795037, 0.63612585434188, 5.31629275763256,
-                -6.84997187279757, -13.0239682050792, 0.189981169418762, 7.38483491142637
+                -6.27499208443443, -1.22468097213209, 5.81907241368362, -3.92206107638759,
+                -4.94850658278194, -0.453876476004197, 4.30633969774666, -3.3563174816445,
+                -6.02002559472886, -2.09468363352179, 4.46574877202188, -4.26072495377516,
+                -5.0798244799288, -1.72613398635412, 5.76821474836136, 0.707038879576404,
+                -5.50430467741627, -3.14168739896938, 4.56177348682651, 3.9073600922006,
+                -4.12305027861692, -3.23866814100161, 3.9661783662543, 2.52600581804315,
+                -5.3875721133069, -5.37340326805192, 5.70660547120509, 0.111472504390871,
+                -3.21631588401429, -4.52403176018136, 7.3156952337464, -1.77999035455415,
+                -5.02598308954637, -4.26615711744045, 1.1431561920545, -0.861746816351694,
+                -6.68503249988375, -5.39752125164611, 1.27697631062818, -0.853488211694949
         );
         KeyRealParameter traitValues = new KeyRealParameter();
         traitValues.initByName("value", data, "keys", spNames, "minordimension", nTraits);
@@ -41,15 +38,16 @@ public class LiabilityNodeMathTestDriver {
         LiabilityNodeMath nodeMath = new LiabilityNodeMath();
         // BM model parameters
         RealParameter inverseMatrix = new RealParameter(new Double[] {
-                0.431864494796763, 0.269799734818774, 0.265743456802657
+                1.15967096041944, -0.22059864425817, 0.0349183919101759, 0.457034581560665,
+                -0.22059864425817, 1.19212258045853, 0.210910014702716, -0.359004307577557,
+                0.0349183919101759, 0.210910014702716, 1.27408118183747, 0.496761070565367,
+                0.457034581560665, -0.359004307577557, 0.496761070565367, 1.47635603144872
         });
         // all traits share one rate
-        RealParameter sigmasq = new RealParameter(new Double[] {1.0});
-
-        nodeMath.initByName("traits", traitValues, "sigmasq", sigmasq, "inverseMatrix", inverseMatrix);
+        RealParameter sigmasq = new RealParameter(new Double[] {4.91917941793269});
+        nodeMath.initByName("traits", traitValues, "sigmasq", sigmasq, "inverseMatrix", inverseMatrix, "oneRateOnly", true);
 
         // branch rate model
-
         IntegerParameter colorAssignments = new IntegerParameter(new Integer[] {0});
         RealParameter colorValues = new RealParameter(new Double[] {1.0});
         RateCategoryClockModel lsc = new RateCategoryClockModel();
@@ -61,7 +59,6 @@ public class LiabilityNodeMathTestDriver {
                 "tree", tree, "nodeMath", nodeMath, "branchRateModel", lsc);
 
         double lik = liabilityLikelihood.calculateLogP();
-        System.out.println("Log likelihood"+ lik);
-        
+        System.out.println("Log likelihood"+ lik); // -75.8005215976135
     }
 }

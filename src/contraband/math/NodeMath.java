@@ -201,24 +201,14 @@ public class NodeMath extends CalculationNode {
         traitVecForSA = new double [nTraits];
 
         useShrinkage = useShrinkageInput.get();
-        if (!useShrinkage && !coEstimate) {
-            if (rhoInput.get() == null) {
-                throw new RuntimeException("NodeMath::If shrinkage method is not used, either correlation or covariance is required.");
-            } else {
-                Log.warning.println("NodeMath::Setting dimension of rho values to " + (nTraits * (nTraits - 1) / 2));
-                rhoInput.get().setDimension((nTraits * (nTraits - 1) / 2));
-                rhoValues = new double[(nTraits * (nTraits - 1) / 2)];
-                storedRhoValues = new double[(nTraits * (nTraits - 1) / 2)];
-                rhoValues = rhoInput.get().getDoubleValues();
-            }
-        }
+        initiateRhoInput();
 
         // check rate input
         if (oneRateOnly) {
             Log.info.println("NodeMath::1 rate is assigned to " + nTraits + " traits.");
             sigmasqInput.get().setDimension(1);
             sigmaValue = sigmasqInput.get().getValue();
-            populateTraitRateMatrixForOneRate();
+            //populateTraitRateMatrixForOneRate();
         } else {
             Log.warning.println("NodeMath::Setting dimension of trait rate to " + nTraits + ".");
             sigmasqInput.get().setDimension(nTraits);
@@ -239,6 +229,20 @@ public class NodeMath extends CalculationNode {
         } else {
             Log.warning.println("NodeMath::Estimating root state by MLE.");
             sampleRoot = false;
+        }
+    }
+
+    protected void initiateRhoInput() {
+        if (!useShrinkage && !coEstimate) {
+            if (rhoInput.get() == null) {
+                throw new RuntimeException("NodeMath::If shrinkage method is not used, either correlation or covariance is required.");
+            } else {
+                Log.warning.println("NodeMath::Setting dimension of rho values to " + (nTraits * (nTraits - 1) / 2));
+                rhoInput.get().setDimension((nTraits * (nTraits - 1) / 2));
+                rhoValues = new double[(nTraits * (nTraits - 1) / 2)];
+                storedRhoValues = new double[(nTraits * (nTraits - 1) / 2)];
+                rhoValues = rhoInput.get().getDoubleValues();
+            }
         }
     }
 
@@ -304,6 +308,8 @@ public class NodeMath extends CalculationNode {
 
     public int getNSpecies () { return nSpecies; }
 
+    public double getSigmaValue () { return sigmaValue; }
+
 
     //setters
     public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
@@ -354,6 +360,8 @@ public class NodeMath extends CalculationNode {
         MatrixUtilsContra.vectorAdd(expect1, expect2, expectp);
         MatrixUtilsContra.setMatrixRow(nodeExpectation, expectp, parentIdx, nTraits);
     }
+
+    public void setTraitRateMatrix (double[] values ) { traitRateMatrix = values; }
 
     public void setTraitRateMatrixInverse (double[] values) { invTraitRateMatrix = values; }
 
@@ -646,14 +654,14 @@ public class NodeMath extends CalculationNode {
         } else {
             System.arraycopy(sigmaValues, 0, storedSigmaValues, 0, nTraits);
         }
-
-        System.arraycopy(rhoValues, 0, storedRhoValues, 0, (nTraits * (nTraits - 1) / 2));
+        if(useShrinkage) {
+            System.arraycopy(rhoValues, 0, storedRhoValues, 0, (nTraits * (nTraits - 1) / 2));
+            // shrinkage only
+            System.arraycopy(transformedTraitValues, 0, storedTransformedTraitValues, 0, nSpecies * nTraits);
+        }
         System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, matDim);
         System.arraycopy(invTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, matDim);
         System.arraycopy(rootValuesVec, 0, storedRootValuesVec, 0, nTraits);
-
-        // shrinkage only
-        System.arraycopy(transformedTraitValues, 0, storedTransformedTraitValues, 0, nSpecies * nTraits);
     }
 
     @Override
@@ -690,13 +698,15 @@ public class NodeMath extends CalculationNode {
             storedSigmaValues = tempSigmaValues;
         }
 
-        double[] tempRhoValues = rhoValues;
-        rhoValues = storedRhoValues;
-        storedRhoValues = tempRhoValues;
+        if(useShrinkage) {
+            double[] tempRhoValues = rhoValues;
+            rhoValues = storedRhoValues;
+            storedRhoValues = tempRhoValues;
 
         // shrinkage only
         double[] tempTraitValuesArrayList = transformedTraitValues;
         transformedTraitValues = storedTransformedTraitValues;
         storedTransformedTraitValues = tempTraitValuesArrayList;
+        }
     }
 }
