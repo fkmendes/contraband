@@ -130,12 +130,12 @@ public class LiabilityNodeMath extends NodeMath{
             setInvTraitRateMatrix(inverseTraitRateMatrix);
 
             // the determinant of original trait rate matrix is the reciprocal of the determinant of the inverse matrix
-            detRhoMatrix = (1.0 / sigmaSq) * detInvRhoMatrix;
+            detRhoMatrix = 1.0 / detInvRhoMatrix;
 
-            double detInvTraitRateMat = detRhoMatrix * FastMath.pow(1/sigmaSq, nTraits);
+            double detInvTraitRateMat = detInvRhoMatrix * FastMath.pow(1/sigmaSq, nTraits);
             setInvTraitRateMatrixDeterminant(detInvTraitRateMat);
 
-            double logDetTraitRateMat = FastMath.log(detRhoMatrix) + nTraits * FastMath.log(sigmaSq);
+            double logDetTraitRateMat = FastMath.log(1.0 / detInvTraitRateMat);
             setTraitRateMatrixDeterminant(logDetTraitRateMat);
         } else {
             // for multiple trait evolutionary rates
