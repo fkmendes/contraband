@@ -26,12 +26,13 @@ public class LiabilityNodeMath extends NodeMath{
     private double detInvRhoMatrix;
     private double detRhoMatrix;
     private double[][] cholesky;
-    private double[] choleskyArray;
+
 
     private double[] upperMatrix;
     private double[][] lowerMatrix;
-    private double[] dataTransformMatA;
-    private double[] transformedTraitsMatArr;
+    private double[] lowerMatArr;
+    private double[] dataTransformMat;
+    private double[] transformedLiabilityArr;
 
     private double [] storedInvTraitRateMatrix;
     private double [] storedRhoMatrix;
@@ -44,13 +45,14 @@ public class LiabilityNodeMath extends NodeMath{
         nTraits = getNTraits();
         nSpecies = getNSpecies();
         matDim = nTraits * nTraits;
-        cholesky = new double[nSpecies][nTraits];
-        choleskyArray = new double[nSpecies * nTraits];
+        cholesky = new double[nTraits][nTraits];
+
 
         upperMatrix = new double[matDim];
-        lowerMatrix = new double[nSpecies][nTraits];
-        dataTransformMatA = new double[matDim];
-        transformedTraitsMatArr = new double[nSpecies * nTraits];
+        lowerMatrix = new double[nTraits][nTraits];
+        lowerMatArr = new double[matDim];
+        dataTransformMat = new double[matDim];
+        transformedLiabilityArr = new double[nSpecies * nTraits];
 
         inverseRho = new double[matDim];
         inverseTraitRateMatrix = new double[matDim];
@@ -132,8 +134,11 @@ public class LiabilityNodeMath extends NodeMath{
             // the determinant of original trait rate matrix is the reciprocal of the determinant of the inverse matrix
             detRhoMatrix = 1.0 / detInvRhoMatrix;
 
+            // NOTE: if using original data, return in real space
+            // if using transformed data, return in log space
             double detInvTraitRateMat = detInvRhoMatrix * FastMath.pow(1/sigmaSq, nTraits);
-            setInvTraitRateMatrixDeterminant(detInvTraitRateMat);
+            //setInvTraitRateMatrixDeterminant(detInvTraitRateMat);
+            setInvTraitRateMatrixDeterminant(FastMath.log(detInvTraitRateMat));
 
             double logDetTraitRateMat = FastMath.log(1.0 / detInvTraitRateMat);
             setTraitRateMatrixDeterminant(logDetTraitRateMat);
@@ -166,39 +171,38 @@ public class LiabilityNodeMath extends NodeMath{
 
     // This method transforms original data set so that traits are independent of each other
     // X.transpose * V.inverse * X ---> Z.transpose * Z
-    public void populateTransformedLiabilities (double[] liabilities) {
-        // copy to a 2D array
-        for(int i = 0; i < nSpecies; i++){
-           //for (int j = 0; j < nTraits; j ++){
-               //cholesky[i][j] = MatrixUtilsContra.getMatrixEntry(liabilities, i, j, nTraits);
-           //}
-           System.arraycopy(liabilities, i * nTraits, cholesky[i], 0, nTraits);
+    @Override
+    public void populateTransformedTraitValues (double[] liabilities) {
+        // (1) copy trait rate matrix to a 2D array
+        for(int i = 0; i < nTraits; i++){
+            System.arraycopy(traitRateMatrix, i * nTraits, cholesky[i], 0, nTraits);
         }
 
+        // (2) perform cholesky decomposition, R = L * L.transpose
         try {
             lowerMatrix = (new CholeskyDecomposition(cholesky)).getL();
             // caution: this returns the lower triangular form
         } catch (IllegalDimension illegalDimension) {
             throw new RuntimeException("Numerical exception in WishartDistribution");
         }
+        // copy the 2D lower matrix to a double array
+        for(int i = 0; i < nTraits; i++){
+            System.arraycopy(lowerMatrix[i], 0, lowerMatArr, i * nTraits, nTraits);
+        }
 
-        //LUDecomposition upperMatLUD = new LUDecomposition(upperMat);
-        //RealMatrix dataTransformMat = upperMatLUD.getSolver().getInverse();
-        /*
-         * TO DO
-         */
-        choleskyArray = new double[matDim];
-        double [] dataTransformMat = new double[matDim];
-        LUDecompositionForArray.ArrayLUDecomposition(choleskyArray, lu, pivot, evenSingular, nTraits);
+        // (3) get the inverse matrix, A = L.inverse
+        LUDecompositionForArray.ArrayLUDecomposition(lowerMatArr, lu, pivot, evenSingular, nTraits);
         try {
             LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evenSingular[1], nTraits, dataTransformMat);
         } catch (RuntimeException e) {
             setSingularMatrix(true);
         }
 
-        //RealMatrix transformedTraitsMat = traitMat.multiply(dataTransformMat);
-        double[] transformedTraitsMat = new double[nSpecies * nTraits];
-        MatrixUtilsContra.matrixMultiply(liabilities, dataTransformMat, nSpecies, nTraits, transformedTraitsMat);
+        // (4) Z = M * A.transpose
+        // the transpose the matrix
+        MatrixUtilsContra.matrixTranspose(dataTransformMat, nTraits, upperMatrix);
+        MatrixUtilsContra.matrixMultiply(liabilities, upperMatrix, nSpecies, nTraits, transformedLiabilityArr);
+        setTransformedTraitValues(transformedLiabilityArr);
     }
 
 

@@ -34,12 +34,12 @@ public class CholeskyDecompositionTestDriver {
         // apache commons
         CholeskyDecomposition matChol = new CholeskyDecomposition(traitRateRM);
         System.out.println("apache commons");
-        RealMatrix upperMat = matChol.getLT();
+        RealMatrix lowerMat = matChol.getL();
         System.out.println("upper matrix");
-        GeneralUtils.displayRealMatrix(upperMat);
-        LUDecomposition upperMatLUD = new LUDecomposition(upperMat);
+        GeneralUtils.displayRealMatrix(lowerMat);
+        LUDecomposition upperMatLUD = new LUDecomposition(lowerMat);
         RealMatrix dataTransformMat = upperMatLUD.getSolver().getInverse();
-        RealMatrix transformedTraitsMat = traitMat.multiply(dataTransformMat);
+        RealMatrix transformedTraitsMat = traitMat.multiply(dataTransformMat.transpose());
         System.out.println("Transformed matrix");
         GeneralUtils.displayRealMatrix(transformedTraitsMat);
 
@@ -73,16 +73,17 @@ public class CholeskyDecompositionTestDriver {
         for (int i = 0; i < 4; i++) {
             MatrixUtilsContra.setMatrixEntry(identityMatrix, i, i, 1.0, 4);
         }
-        LUDecompositionForArray.ArrayLUDecomposition(upperMatArr, lu, pivot, evenSingular, 4);
+        LUDecompositionForArray.ArrayLUDecomposition(lowerMatArr, lu, pivot, evenSingular, 4);
         double[] dataTransformMatArr = new double[16];
         try {
             LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evenSingular[1], 4, dataTransformMatArr);
         } catch (RuntimeException e) {
             System.out.println("Singular matrix.");
         }
+        MatrixUtilsContra.matrixTranspose(dataTransformMatArr, 4, upperMatArr);
 
         double[] transformedTraitsMatArr = new double[6 * 4];
-        MatrixUtilsContra.matrixMultiply(traitMatArr, dataTransformMatArr, 6, 4, transformedTraitsMatArr);
+        MatrixUtilsContra.matrixMultiply(traitMatArr, upperMatArr, 6, 4, transformedTraitsMatArr);
         System.out.println("Transformed 1D array" + "\n" + Arrays.toString(transformedTraitsMatArr));
 
     }

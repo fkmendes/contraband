@@ -377,6 +377,8 @@ public class NodeMath extends CalculationNode {
 
     public void setSingularMatrix(boolean value) { singularMatrix = value; }
 
+    public void setTransformedTraitValues(double[] values) { transformedTraitValues = values; }
+
     private void initializeAbCdEfArray() {
         // A C E f are single double values for each node
         aArray = new double[nodeNr];
@@ -648,6 +650,8 @@ public class NodeMath extends CalculationNode {
             System.arraycopy(transformedTraitsMat.getRow(j), 0, transformedTraitValues, j * nTraits, nTraits);
         }
     }
+
+    public void populateTransformedTraitValues (double[] liabilities) {}
 
     @Override
     protected boolean requiresRecalculation() {
