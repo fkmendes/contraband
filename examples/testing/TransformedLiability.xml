@@ -66,7 +66,7 @@
     <!-- START likelihood -->
     <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
      <!-- START Morphological likleihood-->
-        <distribution id="PCMLikelihood" spec="contraband.prunelikelihood.LiabilityLikelihood">
+        <distribution id="PCMLikelihood" spec="contraband.prunelikelihood.TransformedLiabilityLikelihood">
             <tree idref="TheTree"/>
 
             <traits id="oneTraitData" spec="outercore.parameter.KeyRealParameter" minordimension="3" keys="t1 t2 t3 t4">
@@ -109,7 +109,7 @@
 
     <operator id="BirthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>
 -->
-    <logger id="tracelog" fileName="LiabilityNodeMath.log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="TransformedLiability.log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
@@ -128,7 +128,7 @@
         <log idref="prior"/>
     </logger>
 
-    <logger id="treelog" fileName="LiabilityNodeMath.trees" logEvery="10000" mode="tree">
+    <logger id="treelog" fileName="TransformedLiability.trees" logEvery="10000" mode="tree">
         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>
