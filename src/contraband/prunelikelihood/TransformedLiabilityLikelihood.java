@@ -2,10 +2,19 @@ package contraband.prunelikelihood;
 
 import beast.core.Input;
 import beast.evolution.tree.Tree;
+import beast.math.matrixalgebra.CholeskyDecomposition;
+import beast.math.matrixalgebra.IllegalDimension;
+import contraband.math.LUDecompositionForArray;
 import contraband.math.MatrixUtilsContra;
 import contraband.math.NodeMath;
 import contraband.utils.PruneLikelihoodUtils;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.EigenDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.SingularValueDecomposition;
 import outercore.parameter.KeyRealParameter;
+
+import java.util.Arrays;
 
 public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
     final public Input<BinaryDiscreteTraits> binaryDiscreteTraitsInput = new Input<>("binaryDiscreteTraits", "Object for binary discrete traits.");
@@ -22,14 +31,15 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
     private int nSpecies;
     private double[] traitValuesArr;
 
+
     private int binaryTraitIndex;
     private int orderedTraitIndex;
     private  int unorderedLiabilityIndex;
 
+    RealMatrix rateRealMatrix;
+
     @Override
     public void initAndValidate() {
-
-
         // get the tree
         tree = treeInput.get();
         nSpecies = treeInput.get().getLeafNodeCount();
@@ -56,8 +66,13 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
             throw new RuntimeException("LiabilityLikelihood::At least one kind of data should be input.");
         }
         setNTraits(totalTraitNr);
+        rateRealMatrix = new Array2DRowRealMatrix(new double[totalTraitNr][totalTraitNr]);
+
         super.initAndValidate();
-        //getNodeMath().populateTransformedTraitValues(traitValuesArr);
+
+        getNodeMath().populateTraitRateMatrix();
+        getNodeMath().performMatrixOperations();
+        getNodeMath().populateTransformedTraitValues(traitValuesArr);
         setTraitValuesArr(getNodeMath().getTransformedTraitValues());
     }
 
@@ -87,6 +102,7 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
          * populate combined trait values in an array
          */
         traitValuesArr = new double[nSpecies * totalTraitNr];
+
         int index = 0;
         // (1) populate continuous trait values
         if(traitsValuesInput.get() != null) {
@@ -123,36 +139,69 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
 
     @Override
     public double calculateLogP() {
-        getNodeMath().populateTraitRateMatrix();
-        getNodeMath().performMatrixOperations();
+        boolean updateTraitRateMatrix = false;
+        if(nodeMathInput.isDirty()) {
+            //update parameters if some parameters are dirty
+            // inverse rho matrix
+            // sigma value(s)
+            // any variables related to trait rate matrix
+            updateTraitRateMatrix = getNodeMath().updateParameters();
+        }
+        if(updateTraitRateMatrix) {
+            // populate trait rate matrix with updated parameters
+            getNodeMath().populateTraitRateMatrix();
 
-        updateTraitValuesArr();
+            // if the trait rate matrix is nearly singular
+            // it should be rejected in advance
+            if(checkNearlySingularForRateMatrix()) {return Double.NEGATIVE_INFINITY;}
+
+            // four quantities will be required in likelihood calculation
+            // trait rate matrix, inverse trait rate matrix
+            // det(trait rate matrix), det(inverse trait rate matrix)
+            getNodeMath().performMatrixOperations();
+        }
+
+        // update trait values if some liability is dirty
+        updateTraitValuesArr(updateTraitRateMatrix);
 
         super.populateLogP();
 
         return getLogP();
     }
 
-    private void updateTraitValuesArr(){
+    private void updateTraitValuesArr(boolean updateRateMatrix){
+        boolean update = false;
         // (1) update liabilities for binary discrete trait values
-        if(binaryDiscreteTraitsInput.get() != null){
+        if(binaryDiscreteTraitsInput.isDirty()){
             double[] binaryLiabilities = binaryDiscreteTraitsInput.get().getLiabilities();
             populateCombinedTraitValuesArr(binaryLiabilities, traitValuesArr, binaryTraitIndex, binaryTraitNr, totalTraitNr, nSpecies);
+            update = true;
         }
 
         // (2) update liabilities for ordered discrete trait values
-        if(orderedDiscreteTraitsInput.get() != null) {
+        if(orderedDiscreteTraitsInput.isDirty()) {
             double[] orderedLiabilities = orderedDiscreteTraitsInput.get().getLiabilities();
             populateCombinedTraitValuesArr(orderedLiabilities, traitValuesArr, orderedTraitIndex, orderedTraitNr, totalTraitNr, nSpecies);
+            update = true;
         }
 
         // (3) update liabilities for unordered discrete trait values
-        if(unorderedDiscreteTraitsInput.get() != null){
+        if(unorderedDiscreteTraitsInput.isDirty()){
             double[] unorderedLiabilities = unorderedDiscreteTraitsInput.get().getLiabilities();
             populateCombinedTraitValuesArr(unorderedLiabilities, traitValuesArr, unorderedLiabilityIndex, unorderedLiabilityNr, totalTraitNr, nSpecies);
+            update = true;
         }
-        getNodeMath().populateTransformedTraitValues(traitValuesArr);
-        setTraitValuesArr(getNodeMath().getTransformedTraitValues());
+
+        // if liability or trait rate matrix is changed, we have to update the transformed trait values
+        if(update || updateRateMatrix) {
+            // (4) transform the original trait values based on the trait rate matrix
+            // so that the transformed trait value are independent
+            //populateTransformedTraitValues(traitValuesArr);
+            getNodeMath().populateTransformedTraitValues(traitValuesArr);
+
+            // (5) update the trait values in the PruneLikelihoodProcess class
+            setTraitValuesArr(getNodeMath().getTransformedTraitValues());
+        }
     }
 
     @Override
@@ -167,13 +216,52 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
 
     @Override
     protected double calculateLikelihood(NodeMath nodeMath, double l0, double[] m0, double r0, int rootIdx){
-        double vCD = nodeMath.getVarianceForNode(rootIdx);
-        double root2Subtract = -0.5 * nodeMath.getTraitRateMatrixDeterminant() - ((getNTraits() / 2.0) * Math.log(2 * Math.PI * vCD));
+        //double vCD = nodeMath.getVarianceForNode(rootIdx);
+        //double root2Subtract = -0.5 * nodeMath.getTraitRateMatrixDeterminant() - ((getNTraits() / 2.0) * Math.log(2 * Math.PI * vCD));
         return MatrixUtilsContra.vecTransScalarMultiply(nodeMath.getRootValuesArr(),
                 l0, getNTraits()) +
                 MatrixUtilsContra.vectorDotMultiply(nodeMath.getRootValuesArr(), m0) +
                 r0 +
                 nodeMath.getLikelihoodForSampledAncestors();
 
+    }
+
+    private boolean checkNearlySingularForRateMatrix () {
+        // initialize
+        boolean nearlySingularRateMatrix = false;
+
+        // for one trait analysis
+        if (getNTraits() == 1) {
+            if (getNodeMath().getTraitRateMatrix()[0] < 1.0E-5) {
+                nearlySingularRateMatrix = true;
+            }
+        }
+
+        // for multiple traits
+        else {
+            for (int i = 0; i < getNTraits(); i++) {
+                MatrixUtilsContra.getMatrixRow(getNodeMath().getTraitRateMatrix(), i, getNTraits(), getNodeMath().getRateMatrixRow());
+                rateRealMatrix.setRow(i, getNodeMath().getRateMatrixRow());
+            }
+
+
+            double[] singularValues = new SingularValueDecomposition(rateRealMatrix).getSingularValues();
+            double min = Arrays.stream(singularValues).min().getAsDouble();
+            double max = Arrays.stream(singularValues).max().getAsDouble();
+
+            double[] eValues = new EigenDecomposition(rateRealMatrix).getRealEigenvalues();
+
+            for (double ei : eValues) {
+                if (ei < 1.0E-5) {
+                    nearlySingularRateMatrix = true;
+                }
+            }
+
+            if ((min / max) < 1.0E-6) {
+                nearlySingularRateMatrix = true;
+            }
+        }
+
+        return nearlySingularRateMatrix;
     }
 }

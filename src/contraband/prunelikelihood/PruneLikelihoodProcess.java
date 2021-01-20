@@ -31,6 +31,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
     private NodeMath nodeMath;
 
     private double[] traitValuesArr;
+    private double[] storedTraitValuesArr;
 
     private boolean popSE;
 
@@ -55,6 +56,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         nodeMath = nodeMathInput.get();
         //nodeMath.setNTraits(nTraits);
         //nodeMath.setNSpecies(nSpecies);
+        storedTraitValuesArr = new double[nTraits * nSpecies];
     }
 
     protected void populateLogP() {
@@ -254,6 +256,21 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         // populate the trait values in an array
         // each species has nTraits in the array
         PruneLikelihoodUtils.populateTraitValuesArr(traitsValues, tree, nTraits, traitValuesArr);
+    }
+
+    @Override
+    public void store() {
+        super.store();
+        System.arraycopy(traitValuesArr, 0, storedTraitValuesArr, 0, nSpecies * nTraits);
+
+    }
+
+    @Override
+    public void restore() {
+        super.restore();
+        double[] tempTraitValuesArr = traitValuesArr;
+        traitValuesArr = storedTraitValuesArr;
+        storedTraitValuesArr = tempTraitValuesArr;
     }
 
     @Override

@@ -24,20 +24,21 @@ public class LiabilityNodeMath extends NodeMath{
     private int nSpecies;
     private int matDim;
     private double detInvRhoMatrix;
-    private double detRhoMatrix;
     private double[][] cholesky;
-
 
     private double[] upperMatrix;
     private double[][] lowerMatrix;
     private double[] lowerMatArr;
     private double[] dataTransformMat;
-    private double[] transformedLiabilityArr;
 
     private double [] storedInvTraitRateMatrix;
     private double [] storedRhoMatrix;
     private double[] storedInverseMatrix;
     private double [] storedTraitRateMatrix;
+
+    //private double[] transformedLiabilityArr;
+    //private double[] storedTransformedLiabilityArr;
+
 
     @Override
     public void initAndValidate() {
@@ -47,12 +48,12 @@ public class LiabilityNodeMath extends NodeMath{
         matDim = nTraits * nTraits;
         cholesky = new double[nTraits][nTraits];
 
-
         upperMatrix = new double[matDim];
         lowerMatrix = new double[nTraits][nTraits];
         lowerMatArr = new double[matDim];
         dataTransformMat = new double[matDim];
-        transformedLiabilityArr = new double[nSpecies * nTraits];
+        //transformedLiabilityArr = new double[nSpecies * nTraits];
+        //storedTransformedLiabilityArr = new double[nSpecies * nTraits];
 
         inverseRho = new double[matDim];
         inverseTraitRateMatrix = new double[matDim];
@@ -87,7 +88,6 @@ public class LiabilityNodeMath extends NodeMath{
             // get from input
             inverseRho = inverseRhoInput.get().getDoubleValues();
         }
-
     }
 
     @Override
@@ -119,7 +119,6 @@ public class LiabilityNodeMath extends NodeMath{
             }
         }
         setTraitRateMatrix(traitRateMatrix);
-
     }
 
     @Override
@@ -132,8 +131,6 @@ public class LiabilityNodeMath extends NodeMath{
             setInvTraitRateMatrix(inverseTraitRateMatrix);
 
             // the determinant of original trait rate matrix is the reciprocal of the determinant of the inverse matrix
-            detRhoMatrix = 1.0 / detInvRhoMatrix;
-
             // NOTE: if using original data, return in real space
             // if using transformed data, return in log space
             double detInvTraitRateMat = detInvRhoMatrix * FastMath.pow(1/sigmaSq, nTraits);
@@ -173,6 +170,7 @@ public class LiabilityNodeMath extends NodeMath{
     // X.transpose * V.inverse * X ---> Z.transpose * Z
     @Override
     public void populateTransformedTraitValues (double[] liabilities) {
+        double[] transformedLiabilityArr = new double[nSpecies * nTraits];
         // (1) copy trait rate matrix to a 2D array
         for(int i = 0; i < nTraits; i++){
             System.arraycopy(traitRateMatrix, i * nTraits, cholesky[i], 0, nTraits);
@@ -202,6 +200,8 @@ public class LiabilityNodeMath extends NodeMath{
         // the transpose the matrix
         MatrixUtilsContra.matrixTranspose(dataTransformMat, nTraits, upperMatrix);
         MatrixUtilsContra.matrixMultiply(liabilities, upperMatrix, nSpecies, nTraits, transformedLiabilityArr);
+
+        // (5) update the transformed liability in the nodeMath class
         setTransformedTraitValues(transformedLiabilityArr);
     }
 
@@ -210,10 +210,13 @@ public class LiabilityNodeMath extends NodeMath{
     @Override
     public void store() {
         super.store();
+
         System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, matDim);
         System.arraycopy(rhoMatrix, 0, storedRhoMatrix, 0, matDim);
         System.arraycopy(inverseTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, matDim);
         System.arraycopy(inverseRho, 0, storedInverseMatrix, 0, matDim);
+
+        //System.arraycopy(transformedLiabilityArr, 0, storedTransformedLiabilityArr, 0, nSpecies * nTraits);
     }
 
     @Override
@@ -235,5 +238,9 @@ public class LiabilityNodeMath extends NodeMath{
         double[] tempTraitRateMatrix = traitRateMatrix;
         traitRateMatrix = storedTraitRateMatrix;
         storedTraitRateMatrix = tempTraitRateMatrix;
+
+        //double[] tempTransformedLiabilityArr = transformedLiabilityArr;
+        //transformedLiabilityArr = storedTransformedLiabilityArr;
+        //storedTransformedLiabilityArr = tempTransformedLiabilityArr;
     }
 }

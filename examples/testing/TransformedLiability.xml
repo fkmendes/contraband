@@ -14,7 +14,7 @@
 <map name="Dirichlet" >beast.math.distributions.Dirichlet</map>
 
 
-<run id="mcmc" spec="MCMC" chainLength="10000000">
+<run id="mcmc" spec="MCMC" chainLength="1000000">
 	<state id="state" storeEvery="5000">
         <tree id="TheTree" name="stateNode" spec='beast.util.TreeParser'
               newick="((t1:0.1252127116,t2:0.1252127116):0.1805853832,(t3:0.03846640117,t4:0.03846640117):0.2673316937);"
@@ -79,7 +79,7 @@
                 <tree idref="TheTree"/>
             </branchRateModel>
 
-            <nodeMath id="pcmNodeMath" spec="contraband.math.LiabilityNodeMath" traits="@oneTraitData">
+            <nodeMath id="pcmNodeMath" spec="contraband.math.LiabilityNodeMath" traits="@oneTraitData" oneRateOnly="true">
             	<sigmasq id="varValues" spec="parameter.RealParameter">1.0</sigmasq>
             	<inverseMatrix id="inverseMatrix" spec="parameter.RealParameter">1.0</inverseMatrix>
                 <!--<rootValues id="rootValues" spec="parameter.RealParameter">0.0</rootValues>-->
@@ -92,11 +92,11 @@
 	<!-- END Posterior -->
 
 
-<!--<operator id="VarValueScaler" spec="ScaleOperator" parameter="@varValues" scaleFactor="0.75" weight="6.0"/>-->
+    <operator id="VarValueScaler" spec="ScaleOperator" parameter="@varValues" scaleFactor="0.75" weight="6.0"/>
     <!-- NOTE: the dimension is equal to the total number of traits -->
-    <operator id="GibbsOperator" spec="contraband.prunelikelihood.InverseMatrixGibbsOperator" dimension="3" values="@inverseMatrix" distr="@wishartPrior" weight="6.0"/>
+<operator id="GibbsOperator" spec="contraband.prunelikelihood.InverseMatrixGibbsOperator" dimension="3" values="@inverseMatrix" distr="@wishartPrior" weight="6.0"/>
 <!--<operator id="rootValueScaler" spec="RealRandomWalkOperator" parameter="@rootValues" windowSize="0.75" weight="6.0"/>-->
-<!--
+
     <operator id="rateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="6.0"/>
 
     <operator id="YuleTreeScaler" spec="ScaleOperator" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
@@ -106,10 +106,9 @@
     <operator id="YuleTreeNarrow" spec="Exchange" tree="@TheTree" weight="15.0"/>
     <operator id="YuleTreeWide" spec="Exchange" isNarrow="false" tree="@TheTree" weight="3.0"/>
     <operator id="YuleTreeWilsonBalding" spec="WilsonBalding" tree="@TheTree" weight="3.0"/>
-
     <operator id="BirthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>
--->
-    <logger id="tracelog" fileName="TransformedLiability.log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
+
+    <logger id="tracelog" fileName="TransformedLiability.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
@@ -128,7 +127,7 @@
         <log idref="prior"/>
     </logger>
 
-    <logger id="treelog" fileName="TransformedLiability.trees" logEvery="10000" mode="tree">
+    <logger id="treelog" fileName="TransformedLiability.trees" logEvery="5000" mode="tree">
         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>
