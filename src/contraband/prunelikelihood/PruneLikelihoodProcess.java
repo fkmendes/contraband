@@ -46,17 +46,19 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         // get clock model
         branchRateModel = branchRateModelInput.get();
 
-        //
-        populateTraitData();
-
         // check input
         if (nodeMathInput.get() == null) {
             throw new RuntimeException("PruneLikelihoodProcess::NodeMath is required for pmc likelihood.");
         }
         nodeMath = nodeMathInput.get();
-        //nodeMath.setNTraits(nTraits);
-        //nodeMath.setNSpecies(nSpecies);
+        nTraits = nodeMath.getNTraits();
+        nSpecies = nodeMath.getNSpecies();
+
+        traitValuesArr = new double[nSpecies * nTraits];
         storedTraitValuesArr = new double[nTraits * nSpecies];
+
+        //
+        populateTraitData();
     }
 
     protected void populateLogP() {
@@ -108,7 +110,10 @@ public abstract class PruneLikelihoodProcess extends Distribution {
     // setters
     public void setPopSE (boolean value) { popSE = value; }
 
-    public void setTraitValuesArr (double[] values) { traitValuesArr = values; }
+    public void setTraitValuesArr (double[] values) {
+        //traitValuesArr = values;
+        System.arraycopy(values, 0, traitValuesArr, 0, values.length);
+    }
 
     public void setNSpecies (int n) { nSpecies = n; }
 
@@ -249,9 +254,9 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         // get the trait values for tips
         // and make a list of real vectors
         traitsValues = traitsValuesInput.get();
-        nTraits = traitsValues.getMinorDimension1();
+        //nTraits = traitsValues.getMinorDimension1();
         //nSpecies = traitsValues.getMinorDimension2();
-        traitValuesArr = new double[nSpecies * nTraits];
+        //traitValuesArr = new double[nSpecies * nTraits];
 
         // populate the trait values in an array
         // each species has nTraits in the array

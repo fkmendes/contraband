@@ -36,7 +36,7 @@ public class LiabilityNodeMath extends NodeMath{
     private double[] storedInverseMatrix;
     private double [] storedTraitRateMatrix;
 
-    //private double[] transformedLiabilityArr;
+    private double[] transformedLiabilityArr;
     //private double[] storedTransformedLiabilityArr;
 
 
@@ -52,7 +52,7 @@ public class LiabilityNodeMath extends NodeMath{
         lowerMatrix = new double[nTraits][nTraits];
         lowerMatArr = new double[matDim];
         dataTransformMat = new double[matDim];
-        //transformedLiabilityArr = new double[nSpecies * nTraits];
+        transformedLiabilityArr = new double[nSpecies * nTraits];
         //storedTransformedLiabilityArr = new double[nSpecies * nTraits];
 
         inverseRho = new double[matDim];
@@ -170,7 +170,6 @@ public class LiabilityNodeMath extends NodeMath{
     // X.transpose * V.inverse * X ---> Z.transpose * Z
     @Override
     public void populateTransformedTraitValues (double[] liabilities) {
-        double[] transformedLiabilityArr = new double[nSpecies * nTraits];
         // (1) copy trait rate matrix to a 2D array
         for(int i = 0; i < nTraits; i++){
             System.arraycopy(traitRateMatrix, i * nTraits, cholesky[i], 0, nTraits);
