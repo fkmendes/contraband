@@ -14,7 +14,7 @@
 <map name="Dirichlet" >beast.math.distributions.Dirichlet</map>
 
 
-<run id="mcmc" spec="MCMC" chainLength="1000000">
+<run id="mcmc" spec="MCMC" chainLength="5000000">
 	<state id="state" storeEvery="5000">
         <tree id="TheTree" name="stateNode" spec='beast.util.TreeParser'
               newick="((t1:0.1252127116,t2:0.1252127116):0.1805853832,(t3:0.03846640117,t4:0.03846640117):0.2673316937);"
@@ -79,7 +79,7 @@
                 <tree idref="TheTree"/>
             </branchRateModel>
 
-            <nodeMath id="pcmNodeMath" spec="contraband.math.LiabilityNodeMath" traits="@oneTraitData" oneRateOnly="true">
+            <nodeMath id="pcmNodeMath" spec="contraband.math.LiabilityNodeMath" traits="@oneTraitData">
             	<sigmasq id="varValues" spec="parameter.RealParameter">1.0</sigmasq>
             	<inverseMatrix id="inverseMatrix" spec="parameter.RealParameter">1.0</inverseMatrix>
                 <!--<rootValues id="rootValues" spec="parameter.RealParameter">0.0</rootValues>-->

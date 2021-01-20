@@ -143,6 +143,7 @@ public class LiabilityNodeMath extends NodeMath{
             // for multiple trait evolutionary rates
             // we will need to LUDecomposition and get the determinant of the matrix
             super.performMatrixOperations();
+            setInvTraitRateMatrixDeterminant(FastMath.log(getTraitRateMatrixInverseDeterminant()));
         }
     }
 
