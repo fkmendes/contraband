@@ -13,6 +13,8 @@
 <map name="OneOnX" >beast.math.distributions.OneOnX</map>
 <map name="Dirichlet" >beast.math.distributions.Dirichlet</map>
 
+<!-- This xml uses continuous data to test the pruning likelihood by transforming the trait values so that they are independent -->
+<!-- The trait correlation matrix is sampled by Gibbs operator for the inverse matrix -->
 
 <run id="mcmc" spec="MCMC" chainLength="5000000">
 	<state id="state" storeEvery="5000">
