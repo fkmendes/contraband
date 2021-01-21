@@ -2,9 +2,6 @@ package contraband.prunelikelihood;
 
 import beast.core.Input;
 import beast.evolution.tree.Tree;
-import beast.math.matrixalgebra.CholeskyDecomposition;
-import beast.math.matrixalgebra.IllegalDimension;
-import contraband.math.LUDecompositionForArray;
 import contraband.math.MatrixUtilsContra;
 import contraband.math.NodeMath;
 import contraband.utils.PruneLikelihoodUtils;
@@ -13,7 +10,6 @@ import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import outercore.parameter.KeyRealParameter;
-
 import java.util.Arrays;
 
 public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
@@ -30,7 +26,7 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
 
     private int nSpecies;
     private double[] traitValuesArr;
-
+    private double[] storedTraitValuesArr;
 
     private int binaryTraitIndex;
     private int orderedTraitIndex;
@@ -102,6 +98,7 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
          * populate combined trait values in an array
          */
         traitValuesArr = new double[nSpecies * totalTraitNr];
+        storedTraitValuesArr = new double[nSpecies * totalTraitNr];
 
         int index = 0;
         // (1) populate continuous trait values
@@ -172,21 +169,21 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
     private void updateTraitValuesArr(boolean updateRateMatrix){
         boolean update = false;
         // (1) update liabilities for binary discrete trait values
-        if(binaryDiscreteTraitsInput.isDirty()){
+        if(binaryDiscreteTraitsInput.get()!= null && binaryDiscreteTraitsInput.get().liabilitiesInput.isDirty()){
             double[] binaryLiabilities = binaryDiscreteTraitsInput.get().getLiabilities();
             populateCombinedTraitValuesArr(binaryLiabilities, traitValuesArr, binaryTraitIndex, binaryTraitNr, totalTraitNr, nSpecies);
             update = true;
         }
 
         // (2) update liabilities for ordered discrete trait values
-        if(orderedDiscreteTraitsInput.isDirty()) {
+        if(orderedDiscreteTraitsInput.get() != null && orderedDiscreteTraitsInput.get().liabilitiesInput.isDirty()) {
             double[] orderedLiabilities = orderedDiscreteTraitsInput.get().getLiabilities();
             populateCombinedTraitValuesArr(orderedLiabilities, traitValuesArr, orderedTraitIndex, orderedTraitNr, totalTraitNr, nSpecies);
             update = true;
         }
 
         // (3) update liabilities for unordered discrete trait values
-        if(unorderedDiscreteTraitsInput.isDirty()){
+        if(unorderedDiscreteTraitsInput.get() != null && unorderedDiscreteTraitsInput.get().liabilitiesInput.isDirty()){
             double[] unorderedLiabilities = unorderedDiscreteTraitsInput.get().getLiabilities();
             populateCombinedTraitValuesArr(unorderedLiabilities, traitValuesArr, unorderedLiabilityIndex, unorderedLiabilityNr, totalTraitNr, nSpecies);
             update = true;
@@ -196,7 +193,6 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
         if(update || updateRateMatrix) {
             // (4) transform the original trait values based on the trait rate matrix
             // so that the transformed trait value are independent
-            //populateTransformedTraitValues(traitValuesArr);
             getNodeMath().populateTransformedTraitValues(traitValuesArr);
 
             // (5) update the trait values in the PruneLikelihoodProcess class
@@ -263,5 +259,22 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
         }
 
         return nearlySingularRateMatrix;
+    }
+
+    @Override
+    public void store() {
+        super.store();
+
+        System.arraycopy(traitValuesArr, 0, storedTraitValuesArr, 0, nSpecies * totalTraitNr);
+    }
+
+    @Override
+    public void restore() {
+        super.restore();
+
+
+        double[] tempTransformedLiabilityArr = traitValuesArr;
+        traitValuesArr = storedTraitValuesArr;
+        storedTraitValuesArr = tempTransformedLiabilityArr;
     }
 }

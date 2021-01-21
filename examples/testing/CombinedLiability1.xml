@@ -46,7 +46,7 @@
     </userDataType>
 </data>
 
-<run id="mcmc" spec="MCMC" chainLength="5000000">
+<run id="mcmc" spec="MCMC" chainLength="1000000">
 	<state id="state" storeEvery="5000">
         <tree id="TheTree" name="stateNode" spec='beast.util.TreeParser'
               newick="((t2:3.043082909,((t8:0.6813104979,t9:0.6813104979):1.253033512,(t4:1.136696041,t5:1.136696041):0.7976479689):1.1087389):1.911605834,((t6:0.7735810358,t7:0.7735810358):3.003882112,(((((t10:0.5210582035,(t15:0.0776958781,t16:0.0776958781):0.4433623254):0.5272727785,(t12:0.2997764237,(t19:0.0306549137,t20:0.0306549137):0.26912151):0.7485545582):1.759764485,((t17:0.07098038897,t18:0.07098038897):2.027903741,t3:2.09888413):0.7092113372):0.5251983552,(t11:0.4296181874,(t13:0.2152161983,t14:0.2152161983):0.2144019891):2.903675635):0.329635734,t1:3.662929556):0.1145335917):1.177225595);"
@@ -78,6 +78,10 @@
         <stateNode idref="rateValues"/>
         <stateNode idref="inverseMatrix"/>
         <parameter id="birthRate" name="stateNode">1.0</parameter>
+        <stateNode idref="binaryLiabilities"/>
+        <stateNode idref="orderedLiabilities"/>
+        <stateNode idref="thresholds"/>
+        <stateNode idref="unorderedLiabilities"/>
 	</state>
 
 	<distribution id="posterior" spec="util.CompoundDistribution">
@@ -163,8 +167,17 @@
     <operator id="VarValueScaler" spec="ScaleOperator" parameter="@varValues" scaleFactor="0.75" weight="6.0"/>
     <!-- NOTE: the dimension is equal to the total number of traits -->
     <operator id="GibbsOperator" spec="contraband.prunelikelihood.InverseMatrixGibbsOperator" dimension="8" values="@inverseMatrix" distr="@wishartPrior" weight="6.0"/>
-
     <operator id="rateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="6.0"/>
+
+ <!--
+    <operator id="BinaryLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@binaryLiabilities" windowSize="1.0" weight="5.0"/>
+    <operator id="BinaryLiabilityScaler" spec="ScaleOperator" parameter="@binaryLiabilities" weight="5.0"/>
+    <operator id="OrderedLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@orderedLiabilities" windowSize="1.0" weight="5.0"/>
+    <operator id="OrderedLiabilityScaler" spec="ScaleOperator" parameter="@orderedLiabilities" weight="5.0"/>
+    <operator id="UnorderedLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@unorderedLiabilities" windowSize="1.0" weight="5.0"/>
+    <operator id="UnorderedLiabilityScaler" spec="ScaleOperator" parameter="@unorderedLiabilities" weight="5.0"/>
+    <operator id="ThresholdsRandomWalk" spec="RealRandomWalkOperator" parameter="@thresholds" windowSize="1.0" weight="3.0"/>
+-->
 
     <operator id="YuleTreeScaler" spec="ScaleOperator" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
     <operator id="YuleTreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
@@ -175,18 +188,18 @@
     <operator id="YuleTreeWilsonBalding" spec="WilsonBalding" tree="@TheTree" weight="3.0"/>
     <operator id="BirthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>
 
-    <logger id="tracelog" fileName="CombinedLiability.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="Transformed.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
-      <log id="TreeStats" spec="beast.evolution.tree.TreeStatLogger" tree="@TheTree"/>
       <log idref="varValues"/>
+      <log id="TreeStats" spec="beast.evolution.tree.TreeStatLogger" tree="@TheTree"/>
       <log idref="inverseMatrix"/>
       <log idref="rateValues"/>
       <log idref="birthRate"/>
     </logger>
 
-    <logger id="screenlog" logEvery="5000">
+    <logger id="screenlog" logEvery="10000">
         <log idref="posterior"/>
         <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
         <log idref="likelihood"/>
@@ -196,5 +209,6 @@
     <logger id="treelog" fileName="CombinedLiability.trees" logEvery="5000" mode="tree">
         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
+
   </run>
 </beast>
