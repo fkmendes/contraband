@@ -64,7 +64,7 @@
     <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
 
      <!-- START Morphological likleihood-->
-        <distribution id="PCMLikelihood" spec="contraband.prunelikelihood.TransformedLiabilityLikelihood">
+        <distribution id="PCMLikelihood" spec="contraband.prunelikelihood.LiabilityLikelihood">
             <tree idref="TheTree"/>
 
             <!--<binaryDiscreteTraits idref="BinaryDiscreteLikelihood"/>-->

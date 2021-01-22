@@ -30,8 +30,7 @@
         </tree>
         <stateNode idref="varValues"/>
         <stateNode idref="rateValues"/>
-        <stateNode idref="covValues"/>
-        <!--<stateNode idref="rootValues"/>-->
+        <stateNode idref="inverseMatrix"/>
         <parameter id="birthRate" name="stateNode">1.0</parameter>
 	</state>
 
@@ -50,13 +49,13 @@
         <distribution id="rateValuesPrior" spec="beast.math.distributions.Prior" x="@rateValues">
             <distr id="LogNormal.rateValues" spec="beast.math.distributions.LogNormalDistributionModel" S="0.2" M="1.0" meanInRealSpace="true"/>
         </distribution>
-<!--
-        <distribution id="rootValuesPrior" spec="beast.math.distributions.Prior" x="@rootValues">
-            <distr id="Normal.rootValues" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
-        </distribution>
--->
-        <distribution id="covValuesPrior" spec="beast.math.distributions.Prior" x="@covValues">
-            <distr id="Uniform.covValues" spec="beast.math.distributions.Uniform" upper="0.5" lower="-0.5"/>
+
+        <distribution id="wishartPrior" spec="beast.math.distributions.WishartDistribution" df="3.0" arg="@inverseMatrix">
+            <scaleMatrix id="scaleMatrix" spec="parameter.RealParameter">
+                1.0 0.5 -0.2
+                0.5 1.0 0.3
+                -0.2 0.3 1.0
+            </scaleMatrix>
         </distribution>
     </distribution>
     <!-- END prior -->
@@ -81,8 +80,7 @@
 
             <nodeMath id="pcmNodeMath" spec="contraband.math.NodeMath" traits="@oneTraitData" transform="true">
                 <sigmasq id="varValues" spec="parameter.RealParameter">1.0</sigmasq>
-                <correlation id="covValues" spec="parameter.RealParameter">0.0</correlation>
-                <!--<rootValues id="rootValues" spec="parameter.RealParameter">0.0</rootValues>-->
+                <inverseMatrix id="inverseMatrix" spec="parameter.RealParameter">1.0</inverseMatrix>
             </nodeMath>
         </distribution>
         <!-- END Morphological likleihood -->
@@ -92,9 +90,9 @@
 	<!-- END Posterior -->
 
 
+    <operator id="GibbsOperator" spec="contraband.prunelikelihood.InverseMatrixGibbsOperator" dimension="3" values="@inverseMatrix" distr="@wishartPrior" weight="6.0"/>
+
     <operator id="VarValueScaler" spec="ScaleOperator" parameter="@varValues" scaleFactor="0.75" weight="6.0"/>
-    <operator id="covValueScaler" spec="RealRandomWalkOperator" parameter="@covValues" windowSize="0.75" weight="6.0"/>
-    <!--<operator id="rootValueScaler" spec="RealRandomWalkOperator" parameter="@rootValues" windowSize="0.75" weight="6.0"/>-->
     <operator id="rateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="6.0"/>
 
     <operator id="YuleTreeScaler" spec="ScaleOperator" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
@@ -107,15 +105,15 @@
 
     <operator id="BirthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>
 
-    <logger id="tracelog" fileName="Binary3.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="Binary5.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
       <log id="TreeStats" spec="beast.evolution.tree.TreeStatLogger" tree="@TheTree"/>
       <log idref="varValues"/>
       <log idref="rateValues"/>
-      <log idref="covValues"/>
       <log idref="birthRate"/>
+      <log idref="inverseMatrix"/>
     </logger>
 
     <logger id="screenlog" logEvery="5000">
@@ -125,7 +123,7 @@
         <log idref="prior"/>
     </logger>
 
-    <logger id="treelog" fileName="Binary3.trees" logEvery="5000" mode="tree">
+    <logger id="treelog" fileName="Binary5.trees" logEvery="5000" mode="tree">
         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>

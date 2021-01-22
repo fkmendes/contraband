@@ -73,7 +73,11 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         nodeMath.setLikelihoodForSampledAncestors(0.0);
         // if using shrinkage method, 'traitValuesArr' is 'transformedTraitValues'
         // otherwise, it is original trait values.
-        pruneNode(tree.getRoot(), nTraits, traitValuesArr, branchRateModel, nodeMath, popSE);
+        if(nodeMath.getTransformedDataFlag()) {
+            pruneNode(tree.getRoot(), nTraits, nodeMath.getTransformedTraitValues(), branchRateModel, nodeMath, popSE);
+        } else {
+            pruneNode(tree.getRoot(), nTraits, traitValuesArr, branchRateModel, nodeMath, popSE);
+        }
 
         // if at some internal node, (aMat + lMat) is singular or -2 * (aMat + lMat) is singular,
         // when calculating (aMat + lMat).inverse and det[-2 * (aMat + lMat)],

@@ -31,6 +31,7 @@ public class NodeMath extends CalculationNode {
     final public Input<Boolean> useShrinkageInput = new Input<>("shrinkage", "TRUE, if shrinkage method is used to estimate the trait correlations.", false);
     final public Input<RealParameter> covarianceInput = new Input<>("covariance", "cov_ij = sigma_i * sigma_j * rho_ij.");
     final public Input<RealParameter> inverseRhoInput = new Input<>("inverseMatrix", "Inverse of trait correlation matrix when using Gibbs sampling.");
+    final public Input<Boolean> transformInput = new Input<>("transform", "TRUE, if data needs to be tranformed to be independent", false);
 
     private Integer nTraits = 0;
     private Integer nSpecies;
@@ -111,6 +112,9 @@ public class NodeMath extends CalculationNode {
     private double detInvRhoMatrix;
     private double[] transformedTraitValues;
     private double[] storedTransformedTraitValues;
+
+    private boolean transformedData;
+    private boolean sampleInverseRho = false;
 
 
     @Override
@@ -234,16 +238,22 @@ public class NodeMath extends CalculationNode {
             Log.warning.println("NodeMath::Estimating root state by MLE.");
             sampleRoot = false;
         }
+
+        transformedData = transformInput.get();
     }
 
     protected void initiateRhoInput() {
+
         if (!useShrinkage && !coEstimate) {
             if (rhoInput.get() != null && inverseRhoInput.get() == null) {
                 rhoInput.get().setDimension((nTraits * (nTraits - 1) / 2));
                 rhoValues = new double[(nTraits * (nTraits - 1) / 2)];
                 storedRhoValues = new double[(nTraits * (nTraits - 1) / 2)];
+                inverseRhoValues = new double[matDim];
+                storedInverseRhoValues = new double[matDim];
                 rhoValues = rhoInput.get().getDoubleValues();
             } else if (rhoInput.get() == null && inverseRhoInput.get() != null) {
+                sampleInverseRho = true;
                 initiateInverseRho();
             } else {
                 throw new RuntimeException("NodeMath::If shrinkage method is not used, either correlation or covariance is required.");
@@ -340,6 +350,8 @@ public class NodeMath extends CalculationNode {
 
     public boolean isOneRateOnly() { return oneRateOnly; }
 
+    public boolean getInverseRhoSamplingFlag () { return sampleInverseRho; }
+
 
     //setters
     public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
@@ -404,6 +416,8 @@ public class NodeMath extends CalculationNode {
     public void setSingularMatrix(boolean value) { singularMatrix = value; }
 
     public void setTransformedTraitValues(double[] values) { transformedTraitValues = values; }
+
+    public boolean getTransformedDataFlag() { return transformedData; }
 
     private void initializeAbCdEfArray() {
         // A C E f are single double values for each node
@@ -523,8 +537,11 @@ public class NodeMath extends CalculationNode {
         LUDecompositionForArray.ArrayLUDecomposition(invTraitRateMatrix, lu, pivot, evensingular, nTraits);
 
         // get the determinant of invTraitRateMatrix
-        detInvTraitRateMat = FastMath.log(LUDecompositionForArray.getDeterminant(lu, nTraits, evensingular));
-        //detInvTraitRateMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evensingular);
+        if(transformedData) {
+            detInvTraitRateMat = FastMath.log(LUDecompositionForArray.getDeterminant(lu, nTraits, evensingular));
+        } else {
+            detInvTraitRateMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evensingular);
+        }
     }
 
     /*
