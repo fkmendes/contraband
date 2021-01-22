@@ -145,6 +145,8 @@ public class TransformedLiabilityLikelihood extends PruneLikelihoodProcess {
             updateTraitRateMatrix = getNodeMath().updateParameters();
         }
         if(updateTraitRateMatrix) {
+            getNodeMath().populateRhoValues();
+
             // populate trait rate matrix with updated parameters
             getNodeMath().populateTraitRateMatrix();
 

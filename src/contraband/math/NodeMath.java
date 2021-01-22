@@ -9,6 +9,7 @@ import contraband.prunelikelihood.BinaryDiscreteTraits;
 import contraband.prunelikelihood.OrderedDiscreteTraits;
 import contraband.prunelikelihood.UnorderedDiscreteTraits;
 import contraband.utils.NodeMathUtils;
+import net.jsign.bouncycastle.util.Pack;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
@@ -29,6 +30,7 @@ public class NodeMath extends CalculationNode {
     final public Input<RealParameter> rootValuesInput = new Input<>("rootValues", "Trait values at the root.");
     final public Input<Boolean> useShrinkageInput = new Input<>("shrinkage", "TRUE, if shrinkage method is used to estimate the trait correlations.", false);
     final public Input<RealParameter> covarianceInput = new Input<>("covariance", "cov_ij = sigma_i * sigma_j * rho_ij.");
+    final public Input<RealParameter> inverseRhoInput = new Input<>("inverseMatrix", "Inverse of trait correlation matrix when using Gibbs sampling.");
 
     private Integer nTraits = 0;
     private Integer nSpecies;
@@ -45,7 +47,7 @@ public class NodeMath extends CalculationNode {
     private double sigmaValue;
     private double[] sigmaValues;
     private double[] rhoValues;
-
+    private double[] inverseRhoValues;
 
     // for doing LUDecompostion
     private double[] lu;
@@ -96,6 +98,7 @@ public class NodeMath extends CalculationNode {
     private double storedSigmaValue;
     private double[] storedSigmaValues;
     private double[] storedRhoValues;
+    private double[] storedInverseRhoValues;
     private double [] storedTraitRateMatrix;
 
     // shrinkage
@@ -235,15 +238,37 @@ public class NodeMath extends CalculationNode {
 
     protected void initiateRhoInput() {
         if (!useShrinkage && !coEstimate) {
-            if (rhoInput.get() == null) {
-                throw new RuntimeException("NodeMath::If shrinkage method is not used, either correlation or covariance is required.");
-            } else {
-                Log.warning.println("NodeMath::Setting dimension of rho values to " + (nTraits * (nTraits - 1) / 2));
+            if (rhoInput.get() != null && inverseRhoInput.get() == null) {
                 rhoInput.get().setDimension((nTraits * (nTraits - 1) / 2));
                 rhoValues = new double[(nTraits * (nTraits - 1) / 2)];
                 storedRhoValues = new double[(nTraits * (nTraits - 1) / 2)];
                 rhoValues = rhoInput.get().getDoubleValues();
+            } else if (rhoInput.get() == null && inverseRhoInput.get() != null) {
+                initiateInverseRho();
+            } else {
+                throw new RuntimeException("NodeMath::If shrinkage method is not used, either correlation or covariance is required.");
             }
+        }
+    }
+
+    protected void initiateInverseRho () {
+        if(inverseRhoInput.get().getDimension() != matDim) {
+            inverseRhoInput.get().setDimension(matDim);
+            rhoValues = new double[matDim];
+            storedRhoValues = new double[matDim];
+            inverseRhoValues = new double[matDim];
+            storedInverseRhoValues = new double[matDim];
+            // initiate an identity matrix
+            for (int i = 0; i < matDim; i++){
+                if(i % (nTraits + 1) == 0) {
+                    inverseRhoInput.get().setValue(i, 1.0);
+                } else {
+                    inverseRhoInput.get().setValue(i, 0.0);
+                }
+            }
+        } else {
+            // get from input
+            inverseRhoValues = inverseRhoInput.get().getDoubleValues();
         }
     }
 
@@ -428,6 +453,19 @@ public class NodeMath extends CalculationNode {
         }
     }
 
+    public void populateRhoValues(){
+        inverseRhoValues = inverseRhoInput.get().getDoubleValues();
+
+        // to get the original rho matrix because it will be used when calculating r parameter
+        LUDecompositionForArray.ArrayLUDecomposition(inverseRhoValues, lu, pivot, evensingular, nTraits);
+        detInvRhoMatrix = LUDecompositionForArray.getDeterminant(lu, nTraits, evensingular);
+        try {
+            LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evensingular[1], nTraits, rhoValues);
+        } catch (RuntimeException e) {
+            singularMatrix = true;
+        }
+    }
+
     /*
      * This method performs matrix operations to get the determinant and inverse matrix.
      * (1)use shrinkage
@@ -568,8 +606,16 @@ public class NodeMath extends CalculationNode {
                 // trait rate matrix = t(upperMatrix) * upperMatrix
                 NodeMathUtils.populateTraitRateMatrix(sigmaValues, rhoValues, upperMatrix, transUpperMatrix, nTraits, traitRateMatrix, coEstimate);
             } else {
-                // trait rate matrix_ji =  trait rate matrix_ij
-                NodeMathUtils.populateTraitRateMatrixDirectly(sigmaValues, rhoValues, nTraits, traitRateMatrix);
+                if(rhoValues.length == matDim) {
+                    for(int i = 0; i < nTraits; i++){
+                        for(int j = 0; j < nTraits; j++){
+                            traitRateMatrix[i * nTraits + j] = FastMath.sqrt(sigmaValues[i]) * FastMath.sqrt(sigmaValues[j]) * rhoValues[i * nTraits + j];
+                        }
+                    }
+                } else {
+                    // trait rate matrix_ji =  trait rate matrix_ij
+                    NodeMathUtils.populateTraitRateMatrixDirectly(sigmaValues, rhoValues, nTraits, traitRateMatrix);
+                }
             }
 
         }
@@ -588,6 +634,10 @@ public class NodeMath extends CalculationNode {
         // update trait correlations
         if(rhoInput.isDirty()) {
             rhoValues = rhoInput.get().getDoubleValues();
+            updateRho = true;
+        }
+        if(inverseRhoInput.isDirty()) {
+            inverseRhoValues = inverseRhoInput.get().getDoubleValues();
             updateRho = true;
         }
         // update trait correlations
@@ -707,9 +757,10 @@ public class NodeMath extends CalculationNode {
             System.arraycopy(sigmaValues, 0, storedSigmaValues, 0, nTraits);
         }
 
-       System.arraycopy(rhoValues, 0, storedRhoValues, 0, (nTraits * (nTraits - 1) / 2));
-       // shrinkage only
-       System.arraycopy(transformedTraitValues, 0, storedTransformedTraitValues, 0, nSpecies * nTraits);
+        System.arraycopy(rhoValues, 0, storedRhoValues, 0, rhoValues.length);
+        System.arraycopy(inverseRhoValues, 0, storedInverseRhoValues, 0, matDim);
+        // shrinkage only
+        System.arraycopy(transformedTraitValues, 0, storedTransformedTraitValues, 0, nSpecies * nTraits);
 
         System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, matDim);
         System.arraycopy(invTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, matDim);
@@ -754,10 +805,13 @@ public class NodeMath extends CalculationNode {
         rhoValues = storedRhoValues;
         storedRhoValues = tempRhoValues;
 
+        double[] tempInverseRhoMatrix = inverseRhoValues;
+        inverseRhoValues = storedInverseRhoValues;
+        storedInverseRhoValues = tempInverseRhoMatrix;
+
         // shrinkage only
         double[] tempTraitValuesArrayList = transformedTraitValues;
         transformedTraitValues = storedTransformedTraitValues;
         storedTransformedTraitValues = tempTraitValuesArrayList;
-
     }
 }
