@@ -4,6 +4,7 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
+import beast.math.matrixalgebra.IllegalDimension;
 import contraband.prunelikelihood.BinaryDiscreteTraits;
 import contraband.prunelikelihood.OrderedDiscreteTraits;
 import contraband.prunelikelihood.UnorderedDiscreteTraits;
@@ -484,7 +485,8 @@ public class NodeMath extends CalculationNode {
         LUDecompositionForArray.ArrayLUDecomposition(invTraitRateMatrix, lu, pivot, evensingular, nTraits);
 
         // get the determinant of invTraitRateMatrix
-        detInvTraitRateMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evensingular);
+        detInvTraitRateMat = FastMath.log(LUDecompositionForArray.getDeterminant(lu, nTraits, evensingular));
+        //detInvTraitRateMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evensingular);
     }
 
     /*
@@ -651,7 +653,43 @@ public class NodeMath extends CalculationNode {
         }
     }
 
-    public void populateTransformedTraitValues (double[] liabilities) {}
+    public void populateTransformedTraitValues (double[] liabilities) {
+        double[][] cholesky = new double[nTraits][nTraits];
+        double[][] lowerMatrix;
+        double[] lowerMatArr = new double[matDim];
+        double[] dataTransformMat = new  double[matDim];
+        upperMatrix = new double[matDim];
+
+        // (1) copy trait rate matrix to a 2D array
+        for(int i = 0; i < nTraits; i++){
+            System.arraycopy(traitRateMatrix, i * nTraits, cholesky[i], 0, nTraits);
+        }
+
+        // (2) perform cholesky decomposition, R = L * L.transpose
+        try {
+            lowerMatrix = (new beast.math.matrixalgebra.CholeskyDecomposition(cholesky)).getL();
+            // caution: this returns the lower triangular form
+        } catch (IllegalDimension illegalDimension) {
+            throw new RuntimeException("Numerical exception in WishartDistribution");
+        }
+        // copy the 2D lower matrix to a double array
+        for(int i = 0; i < nTraits; i++){
+            System.arraycopy(lowerMatrix[i], 0, lowerMatArr, i * nTraits, nTraits);
+        }
+
+        // (3) get the inverse matrix, A = L.inverse
+        LUDecompositionForArray.ArrayLUDecomposition(lowerMatArr, lu, pivot, evensingular, nTraits);
+        try {
+            LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evensingular[1], nTraits, dataTransformMat);
+        } catch (RuntimeException e) {
+            singularMatrix = true;
+        }
+
+        // (4) Z = M * A.transpose
+        // the transpose the matrix
+        MatrixUtilsContra.matrixTranspose(dataTransformMat, nTraits, upperMatrix);
+        MatrixUtilsContra.matrixMultiply(liabilities, upperMatrix, nSpecies, nTraits, transformedTraitValues);
+    }
 
     @Override
     protected boolean requiresRecalculation() {
@@ -668,11 +706,11 @@ public class NodeMath extends CalculationNode {
         } else {
             System.arraycopy(sigmaValues, 0, storedSigmaValues, 0, nTraits);
         }
-        if(useShrinkage) {
-            System.arraycopy(rhoValues, 0, storedRhoValues, 0, (nTraits * (nTraits - 1) / 2));
-            // shrinkage only
-            System.arraycopy(transformedTraitValues, 0, storedTransformedTraitValues, 0, nSpecies * nTraits);
-        }
+
+       System.arraycopy(rhoValues, 0, storedRhoValues, 0, (nTraits * (nTraits - 1) / 2));
+       // shrinkage only
+       System.arraycopy(transformedTraitValues, 0, storedTransformedTraitValues, 0, nSpecies * nTraits);
+
         System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, matDim);
         System.arraycopy(invTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, matDim);
         System.arraycopy(rootValuesVec, 0, storedRootValuesVec, 0, nTraits);
@@ -712,15 +750,14 @@ public class NodeMath extends CalculationNode {
             storedSigmaValues = tempSigmaValues;
         }
 
-        if(useShrinkage) {
-            double[] tempRhoValues = rhoValues;
-            rhoValues = storedRhoValues;
-            storedRhoValues = tempRhoValues;
+        double[] tempRhoValues = rhoValues;
+        rhoValues = storedRhoValues;
+        storedRhoValues = tempRhoValues;
 
         // shrinkage only
         double[] tempTraitValuesArrayList = transformedTraitValues;
         transformedTraitValues = storedTransformedTraitValues;
         storedTransformedTraitValues = tempTraitValuesArrayList;
-        }
+
     }
 }
