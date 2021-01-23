@@ -53,5 +53,14 @@ public class LiabilityLikelihoodTestDriver2 {
 
         double logP1 = lik1.calculateLogP();
         System.out.println("Log likelihood 1 = "+ logP1); //-9.01503846914647
+
+        // transformed likelihood
+        NodeMath nodeMath2 = new NodeMath();
+        nodeMath2.initByName("traits", traitValues, "sigmasq", sigmasq, "inverseMatrix", inverseMatrix, "oneRateOnly", true, "transform", true);
+        LiabilityLikelihood lik2 = new LiabilityLikelihood();
+        lik2.initByName("traits", traitValues,
+                "tree", tree, "nodeMath", nodeMath2, "branchRateModel", lsc);
+        double logP2 = lik2.calculateLogP();
+        System.out.println("Log likelihood 2 = "+ logP2); //-9.01503846914647
     }
 }
