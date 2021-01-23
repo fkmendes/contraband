@@ -65,11 +65,15 @@ public class LiabilityLikelihood extends PruneLikelihoodProcess {
         rateRealMatrix = new Array2DRowRealMatrix(new double[totalTraitNr][totalTraitNr]);
 
         super.initAndValidate();
-
+        if(getNodeMath().getInverseRhoSamplingFlag()) {
+            getNodeMath().populateRhoValues();
+        }
         getNodeMath().populateTraitRateMatrix();
         getNodeMath().performMatrixOperations();
-        //getNodeMath().populateTransformedTraitValues(traitValuesArr);
-        //setTraitValuesArr(getNodeMath().getTransformedTraitValues());
+        if(getNodeMath().getTransformedDataFlag()) {
+            getNodeMath().populateTransformedTraitValues(traitValuesArr);
+            setTraitValuesArr(getNodeMath().getTransformedTraitValues());
+        }
     }
 
     // add liabilities of discrete traits to the traitValuesArr

@@ -4,14 +4,13 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.clock.RateCategoryClockModel;
-import contraband.math.LiabilityNodeMath;
-import contraband.prunelikelihood.TransformedLiabilityLikelihood;
+import contraband.math.NodeMath;
+import contraband.prunelikelihood.LiabilityLikelihood;
 import outercore.parameter.KeyRealParameter;
-
 import java.util.Arrays;
 import java.util.List;
 
-public class TransformedLiabilityLikelihoodTestDriver {
+public class LiabilityLikelihoodTestDriver1 {
     public static void main(String[] args) {
         // tree
         String treeStr = "((t4:0.294791968,(t7:0.2380450868,t8:0.2380450868):0.05674688124):1.269758843,(((t5:0.2457411247,t6:0.2457411247):0.4091478892,(t2:0.3449767887,t3:0.3449767887):0.3099122252):0.771197872,(t1:1.012806474,(t9:0.06711245421,t10:0.06711245421):0.9456940195):0.4132804122):0.1384639249);";
@@ -35,7 +34,7 @@ public class TransformedLiabilityLikelihoodTestDriver {
         KeyRealParameter traitValues = new KeyRealParameter();
         traitValues.initByName("value", data, "keys", spNames, "minordimension", nTraits);
 
-        LiabilityNodeMath nodeMath = new LiabilityNodeMath();
+        NodeMath nodeMath = new NodeMath();
         // BM model parameters
         RealParameter inverseMatrix = new RealParameter(new Double[] {
                 1.15967096041944, -0.22059864425817, 0.0349183919101759, 0.457034581560665,
@@ -45,7 +44,7 @@ public class TransformedLiabilityLikelihoodTestDriver {
         });
         // all traits share one rate
         RealParameter sigmasq = new RealParameter(new Double[] {4.91917941793269});
-        nodeMath.initByName("traits", traitValues, "sigmasq", sigmasq, "inverseMatrix", inverseMatrix, "oneRateOnly", true);
+        nodeMath.initByName("traits", traitValues, "sigmasq", sigmasq, "inverseMatrix", inverseMatrix, "oneRateOnly", true, "transform", true);
 
         // branch rate model
         IntegerParameter colorAssignments = new IntegerParameter(new Integer[] {0});
@@ -53,12 +52,12 @@ public class TransformedLiabilityLikelihoodTestDriver {
         RateCategoryClockModel lsc = new RateCategoryClockModel();
         lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
 
-        // prune likelihood
-        TransformedLiabilityLikelihood lik = new TransformedLiabilityLikelihood();
+        // transformed likelihood
+        LiabilityLikelihood lik = new LiabilityLikelihood();
         lik.initByName("traits", traitValues,
                 "tree", tree, "nodeMath", nodeMath, "branchRateModel", lsc);
 
         double logP = lik.calculateLogP();
-        System.out.println("Log likelihood"+ logP); // -75.8005215976135
+        System.out.println("Log likelihood = "+ logP); // -75.8005215976135
     }
 }

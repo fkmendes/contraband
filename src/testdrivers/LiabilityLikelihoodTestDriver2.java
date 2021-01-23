@@ -4,15 +4,13 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.clock.RateCategoryClockModel;
-import contraband.math.LiabilityNodeMath;
+import contraband.math.NodeMath;
 import contraband.prunelikelihood.LiabilityLikelihood;
-import contraband.prunelikelihood.TransformedLiabilityLikelihood;
 import outercore.parameter.KeyRealParameter;
-
 import java.util.Arrays;
 import java.util.List;
 
-public class TransformedLikelihoodTestDriver2 {
+public class LiabilityLikelihoodTestDriver2 {
     public static void main(String[] args) {
 
         // tree
@@ -31,7 +29,7 @@ public class TransformedLikelihoodTestDriver2 {
         KeyRealParameter traitValues = new KeyRealParameter();
         traitValues.initByName("value", data, "keys", spNames, "minordimension", nTraits);
 
-        LiabilityNodeMath nodeMath = new LiabilityNodeMath();
+        NodeMath nodeMath = new NodeMath();
         // BM model parameters
         RealParameter inverseMatrix = new RealParameter(new Double[] {
                 1.0, 0.0, 0.0,
@@ -49,25 +47,11 @@ public class TransformedLikelihoodTestDriver2 {
         lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
 
         // non-transformed likelihood
-/*
         LiabilityLikelihood lik1 = new LiabilityLikelihood();
         lik1.initByName("traits", traitValues,
                 "tree", tree, "nodeMath", nodeMath, "branchRateModel", lsc);
 
         double logP1 = lik1.calculateLogP();
         System.out.println("Log likelihood 1 = "+ logP1); //-9.01503846914647
-        */
-
-
-        // transformed likelihood
-        TransformedLiabilityLikelihood lik2 = new TransformedLiabilityLikelihood();
-        lik2.initByName("traits", traitValues,
-                "tree", tree, "nodeMath", nodeMath, "branchRateModel", lsc);
-
-        double logP2 = lik2.calculateLogP();
-        System.out.println("Log likelihood 2 = "+ logP2); // -9.01503846914647
-
-
-
     }
 }

@@ -262,12 +262,12 @@ public class NodeMath extends CalculationNode {
     }
 
     protected void initiateInverseRho () {
+        rhoValues = new double[matDim];
+        storedRhoValues = new double[matDim];
+        inverseRhoValues = new double[matDim];
+        storedInverseRhoValues = new double[matDim];
         if(inverseRhoInput.get().getDimension() != matDim) {
             inverseRhoInput.get().setDimension(matDim);
-            rhoValues = new double[matDim];
-            storedRhoValues = new double[matDim];
-            inverseRhoValues = new double[matDim];
-            storedInverseRhoValues = new double[matDim];
             // initiate an identity matrix
             for (int i = 0; i < matDim; i++){
                 if(i % (nTraits + 1) == 0) {
@@ -587,8 +587,14 @@ public class NodeMath extends CalculationNode {
                 // where upperMatrix is from rho and sigmasq
                 NodeMathUtils.populateTraitRateMatrix(sigmaValue, rhoValues, upperMatrix, transUpperMatrix, nTraits, traitRateMatrix);
             } else {
-                // trait rate matrix_ji =  trait rate matrix_ij
-                NodeMathUtils.populateTraitRateMatrixDirectly(sigmaValue, rhoValues, nTraits, traitRateMatrix);
+                if(rhoValues.length == matDim) {
+                    for(int i = 0; i < matDim; i ++){
+                            traitRateMatrix[i] = sigmaValue * rhoValues[i];
+                    }
+                } else {
+                    // trait rate matrix_ji =  trait rate matrix_ij
+                    NodeMathUtils.populateTraitRateMatrixDirectly(sigmaValue, rhoValues, nTraits, traitRateMatrix);
+                }
             }
         }
     }
