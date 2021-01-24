@@ -98,12 +98,10 @@
 	</distribution> 
 	<!-- END Posterior -->
 
-    <operator id="BinaryLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@binaryLiabilities" windowSize="1.0" weight="5.0"/>
     <operator id="BinaryLiabilityScaler" spec="ScaleOperator" parameter="@binaryLiabilities" weight="5.0"/>
-<!--
+
     <operator id="GibbsOperator" spec="contraband.prunelikelihood.InverseMatrixGibbsOperator" dimension="3" values="@inverseMatrix" distr="@wishartPrior" weight="6.0"/>
--->
-    <!--<operator id="VarValueScaler" spec="ScaleOperator" parameter="@varValues" scaleFactor="0.75" weight="6.0"/>-->
+    <operator id="VarValueScaler" spec="ScaleOperator" parameter="@varValues" scaleFactor="0.75" weight="6.0"/>
     <operator id="rateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="6.0"/>
 
     <operator id="YuleTreeScaler" spec="ScaleOperator" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>

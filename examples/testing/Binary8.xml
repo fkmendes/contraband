@@ -82,7 +82,7 @@
                 <tree idref="TheTree"/>
             </branchRateModel>
 
-            <nodeMath id="pcmNodeMath" spec="contraband.math.NodeMath">
+            <nodeMath id="pcmNodeMath" spec="contraband.math.NodeMath" oneRateOnly="true">
                 <binaryDiscreteTraits idref="BinaryDiscreteLikelihood"/>
                 <sigmasq id="varValues" spec="parameter.RealParameter">1.0</sigmasq>
                 <correlation id="covValues" spec="parameter.RealParameter">0.0</correlation>
@@ -94,12 +94,10 @@
 	</distribution> 
 	<!-- END Posterior -->
 
-    <operator id="BinaryLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@binaryLiabilities" windowSize="1.0" weight="5.0"/>
     <operator id="BinaryLiabilityScaler" spec="ScaleOperator" parameter="@binaryLiabilities" weight="5.0"/>
-    <!--
+
     <operator id="covValueScaler" spec="RealRandomWalkOperator" parameter="@covValues" windowSize="0.75" weight="6.0"/>
     <operator id="VarValueScaler" spec="ScaleOperator" parameter="@varValues" scaleFactor="0.75" weight="6.0"/>
-    -->
     <operator id="rateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="6.0"/>
 
     <operator id="YuleTreeScaler" spec="ScaleOperator" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
@@ -115,6 +113,7 @@
     <logger id="tracelog" fileName="Binary8.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
+
       <log idref="prior"/>
       <log id="TreeStats" spec="beast.evolution.tree.TreeStatLogger" tree="@TheTree"/>
       <log idref="varValues"/>
@@ -122,6 +121,7 @@
       <log idref="birthRate"/>
       <log idref="covValues"/>
       <log idref="binaryLiabilities"/>
+
     </logger>
 
     <logger id="screenlog" logEvery="5000">
@@ -134,5 +134,6 @@
     <logger id="treelog" fileName="Binary8.trees" logEvery="5000" mode="tree">
         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
+
   </run>
 </beast>
