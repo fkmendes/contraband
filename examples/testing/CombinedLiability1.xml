@@ -119,22 +119,22 @@
     <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
         <!-- START Morphological likleihood-->
         <distribution id="BinaryDiscreteLikelihood" spec="contraband.prunelikelihood.BinaryDiscreteTraits" tree="@TheTree">
-            <liability id="binaryLiabilities" spec="parameter.RealParameter">1.0</liability>
+            <liability id="binaryLiabilities" spec="parameter.RealParameter" lower="-2.0" upper="2.0">1.0</liability>
             <data id="binaryData" spec="FilteredAlignment" data="@discrete_traits" filter="1,2"/>
         </distribution>
 
         <distribution id="OrderedDiscreteLikelihood" spec="contraband.prunelikelihood.OrderedDiscreteTraits" tree="@TheTree">
-            <liability id="orderedLiabilities" spec="parameter.RealParameter">1.0</liability>
+            <liability id="orderedLiabilities" spec="parameter.RealParameter" lower="-5.0" upper="5.0">1.0</liability>
             <threshold id="thresholds" spec="parameter.RealParameter">1.0</threshold>
             <data id="orderedData" spec="FilteredAlignment" data="@discrete_traits" filter="3,4"/>
         </distribution>
 
         <distribution id="UnorderedDiscreteLikelihood" spec="contraband.prunelikelihood.UnorderedDiscreteTraits" tree="@TheTree">
-            <liability id="unorderedLiabilities" spec="parameter.RealParameter">1.0</liability>
+            <liability id="unorderedLiabilities" spec="parameter.RealParameter" lower="-5.0" upper="5.0">1.0</liability>
             <data id="unorderedData" spec="FilteredAlignment" data="@discrete_traits" filter="5"/>
         </distribution>
 
-        <distribution id="PCMLikelihood" spec="contraband.prunelikelihood.TransformedLiabilityLikelihood" tree="@TheTree">
+        <distribution id="PCMLikelihood" spec="contraband.prunelikelihood.LiabilityLikelihood" tree="@TheTree">
             <traits id="oneTraitData" spec="outercore.parameter.KeyRealParameter" minordimension="2" keys="t2 t8 t9 t4 t5 t6 t7 t10 t15 t16 t12 t19 t20 t17 t18 t3 t11 t13 t14 t1">
                 3.70297667442968 -0.0191670878738093 2.56382919336109 3.00405587054247 0.685409736964148 0.907514732148887 1.4101217343777 0.570047495963578 -0.0505217389059164 0.385086153147948 -2.2613508173723 -0.843542260222308 -0.0980057923887937 0.546984097100476 -4.33152233634265 -4.60615970285192 -3.29331661502761 -1.99707026186712 -3.32891606449984 -2.42786412449942 -2.86624181028458 -5.26233336396985 -2.47321522019618 -6.18440164753682 -2.75021124791825 -6.01365663212403 -0.837957378058093 -1.28557921676287 -0.372831901831766 -0.881460198523359 -5.5595425610609 -0.539799302919949 3.01639098106283 -2.44376074610602 0.905310741252493 -2.36490909624967 0.922383284912055 -3.04164644311999 -1.32896042560339 3.46859000989711
             </traits>
@@ -149,7 +149,7 @@
                 <tree idref="TheTree"/>
             </branchRateModel>
 
-            <nodeMath id="pcmNodeMath" spec="contraband.math.LiabilityNodeMath" traits="@oneTraitData">
+            <nodeMath id="pcmNodeMath" spec="contraband.math.NodeMath" transform="true" traits="@oneTraitData">
                 <binaryDiscreteTraits idref="BinaryDiscreteLikelihood"/>
                 <orderedDiscreteTraits idref="OrderedDiscreteLikelihood"/>
                 <unorderedDiscreteTraits idref="UnorderedDiscreteLikelihood"/>
@@ -167,15 +167,16 @@
     <operator id="VarValueScaler" spec="ScaleOperator" parameter="@varValues" scaleFactor="0.75" weight="6.0"/>
     <!-- NOTE: the dimension is equal to the total number of traits -->
     <operator id="GibbsOperator" spec="contraband.prunelikelihood.InverseMatrixGibbsOperator" dimension="8" values="@inverseMatrix" distr="@wishartPrior" weight="6.0"/>
+
     <operator id="rateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="6.0"/>
 
- <!--
-    <operator id="BinaryLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@binaryLiabilities" windowSize="1.0" weight="5.0"/>
     <operator id="BinaryLiabilityScaler" spec="ScaleOperator" parameter="@binaryLiabilities" weight="5.0"/>
-    <operator id="OrderedLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@orderedLiabilities" windowSize="1.0" weight="5.0"/>
+
     <operator id="OrderedLiabilityScaler" spec="ScaleOperator" parameter="@orderedLiabilities" weight="5.0"/>
-    <operator id="UnorderedLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@unorderedLiabilities" windowSize="1.0" weight="5.0"/>
+
     <operator id="UnorderedLiabilityScaler" spec="ScaleOperator" parameter="@unorderedLiabilities" weight="5.0"/>
+
+    <!--
     <operator id="ThresholdsRandomWalk" spec="RealRandomWalkOperator" parameter="@thresholds" windowSize="1.0" weight="3.0"/>
 -->
 
@@ -192,11 +193,18 @@
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
+
       <log idref="varValues"/>
       <log id="TreeStats" spec="beast.evolution.tree.TreeStatLogger" tree="@TheTree"/>
-      <log idref="inverseMatrix"/>
       <log idref="rateValues"/>
       <log idref="birthRate"/>
+
+        <!--
+      <log idref="inverseMatrix"/>
+      <log idref="binaryLiabilities"/>
+      <log idref="orderedLiabilities"/>
+      <log idref="unorderedLiabilities"/>
+      -->
     </logger>
 
     <logger id="screenlog" logEvery="10000">
@@ -205,10 +213,10 @@
         <log idref="likelihood"/>
         <log idref="prior"/>
     </logger>
-
+<!--
     <logger id="treelog" fileName="CombinedLiability.trees" logEvery="5000" mode="tree">
         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
-
+-->
   </run>
 </beast>

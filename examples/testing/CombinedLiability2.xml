@@ -119,18 +119,18 @@
     <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
         <!-- START Morphological likleihood-->
         <distribution id="BinaryDiscreteLikelihood" spec="contraband.prunelikelihood.BinaryDiscreteTraits" tree="@TheTree">
-            <liability id="binaryLiabilities" spec="parameter.RealParameter">1.0</liability>
+            <liability id="binaryLiabilities" spec="parameter.RealParameter" lower="-2.0" upper="2.0">1.0</liability>
             <data id="binaryData" spec="FilteredAlignment" data="@discrete_traits" filter="1,2"/>
         </distribution>
 
         <distribution id="OrderedDiscreteLikelihood" spec="contraband.prunelikelihood.OrderedDiscreteTraits" tree="@TheTree">
-            <liability id="orderedLiabilities" spec="parameter.RealParameter">1.0</liability>
+            <liability id="orderedLiabilities" spec="parameter.RealParameter" lower="-5.0" upper="5.0">1.0</liability>
             <threshold id="thresholds" spec="parameter.RealParameter">1.0</threshold>
             <data id="orderedData" spec="FilteredAlignment" data="@discrete_traits" filter="3,4"/>
         </distribution>
 
         <distribution id="UnorderedDiscreteLikelihood" spec="contraband.prunelikelihood.UnorderedDiscreteTraits" tree="@TheTree">
-            <liability id="unorderedLiabilities" spec="parameter.RealParameter">1.0</liability>
+            <liability id="unorderedLiabilities" spec="parameter.RealParameter" lower="-5.0" upper="5.0">1.0</liability>
             <data id="unorderedData" spec="FilteredAlignment" data="@discrete_traits" filter="5"/>
         </distribution>
 
@@ -149,7 +149,7 @@
                 <tree idref="TheTree"/>
             </branchRateModel>
 
-            <nodeMath id="pcmNodeMath" spec="contraband.math.LiabilityNodeMath" traits="@oneTraitData">
+            <nodeMath id="pcmNodeMath" spec="contraband.math.NodeMath" traits="@oneTraitData">
                 <binaryDiscreteTraits idref="BinaryDiscreteLikelihood"/>
                 <orderedDiscreteTraits idref="OrderedDiscreteLikelihood"/>
                 <unorderedDiscreteTraits idref="UnorderedDiscreteLikelihood"/>
@@ -168,13 +168,14 @@
     <!-- NOTE: the dimension is equal to the total number of traits -->
     <operator id="GibbsOperator" spec="contraband.prunelikelihood.InverseMatrixGibbsOperator" dimension="8" values="@inverseMatrix" distr="@wishartPrior" weight="6.0"/>
     <operator id="rateValueScaler" spec="ScaleOperator" parameter="@rateValues" scaleFactor="0.75" weight="6.0"/>
-<!--
-    <operator id="BinaryLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@binaryLiabilities" windowSize="1.0" weight="5.0"/>
+
     <operator id="BinaryLiabilityScaler" spec="ScaleOperator" parameter="@binaryLiabilities" weight="5.0"/>
-    <operator id="OrderedLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@orderedLiabilities" windowSize="1.0" weight="5.0"/>
+
     <operator id="OrderedLiabilityScaler" spec="ScaleOperator" parameter="@orderedLiabilities" weight="5.0"/>
-    <operator id="UnorderedLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@unorderedLiabilities" windowSize="1.0" weight="5.0"/>
+
     <operator id="UnorderedLiabilityScaler" spec="ScaleOperator" parameter="@unorderedLiabilities" weight="5.0"/>
+
+<!--
     <operator id="ThresholdsRandomWalk" spec="RealRandomWalkOperator" parameter="@thresholds" windowSize="1.0" weight="3.0"/>
 -->
 
@@ -191,11 +192,18 @@
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
+
       <log idref="varValues"/>
       <log id="TreeStats" spec="beast.evolution.tree.TreeStatLogger" tree="@TheTree"/>
-      <log idref="inverseMatrix"/>
       <log idref="rateValues"/>
       <log idref="birthRate"/>
+
+        <!--
+      <log idref="inverseMatrix"/>
+      <log idref="binaryLiabilities"/>
+      <log idref="orderedLiabilities"/>
+      <log idref="unorderedLiabilities"/>
+      -->
     </logger>
 
     <logger id="screenlog" logEvery="10000">
@@ -204,9 +212,10 @@
         <log idref="likelihood"/>
         <log idref="prior"/>
     </logger>
-
+    <!--
     <logger id="treelog" fileName="CombinedLiability.trees" logEvery="5000" mode="tree">
         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
+    -->
   </run>
 </beast>
