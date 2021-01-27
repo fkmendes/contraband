@@ -46,8 +46,22 @@ public class BMLikelihood extends MorphologyLikelihood {
 
 
     @Override
-    protected void populateAbCdEfForNode (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx) {
-            MorphologyLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, nodeIdx);
+    protected void populateAbCdEfForTips (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx) {
+        if(nodeMath.getMatrixParamsFlag()){
+            MorphologyLikelihoodUtils.populateACEfMatrix(nodeMath, branchLength, nTraits, nodeIdx);
+        } else {
+            if(nodeMath.getPopVarianceFlag()) {
+                double variance = branchLength + nodeMath.getPopVarianceMatrix()[0];
+                MorphologyLikelihoodUtils.populateACEf(nodeMath, variance, nTraits, nodeIdx);
+            } else {
+                MorphologyLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, nodeIdx);
+            }
+        }
+    }
+
+    @Override
+    protected void populateAbCdEfForInternalNodes (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx) {
+        MorphologyLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, nodeIdx);
     }
 
     @Override
@@ -93,14 +107,14 @@ public class BMLikelihood extends MorphologyLikelihood {
         if(transformData) {
             return MatrixUtilsContra.vecTransScalarMultiply(
                     nodeMath.getSampledAncestorTraitsVec(),
-                    nodeMath.getLForNode(childIdx),
+                    nodeMath.getLForNode(childIdx)[0],
                     nTraits) +
                     MatrixUtilsContra.vectorDotMultiply(
                             nodeMath.getSampledAncestorTraitsVec(),
                             nodeMath.getMVecForNode(childIdx)) +
                     nodeMath.getRForNode(childIdx);
         } else {
-            return nodeMath.getLForNode(childIdx) *
+            return nodeMath.getLForNode(childIdx)[0] *
                     MatrixUtilsContra.tVecDotMatrixDotVec(
                             nodeMath.getSampledAncestorTraitsVec(),
                             nodeMath.getTraitRateMatrixInverse(),

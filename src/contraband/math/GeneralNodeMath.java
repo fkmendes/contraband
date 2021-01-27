@@ -7,7 +7,13 @@ import beast.core.util.Log;
 import beast.evolution.tree.Tree;
 import contraband.prunelikelihood.MorphologicalData;
 import contraband.prunelikelihood.SigmaMatrix;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.EigenDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.apache.commons.math3.util.FastMath;
+
+import java.util.Arrays;
 
 public class GeneralNodeMath extends CalculationNode {
     final public Input<MorphologicalData> traitInput = new Input<>("trait","Morphological data set.");
@@ -23,6 +29,7 @@ public class GeneralNodeMath extends CalculationNode {
 
     private boolean shareRho;
     private boolean matrixParams;
+    private boolean popVariance;
     private boolean sampleRoot;
 
     private SigmaMatrix rateMatrix;
@@ -67,6 +74,7 @@ public class GeneralNodeMath extends CalculationNode {
 
     // temporary variables
     private double[] traitsVec;
+    private RealMatrix realMatrix;
 
     // this is for trees with sampled ancestors
     private double likForSA;
@@ -76,6 +84,15 @@ public class GeneralNodeMath extends CalculationNode {
     private double detTraitRateMat;
     private double [] invTraitRateMatrix;
     private double detInvTraitRateMat;
+
+    // for matrixParams
+    private double [] varianceMatrix;
+    private double detVarianceMat;
+    private double [] invVarianceMatrix;
+    private double detInvVarianceMat;
+    private double[] rateScaler;
+
+    private double[] popVarianceMatrix;
 
     private double storedDetTraitRateMat;
     private double [] storedInvTraitRateMatrix;
@@ -100,16 +117,24 @@ public class GeneralNodeMath extends CalculationNode {
         // get intraspecific variance-covariance matrix
         if(popMatrixInput.get() == null){
             // ignore intraspecific variance
+            popVariance = false;
             matrixParams = false;
         } else {
             // account for intraspecific variance
+            popVariance = true;
             popMatrix = popMatrixInput.get();
+            popMatrix.populateSigmaMatrix();
+            popVarianceMatrix = popMatrix.getSigmaMatrix();
             matrixParams = !rateMatrix.getOneRateOnly() || !popMatrix.getOneRateOnly();
             if(!shareRho || matrixParams){
                 if(traitInput.get().getTransformDataFlag()) {
                     throw new RuntimeException("GeneralNodeMath:: Data cannot be transformed!.");
                 }
             }
+            if(matrixParams) {
+                initMatrixParams();
+            }
+
         }
 
         // get root values
@@ -172,6 +197,7 @@ public class GeneralNodeMath extends CalculationNode {
             lMatInit = new double[matDim];
             lArray = new double[matDim * nodeNr];
         } else {
+            lMatInit = new double[1];
             // each node has a single double value L
             lArray = new double[nodeNr];
         }
@@ -217,6 +243,13 @@ public class GeneralNodeMath extends CalculationNode {
         storedInvTraitRateMatrix = new double[matDim];
     }
 
+    private void initMatrixParams(){
+        varianceMatrix = new double [matDim];
+        invVarianceMatrix = new double [matDim];
+        rateScaler = new double[nTraits * nTraits];
+        realMatrix = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
+    }
+
     //getters
     public double getAForNode (int nodeIdx) { return aArray[nodeIdx]; }
 
@@ -241,7 +274,10 @@ public class GeneralNodeMath extends CalculationNode {
 
     public double getfForNode (int nodeIdx) { return fArray[nodeIdx]; }
 
-    public double getLForNode (int nodeIdx) { return lArray[nodeIdx]; }
+    public double[] getLForNode (int nodeIdx) {
+
+        return new double[]{lArray[nodeIdx]};
+    }
 
     public double[] getLMatForNode (int nodeIdx) {
         MatrixUtilsContra.getMatrixRow(lArray, nodeIdx, matDim, lMat);
@@ -269,6 +305,8 @@ public class GeneralNodeMath extends CalculationNode {
 
     public double[] getInitMVec () { return mVecInit; }
 
+    public double[] getInitLMat () { return lMatInit; }
+
     public double[] getTraitsVec () {return traitsVec; }
 
     public double[] getTempVec () { return mVec; }
@@ -278,6 +316,18 @@ public class GeneralNodeMath extends CalculationNode {
     public double getTraitRateMatrixInverseDeterminant () { return detInvTraitRateMat; }
 
     public double getVarianceForNode (int nodeIdx) { return nodeVariance[nodeIdx]; }
+
+    public boolean getMatrixParamsFlag() { return matrixParams; }
+
+    public boolean getPopVarianceFlag() { return popVariance; }
+
+    public double[] getPopVarianceMatrix () { return popVarianceMatrix; }
+
+    public double getVarianceMatrixDet() { return detVarianceMat; }
+
+    public double getInvVarianceDet () {return detInvVarianceMat; }
+
+    public double[] getInvVarianceMatrix() {return invVarianceMatrix; }
 
     // setters
     public void setLikelihoodForSampledAncestors(double value) {
@@ -292,7 +342,7 @@ public class GeneralNodeMath extends CalculationNode {
 
     public void setfForNode (int nodeIdx, double value) { fArray[nodeIdx] = value; }
 
-    public void setLForNode (int nodeIdx, double value) { lArray[nodeIdx] = value; }
+    public void setLForNode (int nodeIdx, double[] value) { lArray[nodeIdx] = value[0]; }
 
     public void setRForNode (int nodeIdx, double value) { rArray[nodeIdx] = value; }
 
@@ -330,7 +380,6 @@ public class GeneralNodeMath extends CalculationNode {
         MatrixUtilsContra.vectorAdd(expect1, expect2, expectp);
         MatrixUtilsContra.setMatrixRow(nodeExpectation, expectp, parentIdx, nTraits);
     }
-
 
     //
     public void populateRootValuesVec(int rootIdx) {
@@ -385,9 +434,65 @@ public class GeneralNodeMath extends CalculationNode {
         }
         if(popMatrixInput.isDirty()){
             popMatrix.populateSigmaMatrix();
+            popVarianceMatrix = popMatrix.getSigmaMatrix();
             update = true;
         }
         return update;
+    }
+
+    /*
+     * matrixParams operations
+     */
+    public void checkNearlySingularMatrix () {
+        for(int i = 0; i < nTraits; i++){
+            for (int j = 0; j < nTraits; j++){
+                realMatrix.setEntry(i, j, varianceMatrix[i * nTraits + j]);
+            }
+        }
+        double[] singularValues = new SingularValueDecomposition(realMatrix).getSingularValues();
+        double min = Arrays.stream(singularValues).min().getAsDouble();
+        double max = Arrays.stream(singularValues).max().getAsDouble();
+
+        EigenDecomposition decomposition = new EigenDecomposition(realMatrix);
+        double[] eValues = decomposition.getRealEigenvalues();
+
+        for (double ei : eValues) {
+            if (ei < 1.0E-5) {
+                singularMatrix = true;
+            }
+        }
+
+        if ((min / max) < 1.0E-6) {
+            singularMatrix = true;
+        }
+    }
+
+    public void populateVarianceMatrix(double branchLength){
+        MatrixUtilsContra.vectorMapMultiply(traitRateMatrix, branchLength, rateScaler);
+        MatrixUtilsContra.vectorAdd(rateScaler, popVarianceMatrix, varianceMatrix);
+    }
+
+    public void operateOnVarianceMatrix() {
+        // LUDecomposition
+        LUDecompositionForArray.ArrayLUDecomposition(varianceMatrix, lu, pivot, evenSingular, nTraits);
+
+        // invert the traitRateMatrix
+        try {
+            LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evenSingular[1], nTraits, invVarianceMatrix);
+        } catch (RuntimeException e) {
+            singularMatrix = true;
+        }
+        // get the determinant of traitRateMatrix
+        double det = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
+        if (det == 0.0) {
+            singularMatrix = true;
+        }
+
+        detVarianceMat = FastMath.log(det);
+
+        // LUDecomposition
+        LUDecompositionForArray.ArrayLUDecomposition(invVarianceMatrix, lu, pivot, evenSingular, nTraits);
+        detInvVarianceMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
     }
 
     @Override

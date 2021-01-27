@@ -72,7 +72,7 @@ public abstract class MorphologyLikelihood extends Distribution {
         nodeMath.populateRootValuesVec(rootIdx);
 
         // get L, m and r at the root
-        double l0 = nodeMath.getLForNode(rootIdx);
+        double l0 = nodeMath.getLForNode(rootIdx)[0];
         double[] m0 = nodeMath.getMVecForNode(rootIdx);
         double r0 = nodeMath.getRForNode(rootIdx);
 
@@ -86,7 +86,7 @@ public abstract class MorphologyLikelihood extends Distribution {
         int thisNodeIdx = node.getNr();
 
         // initialize before sum
-        double thisNodeL = 0.0;
+        double[] thisNodeL = nodeMath.getInitLMat().clone();
         double [] thisNodeMVec = nodeMath.getInitMVec().clone();
         double thisNodeR = 0.0;
 
@@ -105,12 +105,13 @@ public abstract class MorphologyLikelihood extends Distribution {
                 //nodeMath.setVarianceForTip(childIdx,nodeMath.getVarianceForNode(childIdx) + 1);
 
                 //PruneLikelihoodUtils.populateACEf(nodeMath, nodeMath.getVarianceForNode(childIdx), nTraits, childIdx);
-                populateAbCdEfForNode(nodeMath, branchLength, nTraits, childIdx);
+                populateAbCdEfForTips(nodeMath, branchLength, nTraits, childIdx);
 
                 populateLmrForTips(nodeMath, traitValuesArr, nTraits, childIdx);
 
                 // add up to this node
-                thisNodeL += nodeMath.getLForNode(childIdx);
+                MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLForNode(childIdx), thisNodeL);
+                //thisNodeL += nodeMath.getLForNode(childIdx);
                 thisNodeR += nodeMath.getRForNode(childIdx);
                 MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
 
@@ -123,7 +124,7 @@ public abstract class MorphologyLikelihood extends Distribution {
                     if (!child.getChild(0).isDirectAncestor() && !child.getChild(1).isDirectAncestor()) {
 
                         //PruneLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, childIdx);
-                        populateAbCdEfForNode(nodeMath, branchLength, nTraits, childIdx);
+                        populateAbCdEfForInternalNodes(nodeMath, branchLength, nTraits, childIdx);
 
                         prune(child, nTraits, traitValuesArr, pcmc, nodeMath);
 
@@ -132,7 +133,8 @@ public abstract class MorphologyLikelihood extends Distribution {
                         // add up to this node
                         thisNodeR += nodeMath.getRForNode(childIdx);
                         MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
-                        thisNodeL += nodeMath.getLForNode(childIdx);
+                        //thisNodeL += nodeMath.getLForNode(childIdx);
+                        MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLForNode(childIdx), thisNodeL);
 
                     } else {
                         // (3) child is an internal node and has a sampled ancestor below
@@ -145,12 +147,13 @@ public abstract class MorphologyLikelihood extends Distribution {
                         int gcSANr = gcSA.getNr();
 
                         //PruneLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, gcSANr);
-                        populateAbCdEfForNode(nodeMath, branchLength, nTraits, gcSANr);
+                        populateAbCdEfForTips(nodeMath, branchLength, nTraits, gcSANr);
 
                         populateLmrForTips(nodeMath, traitValuesArr, nTraits, gcSANr);
 
                         // add up to this node
-                        thisNodeL += nodeMath.getLForNode(gcSANr);
+                        //thisNodeL += nodeMath.getLForNode(gcSANr);
+                        MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLForNode(gcSANr), thisNodeL);
                         thisNodeR += nodeMath.getRForNode(gcSANr);
                         MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
 
@@ -187,7 +190,9 @@ public abstract class MorphologyLikelihood extends Distribution {
         nodeMath.setRForNode(thisNodeIdx, thisNodeR);
     }
 
-    protected abstract void populateAbCdEfForNode (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx);
+    protected abstract void populateAbCdEfForTips (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx);
+
+    protected abstract void populateAbCdEfForInternalNodes (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx);
 
     protected abstract void populateLmrForTips(GeneralNodeMath nodeMath, double[] traitValuesArr, int nTraits, int nodeIdx);
 
