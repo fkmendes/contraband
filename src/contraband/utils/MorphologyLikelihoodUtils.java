@@ -1,18 +1,8 @@
 package contraband.utils;
 
-import beast.evolution.tree.Tree;
-
 import contraband.math.GeneralNodeMath;
-import contraband.math.NodeMath;
 import contraband.math.MatrixUtilsContra;
-
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.stat.descriptive.moment.Variance;
-import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.commons.math3.util.FastMath;
-
-import outercore.parameter.KeyRealParameter;
 
 public class MorphologyLikelihoodUtils {
 
@@ -44,7 +34,7 @@ public class MorphologyLikelihoodUtils {
        nodeMath.setTraitsVecForTip(traitValuesArr, nodeIdx);
 
         // node expectation at the tips is equal to its trait values
-        //nodeMath.setExpectationForTip(nodeIdx);
+        nodeMath.setExpectationForTip(nodeIdx);
 
          // set the L matrix
         // L_tips = C_i)
@@ -85,7 +75,7 @@ public class MorphologyLikelihoodUtils {
         nodeMath.setTraitsVecForTip(traitValuesArr, nodeIdx);
 
         // node expectation at the tips is equal to its trait values
-        //nodeMath.setExpectationForTip(nodeIdx);
+        nodeMath.setExpectationForTip(nodeIdx);
 
         // set the L matrix
         // L_tips = C_i

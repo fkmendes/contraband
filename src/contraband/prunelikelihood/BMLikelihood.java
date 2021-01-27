@@ -17,12 +17,19 @@ public class BMLikelihood extends MorphologyLikelihood {
 
         nTraits = traitInput.get().getTotalTraitNr();
         transformData = traitInput.get().getTransformDataFlag();
+        nodeMathInput.get().updateSigmaMatrix();
+        nodeMathInput.get().operateOnTraitRateMatrix();
+        nodeMathInput.get().operateOnInvTraitRateMatrix();
     }
 
     @Override
     protected void updateParameters() {
         // update BM model parameters
         boolean updateSigmaMatrix = nodeMathInput.get().updateSigmaMatrix();
+        if(updateSigmaMatrix) {
+            nodeMathInput.get().operateOnTraitRateMatrix();
+            nodeMathInput.get().operateOnInvTraitRateMatrix();
+        }
 
         // update trait values (liabilities)
         traitInput.get().updateTraitValuesArr(updateSigmaMatrix);
@@ -30,6 +37,7 @@ public class BMLikelihood extends MorphologyLikelihood {
 
     @Override
     public double calculateLogP (){
+        updateParameters();
 
         super.populateLogP();
 

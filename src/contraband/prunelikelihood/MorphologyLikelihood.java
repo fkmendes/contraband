@@ -97,7 +97,7 @@ public abstract class MorphologyLikelihood extends Distribution {
             int childIdx = child.getNr();
 
             double branchLength = child.getLength() * pcmc.getRateForBranch(child);
-            //nodeMath.setVarianceForTip(childIdx, branchLength);
+            nodeMath.setVarianceForTip(childIdx, branchLength);
 
             // (1) child is a normal tip
             if (child.isLeaf() && branchLength != 0.0) {
@@ -176,10 +176,10 @@ public abstract class MorphologyLikelihood extends Distribution {
         }
 
         // estimate the node variance
-        //nodeMath.setVarianceForParent(thisNodeIdx, node.getLength() * pcmc.getRateForBranch(node), node.getChild(0).getNr(), node.getChild(1).getNr());
+        nodeMath.setVarianceForParent(thisNodeIdx, node.getLength() * pcmc.getRateForBranch(node), node.getChild(0).getNr(), node.getChild(1).getNr());
 
         // estimate the node expectations
-        //nodeMath.setExpectationForParent(thisNodeIdx, node.getChild(0).getNr(), node.getChild(1).getNr());
+        nodeMath.setExpectationForParent(thisNodeIdx, node.getChild(0).getNr(), node.getChild(1).getNr());
 
         // set lMat, mVec and r for this node
         nodeMath.setLForNode(thisNodeIdx, thisNodeL);

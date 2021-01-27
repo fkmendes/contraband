@@ -94,8 +94,8 @@ public class SigmaMatrix extends CalculationNode {
 
             if (rhoInput.get().getDimension() != (nTraits * (nTraits - 1) / 2)) {
                 rhoInput.get().setDimension((nTraits * (nTraits - 1) / 2));
-                rhoValues = rhoInput.get().getDoubleValues();
             }
+            rhoValues = rhoInput.get().getDoubleValues();
         }
 
         if(coEstimate) {

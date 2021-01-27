@@ -19,7 +19,7 @@ public class MorphologicalData extends CalculationNode{
     final public Input<UnorderedDiscreteTraits> unorderedDiscreteTraitsInput = new Input<>("unorderedDiscreteTraits", "Object for unordered discrete traits.");
     final public Input<Tree> treeInput = new Input<>("tree", "Phylogenetic tree.");
     final public Input<Boolean> transformInput = new Input<>("transform", "TRUE, if data needs to be transformed to be independent", false);
-    final public Input<NodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.", Input.Validate.REQUIRED);
+    final public Input<NodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.");
 
     private Tree  tree;
     private int totalTraitNr;
@@ -59,26 +59,26 @@ public class MorphologicalData extends CalculationNode{
         int leafNodeCount = tree.getLeafNodeCount();
 
         // collect trait information
-        totalTraitNr = 0;
+
         speciesNr = 0;
        if (traitsValuesInput.get() != null) {
            KeyRealParameter traitsValues = traitsValuesInput.get();
-           totalTraitNr += traitsValues.getMinorDimension1();
+           contTraitNr = traitsValues.getMinorDimension1();
            speciesNr = traitsValues.getMinorDimension2();
        }
        if(binaryDiscreteTraitsInput.get() != null) {
-           totalTraitNr += binaryDiscreteTraitsInput.get().getLiabilityNr();
+           binaryTraitNr = binaryDiscreteTraitsInput.get().getLiabilityNr();
            speciesNr = binaryDiscreteTraitsInput.get().getSpeciesNr();
        }
        if(orderedDiscreteTraitsInput.get() != null) {
-           totalTraitNr += orderedDiscreteTraitsInput.get().getLiabilityNr();
+           orderedTraitNr = orderedDiscreteTraitsInput.get().getLiabilityNr();
            speciesNr = orderedDiscreteTraitsInput.get().getSpeciesNr();
        }
        if(unorderedDiscreteTraitsInput.get() != null){
-           totalTraitNr += unorderedDiscreteTraitsInput.get().getNrOfLiabilities();
+           unorderedLiabilityNr = unorderedDiscreteTraitsInput.get().getNrOfLiabilities();
            speciesNr = unorderedDiscreteTraitsInput.get().getSpeciesNr();
        }
-
+        totalTraitNr = binaryTraitNr + orderedTraitNr + unorderedLiabilityNr + contTraitNr;
        if(speciesNr != leafNodeCount) {
            throw new RuntimeException("MorphologicalData::Species number in the data set does not match the leaf node number in tree.");
        }
@@ -87,7 +87,7 @@ public class MorphologicalData extends CalculationNode{
 
         initArrays();
         initLUDecomposition();
-
+        populateTraitData();
     }
 
     // getters
@@ -97,9 +97,9 @@ public class MorphologicalData extends CalculationNode{
 
     public double[] getMorphologicalData () {
         if(transformedData) {
-            return traitValuesArr;
-        } else {
             return transformedTraitValues;
+        } else {
+            return traitValuesArr;
         }
     }
 

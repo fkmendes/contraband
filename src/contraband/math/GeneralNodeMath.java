@@ -95,6 +95,7 @@ public class GeneralNodeMath extends CalculationNode {
 
         // get trait rate matrix
         rateMatrix = rateMatrixInput.get();
+        rateMatrix.populateSigmaMatrix();
 
         // get intraspecific variance-covariance matrix
         if(popMatrixInput.get() == null){
@@ -276,6 +277,8 @@ public class GeneralNodeMath extends CalculationNode {
 
     public double getTraitRateMatrixInverseDeterminant () { return detInvTraitRateMat; }
 
+    public double getVarianceForNode (int nodeIdx) { return nodeVariance[nodeIdx]; }
+
     // setters
     public void setLikelihoodForSampledAncestors(double value) {
         likForSA = value;
@@ -303,6 +306,29 @@ public class GeneralNodeMath extends CalculationNode {
 
     public void setTraitsVecForTip (double[] traitValues, int tipIdx) {
         MatrixUtilsContra.getMatrixRow(traitValues, tipIdx, nTraits, traitsVec);
+    }
+
+    public void setExpectationForTip (int nodeIdx) {
+        MatrixUtilsContra.setMatrixRow(nodeExpectation, traitsVec, nodeIdx, nTraits);
+    }
+
+    public void setVarianceForTip (int nodeIdx, double value) { nodeVariance[nodeIdx] = value; }
+
+    public void setVarianceForParent (int parentIdx, double branchLength, int child1Idx, int child2Idx) {
+        double vc1 = nodeVariance[child1Idx];
+        double vc2 = nodeVariance[child2Idx];
+        nodeVariance[parentIdx] = branchLength + ((vc1 * vc2)/(vc1 + vc2));
+    }
+
+    public void setExpectationForParent (int parentIdx, int child1Idx, int child2Idx) {
+        double vc1 = nodeVariance[child1Idx];
+        double vc2 = nodeVariance[child2Idx];
+        MatrixUtilsContra.getMatrixRow(nodeExpectation, child1Idx, nTraits, expect1);
+        MatrixUtilsContra.getMatrixRow(nodeExpectation, child2Idx, nTraits, expect2);
+        MatrixUtilsContra.vectorMapMultiply(expect1, vc2/(vc1+vc2), expect1);
+        MatrixUtilsContra.vectorMapMultiply(expect2, vc1/(vc1+vc2), expect2);
+        MatrixUtilsContra.vectorAdd(expect1, expect2, expectp);
+        MatrixUtilsContra.setMatrixRow(nodeExpectation, expectp, parentIdx, nTraits);
     }
 
 
