@@ -12,7 +12,7 @@ import contraband.utils.MorphologyLikelihoodUtils;
 import java.util.List;
 import java.util.Random;
 
-public class MorphologyLikelihood extends Distribution {
+public abstract class MorphologyLikelihood extends Distribution {
     final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Input.Validate.REQUIRED);
     final public Input<BranchRateModel.Base> branchRateModelInput = new Input<>("branchRateModel", "the rate or optimum on each branch", Input.Validate.REQUIRED);
     final public Input<GeneralNodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.", Input.Validate.REQUIRED);
@@ -20,11 +20,9 @@ public class MorphologyLikelihood extends Distribution {
 
     private Tree tree;
     private BranchRateModel.Base branchRateModel;
-    private double[] traitValuesArr;
     private GeneralNodeMath nodeMath;
+    private MorphologicalData traits;
 
-    private int nTraits;
-    private boolean transformData;
 
     @Override
     public void initAndValidate() {
@@ -36,36 +34,37 @@ public class MorphologyLikelihood extends Distribution {
         // get clock model
         branchRateModel = branchRateModelInput.get();
 
+        // get node math
         nodeMath = nodeMathInput.get();
 
-        transformData = traitInput.get().getTransformDataFlag();
-
-        int nSpecies = traitInput.get().getSpeciesNr();
-        nTraits = traitInput.get().getTotalTraitNr();
-        traitValuesArr = new double[nSpecies * nTraits];
-        traitValuesArr = traitInput.get().getMorphologicalData();
+        // get morphological data
+        traits = traitInput.get();
     }
 
+    abstract protected void updateParameters();
 
-    @Override
-    public double calculateLogP() {
+    public double getLogP() { return logP; }
+
+    protected void populateLogP() {
         // reject the tree with a sampled ancestor being the child of root
         if(tree.getRoot().getChild(0).isDirectAncestor() || tree.getRoot().getChild(1).isDirectAncestor()) {
-            return Double.NEGATIVE_INFINITY;
+            logP = Double.NEGATIVE_INFINITY;
+            return;
         }
 
         // initiate the likelihood for sampled ancestors
         nodeMath.setLikelihoodForSampledAncestors(0.0);
 
         // prune the tree by starting from the root
-        prune(tree.getRoot(), nTraits, traitValuesArr, branchRateModel, nodeMath);
+        prune(tree.getRoot(), traits.getTotalTraitNr(), traits.getMorphologicalData(), branchRateModel, nodeMath);
 
 
         // if at some internal node, (aMat + lMat) is singular or -2 * (aMat + lMat) is singular,
         // when calculating (aMat + lMat).inverse and det[-2 * (aMat + lMat)],
         // reject the state
         if (nodeMath.getSingularMatrixFlag()) {
-            return Double.NEGATIVE_INFINITY;
+            logP = Double.NEGATIVE_INFINITY;
+            return;
         }
 
         int rootIdx = tree.getRoot().getNr();
@@ -78,9 +77,7 @@ public class MorphologyLikelihood extends Distribution {
         double r0 = nodeMath.getRForNode(rootIdx);
 
         // calculate likelihood in log space
-        logP = calculateLikelihood(nodeMath, l0, m0, r0, nTraits, rootIdx);
-
-        return logP;
+        logP = calculateLikelihood(nodeMath, l0, m0, r0, traits.getTotalTraitNr(), rootIdx);
     }
 
     public void prune(Node node, int nTraits, double[] traitValuesArr,
@@ -190,70 +187,15 @@ public class MorphologyLikelihood extends Distribution {
         nodeMath.setRForNode(thisNodeIdx, thisNodeR);
     }
 
-    private void populateAbCdEfForNode (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx) {
-            MorphologyLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, nodeIdx);
-    }
+    protected abstract void populateAbCdEfForNode (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx);
 
-    private void populateLmrForTips(GeneralNodeMath nodeMath, double[] traitValuesArr, int nTraits, int nodeIdx) {
-        if(transformData) {
-            MorphologyLikelihoodUtils.populateLmrForTipTransform(nodeMath, traitValuesArr, nTraits, nodeIdx);
-        } else {
-            MorphologyLikelihoodUtils.populateLmrForTip(nodeMath, traitValuesArr, nTraits, nodeIdx);
-        }
-    }
+    protected abstract void populateLmrForTips(GeneralNodeMath nodeMath, double[] traitValuesArr, int nTraits, int nodeIdx);
 
+    protected abstract void populateLmrForInternalNodes(GeneralNodeMath nodeMath, int nTraits, int nodeIdx);
 
-    private void populateLmrForInternalNodes(GeneralNodeMath nodeMath, int nTraits, int nodeIdx) {
-        if(transformData) {
-            MorphologyLikelihoodUtils.populateLmrForInternalNodeTransform(nodeMath, nTraits, nodeIdx);
-        } else {
-            MorphologyLikelihoodUtils.populateLmrForInternalNode(nodeMath, nTraits, nodeIdx);
-        }
-    }
+    protected abstract double calculateLikelihood(GeneralNodeMath nodeMath, double l0, double[] m0, double r0, int nTraits, int rootIdx);
 
-    private double calculateLikelihood(GeneralNodeMath nodeMath, double l0, double[] m0, double r0, int nTraits, int rootIdx){
-        if(transformData){
-            return MatrixUtilsContra.vecTransScalarMultiply(nodeMath.getRootValuesArr(),
-                    l0, nTraits) +
-                    MatrixUtilsContra.vectorDotMultiply(nodeMath.getRootValuesArr(), m0) +
-                    r0 +
-                    nodeMath.getLikelihoodForSampledAncestors();
-        } else {
-            return l0 * MatrixUtilsContra.tVecDotMatrixDotVec(
-                    nodeMath.getRootValuesArr(),
-                    nodeMath.getTraitRateMatrixInverse(),
-                    nTraits) +
-                    MatrixUtilsContra.vectorDotMultiply(
-                            nodeMath.getRootValuesArr(),
-                            m0) +
-                    r0 + nodeMath.getLikelihoodForSampledAncestors();
-        }
-    }
-
-    private double calculateLikelihoodForSA (GeneralNodeMath nodeMath, int childIdx) {
-        if(transformData) {
-            return MatrixUtilsContra.vecTransScalarMultiply(
-                    nodeMath.getSampledAncestorTraitsVec(),
-                    nodeMath.getLForNode(childIdx),
-                    nTraits) +
-                    MatrixUtilsContra.vectorDotMultiply(
-                            nodeMath.getSampledAncestorTraitsVec(),
-                            nodeMath.getMVecForNode(childIdx)) +
-                    nodeMath.getRForNode(childIdx);
-        } else {
-            return nodeMath.getLForNode(childIdx) *
-                    MatrixUtilsContra.tVecDotMatrixDotVec(
-                            nodeMath.getSampledAncestorTraitsVec(),
-                            nodeMath.getTraitRateMatrixInverse(),
-                            nTraits) +
-                    MatrixUtilsContra.vectorDotMultiply(
-                            nodeMath.getSampledAncestorTraitsVec(),
-                            nodeMath.getMVecForNode(childIdx)) +
-                    nodeMath.getRForNode(childIdx);
-        }
-    }
-
-
+    protected abstract double calculateLikelihoodForSA (GeneralNodeMath nodeMath, int childIdx);
 
 
     @Override

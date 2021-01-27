@@ -104,6 +104,11 @@ public class GeneralNodeMath extends CalculationNode {
             // account for intraspecific variance
             popMatrix = popMatrixInput.get();
             matrixParams = !rateMatrix.getOneRateOnly() || !popMatrix.getOneRateOnly();
+            if(!shareRho || matrixParams){
+                if(traitInput.get().getTransformDataFlag()) {
+                    throw new RuntimeException("GeneralNodeMath:: Data cannot be transformed!.");
+                }
+            }
         }
 
         // get root values
@@ -344,6 +349,19 @@ public class GeneralNodeMath extends CalculationNode {
         } else {
             detInvTraitRateMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
         }
+    }
+
+    public boolean updateSigmaMatrix(){
+        boolean update = false;
+        if(rateMatrixInput.isDirty()){
+            rateMatrix.populateSigmaMatrix();
+            update = true;
+        }
+        if(popMatrixInput.isDirty()){
+            popMatrix.populateSigmaMatrix();
+            update = true;
+        }
+        return update;
     }
 
     @Override

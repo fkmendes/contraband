@@ -177,7 +177,7 @@ public class MorphologicalData extends CalculationNode{
         }
     }
 
-    private void updateTraitValuesArr(boolean updateRateMatrix){
+    public void updateTraitValuesArr(boolean updateRateMatrix){
         boolean update = false;
         // (1) update liabilities for binary discrete trait values
         if(binaryDiscreteTraitsInput.get()!= null && binaryDiscreteTraitsInput.get().liabilitiesInput.isDirty()){
