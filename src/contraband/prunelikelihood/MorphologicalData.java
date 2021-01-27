@@ -105,6 +105,8 @@ public class MorphologicalData extends CalculationNode{
 
     public boolean getSingularTransformMatrix () { return singularMatrix; }
 
+    public boolean getTransformDataFlag () { return transformedData; }
+
 
     // initiate
     private void initArrays() {

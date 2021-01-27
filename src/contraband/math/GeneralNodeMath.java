@@ -7,6 +7,7 @@ import beast.core.util.Log;
 import beast.evolution.tree.Tree;
 import contraband.prunelikelihood.MorphologicalData;
 import contraband.prunelikelihood.SigmaMatrix;
+import org.apache.commons.math3.util.FastMath;
 
 public class GeneralNodeMath extends CalculationNode {
     final public Input<MorphologicalData> traitInput = new Input<>("trait","Morphological data set.");
@@ -71,6 +72,16 @@ public class GeneralNodeMath extends CalculationNode {
     private double likForSA;
     private double[] traitVecForSA;
 
+    private double [] traitRateMatrix;
+    private double detTraitRateMat;
+    private double [] invTraitRateMatrix;
+    private double detInvTraitRateMat;
+
+    private double storedDetTraitRateMat;
+    private double [] storedInvTraitRateMatrix;
+    private double storedDetInvTraitRateMat;
+    private double [] storedTraitRateMatrix;
+
     @Override
     public void initAndValidate() {
         tree = treeInput.get();
@@ -116,6 +127,8 @@ public class GeneralNodeMath extends CalculationNode {
         initLmrArray();
         initUDecomposition();
         initForSampledAncestors();
+        initVarianceAndExpectation();
+        initTraitRateMatrix();
     }
 
     // initialise
@@ -186,9 +199,16 @@ public class GeneralNodeMath extends CalculationNode {
         expectp = new double [nTraits];
     }
 
-    public void initForSampledAncestors () {
+    private void initForSampledAncestors () {
         likForSA = 0.0;
         traitVecForSA = new double [nTraits];
+    }
+
+    private void initTraitRateMatrix () {
+        traitRateMatrix = new double[matDim];
+        invTraitRateMatrix = new double[matDim];
+        storedTraitRateMatrix = new double[matDim];
+        storedInvTraitRateMatrix = new double[matDim];
     }
 
     //getters
@@ -229,6 +249,58 @@ public class GeneralNodeMath extends CalculationNode {
         return mVec;
     }
 
+    public boolean getSingularMatrixFlag () { return singularMatrix; }
+
+    public double getTraitRateMatrixDeterminant () { return detTraitRateMat; }
+
+    public double[] getRootValuesArr () { return rootValuesVec; }
+
+    public double[] getTraitRateMatrixInverse () { return invTraitRateMatrix; }
+
+    public double getLikelihoodForSampledAncestors () { return likForSA; }
+
+    public double[] getSampledAncestorTraitsVec () { return traitVecForSA; }
+
+    public double[] getInitMVec () { return mVecInit; }
+
+    public double[] getTraitsVec () {return traitsVec; }
+
+    public double[] getTempVec () { return mVec; }
+
+    public double[] getTraitRateMatrix () { return traitRateMatrix; }
+
+    public double getTraitRateMatrixInverseDeterminant () { return detInvTraitRateMat; }
+
+    // setters
+    public void setLikelihoodForSampledAncestors(double value) {
+        likForSA = value;
+    }
+
+    public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
+
+    public void setCForNode (int nodeIdx, double value) { cArray[nodeIdx] = value; }
+
+    public void setEForNode (int nodeIdx, double value) { eArray[nodeIdx] = value; }
+
+    public void setfForNode (int nodeIdx, double value) { fArray[nodeIdx] = value; }
+
+    public void setLForNode (int nodeIdx, double value) { lArray[nodeIdx] = value; }
+
+    public void setRForNode (int nodeIdx, double value) { rArray[nodeIdx] = value; }
+
+    public void setMVecForNode (int nodeIdx, double[] value) {
+        MatrixUtilsContra.setMatrixRow(mVecArray, value, nodeIdx, nTraits);
+    }
+
+    public void setTraitsVecForSampledAncestor (double[] traitValues, int nodeIdx) {
+        MatrixUtilsContra.getMatrixRow(traitValues, nodeIdx, nTraits, traitVecForSA);
+    }
+
+    public void setTraitsVecForTip (double[] traitValues, int tipIdx) {
+        MatrixUtilsContra.getMatrixRow(traitValues, tipIdx, nTraits, traitsVec);
+    }
+
+
     //
     public void populateRootValuesVec(int rootIdx) {
         if(sampleRoot && rootValuesInput.isDirty()) {
@@ -239,8 +311,82 @@ public class GeneralNodeMath extends CalculationNode {
         }
     }
 
-    //
+    // invert trait rate matrix and get determinant
+    public void operateOnTraitRateMatrix() {
+        singularMatrix = false;
 
+        traitRateMatrix = rateMatrix.getSigmaMatrix();
+
+        // LUDecomposition
+        LUDecompositionForArray.ArrayLUDecomposition(traitRateMatrix, lu, pivot, evenSingular, nTraits);
+
+        // invert the traitRateMatrix
+        try {
+            LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evenSingular[1], nTraits, invTraitRateMatrix);
+        } catch (RuntimeException e) {
+            singularMatrix = true;
+        }
+        // get the determinant of traitRateMatrix
+        double det = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
+        if (det == 0.0) {
+            singularMatrix = true;
+        }
+        detTraitRateMat = FastMath.log(det);
+    }
+
+    public void operateOnInvTraitRateMatrix() {
+        // LUDecomposition
+        LUDecompositionForArray.ArrayLUDecomposition(invTraitRateMatrix, lu, pivot, evenSingular, nTraits);
+
+        // get the determinant of invTraitRateMatrix
+        if(traitInput.get().getTransformDataFlag()) {
+            detInvTraitRateMat = FastMath.log(LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular));
+        } else {
+            detInvTraitRateMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
+        }
+    }
+
+    @Override
+    protected boolean requiresRecalculation() {
+        return true;
+    }
+
+    @Override
+    public void store() {
+        super.store();
+
+        storedDetTraitRateMat = detTraitRateMat;
+        storedDetInvTraitRateMat = detInvTraitRateMat;
+
+        System.arraycopy(rootValuesVec, 0, storedRootValuesVec, 0, nTraits);
+        System.arraycopy(invTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, matDim);
+        System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, matDim);
+    }
+
+    @Override
+    public void restore() {
+        super.restore();
+
+        double tempDetTraitRateMat = detTraitRateMat;
+        detTraitRateMat = storedDetTraitRateMat;
+        storedDetTraitRateMat = tempDetTraitRateMat;
+
+        double tempDetInvTraitRateMat = detInvTraitRateMat;
+        detInvTraitRateMat = storedDetInvTraitRateMat;
+        storedDetInvTraitRateMat = tempDetInvTraitRateMat;
+
+        double[] tempTraitRateMatrix = traitRateMatrix;
+        traitRateMatrix = storedTraitRateMatrix;
+        storedTraitRateMatrix = tempTraitRateMatrix;
+
+        double[] tempInvTraitRateMatrix = invTraitRateMatrix;
+        invTraitRateMatrix = storedInvTraitRateMatrix;
+        storedInvTraitRateMatrix = tempInvTraitRateMatrix;
+
+        double[] tempRootValuesVec = rootValuesVec;
+        rootValuesVec= storedRootValuesVec;
+        storedRootValuesVec = tempRootValuesVec;
+    }
 
 
 
