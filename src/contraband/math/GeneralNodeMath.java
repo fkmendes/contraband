@@ -91,6 +91,8 @@ public class GeneralNodeMath extends CalculationNode {
     private double [] invVarianceMatrix;
     private double detInvVarianceMat;
     private double[] rateScaler;
+    private double[] aPlusLInverse;
+    private double logNegativeTwoAplusL;
 
     private double[] popVarianceMatrix;
 
@@ -246,8 +248,9 @@ public class GeneralNodeMath extends CalculationNode {
     private void initMatrixParams(){
         varianceMatrix = new double [matDim];
         invVarianceMatrix = new double [matDim];
-        rateScaler = new double[nTraits * nTraits];
+        rateScaler = new double[matDim];
         realMatrix = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
+        aPlusLInverse = new double [matDim];
     }
 
     //getters
@@ -275,8 +278,12 @@ public class GeneralNodeMath extends CalculationNode {
     public double getfForNode (int nodeIdx) { return fArray[nodeIdx]; }
 
     public double[] getLForNode (int nodeIdx) {
-
-        return new double[]{lArray[nodeIdx]};
+        if(matrixParams) {
+            MatrixUtilsContra.getMatrixRow(lArray, nodeIdx, matDim, lMat);
+            return lMat;
+        } else {
+            return new double[]{lArray[nodeIdx]};
+        }
     }
 
     public double[] getLMatForNode (int nodeIdx) {
@@ -329,6 +336,10 @@ public class GeneralNodeMath extends CalculationNode {
 
     public double[] getInvVarianceMatrix() {return invVarianceMatrix; }
 
+    public double[] getAPlusLInverse () { return aPlusLInverse; }
+
+    public double getLogDetNegativeTwoAplusL() { return logNegativeTwoAplusL; }
+
     // setters
     public void setLikelihoodForSampledAncestors(double value) {
         likForSA = value;
@@ -336,13 +347,31 @@ public class GeneralNodeMath extends CalculationNode {
 
     public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
 
+    public void setAMatForNode (int nodeIdx, double[] value) {
+        System.arraycopy(value, 0, aArray, nodeIdx * matDim, value.length);
+    }
+
     public void setCForNode (int nodeIdx, double value) { cArray[nodeIdx] = value; }
+
+    public void setCMatForNode (int nodeIdx, double[] value) {
+        System.arraycopy(value, 0, cArray, nodeIdx * matDim, value.length);
+    }
 
     public void setEForNode (int nodeIdx, double value) { eArray[nodeIdx] = value; }
 
+    public void setEMatForNode (int nodeIdx, double[] value) {
+        System.arraycopy(value, 0, eArray, nodeIdx * matDim, value.length);
+    }
+
     public void setfForNode (int nodeIdx, double value) { fArray[nodeIdx] = value; }
 
-    public void setLForNode (int nodeIdx, double[] value) { lArray[nodeIdx] = value[0]; }
+    public void setLForNode (int nodeIdx, double[] value) {
+        if(matrixParams) {
+            System.arraycopy(value, 0, lArray, nodeIdx * matDim, matDim);
+        } else {
+            lArray[nodeIdx] = value[0];
+        }
+    }
 
     public void setRForNode (int nodeIdx, double value) { rArray[nodeIdx] = value; }
 
@@ -467,9 +496,13 @@ public class GeneralNodeMath extends CalculationNode {
         }
     }
 
-    public void populateVarianceMatrix(double branchLength){
+    public void populateVarianceMatrixForTips(double branchLength){
         MatrixUtilsContra.vectorMapMultiply(traitRateMatrix, branchLength, rateScaler);
         MatrixUtilsContra.vectorAdd(rateScaler, popVarianceMatrix, varianceMatrix);
+    }
+
+    public void populateVarianceMatrixForIntNodes(double branchLength){
+        MatrixUtilsContra.vectorMapMultiply(traitRateMatrix, branchLength, varianceMatrix);
     }
 
     public void operateOnVarianceMatrix() {
@@ -494,6 +527,31 @@ public class GeneralNodeMath extends CalculationNode {
         LUDecompositionForArray.ArrayLUDecomposition(invVarianceMatrix, lu, pivot, evenSingular, nTraits);
         detInvVarianceMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
     }
+
+    public void operateOnAPlusLMatrixForNode (int nodeIdx){
+        double[] A = getAMatForNode(nodeIdx);
+        double[] L = getLForNode(nodeIdx);
+
+        // (A + L)
+        double[] aPlusL = new double[nTraits * nTraits];
+        MatrixUtilsContra.vectorAdd(getAMatForNode(nodeIdx), getLForNode(nodeIdx), aPlusL);
+
+        // invert (A + L)
+        LUDecompositionForArray.ArrayLUDecomposition(aPlusL, lu, pivot, evenSingular, nTraits);
+        try {
+            LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evenSingular[1], nTraits, aPlusLInverse);
+        } catch (RuntimeException e) {
+            singularMatrix = true;
+        }
+
+        // get the determinant of (A + L)
+        double det = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
+
+        // get the determinant of -2 * (A + L) = (-2)^nTraits * det(A + L)
+        double detVNode = FastMath.pow(-2, nTraits) * det;
+        logNegativeTwoAplusL = FastMath.log(detVNode);
+    }
+
 
     @Override
     protected boolean requiresRecalculation() {

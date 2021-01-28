@@ -72,7 +72,7 @@ public abstract class MorphologyLikelihood extends Distribution {
         nodeMath.populateRootValuesVec(rootIdx);
 
         // get L, m and r at the root
-        double l0 = nodeMath.getLForNode(rootIdx)[0];
+        double[] l0 = nodeMath.getLForNode(rootIdx);
         double[] m0 = nodeMath.getMVecForNode(rootIdx);
         double r0 = nodeMath.getRForNode(rootIdx);
 
@@ -198,7 +198,7 @@ public abstract class MorphologyLikelihood extends Distribution {
 
     protected abstract void populateLmrForInternalNodes(GeneralNodeMath nodeMath, int nTraits, int nodeIdx);
 
-    protected abstract double calculateLikelihood(GeneralNodeMath nodeMath, double l0, double[] m0, double r0, int nTraits, int rootIdx);
+    protected abstract double calculateLikelihood(GeneralNodeMath nodeMath, double[] l0, double[] m0, double r0, int nTraits, int rootIdx);
 
     protected abstract double calculateLikelihoodForSA (GeneralNodeMath nodeMath, int childIdx);
 

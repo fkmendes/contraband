@@ -48,7 +48,7 @@ public class BMLikelihood extends MorphologyLikelihood {
     @Override
     protected void populateAbCdEfForTips (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx) {
         if(nodeMath.getMatrixParamsFlag()){
-            MorphologyLikelihoodUtils.populateACEfMatrix(nodeMath, branchLength, nTraits, nodeIdx);
+            MorphologyLikelihoodUtils.populateACEfMatrixForTips(nodeMath, branchLength, nTraits, nodeIdx);
         } else {
             if(nodeMath.getPopVarianceFlag()) {
                 double variance = branchLength + nodeMath.getPopVarianceMatrix()[0];
@@ -61,7 +61,11 @@ public class BMLikelihood extends MorphologyLikelihood {
 
     @Override
     protected void populateAbCdEfForInternalNodes (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx) {
-        MorphologyLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, nodeIdx);
+        if(nodeMath.getMatrixParamsFlag()){
+            MorphologyLikelihoodUtils.populateACEfMatrixForIntNodes(nodeMath, branchLength, nTraits, nodeIdx);
+        } else {
+            MorphologyLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, nodeIdx);
+        }
     }
 
     @Override
@@ -69,7 +73,11 @@ public class BMLikelihood extends MorphologyLikelihood {
         if(transformData) {
             MorphologyLikelihoodUtils.populateLmrForTipTransform(nodeMath, traitValuesArr, nTraits, nodeIdx);
         } else {
-            MorphologyLikelihoodUtils.populateLmrForTip(nodeMath, traitValuesArr, nTraits, nodeIdx);
+            if(nodeMath.getMatrixParamsFlag()) {
+                MorphologyLikelihoodUtils.populateLmrMatrixForTip(nodeMath, traitValuesArr, nTraits, nodeIdx);
+            } else {
+                MorphologyLikelihoodUtils.populateLmrForTip(nodeMath, traitValuesArr, nTraits, nodeIdx);
+            }
         }
     }
 
@@ -78,27 +86,38 @@ public class BMLikelihood extends MorphologyLikelihood {
         if(transformData) {
             MorphologyLikelihoodUtils.populateLmrForInternalNodeTransform(nodeMath, nTraits, nodeIdx);
         } else {
-            MorphologyLikelihoodUtils.populateLmrForInternalNode(nodeMath, nTraits, nodeIdx);
+            if(nodeMath.getMatrixParamsFlag()) {
+                MorphologyLikelihoodUtils.populateLmrMatrixForIntNode(nodeMath, nTraits, nodeIdx);
+            } else {
+                MorphologyLikelihoodUtils.populateLmrForIntNode(nodeMath, nTraits, nodeIdx);
+            }
         }
     }
 
     @Override
-    protected double calculateLikelihood(GeneralNodeMath nodeMath, double l0, double[] m0, double r0, int nTraits, int rootIdx){
+    protected double calculateLikelihood(GeneralNodeMath nodeMath, double[] l0, double[] m0, double r0, int nTraits, int rootIdx){
         if(transformData){
             return MatrixUtilsContra.vecTransScalarMultiply(nodeMath.getRootValuesArr(),
-                    l0, nTraits) +
+                    l0[0], nTraits) +
                     MatrixUtilsContra.vectorDotMultiply(nodeMath.getRootValuesArr(), m0) +
                     r0 +
                     nodeMath.getLikelihoodForSampledAncestors();
         } else {
-            return l0 * MatrixUtilsContra.tVecDotMatrixDotVec(
-                    nodeMath.getRootValuesArr(),
-                    nodeMath.getTraitRateMatrixInverse(),
-                    nTraits) +
-                    MatrixUtilsContra.vectorDotMultiply(
-                            nodeMath.getRootValuesArr(),
-                            m0) +
-                    r0 + nodeMath.getLikelihoodForSampledAncestors();
+            if(nodeMath.getMatrixParamsFlag()){
+                return MatrixUtilsContra.tVecDotMatrixDotVec(nodeMath.getRootValuesArr(), l0, nTraits)
+                       + MatrixUtilsContra.vectorDotMultiply(
+                       nodeMath.getRootValuesArr(), m0) +
+                       r0 + nodeMath.getLikelihoodForSampledAncestors();
+            } else {
+                return l0[0] * MatrixUtilsContra.tVecDotMatrixDotVec(
+                        nodeMath.getRootValuesArr(),
+                        nodeMath.getTraitRateMatrixInverse(),
+                        nTraits) +
+                        MatrixUtilsContra.vectorDotMultiply(
+                                nodeMath.getRootValuesArr(),
+                                m0) +
+                        r0 + nodeMath.getLikelihoodForSampledAncestors();
+            }
         }
     }
 
