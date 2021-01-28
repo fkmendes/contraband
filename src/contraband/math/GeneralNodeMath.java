@@ -127,8 +127,6 @@ public class GeneralNodeMath extends CalculationNode {
             // account for intraspecific variance
             popVariance = true;
             popMatrix = popMatrixInput.get();
-            popMatrix.populateSigmaMatrix();
-            popVarianceMatrix = popMatrix.getSigmaMatrix();
             matrixParams = !rateMatrix.getOneRateOnly() || !popMatrix.getOneRateOnly();
             if(!shareRho || matrixParams){
                 if(traitInput.get().getTransformDataFlag()) {
@@ -139,8 +137,12 @@ public class GeneralNodeMath extends CalculationNode {
                 // if using matrix parameterization, A, C, E and L are nTraits * nTraits matrix
                 paramDim = nTraits * nTraits;
                 initMatrixParams();
+                popMatrix.populateSigmaMatrix();
+            } else {
+                popMatrix.populateSigmaValue();
             }
-
+            popVarianceMatrix = new double[paramDim];
+            popVarianceMatrix = popMatrix.getSigmaMatrix();
         }
 
         // get root values
@@ -315,6 +317,8 @@ public class GeneralNodeMath extends CalculationNode {
 
     public double getLogDetNegativeTwoAplusL() { return logNegativeTwoAplusL; }
 
+    public double getTraitRate() { return rateMatrix.getSigmaMatrix()[0]; }
+
     // setters
     public void setLikelihoodForSampledAncestors(double value) {
         likForSA = value;
@@ -395,7 +399,15 @@ public class GeneralNodeMath extends CalculationNode {
     public void operateOnTraitRateMatrix() {
         singularMatrix = false;
 
-        traitRateMatrix = rateMatrix.getSigmaMatrix();
+        if(popVariance && !matrixParams){
+            // taking intraspecific variance into account
+            // all traits share (1) the same evolutionary rate (2) the same trait correlations (3) the same intraspecific variance
+            rateMatrix.populateRhoMatrix();
+            rateMatrix.populateSigmaValue();
+            traitRateMatrix = rateMatrix.getRhoMatrix();
+        } else {
+            traitRateMatrix = rateMatrix.getSigmaMatrix();
+        }
 
         // LUDecomposition
         LUDecompositionForArray.ArrayLUDecomposition(traitRateMatrix, lu, pivot, evenSingular, nTraits);

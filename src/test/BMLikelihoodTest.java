@@ -123,5 +123,42 @@ public class BMLikelihoodTest {
         Assert.assertEquals(-18.2556630238236, logP, EPSILON);
     }
 
+    @Test
+    public void testBMLikelihoodStrictVariance() {
+        treeStr = "((t1:0.506469612,t2:0.506469612):0.186771392,(t3:0.3878183895,t4:0.3878183895):0.3054226144);";
+        spNames = "t1 t2 t3 t4";
+        tree = new TreeParser(treeStr, false, false, true, 0);
+
+        // trait values
+        nTraits = 3;
+        contTraitData =  Arrays.asList(
+                -0.289918575728678, 1.34532611974715, -2.96529960582725,
+                -0.712676267192549, 4.21710554156492, -1.28217844494824,
+                0.477776523772291, 3.42975846405347, -2.20213758750652,
+                2.33571507387484, 4.18494623610507, -3.99013430052531
+        );
+        contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
+        morphData.initByName("traits", contTrait, "tree", tree);
+
+        // branch rate model
+        lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
+
+        // BM model parameters
+        rootValues = new RealParameter(new Double[]{0.0, 3.0, -3.0});
+        sigmasq = new RealParameter(new Double[]{2.5});
+        sigmaesq = new RealParameter(new Double[]{0.4});
+        correlation = new RealParameter(new Double[]{0.5, -0.2, 0.1});
+        sigmaMatrix.initByName("sigmasq", sigmasq, "correlation", correlation, "trait", morphData, "oneRateOnly", true);
+        sigmaEMatrix.initByName("sigmasq", sigmaesq, "correlation", correlation, "trait", morphData, "oneRateOnly", true);
+        nodeMath.initByName("trait", morphData, "rateMatrix", sigmaMatrix, "popMatrix", sigmaEMatrix, "tree", tree, "shareCorrelation", true, "rootValues", rootValues);
+
+        // prune likelihood
+        BMLikelihood pcm = new BMLikelihood();
+        pcm.initByName("nodeMath", nodeMath, "tree", tree, "trait", morphData, "branchRateModel", lsc);
+        double logP = pcm.calculateLogP();
+        Assert.assertEquals(-18.6104281258402, logP, EPSILON);
+
+    }
+
 
 }

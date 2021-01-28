@@ -51,7 +51,7 @@ public class BMLikelihood extends MorphologyLikelihood {
             MorphologyLikelihoodUtils.populateACEfMatrixForTips(nodeMath, branchLength, nTraits, nodeIdx);
         } else {
             if(nodeMath.getPopVarianceFlag()) {
-                double variance = branchLength + nodeMath.getPopVarianceMatrix()[0];
+                double variance = branchLength * nodeMath.getTraitRate() + nodeMath.getPopVarianceMatrix()[0];
                 MorphologyLikelihoodUtils.populateACEf(nodeMath, variance, nTraits, nodeIdx);
             } else {
                 MorphologyLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, nodeIdx);
@@ -64,7 +64,12 @@ public class BMLikelihood extends MorphologyLikelihood {
         if(nodeMath.getMatrixParamsFlag()){
             MorphologyLikelihoodUtils.populateACEfMatrixForIntNodes(nodeMath, branchLength, nTraits, nodeIdx);
         } else {
-            MorphologyLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, nodeIdx);
+            if(nodeMath.getPopVarianceFlag()) {
+                double variance = branchLength * nodeMath.getTraitRate();
+                MorphologyLikelihoodUtils.populateACEf(nodeMath, variance, nTraits, nodeIdx);
+            } else {
+                MorphologyLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, nodeIdx);
+            }
         }
     }
 

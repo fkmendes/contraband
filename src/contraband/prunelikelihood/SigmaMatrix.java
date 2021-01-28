@@ -39,6 +39,7 @@ public class SigmaMatrix extends CalculationNode {
     private int matDim;
 
     private double[] sigmaMatrix;
+    private double[] rhoMatrix;
 
     private double [] upperMatrix;
     private double [] transUpperMatrix;
@@ -59,6 +60,10 @@ public class SigmaMatrix extends CalculationNode {
 
         nTraits = traitInput.get().getTotalTraitNr();
         sigmaMatrix = new double[nTraits * nTraits];
+        rhoMatrix = new double[nTraits * nTraits];
+        for (int i = 0; i < nTraits; i++){
+            rhoMatrix[i * nTraits + i] = 1.0;
+        }
 
         // get elements on the diagonal
         if(oneRateOnly) {
@@ -124,9 +129,27 @@ public class SigmaMatrix extends CalculationNode {
     // getters
     public double [] getSigmaMatrix () { return sigmaMatrix; }
 
+    public double [] getRhoMatrix () { return rhoMatrix; }
+
     public boolean getOneRateOnly () { return oneRateOnly; }
 
     // main
+    public void populateSigmaValue () {
+        sigmaMatrix[0] = sigmaValue;
+    }
+
+    public void populateRhoMatrix () {
+        int m = 0;
+        for (int i = 0; i < nTraits; i++) {
+            for (int j = (i + 1); j < nTraits; j++){
+                double cor = rhoValues[m];
+                rhoMatrix[i * nTraits + j] = cor;
+                rhoMatrix[j * nTraits + i] = cor;
+                m++;
+            }
+        }
+    }
+
     public void populateSigmaMatrix() {
         if(oneRateOnly) {
             if(coEstimate){
