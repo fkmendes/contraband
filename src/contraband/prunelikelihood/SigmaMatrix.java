@@ -4,7 +4,11 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import contraband.math.MatrixUtilsContra;
+import contraband.utils.MorphologyLikelihoodUtils;
 import contraband.utils.NodeMathUtils;
+import contraband.utils.PruneLikelihoodUtils;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.util.FastMath;
 import outercore.parameter.KeyRealParameter;
 
@@ -22,6 +26,7 @@ public class SigmaMatrix extends CalculationNode {
     final public Input<RealParameter> inverseRhoInput = new Input<>("inverseMatrix", "Inverse of trait correlation matrix when using Gibbs sampling.");
     final public Input<Boolean> useShrinkageInput = new Input<>("shrinkage", "TRUE, if shrinkage method is used to estimate the trait correlations.", false);
     final public Input<KeyRealParameter> populationInput = new Input<>("population","Trait values for calculating the population noise. Continuous data only.");
+    final public Input<RealParameter> deltaInput = new Input<>("delta", "Shrinkage intensity parameter.");
 
     private double sigmaValue;
     private double[] sigmaValues;
@@ -43,6 +48,9 @@ public class SigmaMatrix extends CalculationNode {
 
     private double [] upperMatrix;
     private double [] transUpperMatrix;
+
+    // using shrinkage
+    private double [] unbiasedRho;
 
     // store and restore
     private double storedSigmaValue;
@@ -112,9 +120,20 @@ public class SigmaMatrix extends CalculationNode {
             }
         }
 
-        // use shrinkage method to estimate rho matrix
+        // use shrinkage method to estimate rho matrix from a population sample of a species
         if(useShrinkage) {
-            KeyRealParameter population = populationInput.get();
+            RealMatrix populationTraitMatrix = MorphologyLikelihoodUtils.populateTraitMatrixForPopulationSample(populationInput.get());
+
+            RealMatrix contTraitMatrix = MorphologyLikelihoodUtils.getContTraitRealMatrix(traitInput.get());
+
+            RealMatrix standardContTraitMatrix = MorphologyLikelihoodUtils.standardiseContinuousTraits(populationTraitMatrix, contTraitMatrix, nTraits, 0);
+
+            unbiasedRho = new double[nTraits * (nTraits - 1) / 2];
+            MorphologyLikelihoodUtils.populateUnbiasedRho(populationTraitMatrix, unbiasedRho);
+
+            // R = delta * I + (1 - delta) * R^
+            double delta = deltaInput.get().getValue();
+            MatrixUtilsContra.vectorMapMultiply(unbiasedRho, 1 - delta, rhoValues);
         }
 
         initArrays();

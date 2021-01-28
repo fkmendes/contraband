@@ -2,7 +2,16 @@ package contraband.utils;
 
 import contraband.math.GeneralNodeMath;
 import contraband.math.MatrixUtilsContra;
+import contraband.prunelikelihood.MorphologicalData;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.stat.descriptive.moment.Variance;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.commons.math3.util.FastMath;
+import outercore.parameter.KeyRealParameter;
 
 public class MorphologyLikelihoodUtils {
 
@@ -271,5 +280,65 @@ public class MorphologyLikelihoodUtils {
         // set L value
         // L = C - 0.25 * E * (A + L).inverse * E.transpose
         nodeMath.setLForNode(nodeIdx,new double[]{nodeMath.getCMatForNode(nodeIdx)[0]  - 0.25 * eAPlusLInv * nodeMath.getEMatForNode(nodeIdx)[0]});
+    }
+
+
+    public static RealMatrix populateTraitMatrixForPopulationSample(KeyRealParameter traitsValues){
+        int nTraits = traitsValues.getMinorDimension1();
+        int nSpecies = traitsValues.getMinorDimension2();
+        RealMatrix traitRM = new Array2DRowRealMatrix(new double[nSpecies][nTraits]);
+        String[] keys = traitsValues.getKeys();
+        for (int i = 0; i < nSpecies; i ++) {
+            // get all traits values for this species
+            Double[] traitForSpecies = traitsValues.getRowValues(keys[i]);
+            for (int j= 0; j < nTraits; j ++) {
+                traitRM.setEntry(i, j, traitForSpecies[j]);
+            }
+        }
+        return traitRM;
+    }
+
+    public static RealMatrix standardiseContinuousTraits(RealMatrix popRM, RealMatrix contRM, int nTraits, double lambda) {
+        Variance var = new Variance();
+        Median median= new Median();
+        double[] empVariance = new double[nTraits];
+        double [] empStandardDeviation = new double[nTraits];
+
+        for(int i = 0; i < nTraits; i++) {
+            empVariance[i] = var.evaluate(popRM.getColumn(i));
+        }
+
+        double target = median.evaluate(empVariance);
+        for (int k = 0; k < nTraits; k ++) {
+            empStandardDeviation[k] = 1.0 / Math.sqrt(lambda * target + (1 - lambda) * empVariance[k]);
+        }
+
+        return contRM.multiply(MatrixUtils.createRealDiagonalMatrix(empStandardDeviation));
+    }
+
+    public static RealMatrix getContTraitRealMatrix (MorphologicalData trait) {
+        int nTraits = trait.getTotalTraitNr();
+        int nSpecies = trait.getSpeciesNr();
+        RealMatrix traitRM = new Array2DRowRealMatrix(new double[nSpecies][nTraits]);
+        for (int i = 0; i < nSpecies; i ++ ) {
+            for (int j = 0; j < nTraits; j++) {
+                traitRM.setEntry(i, j, trait.getMorphologicalData()[i * nTraits + j]);
+            }
+        }
+        return traitRM;
+    }
+
+    // This method calculates unbiased estimation of correlation matrix
+    public static void populateUnbiasedRho(RealMatrix traitMat, double[] unbiasedRho){
+        PearsonsCorrelation correlation = new PearsonsCorrelation(traitMat);
+        RealMatrix unbiasedRhoRM = correlation.getCorrelationMatrix();
+
+        int idx = 0;
+        int dim = unbiasedRhoRM.getColumnDimension();
+        for (int i = 0; i < dim; i++){
+            for (int j = i + 1; j < dim; j ++) {
+                unbiasedRho[idx] =  unbiasedRhoRM.getEntry(i, j);
+            }
+        }
     }
 }
