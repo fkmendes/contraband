@@ -8,6 +8,8 @@ import beast.math.matrixalgebra.IllegalDimension;
 import contraband.math.LUDecompositionForArray;
 import contraband.math.MatrixUtilsContra;
 import contraband.math.NodeMath;
+import contraband.utils.MorphologyLikelihoodUtils;
+import org.apache.commons.math3.linear.RealMatrix;
 import outercore.parameter.KeyRealParameter;
 
 // This class deals with different kinds of morphological traits, including continuous, binary discrete, ordered discrete and unordered discrete,
@@ -20,6 +22,7 @@ public class MorphologicalData extends CalculationNode{
     final public Input<Tree> treeInput = new Input<>("tree", "Phylogenetic tree.");
     final public Input<Boolean> transformInput = new Input<>("transform", "TRUE, if data needs to be transformed to be independent", false);
     final public Input<NodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.");
+    final public Input<KeyRealParameter> populationInput = new Input<>("population","Trait values for standardize the data so that each trait has unit variance.");
 
     private Tree  tree;
     private int totalTraitNr;
@@ -52,6 +55,8 @@ public class MorphologicalData extends CalculationNode{
     private boolean[] evensingular;
     private double [] identityMatrix;
     private boolean singularMatrix;
+
+    private RealMatrix populationTraitMatrix;
 
     @Override
     public void initAndValidate() {
@@ -86,8 +91,19 @@ public class MorphologicalData extends CalculationNode{
         transformedData = transformInput.get();
 
         initArrays();
+
         initLUDecomposition();
+
         populateTraitData();
+
+        // standardize continuous trait values before transforming trait values
+        // because we will transform the standardized data
+        standardizeContTraitData ();
+
+        // transform the data if specified
+        if(transformedData) {
+            transformTraitValues(traitValuesArr);
+        }
     }
 
     // getters
@@ -170,11 +186,6 @@ public class MorphologicalData extends CalculationNode{
             double[] unorderedLiabilities = unorderedDiscreteTraitsInput.get().getLiabilities();
             populateCombinedTraitValuesArr(unorderedLiabilities, traitValuesArr, index, unorderedLiabilityNr, totalTraitNr, speciesNr);
         }
-
-        // (5) transform the data if specified
-        if(transformedData) {
-            transformTraitValues(traitValuesArr);
-        }
     }
 
     public void updateTraitValuesArr(boolean updateRateMatrix){
@@ -242,6 +253,20 @@ public class MorphologicalData extends CalculationNode{
         // the transpose the matrix
         MatrixUtilsContra.matrixTranspose(dataTransformMat, totalTraitNr, upperMatrix);
         MatrixUtilsContra.matrixMultiply(liabilities, upperMatrix, speciesNr, totalTraitNr, transformedTraitValues);
+    }
+
+    public void standardizeContTraitData () {
+        if(populationInput.get() != null) {
+            populationTraitMatrix = MorphologyLikelihoodUtils.populateTraitMatrixForPopulationSample(populationInput.get());
+
+            RealMatrix contTraitMatrix = MorphologyLikelihoodUtils.getContTraitRealMatrix(traitValuesArr, totalTraitNr, speciesNr);
+            RealMatrix standardContTraitMatrix = MorphologyLikelihoodUtils.standardiseContinuousTraits(populationTraitMatrix, contTraitMatrix, totalTraitNr, 0);
+            // populate the standardized data in a double array
+            for (int i = 0; i < speciesNr; i ++) {
+                System.arraycopy(standardContTraitMatrix.getRow(i), 0, traitValuesArr, i * totalTraitNr, totalTraitNr);
+            }
+
+        }
     }
 
 

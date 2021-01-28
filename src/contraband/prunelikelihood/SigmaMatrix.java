@@ -114,10 +114,6 @@ public class SigmaMatrix extends CalculationNode {
                 unbiasedRho = new double[nTraits * (nTraits - 1) / 2];
 
                 estimateCorrelationUsingShrinkage();
-
-                // This can be in MorphologicalData
-                // RealMatrix contTraitMatrix = MorphologyLikelihoodUtils.getContTraitRealMatrix(traitInput.get());
-                // RealMatrix standardContTraitMatrix = MorphologyLikelihoodUtils.standardiseContinuousTraits(populationTraitMatrix, contTraitMatrix, nTraits, 0);
             }
 
             else if(coEstimate) {

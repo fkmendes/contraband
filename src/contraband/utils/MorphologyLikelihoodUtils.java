@@ -316,13 +316,11 @@ public class MorphologyLikelihoodUtils {
         return contRM.multiply(MatrixUtils.createRealDiagonalMatrix(empStandardDeviation));
     }
 
-    public static RealMatrix getContTraitRealMatrix (MorphologicalData trait) {
-        int nTraits = trait.getTotalTraitNr();
-        int nSpecies = trait.getSpeciesNr();
+    public static RealMatrix getContTraitRealMatrix (double[] traitValuesArr, int nTraits, int nSpecies) {
         RealMatrix traitRM = new Array2DRowRealMatrix(new double[nSpecies][nTraits]);
         for (int i = 0; i < nSpecies; i ++ ) {
             for (int j = 0; j < nTraits; j++) {
-                traitRM.setEntry(i, j, trait.getMorphologicalData()[i * nTraits + j]);
+                traitRM.setEntry(i, j, traitValuesArr[i * nTraits + j]);
             }
         }
         return traitRM;
