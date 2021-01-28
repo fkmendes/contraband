@@ -8,7 +8,7 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import contraband.math.GeneralNodeMath;
 import contraband.math.MatrixUtilsContra;
-import contraband.utils.MorphologyLikelihoodUtils;
+
 import java.util.List;
 import java.util.Random;
 
@@ -72,7 +72,7 @@ public abstract class MorphologyLikelihood extends Distribution {
         nodeMath.populateRootValuesVec(rootIdx);
 
         // get L, m and r at the root
-        double[] l0 = nodeMath.getLForNode(rootIdx);
+        double[] l0 = nodeMath.getLMatForNode(rootIdx);
         double[] m0 = nodeMath.getMVecForNode(rootIdx);
         double r0 = nodeMath.getRForNode(rootIdx);
 
@@ -110,7 +110,7 @@ public abstract class MorphologyLikelihood extends Distribution {
                 populateLmrForTips(nodeMath, traitValuesArr, nTraits, childIdx);
 
                 // add up to this node
-                MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLForNode(childIdx), thisNodeL);
+                MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLMatForNode(childIdx), thisNodeL);
                 //thisNodeL += nodeMath.getLForNode(childIdx);
                 thisNodeR += nodeMath.getRForNode(childIdx);
                 MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
@@ -134,7 +134,7 @@ public abstract class MorphologyLikelihood extends Distribution {
                         thisNodeR += nodeMath.getRForNode(childIdx);
                         MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
                         //thisNodeL += nodeMath.getLForNode(childIdx);
-                        MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLForNode(childIdx), thisNodeL);
+                        MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLMatForNode(childIdx), thisNodeL);
 
                     } else {
                         // (3) child is an internal node and has a sampled ancestor below
@@ -153,7 +153,7 @@ public abstract class MorphologyLikelihood extends Distribution {
 
                         // add up to this node
                         //thisNodeL += nodeMath.getLForNode(gcSANr);
-                        MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLForNode(gcSANr), thisNodeL);
+                        MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLMatForNode(gcSANr), thisNodeL);
                         thisNodeR += nodeMath.getRForNode(gcSANr);
                         MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
 

@@ -2,7 +2,6 @@ package contraband.utils;
 
 import contraband.math.GeneralNodeMath;
 import contraband.math.MatrixUtilsContra;
-import net.jsign.bouncycastle.pqc.math.linearalgebra.Matrix;
 import org.apache.commons.math3.util.FastMath;
 
 public class MorphologyLikelihoodUtils {
@@ -79,11 +78,11 @@ public class MorphologyLikelihoodUtils {
 
          // set the L matrix
         // L_tips = C_i)
-        nodeMath.setLForNode(nodeIdx, new double[] {nodeMath.getCForNode(nodeIdx)});
+        nodeMath.setLForNode(nodeIdx, nodeMath.getCMatForNode(nodeIdx));
 
         // set r value
         // r_tip = A_i * (m_i.transpose * invTraitRateMatrix * m_i) + f_i
-        nodeMath.setRForNode(nodeIdx, nodeMath.getAForNode(nodeIdx) *
+        nodeMath.setRForNode(nodeIdx, nodeMath.getAMatForNode(nodeIdx)[0] *
                     MatrixUtilsContra.tVecDotMatrixDotVec(
                             nodeMath.getTraitsVec(),
                             nodeMath.getTraitRateMatrixInverse(),
@@ -98,7 +97,7 @@ public class MorphologyLikelihoodUtils {
                     nTraits,
                     nodeMath.getTempVec());
         MatrixUtilsContra.vectorMapMultiply(nodeMath.getTempVec(),
-                    nodeMath.getEForNode(nodeIdx),
+                    nodeMath.getEMatForNode(nodeIdx)[0],
                     nodeMath.getTempVec());
 
         nodeMath.setMVecForNode(nodeIdx, nodeMath.getTempVec());
@@ -145,20 +144,20 @@ public class MorphologyLikelihoodUtils {
 
         // set the L matrix
         // L_tips = C_i
-        nodeMath.setLForNode(nodeIdx, new double[] {nodeMath.getCForNode(nodeIdx)});
+        nodeMath.setLForNode(nodeIdx, nodeMath.getCMatForNode(nodeIdx));
 
         // set r value
         // r_tip = A_i * (m_i.transpose * invTraitRateMatrix * m_i) + f_i
         nodeMath.setRForNode(nodeIdx, MatrixUtilsContra.vecTransScalarMultiply(
                     nodeMath.getTraitsVec(),
-                    nodeMath.getAForNode(nodeIdx),
+                    nodeMath.getAMatForNode(nodeIdx)[0],
                     nTraits) +
                     nodeMath.getfForNode(nodeIdx));
 
         // calculate m vector
         // m_tip = E * invTraitRate * m_i
             MatrixUtilsContra.vectorMapMultiply(nodeMath.getTraitsVec(),
-                    nodeMath.getEForNode(nodeIdx),
+                    nodeMath.getEMatForNode(nodeIdx)[0],
                     nodeMath.getTempVec());
 
         nodeMath.setMVecForNode(nodeIdx, nodeMath.getTempVec());
@@ -172,7 +171,7 @@ public class MorphologyLikelihoodUtils {
      */
     public static void populateLmrForIntNode(GeneralNodeMath nodeMath, int nTraits, int nodeIdx) {
         // (A + L)
-        double aPlusL = nodeMath.getAForNode(nodeIdx)  + nodeMath.getLForNode(nodeIdx)[0];
+        double aPlusL = nodeMath.getAMatForNode(nodeIdx)[0] + nodeMath.getLMatForNode(nodeIdx)[0];
 
         // 1 / (A + L) = (A + L).inverse
         double aPlusLInv = 1.0 / aPlusL;
@@ -193,13 +192,13 @@ public class MorphologyLikelihoodUtils {
 
         // set m vector
         // m_non-tip = - 0.5 *  E * (A + L).inverse * m_i
-        double eAPlusLInv = nodeMath.getEForNode(nodeIdx) * aPlusLInv;
+        double eAPlusLInv = nodeMath.getEMatForNode(nodeIdx)[0] * aPlusLInv;
         MatrixUtilsContra.vectorMapMultiply(mVecForChild, -0.5 * eAPlusLInv, nodeMath.getTempVec());
         nodeMath.setMVecForNode(nodeIdx, nodeMath.getTempVec());
 
         // set L value
         // L = C - 0.25 * E * (A + L).inverse * E.transpose
-        nodeMath.setLForNode(nodeIdx,new double[] {nodeMath.getCForNode(nodeIdx)  - 0.25 * eAPlusLInv * nodeMath.getEForNode(nodeIdx)});
+        nodeMath.setLForNode(nodeIdx,new double[] {nodeMath.getCMatForNode(nodeIdx)[0]  - 0.25 * eAPlusLInv * nodeMath.getEMatForNode(nodeIdx)[0]});
     }
 
     public static void populateLmrMatrixForIntNode(GeneralNodeMath nodeMath, int nTraits, int nodeIdx) {
@@ -244,7 +243,7 @@ public class MorphologyLikelihoodUtils {
 
     public static void populateLmrForInternalNodeTransform(GeneralNodeMath nodeMath, int nTraits, int nodeIdx) {
         // (A + L)
-        double aPlusL = nodeMath.getAForNode(nodeIdx)  + nodeMath.getLForNode(nodeIdx)[0];
+        double aPlusL = nodeMath.getAMatForNode(nodeIdx)[0]  + nodeMath.getLMatForNode(nodeIdx)[0];
 
         // 1 / (A + L) = (A + L).inverse
         double aPlusLInv = 1.0 / aPlusL;
@@ -265,12 +264,12 @@ public class MorphologyLikelihoodUtils {
 
         // set m vector
         // m_non-tip = - 0.5 *  E * (A + L).inverse * m_i
-        double eAPlusLInv = nodeMath.getEForNode(nodeIdx) * aPlusLInv;
+        double eAPlusLInv = nodeMath.getEMatForNode(nodeIdx)[0] * aPlusLInv;
         MatrixUtilsContra.vectorMapMultiply(mVecForChild, -0.5 * eAPlusLInv, nodeMath.getTempVec());
         nodeMath.setMVecForNode(nodeIdx, nodeMath.getTempVec());
 
         // set L value
         // L = C - 0.25 * E * (A + L).inverse * E.transpose
-        nodeMath.setLForNode(nodeIdx,new double[]{nodeMath.getCForNode(nodeIdx)  - 0.25 * eAPlusLInv * nodeMath.getEForNode(nodeIdx)});
+        nodeMath.setLForNode(nodeIdx,new double[]{nodeMath.getCMatForNode(nodeIdx)[0]  - 0.25 * eAPlusLInv * nodeMath.getEMatForNode(nodeIdx)[0]});
     }
 }

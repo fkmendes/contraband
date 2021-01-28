@@ -126,14 +126,14 @@ public class BMLikelihood extends MorphologyLikelihood {
         if(transformData) {
             return MatrixUtilsContra.vecTransScalarMultiply(
                     nodeMath.getSampledAncestorTraitsVec(),
-                    nodeMath.getLForNode(childIdx)[0],
+                    nodeMath.getLMatForNode(childIdx)[0],
                     nTraits) +
                     MatrixUtilsContra.vectorDotMultiply(
                             nodeMath.getSampledAncestorTraitsVec(),
                             nodeMath.getMVecForNode(childIdx)) +
                     nodeMath.getRForNode(childIdx);
         } else {
-            return nodeMath.getLForNode(childIdx)[0] *
+            return nodeMath.getLMatForNode(childIdx)[0] *
                     MatrixUtilsContra.tVecDotMatrixDotVec(
                             nodeMath.getSampledAncestorTraitsVec(),
                             nodeMath.getTraitRateMatrixInverse(),

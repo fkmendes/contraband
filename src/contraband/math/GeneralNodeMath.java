@@ -36,7 +36,8 @@ public class GeneralNodeMath extends CalculationNode {
     private SigmaMatrix popMatrix;
 
     private int nTraits;
-    private int matDim;
+    private int traitDim;
+    private int paramDim;
 
     private double [] aArray;
     private double [] cArray;
@@ -107,7 +108,8 @@ public class GeneralNodeMath extends CalculationNode {
         nodeNr = tree.getNodeCount();
 
         nTraits = traitInput.get().getTotalTraitNr();
-        matDim = nTraits * nTraits;
+        traitDim = nTraits * nTraits; // the dimension of trait rate matrix
+        paramDim = 1; // the dimension of A, C, E and L , = 1 if NOT using matrix parameterization
 
         // if trait rate matrix and intraspecific matrix share correlation
         shareRho = shareRhoInput.get();
@@ -134,6 +136,8 @@ public class GeneralNodeMath extends CalculationNode {
                 }
             }
             if(matrixParams) {
+                // if using matrix parameterization, A, C, E and L are nTraits * nTraits matrix
+                paramDim = nTraits * nTraits;
                 initMatrixParams();
             }
 
@@ -169,20 +173,14 @@ public class GeneralNodeMath extends CalculationNode {
         // f is a single double value for each node
         fArray = new double[nodeNr];
 
-        if(matrixParams) {
-            // A C E are matrix for each node
-            aMat = new double[matDim];
-            cMat = new double[matDim];
-            eMat = new double[matDim];
-            aArray = new double[matDim * nodeNr];
-            cArray = new double[matDim * nodeNr];
-            eArray = new double[matDim * nodeNr];
-        } else {
-            // A C E are single double values for each node
-            aArray = new double[nodeNr];
-            cArray = new double[nodeNr];
-            eArray = new double[nodeNr];
-        }
+        // A C E are matrix for each node
+        aMat = new double[paramDim];
+        cMat = new double[paramDim];
+        eMat = new double[paramDim];
+        aArray = new double[paramDim * nodeNr];
+        cArray = new double[paramDim * nodeNr];
+        eArray = new double[paramDim * nodeNr];
+
     }
 
     private void initLmrArray() {
@@ -192,24 +190,18 @@ public class GeneralNodeMath extends CalculationNode {
         mVecInit = new double[nTraits];
         // each nodes has a single double r
         rArray = new double[nodeNr];
+        // depend on input, L can be either a matrix or a double value
+        lMat = new double[paramDim];
+        lMatInit = new double[paramDim];
+        lArray = new double[paramDim * nodeNr];
 
-        if(matrixParams) {
-            // each node has a L matrix
-            lMat = new double[matDim];
-            lMatInit = new double[matDim];
-            lArray = new double[matDim * nodeNr];
-        } else {
-            lMatInit = new double[1];
-            // each node has a single double value L
-            lArray = new double[nodeNr];
-        }
     }
 
     private void initUDecomposition() {
-        lu = new double [matDim];
+        lu = new double [traitDim];
         pivot = new int[nTraits];
         evenSingular = new boolean[2];
-        identityMatrix = new double[matDim];
+        identityMatrix = new double[traitDim];
 
         // create an identity matrix for LUDecomposition
         for (int i = 0; i < nTraits; i++) {
@@ -220,7 +212,7 @@ public class GeneralNodeMath extends CalculationNode {
     private void initVarianceAndExpectation() {
         // each node has its variance = branch rate * branch length * trait rate matrix + intraspecific variance (if necessary)
         if(matrixParams){
-            nodeVariance = new double[nodeNr * matDim];
+            nodeVariance = new double[nodeNr * traitDim];
         } else {
             nodeVariance = new double[nodeNr];
         }
@@ -239,55 +231,40 @@ public class GeneralNodeMath extends CalculationNode {
     }
 
     private void initTraitRateMatrix () {
-        traitRateMatrix = new double[matDim];
-        invTraitRateMatrix = new double[matDim];
-        storedTraitRateMatrix = new double[matDim];
-        storedInvTraitRateMatrix = new double[matDim];
+        traitRateMatrix = new double[traitDim];
+        invTraitRateMatrix = new double[traitDim];
+        storedTraitRateMatrix = new double[traitDim];
+        storedInvTraitRateMatrix = new double[traitDim];
     }
 
     private void initMatrixParams(){
-        varianceMatrix = new double [matDim];
-        invVarianceMatrix = new double [matDim];
-        rateScaler = new double[matDim];
+        varianceMatrix = new double [traitDim];
+        invVarianceMatrix = new double [traitDim];
+        rateScaler = new double[traitDim];
         realMatrix = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
-        aPlusLInverse = new double [matDim];
+        aPlusLInverse = new double [traitDim];
     }
 
     //getters
-    public double getAForNode (int nodeIdx) { return aArray[nodeIdx]; }
-
-    public double[] getAMatForNode (int nodeIdx) {
-        MatrixUtilsContra.getMatrixRow(aArray, nodeIdx, matDim, aMat);
+    public double[] getAMatForNode(int nodeIdx) {
+        MatrixUtilsContra.getMatrixRow(aArray, nodeIdx, paramDim, aMat);
         return aMat;
     }
 
-    public double getCForNode (int nodeIdx) { return cArray[nodeIdx]; }
-
-    public double[] getCMatForNode (int nodeIdx) {
-        MatrixUtilsContra.getMatrixRow(cArray, nodeIdx, matDim, cMat);
+    public double[] getCMatForNode(int nodeIdx) {
+        MatrixUtilsContra.getMatrixRow(cArray, nodeIdx, paramDim, cMat);
         return cMat;
     }
 
-    public double getEForNode (int nodeIdx) { return eArray[nodeIdx]; }
-
-    public double[] getEMatForNode (int nodeIdx) {
-        MatrixUtilsContra.getMatrixRow(eArray, nodeIdx, matDim, eMat);
+    public double[] getEMatForNode(int nodeIdx) {
+        MatrixUtilsContra.getMatrixRow(eArray, nodeIdx, paramDim, eMat);
         return eMat;
     }
 
     public double getfForNode (int nodeIdx) { return fArray[nodeIdx]; }
 
-    public double[] getLForNode (int nodeIdx) {
-        if(matrixParams) {
-            MatrixUtilsContra.getMatrixRow(lArray, nodeIdx, matDim, lMat);
-            return lMat;
-        } else {
-            return new double[]{lArray[nodeIdx]};
-        }
-    }
-
-    public double[] getLMatForNode (int nodeIdx) {
-        MatrixUtilsContra.getMatrixRow(lArray, nodeIdx, matDim, lMat);
+    public double[] getLMatForNode(int nodeIdx) {
+        MatrixUtilsContra.getMatrixRow(lArray, nodeIdx, paramDim, lMat);
         return lMat;
     }
 
@@ -332,8 +309,6 @@ public class GeneralNodeMath extends CalculationNode {
 
     public double getVarianceMatrixDet() { return detVarianceMat; }
 
-    public double getInvVarianceDet () {return detInvVarianceMat; }
-
     public double[] getInvVarianceMatrix() {return invVarianceMatrix; }
 
     public double[] getAPlusLInverse () { return aPlusLInverse; }
@@ -348,29 +323,25 @@ public class GeneralNodeMath extends CalculationNode {
     public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
 
     public void setAMatForNode (int nodeIdx, double[] value) {
-        System.arraycopy(value, 0, aArray, nodeIdx * matDim, value.length);
+        System.arraycopy(value, 0, aArray, nodeIdx * traitDim, value.length);
     }
 
     public void setCForNode (int nodeIdx, double value) { cArray[nodeIdx] = value; }
 
     public void setCMatForNode (int nodeIdx, double[] value) {
-        System.arraycopy(value, 0, cArray, nodeIdx * matDim, value.length);
+        System.arraycopy(value, 0, cArray, nodeIdx * traitDim, value.length);
     }
 
     public void setEForNode (int nodeIdx, double value) { eArray[nodeIdx] = value; }
 
     public void setEMatForNode (int nodeIdx, double[] value) {
-        System.arraycopy(value, 0, eArray, nodeIdx * matDim, value.length);
+        System.arraycopy(value, 0, eArray, nodeIdx * traitDim, value.length);
     }
 
     public void setfForNode (int nodeIdx, double value) { fArray[nodeIdx] = value; }
 
     public void setLForNode (int nodeIdx, double[] value) {
-        if(matrixParams) {
-            System.arraycopy(value, 0, lArray, nodeIdx * matDim, matDim);
-        } else {
-            lArray[nodeIdx] = value[0];
-        }
+       System.arraycopy(value, 0, lArray, nodeIdx * paramDim, paramDim);
     }
 
     public void setRForNode (int nodeIdx, double value) { rArray[nodeIdx] = value; }
@@ -524,17 +495,14 @@ public class GeneralNodeMath extends CalculationNode {
         detVarianceMat = FastMath.log(det);
 
         // LUDecomposition
-        LUDecompositionForArray.ArrayLUDecomposition(invVarianceMatrix, lu, pivot, evenSingular, nTraits);
-        detInvVarianceMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
+        //LUDecompositionForArray.ArrayLUDecomposition(invVarianceMatrix, lu, pivot, evenSingular, nTraits);
+        //detInvVarianceMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
     }
 
     public void operateOnAPlusLMatrixForNode (int nodeIdx){
-        double[] A = getAMatForNode(nodeIdx);
-        double[] L = getLForNode(nodeIdx);
-
         // (A + L)
         double[] aPlusL = new double[nTraits * nTraits];
-        MatrixUtilsContra.vectorAdd(getAMatForNode(nodeIdx), getLForNode(nodeIdx), aPlusL);
+        MatrixUtilsContra.vectorAdd(getAMatForNode(nodeIdx), getLMatForNode(nodeIdx), aPlusL);
 
         // invert (A + L)
         LUDecompositionForArray.ArrayLUDecomposition(aPlusL, lu, pivot, evenSingular, nTraits);
@@ -566,8 +534,8 @@ public class GeneralNodeMath extends CalculationNode {
         storedDetInvTraitRateMat = detInvTraitRateMat;
 
         System.arraycopy(rootValuesVec, 0, storedRootValuesVec, 0, nTraits);
-        System.arraycopy(invTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, matDim);
-        System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, matDim);
+        System.arraycopy(invTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, traitDim);
+        System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, traitDim);
     }
 
     @Override
