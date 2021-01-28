@@ -2,6 +2,7 @@ package contraband.prunelikelihood;
 
 import beast.core.CalculationNode;
 import beast.core.Input;
+import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import beast.math.matrixalgebra.CholeskyDecomposition;
 import beast.math.matrixalgebra.IllegalDimension;
@@ -23,6 +24,7 @@ public class MorphologicalData extends CalculationNode{
     final public Input<Boolean> transformInput = new Input<>("transform", "TRUE, if data needs to be transformed to be independent", false);
     final public Input<NodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.");
     final public Input<KeyRealParameter> populationInput = new Input<>("population","Trait values for standardize the data so that each trait has unit variance.");
+    final public Input<RealParameter> lambdaInput = new Input<>("lambda","Parameter for estimate popolation variance.");
 
     private Tree  tree;
     private int totalTraitNr;
@@ -258,9 +260,15 @@ public class MorphologicalData extends CalculationNode{
     public void standardizeContTraitData () {
         if(populationInput.get() != null) {
             populationTraitMatrix = MorphologyLikelihoodUtils.populateTraitMatrixForPopulationSample(populationInput.get());
-
+            // future work, lambda can be automatically assigned.
+            double lambda;
+            if(lambdaInput.get() == null) {
+                lambda = 0.0;
+            } else {
+                lambda = lambdaInput.get().getArrayValue();
+            }
             RealMatrix contTraitMatrix = MorphologyLikelihoodUtils.getContTraitRealMatrix(traitValuesArr, totalTraitNr, speciesNr);
-            RealMatrix standardContTraitMatrix = MorphologyLikelihoodUtils.standardiseContinuousTraits(populationTraitMatrix, contTraitMatrix, totalTraitNr, 0);
+            RealMatrix standardContTraitMatrix = MorphologyLikelihoodUtils.standardiseContinuousTraits(populationTraitMatrix, contTraitMatrix, totalTraitNr, lambda);
             // populate the standardized data in a double array
             for (int i = 0; i < speciesNr; i ++) {
                 System.arraycopy(standardContTraitMatrix.getRow(i), 0, traitValuesArr, i * totalTraitNr, totalTraitNr);
