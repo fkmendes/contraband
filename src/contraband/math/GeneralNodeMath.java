@@ -168,6 +168,8 @@ public class GeneralNodeMath extends CalculationNode {
         initForSampledAncestors();
         initVarianceAndExpectation();
         initTraitRateMatrix();
+
+        traitRateMatrix = rateMatrix.getSigmaMatrix();
     }
 
     // initialise

@@ -6,9 +6,9 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import beast.math.matrixalgebra.CholeskyDecomposition;
 import beast.math.matrixalgebra.IllegalDimension;
+import contraband.math.GeneralNodeMath;
 import contraband.math.LUDecompositionForArray;
 import contraband.math.MatrixUtilsContra;
-import contraband.math.NodeMath;
 import contraband.utils.MorphologyLikelihoodUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import outercore.parameter.KeyRealParameter;
@@ -22,7 +22,7 @@ public class MorphologicalData extends CalculationNode{
     final public Input<UnorderedDiscreteTraits> unorderedDiscreteTraitsInput = new Input<>("unorderedDiscreteTraits", "Object for unordered discrete traits.");
     final public Input<Tree> treeInput = new Input<>("tree", "Phylogenetic tree.");
     final public Input<Boolean> transformInput = new Input<>("transform", "TRUE, if data needs to be transformed to be independent", false);
-    final public Input<NodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.");
+    final public Input<GeneralNodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.");
     final public Input<KeyRealParameter> populationInput = new Input<>("population","Trait values for standardize the data so that each trait has unit variance.");
     final public Input<RealParameter> lambdaInput = new Input<>("lambda","Parameter for estimate popolation variance.");
 
@@ -101,11 +101,6 @@ public class MorphologicalData extends CalculationNode{
         // standardize continuous trait values before transforming trait values
         // because we will transform the standardized data
         standardizeContTraitData ();
-
-        // transform the data if specified
-        if(transformedData) {
-            transformTraitValues(traitValuesArr);
-        }
     }
 
     // getters
@@ -150,6 +145,13 @@ public class MorphologicalData extends CalculationNode{
         }
     }
 
+    //
+    public void transformTraitData () {
+        // transform the data if specified
+        if(transformedData) {
+            transformTraitValues(traitValuesArr);
+        }
+    }
 
     // initialize the combined morphological data set
     private void populateTraitData(){
