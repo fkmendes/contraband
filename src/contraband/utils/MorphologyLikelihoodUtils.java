@@ -338,6 +338,7 @@ public class MorphologyLikelihoodUtils {
         for (int i = 0; i < dim; i++){
             for (int j = i + 1; j < dim; j ++) {
                 unbiasedRho[idx] =  unbiasedRhoRM.getEntry(i, j);
+                idx ++;
             }
         }
     }

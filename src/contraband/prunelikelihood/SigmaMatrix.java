@@ -51,6 +51,8 @@ public class SigmaMatrix extends CalculationNode {
 
     // using shrinkage
     private double [] unbiasedRho;
+    private double delta;
+    private RealMatrix populationTraitMatrix;
 
     // store and restore
     private double storedSigmaValue;
@@ -105,35 +107,34 @@ public class SigmaMatrix extends CalculationNode {
             rhoValues = new double[nTraits * (nTraits - 1) / 2];
             storedRhoValues = new double[nTraits * (nTraits - 1) / 2];
 
-            if (rhoInput.get().getDimension() != (nTraits * (nTraits - 1) / 2)) {
-                rhoInput.get().setDimension((nTraits * (nTraits - 1) / 2));
+            // use shrinkage method to estimate rho matrix from a population sample of a species
+            if(useShrinkage) {
+                populationTraitMatrix = MorphologyLikelihoodUtils.populateTraitMatrixForPopulationSample(populationInput.get());
+
+                unbiasedRho = new double[nTraits * (nTraits - 1) / 2];
+
+                estimateCorrelationUsingShrinkage();
+
+                // This can be in MorphologicalData
+                // RealMatrix contTraitMatrix = MorphologyLikelihoodUtils.getContTraitRealMatrix(traitInput.get());
+                // RealMatrix standardContTraitMatrix = MorphologyLikelihoodUtils.standardiseContinuousTraits(populationTraitMatrix, contTraitMatrix, nTraits, 0);
             }
-            rhoValues = rhoInput.get().getDoubleValues();
-        }
 
-        if(coEstimate) {
-            // an upper diagonal matrix
-            covarianceValues = new double[nTraits * (nTraits - 1) / 2];
-            if (covarianceInput.get().getDimension() != (nTraits * (nTraits - 1) / 2)) {
-                covarianceInput.get().setDimension((nTraits * (nTraits - 1) / 2));
-                covarianceValues = covarianceInput.get().getDoubleValues();
+            else if(coEstimate) {
+                // an upper diagonal matrix
+                covarianceValues = new double[nTraits * (nTraits - 1) / 2];
+                if (covarianceInput.get().getDimension() != (nTraits * (nTraits - 1) / 2)) {
+                    covarianceInput.get().setDimension((nTraits * (nTraits - 1) / 2));
+                    covarianceValues = covarianceInput.get().getDoubleValues();
+                }
             }
-        }
-
-        // use shrinkage method to estimate rho matrix from a population sample of a species
-        if(useShrinkage) {
-            RealMatrix populationTraitMatrix = MorphologyLikelihoodUtils.populateTraitMatrixForPopulationSample(populationInput.get());
-
-            RealMatrix contTraitMatrix = MorphologyLikelihoodUtils.getContTraitRealMatrix(traitInput.get());
-
-            RealMatrix standardContTraitMatrix = MorphologyLikelihoodUtils.standardiseContinuousTraits(populationTraitMatrix, contTraitMatrix, nTraits, 0);
-
-            unbiasedRho = new double[nTraits * (nTraits - 1) / 2];
-            MorphologyLikelihoodUtils.populateUnbiasedRho(populationTraitMatrix, unbiasedRho);
-
-            // R = delta * I + (1 - delta) * R^
-            double delta = deltaInput.get().getValue();
-            MatrixUtilsContra.vectorMapMultiply(unbiasedRho, 1 - delta, rhoValues);
+            
+            else {
+                if (rhoInput.get().getDimension() != (nTraits * (nTraits - 1) / 2)) {
+                    rhoInput.get().setDimension((nTraits * (nTraits - 1) / 2));
+                }
+                rhoValues = rhoInput.get().getDoubleValues();
+            }
         }
 
         initArrays();
@@ -266,6 +267,14 @@ public class SigmaMatrix extends CalculationNode {
             updateSigma = true;
         }
         return updateRho || updateSigma;
+    }
+
+    private void estimateCorrelationUsingShrinkage() {
+        MorphologyLikelihoodUtils.populateUnbiasedRho(populationTraitMatrix, unbiasedRho);
+
+        // R = delta * I + (1 - delta) * R^
+        delta = deltaInput.get().getValue();
+        MatrixUtilsContra.vectorMapMultiply(unbiasedRho, 1 - delta, rhoValues);
     }
 
     @Override
