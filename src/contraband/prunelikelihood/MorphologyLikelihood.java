@@ -17,6 +17,7 @@ public abstract class MorphologyLikelihood extends Distribution {
     final public Input<BranchRateModel.Base> branchRateModelInput = new Input<>("branchRateModel", "the rate or optimum on each branch", Input.Validate.REQUIRED);
     final public Input<GeneralNodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.", Input.Validate.REQUIRED);
     final public Input<MorphologicalData> traitInput = new Input<>("trait","Morphological data set.", Input.Validate.REQUIRED);
+    final public Input<Boolean> restrictInput = new Input<>("restrict","If likelihood at the root needs to subtracted or not.",false);
 
     private Tree tree;
     private BranchRateModel.Base branchRateModel;

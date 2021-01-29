@@ -10,16 +10,21 @@ public class BMLikelihood extends MorphologyLikelihood {
 
     private int nTraits;
     private boolean transformData;
+    private boolean restrict;
 
     @Override
     public void initAndValidate() {
         super.initAndValidate();
-
+        restrict = restrictInput.get();
         nTraits = traitInput.get().getTotalTraitNr();
         transformData = traitInput.get().getTransformDataFlag();
         nodeMathInput.get().updateSigmaMatrix();
         nodeMathInput.get().operateOnTraitRateMatrix();
         nodeMathInput.get().operateOnInvTraitRateMatrix();
+        if(transformData) {
+            traitInput.get().transformTraitData();
+        }
+
     }
 
     @Override
@@ -101,12 +106,19 @@ public class BMLikelihood extends MorphologyLikelihood {
 
     @Override
     protected double calculateLikelihood(GeneralNodeMath nodeMath, double[] l0, double[] m0, double r0, int nTraits, int rootIdx){
+
+        double root2Subtract = 0.0;
+        if(restrict) {
+            double vCD = nodeMath.getVarianceForNode(rootIdx);
+            root2Subtract = -0.5 * nodeMath.getTraitRateMatrixDeterminant() - ((nTraits / 2.0) * Math.log(2 * Math.PI * vCD));
+        }
+
         if(transformData){
             return MatrixUtilsContra.vecTransScalarMultiply(nodeMath.getRootValuesArr(),
                     l0[0], nTraits) +
                     MatrixUtilsContra.vectorDotMultiply(nodeMath.getRootValuesArr(), m0) +
                     r0 +
-                    nodeMath.getLikelihoodForSampledAncestors();
+                    nodeMath.getLikelihoodForSampledAncestors() - root2Subtract;
         } else {
             if(nodeMath.getMatrixParamsFlag()){
                 return MatrixUtilsContra.tVecDotMatrixDotVec(nodeMath.getRootValuesArr(), l0, nTraits)
@@ -121,7 +133,7 @@ public class BMLikelihood extends MorphologyLikelihood {
                         MatrixUtilsContra.vectorDotMultiply(
                                 nodeMath.getRootValuesArr(),
                                 m0) +
-                        r0 + nodeMath.getLikelihoodForSampledAncestors();
+                        r0 + nodeMath.getLikelihoodForSampledAncestors() - root2Subtract;
             }
         }
     }
