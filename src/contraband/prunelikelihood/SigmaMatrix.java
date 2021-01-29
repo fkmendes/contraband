@@ -3,6 +3,7 @@ package contraband.prunelikelihood;
 import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
+import contraband.math.LUDecompositionForArray;
 import contraband.math.MatrixUtilsContra;
 import contraband.utils.MorphologyLikelihoodUtils;
 import contraband.utils.NodeMathUtils;
@@ -59,6 +60,13 @@ public class SigmaMatrix extends CalculationNode {
     private double[] storedSigmaValues;
     private double[] storedRhoValues;
     private double[] storedInverseRhoMatrix;
+
+    private double[] lu;
+    private int[] pivot;
+    private boolean[] evenSingular;
+    private double [] identityMatrix;
+    private double detInvRhoMatrix;
+    private boolean singularMatrix;
 
     @Override
     public void initAndValidate() {
@@ -134,12 +142,25 @@ public class SigmaMatrix extends CalculationNode {
         }
 
         initArrays();
+        initUDecomposition();
     }
 
     private void initArrays() {
         matDim = nTraits * nTraits;
         upperMatrix = new double[matDim];
         transUpperMatrix = new double[matDim];
+    }
+
+    private void initUDecomposition() {
+        lu = new double [matDim];
+        pivot = new int[nTraits];
+        evenSingular = new boolean[2];
+        identityMatrix = new double[matDim];
+
+        // create an identity matrix for LUDecomposition
+        for (int i = 0; i < nTraits; i++) {
+            MatrixUtilsContra.setMatrixEntry(identityMatrix, i, i, 1.0, nTraits);
+        }
     }
 
     // getters
@@ -271,6 +292,19 @@ public class SigmaMatrix extends CalculationNode {
         // R = delta * I + (1 - delta) * R^
         delta = deltaInput.get().getValue();
         MatrixUtilsContra.vectorMapMultiply(unbiasedRho, 1 - delta, rhoValues);
+    }
+
+    public void populateRhoValuesFromInverseMatrix() {
+        inverseRhoMatrix = inverseRhoInput.get().getDoubleValues();
+
+        // to get the original rho matrix because it will be used when calculating r parameter
+        LUDecompositionForArray.ArrayLUDecomposition(inverseRhoMatrix, lu, pivot, evenSingular, nTraits);
+        detInvRhoMatrix = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
+        try {
+            LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evenSingular[1], nTraits, rhoValues);
+        } catch (RuntimeException e) {
+            singularMatrix = true;
+        }
     }
 
     @Override
