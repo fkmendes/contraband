@@ -29,6 +29,7 @@ public class BMLikelihoodTest {
     private RealParameter sigmasq;
     private RealParameter sigmaesq;
     private RealParameter delta;
+    private RealParameter lambda;
     private final KeyRealParameter population = new KeyRealParameter();
     private final MorphologicalData morphData = new MorphologicalData();
     private final GeneralNodeMath nodeMath = new GeneralNodeMath();
@@ -212,6 +213,66 @@ public class BMLikelihoodTest {
         pcm.initByName("nodeMath", nodeMath, "tree", tree, "trait", morphData, "branchRateModel", lsc, "restrict", true);
         double logP = pcm.calculateLogP();
         Assert.assertEquals(-538.9563236764393, logP, EPSILON);
+    }
+
+    @Test
+    public void testBMLikelihoodWithStandardizedData() {
+        // tree
+        treeStr = "((t2:0.8634660628,(t5:0.08432407594,t6:0.08432407594):1.623681925):1.067074613,((t3:0.2860224457,t4:0.2860224457):1.490933336,t1:1.776955782):0.9981248329);";
+        spNames = "t2 t5 t6 t3 t4 t1";
+        tree = new TreeParser(treeStr, false, false, true, 0);
+
+        // continuous trait values
+        nTraits = 5;
+        contTraitData = Arrays.asList(
+                -0.79046984445445, -1.24550433961309, 1.00719121269088, -5.55377524207666, -0.190324276352273,
+                -3.1456158063213, -4.40064210544044, -1.23674454689067, -4.92495067785601, 1.78818291334198,
+                -3.1863298538836, -4.78828705170277, -1.89361406474235, -5.38105779594416, 3.01155546394615,
+                -1.89832596392192, -1.4447079523426, 0.788657863129313, -4.36682104865865, -0.292610969178535,
+                -4.41476753811221, -0.503260556700194, -1.07759730767263, -5.33637141004697, -1.92411328976331,
+                1.24483751383358, -1.35069964377611, 0.0371698384792132, -6.31422173911139, -1.78833990891775
+        );
+        contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
+
+        // population samples
+        popTraitData = Arrays.asList(
+                -1.49423749961236, -2.20443210635097, 13.0073187571802, -1.73557048290321, 0.362214907528917,
+                1.61438393261534, -0.600823508278549, 6.76701308252399, 1.35749484021919, 0.0284817981254237,
+                5.69171615806967, -1.00502666401073, 0.305337545316146, 0.330407167242628, 0.305460656456528,
+                -1.76564797547353, 2.73908099097237, -10.2246819199159, 7.24123831044803, -0.143939688662232,
+                -5.88260110808259, -0.304175058530707, -5.9742892461524, 0.674662257070058, -5.64650554205318,
+                -11.0382115821499, 7.74032190916081, 2.29305900150846, -7.36164535234136, 7.52792561895395
+        );
+        String pop = "sp1 sp2 sp3 sp4 sp5 sp6";
+        population.initByName("value", popTraitData, "keys", pop, "minordimension", nTraits);
+
+        lambda = new RealParameter(new Double[]{0.604237758992233});
+        morphData.initByName("traits", contTrait, "tree", tree, "nodeMath", nodeMath, "population", population, "lambda", lambda);
+
+        // branch rate model
+        lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
+
+        // shared evolutionary rate
+        // correlations are estimated by shrinkage method
+        sigmasq = new RealParameter(new Double[]{2.5});
+        delta = new RealParameter(new Double[] {0.879396295242854});
+        sigmaMatrix.initByName("sigmasq", sigmasq, "trait", morphData, "shrinkage", true, "delta", delta, "population", population, "oneRateOnly", true);
+
+        // accounting for intraspecific variance
+        // after standardizing, all traits have the shared unit variance
+        // the correlations are shared between species and individual samples
+        sigmaesq = new RealParameter(new Double[]{1.0});
+        sigmaEMatrix.initByName("sigmasq", sigmaesq, "correlation", correlation, "trait", morphData, "oneRateOnly", true);
+
+        // node math
+        rootValues = new RealParameter(new Double[]{-2.41413149877084, 0.55485848422132, 2.16888235336611, -4.6913954052587, 0.8582493776221});
+        nodeMath.initByName("trait", morphData, "rateMatrix", sigmaMatrix, "popMatrix", sigmaEMatrix, "tree", tree, "rootValues", rootValues);
+
+        // prune likelihood
+        BMLikelihood pcm = new BMLikelihood();
+        pcm.initByName("nodeMath", nodeMath, "tree", tree, "trait", morphData, "branchRateModel", lsc);
+        double logP = pcm.calculateLogP();
+        Assert.assertEquals(-56.1142534456042, logP, EPSILON);
     }
 
 

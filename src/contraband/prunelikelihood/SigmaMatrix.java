@@ -133,7 +133,7 @@ public class SigmaMatrix extends CalculationNode {
                 }
             }
             
-            else {
+            else if (rhoInput.get()!=null){
                 if (rhoInput.get().getDimension() != (nTraits * (nTraits - 1) / 2)) {
                     rhoInput.get().setDimension((nTraits * (nTraits - 1) / 2));
                 }
