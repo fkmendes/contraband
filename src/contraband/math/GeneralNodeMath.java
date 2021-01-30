@@ -299,7 +299,12 @@ public class GeneralNodeMath extends CalculationNode {
 
     public double[] getTempVec () { return mVec; }
 
-    public double[] getTraitRateMatrix () { return traitRateMatrix; }
+    public double[] getTraitRateMatrix () {
+        if(popVariance && !matrixParams){
+            return  rateMatrix.getRhoMatrix();
+        }
+        return rateMatrix.getSigmaMatrix();
+    }
 
     public double getTraitRateMatrixInverseDeterminant () { return detInvTraitRateMat; }
 
@@ -406,13 +411,13 @@ public class GeneralNodeMath extends CalculationNode {
             // all traits share (1) the same evolutionary rate (2) the same trait correlations (3) the same intraspecific variance
             rateMatrix.populateRhoMatrix();
             rateMatrix.populateSigmaValue();
-            traitRateMatrix = rateMatrix.getRhoMatrix();
+            //traitRateMatrix = rateMatrix.getRhoMatrix();
+            // LUDecomposition
+            LUDecompositionForArray.ArrayLUDecomposition(rateMatrix.getRhoMatrix(), lu, pivot, evenSingular, nTraits);
         } else {
-            traitRateMatrix = rateMatrix.getSigmaMatrix();
+            // LUDecomposition
+            LUDecompositionForArray.ArrayLUDecomposition(rateMatrix.getSigmaMatrix(), lu, pivot, evenSingular, nTraits);
         }
-
-        // LUDecomposition
-        LUDecompositionForArray.ArrayLUDecomposition(traitRateMatrix, lu, pivot, evenSingular, nTraits);
 
         // invert the traitRateMatrix
         try {
@@ -440,26 +445,28 @@ public class GeneralNodeMath extends CalculationNode {
         }
     }
 
-    public boolean updateSigmaMatrix(){
-        boolean update = true;
-
-        rateMatrix.updateParameters();
+    public void updateSigmaMatrix(){
+        if(rateMatrixInput.isDirty()) {
+            rateMatrix.updateParameters();
+        }
 
         if(popMatrixInput.isDirty()){
-            popMatrix.populateSigmaMatrix();
+            popMatrix.updateParameters();
             popVarianceMatrix = popMatrix.getSigmaMatrix();
-            update = true;
         }
-        return update;
+            //popMatrix.populateSigmaMatrix();
+            //popVarianceMatrix = popMatrix.getSigmaMatrix();
+        //}
     }
 
     /*
      * matrixParams operations
      */
     public void checkNearlySingularMatrix () {
+        realMatrix = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         for(int i = 0; i < nTraits; i++){
             for (int j = 0; j < nTraits; j++){
-                realMatrix.setEntry(i, j, varianceMatrix[i * nTraits + j]);
+                realMatrix.setEntry(i, j, traitRateMatrix[i * nTraits + j]);
             }
         }
         double[] singularValues = new SingularValueDecomposition(realMatrix).getSingularValues();

@@ -284,14 +284,13 @@ public class SigmaMatrix extends CalculationNode {
                 sigmaValues = sigmasqInput.get().getDoubleValues();
             }
             updateSigma = true;
-        }
+       }
 
         boolean updateSigmaMatrix = updateRho || updateSigma;
 
         if(updateSigmaMatrix){
             populateSigmaMatrix();
         }
-
         return updateSigmaMatrix;
     }
 
