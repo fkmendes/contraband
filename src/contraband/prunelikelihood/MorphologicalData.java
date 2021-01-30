@@ -22,7 +22,6 @@ public class MorphologicalData extends CalculationNode{
     final public Input<UnorderedDiscreteTraits> unorderedDiscreteTraitsInput = new Input<>("unorderedDiscreteTraits", "Object for unordered discrete traits.");
     final public Input<Tree> treeInput = new Input<>("tree", "Phylogenetic tree.");
     final public Input<Boolean> transformInput = new Input<>("transform", "TRUE, if data needs to be transformed to be independent", false);
-    final public Input<GeneralNodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.");
     final public Input<KeyRealParameter> populationInput = new Input<>("population","Trait values for standardize the data so that each trait has unit variance.");
     final public Input<RealParameter> lambdaInput = new Input<>("lambda","Parameter for estimate popolation variance.");
 
@@ -146,10 +145,10 @@ public class MorphologicalData extends CalculationNode{
     }
 
     //
-    public void transformTraitData () {
+    public void transformTraitData (double[] traitRateMatrix) {
         // transform the data if specified
         if(transformedData) {
-            transformTraitValues(traitValuesArr);
+            transformTraitValues(traitValuesArr, traitRateMatrix);
         }
     }
 
@@ -192,7 +191,7 @@ public class MorphologicalData extends CalculationNode{
         }
     }
 
-    public void updateTraitValuesArr(boolean updateRateMatrix){
+    public void updateTraitValuesArr(boolean updateRateMatrix, double[] traitRateMatrix){
         boolean update = false;
         // (1) update liabilities for binary discrete trait values
         if(binaryDiscreteTraitsInput.get()!= null && binaryDiscreteTraitsInput.get().liabilitiesInput.isDirty()){
@@ -220,17 +219,17 @@ public class MorphologicalData extends CalculationNode{
             if (update || updateRateMatrix) {
                 // (4) transform the original trait values based on the trait rate matrix
                 // so that the transformed trait value are independent
-                transformTraitValues(traitValuesArr);
+                transformTraitValues(traitValuesArr, traitRateMatrix);
             }
         }
     }
 
 
 
-    private void transformTraitValues (double[] liabilities) {
+    private void transformTraitValues (double[] liabilities, double[] traitRateMatrix) {
         // (1) copy trait rate matrix to a 2D array
         for(int i = 0; i < totalTraitNr; i++){
-            System.arraycopy(nodeMathInput.get().getTraitRateMatrix(), i * totalTraitNr, cholesky[i], 0, totalTraitNr);
+            System.arraycopy(traitRateMatrix, i * totalTraitNr, cholesky[i], 0, totalTraitNr);
         }
 
         // (2) perform cholesky decomposition, R = L * L.transpose

@@ -98,7 +98,7 @@ public class MorphologicalDataTest {
         );
         String popSpecies = "sp1 sp2 sp3 sp4 sp5 sp6 sp7 sp8";
         population.initByName("value", popTraitData, "keys", popSpecies , "minordimension", nTraits);
-        morphData.initByName("traits", contTrait, "tree", tree, "transform", true, "nodeMath", nodeMath);
+        morphData.initByName("traits", contTrait, "tree", tree, "transform", true);
 
         // BM model parameters
         delta = new RealParameter(new Double[]{0.676132776830971});
@@ -107,7 +107,7 @@ public class MorphologicalDataTest {
 
         nodeMath.initByName("trait", morphData, "rateMatrix", sigmaMatrix, "tree", tree);
 
-        morphData.transformTraitData();
+        morphData.transformTraitData(nodeMath.getTraitRateMatrix());
         double[] transformedData = morphData.getMorphologicalData();
         double[] t1 = new double[nTraits];
         MatrixUtilsContra.getMatrixRow(transformedData, 0, nTraits, t1);

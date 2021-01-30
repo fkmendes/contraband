@@ -193,7 +193,7 @@ public class BMLikelihoodTest {
         );
         String pop = "sp1 sp2 sp3 sp4 sp5 sp6";
         population.initByName("value", popTraitData, "keys", pop, "minordimension", nTraits);
-        morphData.initByName("traits", contTrait, "tree", tree, "nodeMath", nodeMath);
+        morphData.initByName("traits", contTrait, "tree", tree);
 
         // branch rate model
         lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
@@ -247,7 +247,7 @@ public class BMLikelihoodTest {
         population.initByName("value", popTraitData, "keys", pop, "minordimension", nTraits);
 
         lambda = new RealParameter(new Double[]{0.604237758992233});
-        morphData.initByName("traits", contTrait, "tree", tree, "nodeMath", nodeMath, "population", population, "lambda", lambda);
+        morphData.initByName("traits", contTrait, "tree", tree, "population", population, "lambda", lambda);
 
         // branch rate model
         lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);

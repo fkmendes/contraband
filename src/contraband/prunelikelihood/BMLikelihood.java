@@ -22,7 +22,7 @@ public class BMLikelihood extends MorphologyLikelihood {
         nodeMathInput.get().operateOnTraitRateMatrix();
         nodeMathInput.get().operateOnInvTraitRateMatrix();
         if(transformData) {
-            traitInput.get().transformTraitData();
+            traitInput.get().transformTraitData(nodeMathInput.get().getTraitRateMatrix());
         }
 
     }
@@ -37,7 +37,7 @@ public class BMLikelihood extends MorphologyLikelihood {
         }
 
         // update trait values (liabilities)
-        traitInput.get().updateTraitValuesArr(updateSigmaMatrix);
+        traitInput.get().updateTraitValuesArr(updateSigmaMatrix, nodeMathInput.get().getTraitRateMatrix());
     }
 
     @Override
