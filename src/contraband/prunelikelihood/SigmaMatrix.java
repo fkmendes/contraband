@@ -45,6 +45,7 @@ public class SigmaMatrix extends CalculationNode {
     private int matDim;
 
     private double[] sigmaMatrix;
+    private double[] storedSigmaMatrix;
     private double[] rhoMatrix;
 
     private double [] upperMatrix;
@@ -78,6 +79,7 @@ public class SigmaMatrix extends CalculationNode {
 
         nTraits = traitInput.get().getTotalTraitNr();
         sigmaMatrix = new double[nTraits * nTraits];
+        storedSigmaMatrix = new double[nTraits * nTraits];
         rhoMatrix = new double[nTraits * nTraits];
         for (int i = 0; i < nTraits; i++){
             rhoMatrix[i * nTraits + i] = 1.0;
@@ -283,7 +285,14 @@ public class SigmaMatrix extends CalculationNode {
             }
             updateSigma = true;
         }
-        return updateRho || updateSigma;
+
+        boolean updateSigmaMatrix = updateRho || updateSigma;
+
+        if(updateSigmaMatrix){
+            populateSigmaMatrix();
+        }
+
+        return updateSigmaMatrix;
     }
 
     private void estimateCorrelationUsingShrinkage() {
@@ -326,6 +335,8 @@ public class SigmaMatrix extends CalculationNode {
             System.arraycopy(inverseRhoMatrix, 0, storedInverseRhoMatrix, 0, matDim);
         }
 
+        System.arraycopy(sigmaMatrix, 0, storedSigmaMatrix, 0, sigmaMatrix.length);
+
     }
 
     @Override
@@ -344,6 +355,10 @@ public class SigmaMatrix extends CalculationNode {
         double[] tempRhoValues = rhoValues;
         rhoValues = storedRhoValues;
         storedRhoValues = tempRhoValues;
+
+        double[] tempSigmaMatrix = sigmaMatrix;
+        sigmaMatrix = storedSigmaMatrix;
+        storedSigmaMatrix = tempSigmaMatrix;
 
         if(inverseMatrix) {
             double[] tempInverseRhoMatrix = inverseRhoMatrix;

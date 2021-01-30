@@ -441,11 +441,10 @@ public class GeneralNodeMath extends CalculationNode {
     }
 
     public boolean updateSigmaMatrix(){
-        boolean update = false;
-        if(rateMatrixInput.isDirty()){
-            rateMatrix.populateSigmaMatrix();
-            update = true;
-        }
+        boolean update = true;
+
+        rateMatrix.updateParameters();
+
         if(popMatrixInput.isDirty()){
             popMatrix.populateSigmaMatrix();
             popVarianceMatrix = popMatrix.getSigmaMatrix();
@@ -549,7 +548,7 @@ public class GeneralNodeMath extends CalculationNode {
 
         System.arraycopy(rootValuesVec, 0, storedRootValuesVec, 0, nTraits);
         System.arraycopy(invTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, traitDim);
-        System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, traitDim);
+        //System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, traitDim);
     }
 
     @Override
@@ -564,9 +563,9 @@ public class GeneralNodeMath extends CalculationNode {
         detInvTraitRateMat = storedDetInvTraitRateMat;
         storedDetInvTraitRateMat = tempDetInvTraitRateMat;
 
-        double[] tempTraitRateMatrix = traitRateMatrix;
-        traitRateMatrix = storedTraitRateMatrix;
-        storedTraitRateMatrix = tempTraitRateMatrix;
+        //double[] tempTraitRateMatrix = traitRateMatrix;
+        //traitRateMatrix = storedTraitRateMatrix;
+        //storedTraitRateMatrix = tempTraitRateMatrix;
 
         double[] tempInvTraitRateMatrix = invTraitRateMatrix;
         invTraitRateMatrix = storedInvTraitRateMatrix;

@@ -5,10 +5,8 @@ import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.clock.RateCategoryClockModel;
 import contraband.math.GeneralNodeMath;
-import contraband.prunelikelihood.BMLikelihood;
-import contraband.prunelikelihood.BMPruneShrinkageLikelihood;
-import contraband.prunelikelihood.MorphologicalData;
-import contraband.prunelikelihood.SigmaMatrix;
+import contraband.math.NodeMath;
+import contraband.prunelikelihood.*;
 import org.junit.Assert;
 import org.junit.Test;
 import outercore.parameter.KeyRealParameter;
@@ -273,6 +271,48 @@ public class BMLikelihoodTest {
         pcm.initByName("nodeMath", nodeMath, "tree", tree, "trait", morphData, "branchRateModel", lsc);
         double logP = pcm.calculateLogP();
         Assert.assertEquals(-56.1142534456042, logP, EPSILON);
+    }
+
+    @Test
+    public void testBMLikelihood1() {
+        // tree
+        treeStr = "((t2:0.1018784755,t3:0.1018784755):0.07645504575,t1:0.1783335212);";
+        spNames = "t2 t3 t1";
+        tree = new TreeParser(treeStr, false, false, true, 0);
+
+        // continuous trait values
+        nTraits = 2;
+        contTraitData = Arrays.asList(
+            -0.432903665204275, 2.92196906278985,
+            -1.55412737943192, 2.70418286048809,
+            -1.88985983258794, 1.95736899616511
+        );
+        contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
+        morphData.initByName("traits", contTrait, "tree", tree);
+
+        // branch rate model
+        lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
+
+        // BM model parameters
+        sigmasq = new RealParameter(new Double[]{0.9754197660108853, 1.3132860235875756});
+        correlation = new RealParameter(new Double[]{-0.3353041364179069});
+        sigmaMatrix.initByName("sigmasq", sigmasq, "correlation", correlation, "trait", morphData);
+        rootValues = new RealParameter(new Double[]{0.0, 0.01579198719846031});
+        nodeMath.initByName("trait", morphData, "rateMatrix", sigmaMatrix, "tree", tree, "rootValues", rootValues);
+
+        // prune likelihood
+        BMLikelihood pcm = new BMLikelihood();
+        pcm.initByName("nodeMath", nodeMath, "tree", tree, "trait", morphData, "branchRateModel", lsc);
+        double logP = pcm.calculateLogP();
+        Assert.assertEquals(-41.700397358260254, logP, EPSILON);
+
+        NodeMath nodeMath1 = new NodeMath();
+        nodeMath1.initByName("traits", contTrait, "sigmasq", sigmasq, "correlation", correlation, "rootValues", rootValues);
+
+        BMPruneLikelihood pcm1 = new BMPruneLikelihood();
+        pcm1.initByName("nodeMath", nodeMath1, "tree", tree, "traits", contTrait, "branchRateModel", lsc);
+        double lik2 = pcm1.calculateLogP();
+        Assert.assertEquals(-41.700397358260254, lik2, EPSILON);
     }
 
 
