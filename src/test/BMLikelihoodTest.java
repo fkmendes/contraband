@@ -5,7 +5,6 @@ import beast.core.parameter.RealParameter;
 import beast.util.TreeParser;
 import contraband.clock.RateCategoryClockModel;
 import contraband.math.GeneralNodeMath;
-import contraband.math.NodeMath;
 import contraband.prunelikelihood.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -273,19 +272,28 @@ public class BMLikelihoodTest {
         Assert.assertEquals(-56.1142534456042, logP, EPSILON);
     }
 
+    // from testBMPruneLikelihood11Species3TraitsSATree in BMPruneLikelihoodTest,java
     @Test
-    public void testBMLikelihood1() {
+    public void testBMLikelihoodSATree() {
         // tree
-        treeStr = "((t2:0.1018784755,t3:0.1018784755):0.07645504575,t1:0.1783335212);";
-        spNames = "t2 t3 t1";
+        treeStr = "(((((t3:0.1588129446,t4:0.1588129446):0.01705137773,((t6:0.09203097793,t7:0.09203097793):0.02043978126,t5:0.0):0.06339356319):0.06941873281,(t8:0.03465123152,t9:0.03465123152):0.2106318237):0.4596163207,t1:0.0):0.4342545645,((t10:0.01280757,t11:0.01280757):0.6723641561,t2:0.6851717261):0.4539822143);";
+        spNames = "t3 t4 t6 t7 t5 t8 t9 t1 t10 t11 t2" ;
         tree = new TreeParser(treeStr, false, false, true, 0);
 
         // continuous trait values
-        nTraits = 2;
+        nTraits = 3;
         contTraitData = Arrays.asList(
-            -0.432903665204275, 2.92196906278985,
-            -1.55412737943192, 2.70418286048809,
-            -1.88985983258794, 1.95736899616511
+                -1.21564787174142, -4.03137227081675, -0.658138349771025,
+                -1.1851671823634, -3.60553672704412, -0.0445842979883116,
+                -0.694393171280324, -3.03652095560971, 0.521821220721283,
+                -0.590751944909478, -3.44783973931706, -0.596693734056411,
+                -0.884946580491066, -3.48302742703454, -0.173523045052619,
+                -0.639187501019874, -2.23470805810516, -0.0197703417294821,
+                -0.705615140755287, -2.06463132261412, 0.136084231018102,
+                -0.543347975313145, -1.45735336840457, -0.883187635997939,
+                -0.41310125318572, 2.02935389582742, -0.398893370910344,
+                -0.578200681462636, 2.04503536970991, -0.596179783025397,
+                0.10299350447178, 0.793454794733989, 0.407591907174602
         );
         contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
         morphData.initByName("traits", contTrait, "tree", tree);
@@ -294,26 +302,16 @@ public class BMLikelihoodTest {
         lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
 
         // BM model parameters
-        sigmasq = new RealParameter(new Double[]{0.9754197660108853, 1.3132860235875756});
-        correlation = new RealParameter(new Double[]{-0.3353041364179069});
+        sigmasq = new RealParameter(new Double[]{ 0.330573809129692, 2.10107882032566, 1.16247744000489});
+        correlation = new RealParameter(new Double[]{0.431864494796763, 0.269799734818774, 0.265743456802657});
         sigmaMatrix.initByName("sigmasq", sigmasq, "correlation", correlation, "trait", morphData);
-        rootValues = new RealParameter(new Double[]{0.0, 0.01579198719846031});
-        nodeMath.initByName("trait", morphData, "rateMatrix", sigmaMatrix, "tree", tree, "rootValues", rootValues);
+        nodeMath.initByName("trait", morphData, "rateMatrix", sigmaMatrix, "tree", tree);
 
         // prune likelihood
         BMLikelihood pcm = new BMLikelihood();
         pcm.initByName("nodeMath", nodeMath, "tree", tree, "trait", morphData, "branchRateModel", lsc);
         double logP = pcm.calculateLogP();
-        Assert.assertEquals(-41.700397358260254, logP, EPSILON);
-
-        NodeMath nodeMath1 = new NodeMath();
-        nodeMath1.initByName("traits", contTrait, "sigmasq", sigmasq, "correlation", correlation, "rootValues", rootValues);
-
-        BMPruneLikelihood pcm1 = new BMPruneLikelihood();
-        pcm1.initByName("nodeMath", nodeMath1, "tree", tree, "traits", contTrait, "branchRateModel", lsc);
-        double lik2 = pcm1.calculateLogP();
-        Assert.assertEquals(-41.700397358260254, lik2, EPSILON);
+        Assert.assertEquals(-19.6436871314934, logP, EPSILON);
     }
-
 
 }
