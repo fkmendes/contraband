@@ -56,6 +56,11 @@ public abstract class MorphologyLikelihood extends Distribution {
         // initiate the likelihood for sampled ancestors
         nodeMath.setLikelihoodForSampledAncestors(0.0);
 
+        if(nodeMath.getMatrixParamsFlag()) {
+            // initialized to be false because variance matrix will be tested if nearly singular
+            nodeMath.setSingularMatrixFlag(false);
+        }
+
         // prune the tree by starting from the root
         prune(tree.getRoot(), traits.getTotalTraitNr(), traits.getMorphologicalData(), branchRateModel, nodeMath);
 

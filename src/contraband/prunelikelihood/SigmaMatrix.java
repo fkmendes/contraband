@@ -257,7 +257,7 @@ public class SigmaMatrix extends CalculationNode {
         }
     }
 
-    public boolean updateParameters(boolean shareRho){
+    public boolean updateParameters(boolean sigmaValueType){
         boolean updateRho = false;
         boolean updateSigma = false;
 
@@ -289,7 +289,7 @@ public class SigmaMatrix extends CalculationNode {
         boolean updateSigmaMatrix = updateRho || updateSigma;
 
         if(updateSigmaMatrix){
-                if(!shareRho) {
+                if(!sigmaValueType) {
                     // update the sigma matrix using rho values and sigma values
                     populateSigmaMatrix();
                 } else {

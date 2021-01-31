@@ -42,7 +42,9 @@ public class BMLikelihood extends MorphologyLikelihood {
     public double calculateLogP (){
         boolean update = updateParameters();
 
-        if(update) {
+
+        //This is only for non-matrix parameterization
+        if(!nodeMathInput.get().getMatrixParamsFlag() && update) {
             nodeMathInput.get().checkNearlySingularMatrix();
 
             if(nodeMathInput.get().getSingularMatrixFlag()){
@@ -52,6 +54,7 @@ public class BMLikelihood extends MorphologyLikelihood {
             nodeMathInput.get().operateOnTraitRateMatrix();
             nodeMathInput.get().operateOnInvTraitRateMatrix();
         }
+
 
         // update trait values (liabilities)
         traitInput.get().updateTraitValuesArr(update, nodeMathInput.get().getTraitRateMatrix());

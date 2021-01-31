@@ -397,6 +397,10 @@ public class GeneralNodeMath extends CalculationNode {
         MatrixUtilsContra.setMatrixRow(nodeExpectation, expectp, parentIdx, nTraits);
     }
 
+    public void setSingularMatrixFlag(boolean value) {
+        singularMatrix  = value;
+    }
+
     //
     public void populateRootValuesVec(int rootIdx) {
         if(sampleRoot && rootValuesInput.isDirty()) {
@@ -450,12 +454,12 @@ public class GeneralNodeMath extends CalculationNode {
     public boolean updateSigmaMatrix(){
         boolean update1 = false;
         if(rateMatrixInput.isDirty()) {
-            update1 = rateMatrix.updateParameters(shareRho);
+            update1 = rateMatrix.updateParameters(!shareRho && matrixParams);
         }
 
         boolean update2 = false;
         if(popMatrixInput.isDirty()){
-            update2 = popMatrix.updateParameters(shareRho);
+            update2 = popMatrix.updateParameters(!shareRho && matrixParams);
         }
         return update1 || update2;
     }
@@ -466,9 +470,18 @@ public class GeneralNodeMath extends CalculationNode {
     public void checkNearlySingularMatrix () {
         // NOTE: if matrix parameterization
         // we need to check the variance matrix
-        for(int i = 0; i < nTraits; i++){
-            for (int j = 0; j < nTraits; j++){
-                realMatrix.setEntry(i, j, rateMatrixInput.get().getSigmaMatrix()[i * nTraits + j]);
+        if(matrixParams) {
+            for (int i = 0; i < nTraits; i++) {
+                for (int j = 0; j < nTraits; j++) {
+                    realMatrix.setEntry(i, j, varianceMatrix[i * nTraits + j]);
+                }
+            }
+        } else {
+            // otherwise we check the trait rate matrix
+            for (int i = 0; i < nTraits; i++) {
+                for (int j = 0; j < nTraits; j++) {
+                    realMatrix.setEntry(i, j, rateMatrixInput.get().getSigmaMatrix()[i * nTraits + j]);
+                }
             }
         }
         double[] singularValues = new SingularValueDecomposition(realMatrix).getSingularValues();
@@ -499,6 +512,8 @@ public class GeneralNodeMath extends CalculationNode {
     }
 
     public void operateOnVarianceMatrix() {
+        checkNearlySingularMatrix();
+
         // LUDecomposition
         LUDecompositionForArray.ArrayLUDecomposition(varianceMatrix, lu, pivot, evenSingular, nTraits);
 
