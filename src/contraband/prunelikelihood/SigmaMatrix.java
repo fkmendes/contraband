@@ -7,8 +7,6 @@ import contraband.math.LUDecompositionForArray;
 import contraband.math.MatrixUtilsContra;
 import contraband.utils.MorphologyLikelihoodUtils;
 import contraband.utils.NodeMathUtils;
-import contraband.utils.PruneLikelihoodUtils;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.util.FastMath;
 import outercore.parameter.KeyRealParameter;
@@ -61,6 +59,7 @@ public class SigmaMatrix extends CalculationNode {
     private double[] storedSigmaValues;
     private double[] storedRhoValues;
     private double[] storedInverseRhoMatrix;
+    private double[] storedRhoMatrix;
 
     private double[] lu;
     private int[] pivot;
@@ -84,6 +83,7 @@ public class SigmaMatrix extends CalculationNode {
         for (int i = 0; i < nTraits; i++){
             rhoMatrix[i * nTraits + i] = 1.0;
         }
+        storedRhoMatrix = new double[nTraits * nTraits];
 
         // get elements on the diagonal
         if(oneRateOnly) {
@@ -257,7 +257,7 @@ public class SigmaMatrix extends CalculationNode {
         }
     }
 
-    public boolean updateParameters(){
+    public boolean updateParameters(boolean shareRho){
         boolean updateRho = false;
         boolean updateSigma = false;
 
@@ -289,7 +289,17 @@ public class SigmaMatrix extends CalculationNode {
         boolean updateSigmaMatrix = updateRho || updateSigma;
 
         if(updateSigmaMatrix){
-            populateSigmaMatrix();
+                if(!shareRho) {
+                    // update the sigma matrix using rho values and sigma values
+                    populateSigmaMatrix();
+                } else {
+                    // if shared rho between trait rate matrix and population variance
+                    // we only update the shared rate/variance among traits and the rho matrix
+                    populateSigmaValue();
+                    if (rhoInput.get() != null) {
+                        populateRhoMatrix();
+                    }
+                }
         }
         return updateSigmaMatrix;
     }
@@ -335,6 +345,7 @@ public class SigmaMatrix extends CalculationNode {
         }
 
         System.arraycopy(sigmaMatrix, 0, storedSigmaMatrix, 0, sigmaMatrix.length);
+        System.arraycopy(rhoMatrix, 0, storedRhoMatrix, 0, storedRhoMatrix.length);
 
     }
 
@@ -358,6 +369,10 @@ public class SigmaMatrix extends CalculationNode {
         double[] tempSigmaMatrix = sigmaMatrix;
         sigmaMatrix = storedSigmaMatrix;
         storedSigmaMatrix = tempSigmaMatrix;
+
+        double[] tempRhoMatrix = rhoMatrix;
+        rhoMatrix = storedRhoMatrix;
+        storedRhoMatrix = tempRhoMatrix;
 
         if(inverseMatrix) {
             double[] tempInverseRhoMatrix = inverseRhoMatrix;

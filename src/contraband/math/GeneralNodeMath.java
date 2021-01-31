@@ -4,7 +4,6 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
-import beast.evolution.substitutionmodel.SYM;
 import beast.evolution.tree.Tree;
 import contraband.prunelikelihood.MorphologicalData;
 import contraband.prunelikelihood.SigmaMatrix;
@@ -13,7 +12,6 @@ import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.apache.commons.math3.util.FastMath;
-
 import java.util.Arrays;
 
 public class GeneralNodeMath extends CalculationNode {
@@ -21,7 +19,7 @@ public class GeneralNodeMath extends CalculationNode {
     final public Input<SigmaMatrix> rateMatrixInput = new Input<>("rateMatrix", "Trait evolutionary variance-covariance matrix, i.e. trait rate matrix.", Input.Validate.REQUIRED);
     final public Input<SigmaMatrix> popMatrixInput = new Input<>("popMatrix", "Intraspecific variance-covariance matrix, i.e. population noise.");
     final public Input<Tree> treeInput = new Input<>("tree", "Phylogenetic tree.");
-    final public Input<Boolean> shareRhoInput = new Input<>("shareCorrelation", "TRUE, if correlations are shared between rateMatrix and popMatrix.", true);
+    final public Input<Boolean> shareRhoInput = new Input<>("shareCorrelation", "TRUE, if correlations are shared between rateMatrix and popMatrix.", false);
     final public Input<RealParameter> rootValuesInput = new Input<>("rootValues", "Trait values at the root.");
 
 
@@ -145,6 +143,12 @@ public class GeneralNodeMath extends CalculationNode {
                 popMatrix.populateSigmaValue();
             }
             popVarianceMatrix = new double[paramDim];
+        }
+        if(popVariance && !matrixParams) {
+            // taking intraspecific variance into account
+            // all traits share (1) the same evolutionary rate (2) the same trait correlations (3) the same intraspecific variance
+            rateMatrix.populateRhoMatrix();
+            rateMatrix.populateSigmaValue();
         }
 
         // get root values
@@ -410,9 +414,6 @@ public class GeneralNodeMath extends CalculationNode {
         if(popVariance && !matrixParams){
             // taking intraspecific variance into account
             // all traits share (1) the same evolutionary rate (2) the same trait correlations (3) the same intraspecific variance
-            rateMatrix.populateRhoMatrix();
-            rateMatrix.populateSigmaValue();
-            //traitRateMatrix = rateMatrix.getRhoMatrix();
             // LUDecomposition
             LUDecompositionForArray.ArrayLUDecomposition(rateMatrix.getRhoMatrix(), lu, pivot, evenSingular, nTraits);
         } else {
@@ -447,21 +448,24 @@ public class GeneralNodeMath extends CalculationNode {
     }
 
     public boolean updateSigmaMatrix(){
-        boolean update = false;
+        boolean update1 = false;
         if(rateMatrixInput.isDirty()) {
-            update = rateMatrix.updateParameters();
+            update1 = rateMatrix.updateParameters(shareRho);
         }
 
+        boolean update2 = false;
         if(popMatrixInput.isDirty()){
-            popMatrix.updateParameters();
+            update2 = popMatrix.updateParameters(shareRho);
         }
-        return update;
+        return update1 || update2;
     }
 
     /*
      * matrixParams operations
      */
     public void checkNearlySingularMatrix () {
+        // NOTE: if matrix parameterization
+        // we need to check the variance matrix
         for(int i = 0; i < nTraits; i++){
             for (int j = 0; j < nTraits; j++){
                 realMatrix.setEntry(i, j, rateMatrixInput.get().getSigmaMatrix()[i * nTraits + j]);
