@@ -28,25 +28,33 @@ public class BMLikelihood extends MorphologyLikelihood {
     }
 
     @Override
-    protected void updateParameters() {
+    protected boolean updateParameters() {
         // update BM model parameters
+        boolean updateTraitRateMatrix = false;
         if(nodeMathInput.isDirty()){
-            nodeMathInput.get().updateSigmaMatrix();
+            updateTraitRateMatrix  = nodeMathInput.get().updateSigmaMatrix();
+        }
+
+        return updateTraitRateMatrix;
+    }
+
+    @Override
+    public double calculateLogP (){
+        boolean update = updateParameters();
+
+        if(update) {
+            nodeMathInput.get().checkNearlySingularMatrix();
+
+            if(nodeMathInput.get().getSingularMatrixFlag()){
+                return Double.NEGATIVE_INFINITY;
+            }
+
             nodeMathInput.get().operateOnTraitRateMatrix();
             nodeMathInput.get().operateOnInvTraitRateMatrix();
         }
 
         // update trait values (liabilities)
-        traitInput.get().updateTraitValuesArr(true, nodeMathInput.get().getTraitRateMatrix());
-    }
-
-    @Override
-    public double calculateLogP (){
-        updateParameters();
-
-        if(nodeMathInput.get().getSingularMatrixFlag()){
-            return Double.NEGATIVE_INFINITY;
-        }
+        traitInput.get().updateTraitValuesArr(update, nodeMathInput.get().getTraitRateMatrix());
 
         super.populateLogP();
 

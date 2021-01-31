@@ -42,7 +42,7 @@ public abstract class MorphologyLikelihood extends Distribution {
         traits = traitInput.get();
     }
 
-    abstract protected void updateParameters();
+    abstract protected boolean updateParameters();
 
     public double getLogP() { return logP; }
 
@@ -103,16 +103,12 @@ public abstract class MorphologyLikelihood extends Distribution {
             // (1) child is a normal tip
             if (child.isLeaf() && branchLength != 0.0) {
 
-                //nodeMath.setVarianceForTip(childIdx,nodeMath.getVarianceForNode(childIdx) + 1);
-
-                //PruneLikelihoodUtils.populateACEf(nodeMath, nodeMath.getVarianceForNode(childIdx), nTraits, childIdx);
                 populateAbCdEfForTips(nodeMath, branchLength, nTraits, childIdx);
 
                 populateLmrForTips(nodeMath, traitValuesArr, nTraits, childIdx);
 
                 // add up to this node
                 MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLMatForNode(childIdx), thisNodeL);
-                //thisNodeL += nodeMath.getLForNode(childIdx);
                 thisNodeR += nodeMath.getRForNode(childIdx);
                 MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
 
@@ -124,7 +120,6 @@ public abstract class MorphologyLikelihood extends Distribution {
                     // (2) child is a normal internal node, i.e. child does not have a sampled ancestor
                     if (!child.getChild(0).isDirectAncestor() && !child.getChild(1).isDirectAncestor()) {
 
-                        //PruneLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, childIdx);
                         populateAbCdEfForInternalNodes(nodeMath, branchLength, nTraits, childIdx);
 
                         prune(child, nTraits, traitValuesArr, pcmc, nodeMath);
@@ -134,7 +129,6 @@ public abstract class MorphologyLikelihood extends Distribution {
                         // add up to this node
                         thisNodeR += nodeMath.getRForNode(childIdx);
                         MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
-                        //thisNodeL += nodeMath.getLForNode(childIdx);
                         MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLMatForNode(childIdx), thisNodeL);
 
                     } else {
@@ -147,13 +141,11 @@ public abstract class MorphologyLikelihood extends Distribution {
                         }
                         int gcSANr = gcSA.getNr();
 
-                        //PruneLikelihoodUtils.populateACEf(nodeMath, branchLength, nTraits, gcSANr);
                         populateAbCdEfForTips(nodeMath, branchLength, nTraits, gcSANr);
 
                         populateLmrForTips(nodeMath, traitValuesArr, nTraits, gcSANr);
 
                         // add up to this node
-                        //thisNodeL += nodeMath.getLForNode(gcSANr);
                         MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLMatForNode(gcSANr), thisNodeL);
                         thisNodeR += nodeMath.getRForNode(gcSANr);
                         MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);

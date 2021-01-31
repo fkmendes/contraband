@@ -4,6 +4,7 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
+import beast.evolution.substitutionmodel.SYM;
 import beast.evolution.tree.Tree;
 import contraband.prunelikelihood.MorphologicalData;
 import contraband.prunelikelihood.SigmaMatrix;
@@ -94,13 +95,14 @@ public class GeneralNodeMath extends CalculationNode {
     private double[] rateScaler;
     private double[] aPlusLInverse;
     private double logNegativeTwoAplusL;
-
     private double[] popVarianceMatrix;
 
     private double storedDetTraitRateMat;
     private double [] storedInvTraitRateMatrix;
     private double storedDetInvTraitRateMat;
     private double [] storedTraitRateMatrix;
+    private double [] storedVarianceMatrix;
+    private double [] storedInvVarianceMatrix;
 
     @Override
     public void initAndValidate() {
@@ -117,6 +119,7 @@ public class GeneralNodeMath extends CalculationNode {
         // get trait rate matrix
         rateMatrix = rateMatrixInput.get();
         rateMatrix.populateSigmaMatrix();
+        realMatrix = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
 
         // get intraspecific variance-covariance matrix
         if(popMatrixInput.get() == null){
@@ -142,7 +145,6 @@ public class GeneralNodeMath extends CalculationNode {
                 popMatrix.populateSigmaValue();
             }
             popVarianceMatrix = new double[paramDim];
-            popVarianceMatrix = popMatrix.getSigmaMatrix();
         }
 
         // get root values
@@ -168,8 +170,6 @@ public class GeneralNodeMath extends CalculationNode {
         initForSampledAncestors();
         initVarianceAndExpectation();
         initTraitRateMatrix();
-
-        traitRateMatrix = rateMatrix.getSigmaMatrix();
     }
 
     // initialise
@@ -244,8 +244,9 @@ public class GeneralNodeMath extends CalculationNode {
     private void initMatrixParams(){
         varianceMatrix = new double [traitDim];
         invVarianceMatrix = new double [traitDim];
+        storedVarianceMatrix = new double [traitDim];
+        storedInvVarianceMatrix = new double [traitDim];
         rateScaler = new double[traitDim];
-        realMatrix = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         aPlusLInverse = new double [traitDim];
     }
 
@@ -314,7 +315,7 @@ public class GeneralNodeMath extends CalculationNode {
 
     public boolean getPopVarianceFlag() { return popVariance; }
 
-    public double[] getPopVarianceMatrix () { return popVarianceMatrix; }
+    public double[] getPopVarianceMatrix () { return popMatrix.getSigmaMatrix(); }
 
     public double getVarianceMatrixDet() { return detVarianceMat; }
 
@@ -445,28 +446,25 @@ public class GeneralNodeMath extends CalculationNode {
         }
     }
 
-    public void updateSigmaMatrix(){
+    public boolean updateSigmaMatrix(){
+        boolean update = false;
         if(rateMatrixInput.isDirty()) {
-            rateMatrix.updateParameters();
+            update = rateMatrix.updateParameters();
         }
 
         if(popMatrixInput.isDirty()){
             popMatrix.updateParameters();
-            popVarianceMatrix = popMatrix.getSigmaMatrix();
         }
-            //popMatrix.populateSigmaMatrix();
-            //popVarianceMatrix = popMatrix.getSigmaMatrix();
-        //}
+        return update;
     }
 
     /*
      * matrixParams operations
      */
     public void checkNearlySingularMatrix () {
-        realMatrix = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         for(int i = 0; i < nTraits; i++){
             for (int j = 0; j < nTraits; j++){
-                realMatrix.setEntry(i, j, traitRateMatrix[i * nTraits + j]);
+                realMatrix.setEntry(i, j, rateMatrixInput.get().getSigmaMatrix()[i * nTraits + j]);
             }
         }
         double[] singularValues = new SingularValueDecomposition(realMatrix).getSingularValues();
@@ -488,12 +486,12 @@ public class GeneralNodeMath extends CalculationNode {
     }
 
     public void populateVarianceMatrixForTips(double branchLength){
-        MatrixUtilsContra.vectorMapMultiply(traitRateMatrix, branchLength, rateScaler);
-        MatrixUtilsContra.vectorAdd(rateScaler, popVarianceMatrix, varianceMatrix);
+        MatrixUtilsContra.vectorMapMultiply(rateMatrix.getSigmaMatrix(), branchLength, rateScaler);
+        MatrixUtilsContra.vectorAdd(rateScaler, popMatrix.getSigmaMatrix(), varianceMatrix);
     }
 
     public void populateVarianceMatrixForIntNodes(double branchLength){
-        MatrixUtilsContra.vectorMapMultiply(traitRateMatrix, branchLength, varianceMatrix);
+        MatrixUtilsContra.vectorMapMultiply(rateMatrix.getSigmaMatrix(), branchLength, varianceMatrix);
     }
 
     public void operateOnVarianceMatrix() {
@@ -513,10 +511,6 @@ public class GeneralNodeMath extends CalculationNode {
         }
 
         detVarianceMat = FastMath.log(det);
-
-        // LUDecomposition
-        //LUDecompositionForArray.ArrayLUDecomposition(invVarianceMatrix, lu, pivot, evenSingular, nTraits);
-        //detInvVarianceMat = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
     }
 
     public void operateOnAPlusLMatrixForNode (int nodeIdx){
@@ -555,7 +549,11 @@ public class GeneralNodeMath extends CalculationNode {
 
         System.arraycopy(rootValuesVec, 0, storedRootValuesVec, 0, nTraits);
         System.arraycopy(invTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, traitDim);
-        //System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, traitDim);
+
+        if(matrixParams) {
+            System.arraycopy(varianceMatrix, 0, storedVarianceMatrix, 0, traitDim);
+            System.arraycopy(invVarianceMatrix, 0, storedInvVarianceMatrix, 0, traitDim);
+        }
     }
 
     @Override
@@ -570,13 +568,19 @@ public class GeneralNodeMath extends CalculationNode {
         detInvTraitRateMat = storedDetInvTraitRateMat;
         storedDetInvTraitRateMat = tempDetInvTraitRateMat;
 
-        //double[] tempTraitRateMatrix = traitRateMatrix;
-        //traitRateMatrix = storedTraitRateMatrix;
-        //storedTraitRateMatrix = tempTraitRateMatrix;
-
         double[] tempInvTraitRateMatrix = invTraitRateMatrix;
         invTraitRateMatrix = storedInvTraitRateMatrix;
         storedInvTraitRateMatrix = tempInvTraitRateMatrix;
+
+        if(matrixParams) {
+            double[] tempInvVarianceMatrix = invVarianceMatrix;
+            invVarianceMatrix = storedInvVarianceMatrix;
+            storedInvVarianceMatrix = tempInvVarianceMatrix;
+
+            double[] tempVarianceMatrix = varianceMatrix;
+            varianceMatrix = storedVarianceMatrix;
+            storedVarianceMatrix = tempVarianceMatrix;
+        }
 
         double[] tempRootValuesVec = rootValuesVec;
         rootValuesVec= storedRootValuesVec;
