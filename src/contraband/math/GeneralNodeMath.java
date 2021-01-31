@@ -468,6 +468,7 @@ public class GeneralNodeMath extends CalculationNode {
      * matrixParams operations
      */
     public void checkNearlySingularMatrix () {
+        singularMatrix = false;
         // NOTE: if matrix parameterization
         // we need to check the variance matrix
         if(matrixParams) {
