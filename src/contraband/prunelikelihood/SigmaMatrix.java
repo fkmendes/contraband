@@ -77,6 +77,9 @@ public class SigmaMatrix extends CalculationNode {
         useShrinkage = useShrinkageInput.get();
 
         nTraits = traitInput.get().getTotalTraitNr();
+        initArrays();
+        initUDecomposition();
+
         sigmaMatrix = new double[nTraits * nTraits];
         storedSigmaMatrix = new double[nTraits * nTraits];
         rhoMatrix = new double[nTraits * nTraits];
@@ -107,11 +110,8 @@ public class SigmaMatrix extends CalculationNode {
             inverseRhoMatrix = new double[nTraits * nTraits];
             storedRhoValues = new double[nTraits * nTraits];
             storedInverseRhoMatrix = new double[nTraits * nTraits];
-
-            if(inverseRhoInput.get().getDimension() != nTraits * nTraits) {
-                inverseRhoInput.get().setDimension(nTraits * nTraits);
-            }
-            inverseRhoMatrix = inverseRhoInput.get().getDoubleValues();
+            initInverseRho();
+            populateRhoValuesFromInverseMatrix();
         } else {
             // if not inverse, it is an upper diagonal matrix
             rhoValues = new double[nTraits * (nTraits - 1) / 2];
@@ -142,9 +142,6 @@ public class SigmaMatrix extends CalculationNode {
                 rhoValues = rhoInput.get().getDoubleValues();
             }
         }
-
-        initArrays();
-        initUDecomposition();
     }
 
     private void initArrays() {
@@ -162,6 +159,25 @@ public class SigmaMatrix extends CalculationNode {
         // create an identity matrix for LUDecomposition
         for (int i = 0; i < nTraits; i++) {
             MatrixUtilsContra.setMatrixEntry(identityMatrix, i, i, 1.0, nTraits);
+        }
+    }
+
+    private void initInverseRho(){
+        if(inverseRhoInput.get().getDimension() != matDim) {
+            inverseRhoInput.get().setDimension(matDim);
+            // initiate an identity matrix
+            for (int i = 0; i < matDim; i++){
+                if(i % (nTraits + 1) == 0) {
+                    inverseRhoInput.get().setValue(i, 1.0);
+                    inverseRhoMatrix[i] = 1.0;
+                } else {
+                    inverseRhoInput.get().setValue(i, 0.0);
+                    inverseRhoMatrix[i] = 0.0;
+                }
+            }
+        } else {
+            // get from input
+            inverseRhoMatrix = inverseRhoInput.get().getDoubleValues();
         }
     }
 
@@ -289,10 +305,14 @@ public class SigmaMatrix extends CalculationNode {
         boolean updateSigmaMatrix = updateRho || updateSigma;
 
         if(updateSigmaMatrix){
+                if(inverseMatrix) {
+                    populateRhoValuesFromInverseMatrix();
+                }
                 if(!sigmaValueType) {
                     // update the sigma matrix using rho values and sigma values
                     populateSigmaMatrix();
-                } else {
+                    }
+                else {
                     // if shared rho between trait rate matrix and population variance
                     // we only update the shared rate/variance among traits and the rho matrix
                     populateSigmaValue();
@@ -313,8 +333,6 @@ public class SigmaMatrix extends CalculationNode {
     }
 
     public void populateRhoValuesFromInverseMatrix() {
-        inverseRhoMatrix = inverseRhoInput.get().getDoubleValues();
-
         // to get the original rho matrix because it will be used when calculating r parameter
         LUDecompositionForArray.ArrayLUDecomposition(inverseRhoMatrix, lu, pivot, evenSingular, nTraits);
         detInvRhoMatrix = LUDecompositionForArray.getDeterminant(lu, nTraits, evenSingular);
