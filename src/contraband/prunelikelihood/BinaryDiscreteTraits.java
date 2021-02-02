@@ -16,8 +16,9 @@ public class BinaryDiscreteTraits extends ThresholdModel{
         nTraits = getLiabilityNr();
         if (liabilitiesInput.get().getDimension() != nSpecies * nTraits){
             liabilitiesInput.get().setDimension(nSpecies * nTraits);
+            initiateLiabilities();
         }
-        initiateLiabilities();
+
     }
 
     @Override
