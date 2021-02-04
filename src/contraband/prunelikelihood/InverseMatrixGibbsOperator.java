@@ -105,7 +105,7 @@ public class InverseMatrixGibbsOperator extends Operator {
         }
     }
 
-    private double[] getOperationScaleMatrixAndSetObservationCount() {
+    public double[] getOperationScaleMatrixAndSetObservationCount() {
 
         // is a normal-normal-wishart model
         incrementOuterProduct(S, likelihood);
@@ -127,7 +127,7 @@ public class InverseMatrixGibbsOperator extends Operator {
         return inverseS2Plus;
     }
 
-    private void incrementOuterProduct(double[]S, LiabilityLikelihood likelihood) {
+    public void incrementOuterProduct(double[]S, LiabilityLikelihood likelihood) {
         // the root values
         // likelihood.getDistribution().getMean();
         double[] mean = nodeMathInput.get().getRootValuesArr();

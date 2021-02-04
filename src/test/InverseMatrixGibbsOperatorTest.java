@@ -63,16 +63,26 @@ public class InverseMatrixGibbsOperatorTest {
 
         RealParameter scaleMatrix = new RealParameter(new Double[] {6.0, 1.74420791678131, 0.393594525754452, -3.25641066860408, -1.13246589247138, 0.178297321312129, 1.74420791678131, 6.0, 4.30627778358757, 0.638826004229484, 0.421550226397813, -1.1075679268688, 0.393594525754452, 4.30627778358757, 6.0, 1.95473941415548, -1.3254970824346, -3.68255945853889, -3.25641066860408, 0.638826004229484, 1.95473941415548, 6.0, 1.28835505899042, 0.316137732937932, -1.13246589247138, 0.421550226397813, -1.3254970824346, 1.28835505899042, 6.0, 0.69566449150443, 0.178297321312129, -1.1075679268688, -3.68255945853889, 0.316137732937932, 0.69566449150443, 6.0});
         WishartDistribution distribution = new WishartDistribution();
-        distribution.initByName("df", 6, "scaleMatrix", scaleMatrix);
+        distribution.initByName("df", 6.0, "scaleMatrix", scaleMatrix);
 
-        RealParameter values = new RealParameter(new Double[]{1.0});
+        RealParameter inverseMatrix = new RealParameter(new Double[]{1.0});
         InverseMatrixGibbsOperator operator = new InverseMatrixGibbsOperator();
         operator.initByName("likelihood", likelihood, "nodeMath", nodeMath,
-                "dimension", 4,
+                "dimension", 6,
                 "distr", distribution,
-                "values", values);
+                "values", inverseMatrix, "weight",1.0);
 
-        operator.proposal();
+        double hastingsRatio = operator.proposal();
+        System.out.println("Hastings ratio = " + hastingsRatio);
 
+        double[] proposedValues = inverseMatrix.getDoubleValues();
+        System.out.println("Proposed values " + "\n" + Arrays.toString(proposedValues));
+
+        double[] S = new double[nTraits * nTraits];
+        operator.incrementOuterProduct(S, likelihood);
+        System.out.println(Arrays.toString(S));
+
+        double[] inverseS2Plus = operator.getOperationScaleMatrixAndSetObservationCount();
+        System.out.println(Arrays.toString(inverseS2Plus));
     }
 }

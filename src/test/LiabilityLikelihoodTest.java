@@ -11,6 +11,7 @@ import contraband.clock.RateCategoryClockModel;
 import contraband.math.NodeMath;
 import contraband.prunelikelihood.BinaryDiscreteTraits;
 import contraband.prunelikelihood.LiabilityLikelihood;
+import contraband.prunelikelihood.OrderedDiscreteTraits;
 import org.junit.Assert;
 import org.junit.Test;
 import outercore.parameter.KeyRealParameter;
@@ -36,7 +37,8 @@ public class LiabilityLikelihoodTest {
     private final IntegerParameter colorAssignments = new IntegerParameter(new Integer[] {0});
     private final RealParameter colorValues = new RealParameter(new Double[] {1.0});
     private final RateCategoryClockModel lsc = new RateCategoryClockModel();
-/*
+
+    //testBMPruneLikelihood10Species2TraitsSATree in BMPruneLikelihoodTest
     @Test
     public void testLiabilityLikelihoodInverseMatrix() {
         // tree with sampled ancestors
@@ -74,22 +76,22 @@ public class LiabilityLikelihoodTest {
         double lnLk = PCM1.calculateLogP();
         Assert.assertEquals(-33.6679664296583, lnLk, EPSILON);
     }
-*/
+
     @Test
     public void testContBinaryTraitsLikelihood() {
-        // tree with sampled ancestors
+        // tree
         treeStr = "(((t3:1.275476423,(t4:0.5941849179,(t5:0.3540775541,t6:0.3540775541):0.2401073638):0.6812915054):0.02631446592,t2:1.301790889):1.054321576,t1:2.356112466);";
         tree = new TreeParser(treeStr, false, false, true, 0);
         spNames = "t3 t4 t5 t6 t2 t1";
 
-        // trait values
+        // continuous trait values
         nTraits = 1;
         data = Arrays.asList(
                 0.82814124000102, -1.09500909925769, 1.15728364543577, 1.52672957333196, 1.69564041037902, -2.7406878251688
         );
         traitValues.initByName("value", data, "keys", spNames, "minordimension", nTraits);
 
-        // each species has four binary discrete traits
+        // each species has one binary discrete trait
         List<Sequence> sequenceList = new ArrayList<>(6);
         Sequence sp1 = new Sequence("t1", "1");
         Sequence sp2 = new Sequence("t2", "0");
@@ -138,5 +140,62 @@ public class LiabilityLikelihoodTest {
         PCM1.initByName("nodeMath", nodeMath, "tree", tree, "traits", traitValues, "binaryDiscreteTraits", discreteTraits, "branchRateModel", lsc);
         double lnLk = PCM1.calculateLogP();
         Assert.assertEquals(-16.7994076650072, lnLk, EPSILON);
+    }
+
+    @Test
+    public void testOrderedTraitsLikelihood(){
+        // tree
+        treeStr = "(((t3:0.7371190954,(t4:0.1920858911,t5:0.1920858911):0.5450332043):0.02105157274,t2:0.7581706681):0.8434572611,t1:1.601627929);";
+        tree = new TreeParser(treeStr, false, false, true, 0);
+        spNames = "t3 t4 t5 t2 t1";
+
+        // each species has one ordered discrete trait
+        List<Sequence> sequenceList = new ArrayList<>(5);
+        Sequence sp1 = new Sequence("t1", "3");
+        Sequence sp2 = new Sequence("t2", "0");
+        Sequence sp3 = new Sequence("t3", "2");
+        Sequence sp4 = new Sequence("t4", "3");
+        Sequence sp5 = new Sequence("t5", "1");
+        sequenceList.add(0, sp1);
+        sequenceList.add(1, sp2);
+        sequenceList.add(2, sp3);
+        sequenceList.add(3, sp4);
+        sequenceList.add(4, sp5);
+
+        UserDataType userDataType1 = new UserDataType();
+        userDataType1.initByName("characterName", "ch1","codeMap", "0=0, 1=1, 2=2, 3=3", "states", 4, "value", "0 absent, 1 small, 2 medium, 3 large");
+
+        List<UserDataType> charStateLabels= new ArrayList<>(1);
+        charStateLabels.add(0, userDataType1);
+
+        StandardData standardData = new StandardData();
+        standardData.initByName("charstatelabels", charStateLabels);
+
+        Alignment data = new Alignment();
+        data.initByName("sequence", sequenceList, "userDataType", standardData);
+
+        RealParameter liabilities  = new RealParameter(new Double[] {3.51681242318801, -1.0643000026872, 1.80434414854696, 2.18521531824921, 1.31751800468113});
+        RealParameter thresholds = new RealParameter(new Double[]{0.0, 1.53619786365198, 2.07544032966701});
+        OrderedDiscreteTraits discreteTraits = new OrderedDiscreteTraits();
+        discreteTraits.initByName("liability", liabilities, "data", data, "threshold", thresholds, "tree", tree);
+
+        discreteTraits.calculateLogP();
+        double lnLkDist = discreteTraits.getLogP();
+        Assert.assertEquals(0.0, lnLkDist, EPSILON);
+
+        // trait evolutionary rate matrix -> inverse matrix
+        sigmasq = new RealParameter(new Double[]{1.0});
+        correlation = new RealParameter(new Double[] {0.0});
+        rootValues = new RealParameter(new Double[]{2.3316769837314});
+        nodeMath.initByName("sigmasq", sigmasq, "orderedDiscreteTraits", discreteTraits, "rootValues", rootValues, "correlation", correlation);
+
+        // branch rate model
+        lsc.initByName("nCat", 1, "rateCatAssign", colorAssignments, "rates", colorValues, "tree", tree);
+
+        // likelihood
+        LiabilityLikelihood PCM2 = new LiabilityLikelihood();
+        PCM2.initByName("nodeMath", nodeMath, "tree", tree, "orderedDiscreteTraits", discreteTraits, "branchRateModel", lsc);
+        double lnLk = PCM2.calculateLogP();
+        Assert.assertEquals(-10.6279097609368, lnLk, EPSILON);
     }
 }
