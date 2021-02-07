@@ -4,6 +4,7 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
+import beast.evolution.tree.Tree;
 import contraband.utils.NodeMathUtils;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -20,6 +21,7 @@ public class NodeMath extends CalculationNode {
     final public Input<RealParameter> rootValuesInput = new Input<>("rootValues", "Trait values at the root.");
     final public Input<Boolean> useShrinkageInput = new Input<>("shrinkage", "TRUE, if shrinkage method is used to estimate the trait correlations.", false);
     final public Input<RealParameter> covarianceInput = new Input<>("covariance", "cov_ij = sigma_i * sigma_j * rho_ij.");
+    final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.");
 
     private Integer nTraits;
     private Integer nSpecies;
@@ -100,13 +102,21 @@ public class NodeMath extends CalculationNode {
     private double[] transformedTraitValues;
     private double[] storedTransformedTraitValues;
 
+    private boolean[] speciesToIgnoreMissingData;
 
     @Override
     public void initAndValidate() {
         // collect trait information
         KeyRealParameter traitsValues = traitsValuesInput.get();
         nTraits = traitsValues.getMinorDimension1();
-        nSpecies = traitsValues.getMinorDimension2();
+        if(treeInput.get() != null){
+            // if some species does not have any data, we Must input tree
+            // We must also specify the root values because there is no MLE
+            nSpecies = treeInput.get().getLeafNodeCount();
+        } else {
+            nSpecies = traitsValues.getMinorDimension2();
+        }
+        speciesToIgnoreMissingData = new boolean[2 * nSpecies - 1];
 
         // TRUE, if sigmasq and rho are in variance-covariance parameterization.
         if (covarianceInput.get() == null) {
@@ -287,6 +297,10 @@ public class NodeMath extends CalculationNode {
         return exp;
     }
 
+    public boolean isSpeciesToIgnore(int nodeNr){
+        return speciesToIgnoreMissingData[nodeNr];
+    }
+
     //setters
     public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
 
@@ -340,6 +354,10 @@ public class NodeMath extends CalculationNode {
     public void setNTraits (int value) { nTraits = value; }
 
     public void setNSpecies (int value) { nSpecies = value; }
+
+    public void setSpeciesToIgnore(int nodeNr) {
+        speciesToIgnoreMissingData[nodeNr] = true;
+    }
 
     private void initializeAbCdEfArray() {
         // A C E f are single double values for each node

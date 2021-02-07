@@ -48,20 +48,20 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         // and make a list of real vectors
         traitsValues = traitsValuesInput.get();
         nTraits = traitsValues.getMinorDimension1();
-        nSpecies = traitsValues.getMinorDimension2();
+        //nSpecies = traitsValues.getMinorDimension2();
+        nSpecies = tree.getLeafNodeCount();
         traitValuesArr = new double[nSpecies * nTraits];
-
-        // populate the trait values in an array
-        // each species has nTraits in the array
-        PruneLikelihoodUtils.populateTraitValuesArr(traitsValues, tree, nTraits, traitValuesArr);
 
         // check input
         if (nodeMathInput.get() == null) {
             throw new RuntimeException("PruneLikelihoodProcess::NodeMath is required for pmc likelihood.");
         }
         nodeMath = nodeMathInput.get();
-        //nodeMath.setNTraits(nTraits);
-        //nodeMath.setNSpecies(nSpecies);
+
+        // populate the trait values in an array
+        // each species has nTraits in the array
+        //PruneLikelihoodUtils.populateTraitValuesArr(traitsValues, tree, nTraits, traitValuesArr);
+        PruneLikelihoodUtils.populateTraitValuesArr(traitsValues, tree, nodeMath, nTraits, traitValuesArr);
     }
 
     protected void populateLogP() {
@@ -130,6 +130,10 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         for (Node child : children) {
 
             int childIdx = child.getNr();
+
+            if(nodeMath.isSpeciesToIgnore(childIdx)){
+                continue;
+            }
 
             double branchLength = child.getLength() * pcmc.getRateForBranch(child);
             nodeMath.setVarianceForTip(childIdx, branchLength);

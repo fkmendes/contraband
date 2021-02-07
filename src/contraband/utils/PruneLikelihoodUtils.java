@@ -29,6 +29,21 @@ public class PruneLikelihoodUtils {
         }
     }
 
+    public static void  populateTraitValuesArr(KeyRealParameter traitValues, Tree tree, NodeMath nodeMath, int nTraits, double[] traitValuesArr) {
+        for (int i = 0; i < tree.getLeafNodeCount(); i ++) {
+            // get all traits values for this species
+            Double[] traitForSpecies = traitValues.getRowValues(tree.getNode(i).getID());
+            if(traitForSpecies == null) {
+                nodeMath.setSpeciesToIgnore(i);
+            } else {
+                for (int j = 0; j < nTraits; j++) {
+                    // populate the traits one by one in an array
+                    traitValuesArr[i * nTraits + j] = traitForSpecies[j];
+                }
+            }
+        }
+    }
+
     /*
      * Fills out traitRM in place
      */
