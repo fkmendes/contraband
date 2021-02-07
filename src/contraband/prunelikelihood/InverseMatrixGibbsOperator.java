@@ -10,7 +10,7 @@ import contraband.math.NodeMath;
 
 public class InverseMatrixGibbsOperator extends Operator {
     final public Input<Integer> dimensionInput = new Input<>("dimension", "The number of rows (columns) of the inverse matrix, representing the number of characters.", Input.Validate.REQUIRED);
-    final public Input<RealParameter> valuesInput = new Input<>("values", "An array of values in the inverse matrix, representing either trait correlation or variance-covariance.", Input.Validate.REQUIRED);
+    final public Input<RealParameter> inverseMatrixInput = new Input<>("inverseMatrix", "An array of values in the inverse matrix, representing either trait correlation or variance-covariance.", Input.Validate.REQUIRED);
     final public Input<WishartDistribution> wishartDistributionInput = new Input<>("distr", "The wishart distribution to randomly draw samples from." , Input.Validate.REQUIRED);
     final public Input<LiabilityLikelihood> likelihoodInput = new Input<>("likelihood", "Multivariate normal distribution for liabilities" , Input.Validate.REQUIRED);
     final public Input<NodeMath> nodeMathInput = new Input<>("nodeMath", "Multivariate normal distribution for liabilities" , Input.Validate.REQUIRED);
@@ -22,6 +22,7 @@ public class InverseMatrixGibbsOperator extends Operator {
     private LiabilityLikelihood likelihood;
     private double [] priorInverseScaleMatrix;
 
+    private double pathWeight = 1.0;
     private double priorDf;
     private double[][] scaleMatrix;
 
@@ -45,12 +46,54 @@ public class InverseMatrixGibbsOperator extends Operator {
         if(wishartDistribution.df.get() < numberOfTraits) {
             throw new RuntimeException("InverseMatrixGibbsOperator:: Small n for large df.");
         }
-        valuesInput.get().setDimension(numberOfTraits * numberOfTraits);
-        proposal = new double[numberOfTraits][numberOfTraits];
-        likelihood = likelihoodInput.get();
-        priorDf = wishartDistribution.df.get();
+        inverseMatrixInput.get().setDimension(numberOfTraits * numberOfTraits);
 
-        priorInverseScaleMatrix = new double[numberOfTraits * numberOfTraits];
+        proposal = new double[numberOfTraits][numberOfTraits];
+
+        likelihood = likelihoodInput.get();
+
+        setupLUDecomposition();
+
+        setupWishartStatistics();
+
+        initMatrixAndArrays();
+    }
+
+
+    @Override
+    public double proposal() {
+        double[] scaleMatrixArr = getOperationScaleMatrixAndSetObservationCount();
+
+        if(singularMatrix){
+            return Double.NEGATIVE_INFINITY;
+        }
+
+        // convert an array to a matrix
+        for (int i = 0; i < numberOfTraits; i++) {
+            for(int j = 0; j < numberOfTraits; j++) {
+                scaleMatrix[i][j] = MatrixUtilsContra.getMatrixEntry(scaleMatrixArr, i, j, numberOfTraits);
+            }
+        }
+
+        //double treeDf = numberObservations;
+        //double df = priorDf + treeDf * pathWeight;
+        double df = priorDf + numberOfSpecies * pathWeight;
+
+        // make proposal
+        proposal = WishartDistribution.nextWishart(df, scaleMatrix);
+        // set up the proposal in the inverse matrix
+        for(int i = 0; i < numberOfTraits; i ++){
+            for (int j = 0; j < numberOfTraits; j ++){
+                inverseMatrixInput.get().setValue(i * numberOfTraits + j, proposal[i][j]);
+            }
+        }
+
+        return 0.0;
+
+    }
+
+    // (1)
+    private void setupLUDecomposition() {
         lu = new double [numberOfTraits * numberOfTraits];
         pivot = new int[numberOfTraits];
         evensingular = new boolean[2];
@@ -60,6 +103,12 @@ public class InverseMatrixGibbsOperator extends Operator {
         for (int i = 0; i < numberOfTraits; i++) {
             MatrixUtilsContra.setMatrixEntry(identityMatrix, i, i, 1.0, numberOfTraits);
         }
+    }
+
+    // (2)
+    private void setupWishartStatistics(){
+        priorDf = wishartDistribution.df.get();
+        priorInverseScaleMatrix = new double[numberOfTraits * numberOfTraits];
 
         double[] priorScaleMatrix = wishartDistribution.scaleMatrix.get().getDoubleValues();
         LUDecompositionForArray.ArrayLUDecomposition(priorScaleMatrix, lu, pivot, evensingular, numberOfTraits);
@@ -68,51 +117,33 @@ public class InverseMatrixGibbsOperator extends Operator {
         } catch (RuntimeException e) {
             singularMatrix = true;
         }
+    }
 
-        // calculate sum-of-the-weighted-squares matrix over tree
+    // (3)
+    private void initMatrixAndArrays(){
         S = new double[numberOfTraits * numberOfTraits];
         numberOfSpecies = nodeMathInput.get().getNSpecies();
         S2 = new double[numberOfTraits * numberOfTraits];
         S2Plus = new double[numberOfTraits * numberOfTraits];
         inverseS2Plus = new double[numberOfTraits * numberOfTraits];
         data = new double[numberOfTraits];
-
         scaleMatrix = new double[numberOfTraits][numberOfTraits];
     }
 
-
-    @Override
-    public double proposal() {
-        double[] scaleMatrixArr = getOperationScaleMatrixAndSetObservationCount();
-
-        for (int i = 0; i < numberOfTraits; i++) {
-            for(int j = 0; j < numberOfTraits; j++) {
-                scaleMatrix[i][j] = MatrixUtilsContra.getMatrixEntry(scaleMatrixArr, i, j, numberOfTraits);
-            }
-        }
-
-        proposal = WishartDistribution.nextWishart(priorDf, scaleMatrix);
-        for(int i = 0; i < numberOfTraits; i ++){
-            for (int j = 0; j < numberOfTraits; j ++){
-                valuesInput.get().setValue(i * numberOfTraits + j, proposal[i][j]);
-            }
-        }
-
-        if(singularMatrix){
-            return Double.NEGATIVE_INFINITY;
-        } else {
-            return 0.0;
-        }
-    }
-
+    // (4) calculate sum-of-the-weighted-squares matrix over tree
     public double[] getOperationScaleMatrixAndSetObservationCount() {
 
-        // is a normal-normal-wishart model
+        // populate S matrix for a normal-normal-wishart model
         incrementOuterProduct(S, likelihood);
 
         try {
-
+            //S2 = new SymmetricMatrix(S);
             System.arraycopy(S, 0, S2, 0, numberOfTraits * numberOfTraits);
+
+            if (pathWeight != 1.0) {
+                // S2 = (SymmetricMatrix) S2.product(pathWeight);
+                MatrixUtilsContra.vectorMapMultiply(S2, pathWeight, S2);
+            }
 
             //S2 = priorInverseScaleMatrix.add(S2);
             MatrixUtilsContra.vectorAdd(S2, priorInverseScaleMatrix, S2Plus);
@@ -127,11 +158,11 @@ public class InverseMatrixGibbsOperator extends Operator {
         return inverseS2Plus;
     }
 
+    // (5)
     public void incrementOuterProduct(double[]S, LiabilityLikelihood likelihood) {
         // the root values
         // likelihood.getDistribution().getMean();
         double[] mean = nodeMathInput.get().getRootValuesArr();
-
 
         // the traitValues;
         //List<Attribute<double[]>> dataList = likelihood.getDataList();
@@ -140,9 +171,9 @@ public class InverseMatrixGibbsOperator extends Operator {
         // iterate each species
         for (int i = 0; i < numberOfSpecies; i++) {
             // trait values for i-th species
-             MatrixUtilsContra.getMatrixRow(traitValues, i, numberOfTraits, data);
+            MatrixUtilsContra.getMatrixRow(traitValues, i, numberOfTraits, data);
 
-             // subtract mean values
+            // subtract mean values
             for (int j = 0; j < numberOfTraits; j++) {
                 data[j] -= mean[j];
             }

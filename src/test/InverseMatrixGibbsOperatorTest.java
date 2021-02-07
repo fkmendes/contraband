@@ -70,7 +70,7 @@ public class InverseMatrixGibbsOperatorTest {
         operator.initByName("likelihood", likelihood, "nodeMath", nodeMath,
                 "dimension", 6,
                 "distr", distribution,
-                "values", inverseMatrix, "weight",1.0);
+                "inverseMatrix", inverseMatrix, "weight",1.0);
 
         double hastingsRatio = operator.proposal();
         System.out.println("Hastings ratio = " + hastingsRatio);
@@ -80,9 +80,9 @@ public class InverseMatrixGibbsOperatorTest {
 
         double[] S = new double[nTraits * nTraits];
         operator.incrementOuterProduct(S, likelihood);
-        System.out.println(Arrays.toString(S));
+        System.out.println("S matrix " + "\n" + Arrays.toString(S));
 
         double[] inverseS2Plus = operator.getOperationScaleMatrixAndSetObservationCount();
-        System.out.println(Arrays.toString(inverseS2Plus));
+        System.out.println("inverseS2Plus " + "\n" + Arrays.toString(inverseS2Plus));
     }
 }
