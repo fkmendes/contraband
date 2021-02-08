@@ -62,8 +62,9 @@ public class ShrinkageUtils {
             xswsvd = pSmallSVD(xsw);
             populateSingularValues(xswsvd, p, singularValues, validIndex);
             populateSqrtSingularValues(singularValues);
-            vMat = getValidVMatrix(xswsvd.getVT(), validIndex).transpose();
+            vMat = getValidVMatrix(xswsvd.getV(), validIndex);
             uMat = getUMatForPSmall(xsw, vMat, singularValues);
+            vMat = vMat.transpose();
         } else if (edgeRatio * n < p) {
             //nsmall.svd
             xswsvd = nSmallSVD(xsw);
@@ -71,6 +72,7 @@ public class ShrinkageUtils {
             populateSqrtSingularValues(singularValues);
             uMat = getValidUMatrix(xswsvd.getU(), validIndex);
             vMat = getVMatForNSmall(xsw, uMat, singularValues);
+            vMat = vMat.transpose();
         } else{
             //positive.svd
             xswsvd = positiveSVD(xsw);
@@ -89,14 +91,12 @@ public class ShrinkageUtils {
         }
 
         // (sweep(xswsvd$u, 2, xswsvd$d^3, "*") %*% t(xswsvd$v))
-        RealMatrix bMat = aMat.multiply(vMat.transpose());
+        RealMatrix bMat = aMat.multiply(vMat);
 
         // xsw * (sweep(xswsvd$u, 2, xswsvd$d^3, "*") %*% t(xswsvd$v))
         RealMatrix cMat = new Array2DRowRealMatrix(new double [n][p]);
         for (int i = 0; i < n; i++) {
             for (int j =0; j < p; j++) {
-                double a1 = xsw.getEntry(i,j);
-                double a2 = bMat.getEntry(i, j);
                 cMat.setEntry(i, j, xsw.getEntry(i,j) * bMat.getEntry(i, j));
             }
         }
@@ -310,7 +310,9 @@ public class ShrinkageUtils {
         int nRow = index.size();
         RealMatrix resMat = new Array2DRowRealMatrix(new double[nRow][nCol]);
         for(int i = 0; i < nRow; i ++){
-            resMat.setRow(i, aMat.getRow(index.get(i)));
+            for(int j =0; j < nCol; j ++) {
+                    resMat.setEntry(i, j, aMat.getEntry(i, j));
+            }
         }
         return resMat;
     }

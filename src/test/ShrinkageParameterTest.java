@@ -214,7 +214,8 @@ public class ShrinkageParameterTest {
 
         Assert.assertEquals(0.543770621867578, delta, EPSILON);
     }
-/*
+
+
     @Test
     public void testShrinkageParameterFiveSpeciesTwelveTraits(){
         // tree
@@ -241,7 +242,7 @@ public class ShrinkageParameterTest {
         delta = shrinkageParameter.getDelta();
         Assert.assertEquals(0.543770621867578, delta, EPSILON);
     }
-*/
+
     @Test
     public void testShrinkageUtilsTwelveSpeciesFiveTraits(){
         // initialize default weight vector
@@ -269,6 +270,33 @@ public class ShrinkageParameterTest {
 
         delta = ShrinkageUtils.estimateDelta(traitMat, weight);
 
+        Assert.assertEquals(0.330907701854751, delta, EPSILON);
+    }
+
+    @Test
+    public void testShrinkageParameterTwelveSpeciesFiveTraits(){
+        // tree
+        treeStr = "((((t1:0.8630412891,t2:0.8630412891):1.932892233,(t3:1.071331611,t4:1.071331611):1.72460191):6.687482641,t5:9.483416163):0.7394673966,((t6:0.7348618051,t7:0.7348618051):6.796716618,((t8:6.73688377,(t9:2.987989272,t10:2.987989272):3.748894498):0.3196768994,(t11:2.102955104,t12:2.102955104):4.953605565):0.4750177538):2.691305136);";
+        spNames = "t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 t12";
+        tree = new TreeParser(treeStr, false, false, true, 0);
+        nSpecies = 12;
+
+        // trait values
+        nTraits = 5;
+        contTraitData =  Arrays.asList(
+                -2.1897883394613, 0.0313359815175198, 5.02365697483978, -0.618578989331967, -3.01387472226807, 0.789127052367002, 0.479217272549513, 3.54132168390706, -2.09421282752067, -3.03657303810015, 2.80202830006273, 0.886130625647486, 4.59991939339537, -1.79290194413071, -4.81067400922374, 5.13578496477532, 1.22864060467125, 2.2813039275738, -1.03981260193573, -4.79665838428698, -4.08812111642109, 0.240434594608957, -2.23929355990271, -2.28738549766977, -3.45188949026898, -6.74180455928669, 3.96619049993955, 0.904152426360484, -3.35629321946682, 4.61310111815135, -5.6100221124425, 3.30716488699528, 1.87786025723574, -2.27371691456047, 4.87854372712174, 1.04990602288301, 3.01608877474802, 1.24556137515722, -3.01784446762082, -1.54582728096936, -3.44295019203676, 1.46502247056061, -2.52848949852231, 6.10229184573588, 3.54875058728228, -5.71114447782265, 0.928413067163238, -2.58377857435135, 6.06015533050127, 1.63490091385978, -0.906649100581506, 1.51753342890478, 0.170292544669327, 4.28370622379737, -1.89626789050161, 2.54048840314469, -1.84473872547521, 1.25933181381947, 2.46266563747088, -1.3022113394064
+        );
+        contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
+        morphData.initByName("traits", contTrait, "tree", tree);
+
+        Double[] weight = new Double [nSpecies];
+        for (int i = 0; i < nSpecies; i++) {
+            weight[i] = 1.0 / nSpecies;
+        }
+        RealParameter traitWeight = new RealParameter(weight);
+        shrinkageParameter.initByName("trait", morphData, "weight", traitWeight);
+
+        delta = shrinkageParameter.getDelta();
         Assert.assertEquals(0.330907701854751, delta, EPSILON);
     }
 

@@ -169,8 +169,9 @@ public class ShrinkageParameter extends CalculationNode {
             xswsvd = ShrinkageUtils.pSmallSVD(xsw);
             ShrinkageUtils.populateSingularValues(xswsvd, p, singularValues, validIndex);
             ShrinkageUtils.populateSqrtSingularValues(singularValues);
-            vMat = ShrinkageUtils.getValidVMatrix(xswsvd.getVT(), validIndex);
+            vMat = ShrinkageUtils.getValidVMatrix(xswsvd.getV(), validIndex);
             uMat = ShrinkageUtils.getUMatForPSmall(xsw, vMat, singularValues);
+            vMat = vMat.transpose();
         } else if (edgeRatio * n < p) {
             //nsmall.svd
             xswsvd = ShrinkageUtils.nSmallSVD(xsw);
@@ -178,6 +179,7 @@ public class ShrinkageParameter extends CalculationNode {
             ShrinkageUtils.populateSqrtSingularValues(singularValues);
             uMat = ShrinkageUtils.getValidUMatrix(xswsvd.getU(), validIndex);
             vMat = ShrinkageUtils.getVMatForNSmall(xsw, uMat, singularValues);
+            vMat = vMat.transpose();
         } else{
             //positive.svd
             xswsvd = ShrinkageUtils.positiveSVD(xsw);
