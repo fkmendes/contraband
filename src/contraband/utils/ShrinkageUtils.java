@@ -62,7 +62,7 @@ public class ShrinkageUtils {
             xswsvd = pSmallSVD(xsw);
             populateSingularValues(xswsvd, p, singularValues, validIndex);
             populateSqrtSingularValues(singularValues);
-            vMat = getValidVMatrix(xswsvd.getVT(), validIndex);
+            vMat = getValidVMatrix(xswsvd.getVT(), validIndex).transpose();
             uMat = getUMatForPSmall(xsw, vMat, singularValues);
         } else if (edgeRatio * n < p) {
             //nsmall.svd
@@ -89,7 +89,7 @@ public class ShrinkageUtils {
         }
 
         // (sweep(xswsvd$u, 2, xswsvd$d^3, "*") %*% t(xswsvd$v))
-        RealMatrix bMat = aMat.multiply(vMat);
+        RealMatrix bMat = aMat.multiply(vMat.transpose());
 
         // xsw * (sweep(xswsvd$u, 2, xswsvd$d^3, "*") %*% t(xswsvd$v))
         RealMatrix cMat = new Array2DRowRealMatrix(new double [n][p]);

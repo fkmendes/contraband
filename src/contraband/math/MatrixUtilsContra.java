@@ -401,11 +401,21 @@ public class MatrixUtilsContra {
 
     /*
      * This method populates the matrix transpose
+     * Requires a square matrix as inArr
      */
     public static double[] matrixTranspose (double [] inArr, int dim, double[] resArr) {
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
                 setMatrixEntry(resArr, j, i, getMatrixEntry(inArr, i, j, dim), dim);
+            }
+        }
+        return resArr;
+    }
+
+    public static double[] matrixTranspose (double [] inArr, int nRow, int nCol, double[] resArr) {
+        for (int i = 0; i < nRow; i++) {
+            for (int j = 0; j < nCol; j++) {
+                setMatrixEntry(resArr, j, i, getMatrixEntry(inArr, i, j, nCol), nRow);
             }
         }
         return resArr;
