@@ -293,12 +293,11 @@ public class ShrinkageUtils {
         return resMat;
     }
 
-    public static double[] getValidUMatrixArr(RealMatrix aMat, List<Integer> index){
-        int nRow = aMat.getRowDimension();
+    public static double[] getValidUMatrixArr(RealMatrix aMat, List<Integer> index, int nSpecies){
         int nCol = index.size();
-        double[] resMat = new double[nRow * nCol];
+        double[] resMat = new double[nSpecies * nCol];
         for(int i = 0; i < nCol; i ++){
-            for(int j = 0; j < nRow; j++) {
+            for(int j = 0; j < nSpecies; j++) {
                 MatrixUtilsContra.setMatrixEntry(resMat, j, i, aMat.getEntry(j, i), nCol);
             }
         }
@@ -317,13 +316,12 @@ public class ShrinkageUtils {
         return resMat;
     }
 
-    public static double[] getValidVMatrixArr(RealMatrix aMat, List<Integer> index){
-        int nCol = aMat.getColumnDimension();
+    public static double[] getValidVMatrixArr(RealMatrix aMat, List<Integer> index, int nTraits){
         int nRow = index.size();
-        double[] resMat = new double[nRow * nCol];
+        double[] resMat = new double[nRow * nTraits];
         for(int i = 0; i < nRow; i ++){
-            for(int j = 0; j < nCol; j ++) {
-                MatrixUtilsContra.setMatrixEntry(resMat, i, j, aMat.getEntry(i, j), nCol);
+            for(int j = 0; j < nTraits; j ++) {
+                MatrixUtilsContra.setMatrixEntry(resMat, i, j, aMat.getEntry(i, j), nTraits);
             }
         }
         return resMat;
@@ -338,16 +336,18 @@ public class ShrinkageUtils {
         return m.multiply(v).multiply(diag);
     }
 
-    public static double[] getUMatArrForPSmall(double[] m, int mRow, double[] v, int vCol, List<Double> d){
+    public static double[] getUMatArrForPSmall(double[] m, double[] v, List<Double> d, int nSpecies){
         int dim = d.size();
         double[] diag = new double[dim * dim];
         for(int i = 0; i < dim; i++){
             MatrixUtilsContra.setMatrixEntry(diag, i, i, 1/d.get(i), dim);
         }
-        double[] temp = new double[mRow * vCol];
-        MatrixUtilsContra.matrixMultiply(m, v, mRow, dim, vCol, temp);
-        double[] res = new double[mRow * dim];
-        MatrixUtilsContra.matrixMultiply(temp, diag, mRow, dim, dim, res);
+
+        double[] temp = new double[nSpecies * dim];
+        MatrixUtilsContra.matrixMultiply(m, v, nSpecies, dim, dim, temp);
+
+        double[] res = new double[nSpecies * dim];
+        MatrixUtilsContra.matrixMultiply(temp, diag, nSpecies, dim, dim, res);
         return res;
     }
 
@@ -361,18 +361,20 @@ public class ShrinkageUtils {
         return m.transpose().multiply(u).multiply(diag);
     }
 
-    public static double[] getVMatForNSmall(double[] m, int mRow, double[] u, int uCol, List<Double> d){
+    public static double[] getVMatForNSmall(double[] m, double[] u, List<Double> d, int nTraits ,int nSpecies){
         int dim = d.size();
         double[] diag = new double[dim * dim];
         for(int i = 0; i < d.size(); i++){
             MatrixUtilsContra.setMatrixEntry(diag, i, i, 1/d.get(i), dim);
         }
+
         double[] mTranspose = new double[m.length];
-        MatrixUtilsContra.matrixTranspose(m, mRow, mTranspose);
-        double[] temp = new double[mRow * dim];
-        MatrixUtilsContra.matrixMultiply(mTranspose, u, mRow, dim, uCol, temp);
-        double[] res = new double[uCol * dim];
-        MatrixUtilsContra.matrixMultiply(temp, diag, mRow, dim, dim, res);
+        MatrixUtilsContra.matrixTranspose(m, nSpecies, nTraits, mTranspose);
+
+        double[] temp = new double[nTraits * dim];
+        MatrixUtilsContra.matrixMultiply(mTranspose, u, nTraits, nSpecies, dim, temp);
+        double[] res = new double[nTraits * dim];
+        MatrixUtilsContra.matrixMultiply(temp, diag, nTraits, dim, dim, res);
         return res;
     }
 
