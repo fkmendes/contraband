@@ -1,5 +1,6 @@
 package contraband.utils;
 
+import contraband.math.MatrixUtilsContra;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.FastMath;
 
@@ -94,6 +95,8 @@ public class ShrinkageUtils {
         RealMatrix cMat = new Array2DRowRealMatrix(new double [n][p]);
         for (int i = 0; i < n; i++) {
             for (int j =0; j < p; j++) {
+                double a1 = xsw.getEntry(i,j);
+                double a2 = bMat.getEntry(i, j);
                 cMat.setEntry(i, j, xsw.getEntry(i,j) * bMat.getEntry(i, j));
             }
         }
@@ -290,12 +293,36 @@ public class ShrinkageUtils {
         return resMat;
     }
 
+    public static double[] getValidUMatrixArr(RealMatrix aMat, List<Integer> index){
+        int nRow = aMat.getRowDimension();
+        int nCol = index.size();
+        double[] resMat = new double[nRow * nCol];
+        for(int i = 0; i < nCol; i ++){
+            for(int j = 0; j < nRow; j++) {
+                MatrixUtilsContra.setMatrixEntry(resMat, j, i, aMat.getEntry(j, i), nCol);
+            }
+        }
+        return resMat;
+    }
+
     public static RealMatrix getValidVMatrix(RealMatrix aMat, List<Integer> index){
         int nCol = aMat.getColumnDimension();
         int nRow = index.size();
         RealMatrix resMat = new Array2DRowRealMatrix(new double[nRow][nCol]);
         for(int i = 0; i < nRow; i ++){
             resMat.setRow(i, aMat.getRow(index.get(i)));
+        }
+        return resMat;
+    }
+
+    public static double[] getValidVMatrixArr(RealMatrix aMat, List<Integer> index){
+        int nCol = aMat.getColumnDimension();
+        int nRow = index.size();
+        double[] resMat = new double[nRow * nCol];
+        for(int i = 0; i < nRow; i ++){
+            for(int j = 0; j < nCol; j ++) {
+                MatrixUtilsContra.setMatrixEntry(resMat, i, j, aMat.getEntry(i, j), nCol);
+            }
         }
         return resMat;
     }
@@ -309,6 +336,20 @@ public class ShrinkageUtils {
         return m.multiply(v).multiply(diag);
     }
 
+    public static double[] getUMatArrForPSmall(double[] m, int mRow, double[] v, int vCol, List<Double> d){
+        int dim = d.size();
+        double[] diag = new double[dim * dim];
+        for(int i = 0; i < dim; i++){
+            MatrixUtilsContra.setMatrixEntry(diag, i, i, 1/d.get(i), dim);
+        }
+        double[] temp = new double[mRow * vCol];
+        MatrixUtilsContra.matrixMultiply(m, v, mRow, dim, vCol, temp);
+        double[] res = new double[mRow * dim];
+        MatrixUtilsContra.matrixMultiply(temp, diag, mRow, dim, dim, res);
+        return res;
+    }
+
+
     //  v = crossprod(m, u) %*% diag(1/d, nrow=length(d))
     public static RealMatrix getVMatForNSmall(RealMatrix m, RealMatrix u, List<Double> d){
         RealMatrix diag = MatrixUtils.createRealIdentityMatrix(d.size());
@@ -316,6 +357,21 @@ public class ShrinkageUtils {
             diag.setEntry(i, i, 1/d.get(i));
         }
         return m.transpose().multiply(u).multiply(diag);
+    }
+
+    public static double[] getVMatForNSmall(double[] m, int mRow, double[] u, int uCol, List<Double> d){
+        int dim = d.size();
+        double[] diag = new double[dim * dim];
+        for(int i = 0; i < d.size(); i++){
+            MatrixUtilsContra.setMatrixEntry(diag, i, i, 1/d.get(i), dim);
+        }
+        double[] mTranspose = new double[m.length];
+        MatrixUtilsContra.matrixTranspose(m, mRow, mTranspose);
+        double[] temp = new double[mRow * dim];
+        MatrixUtilsContra.matrixMultiply(mTranspose, u, mRow, dim, uCol, temp);
+        double[] res = new double[uCol * dim];
+        MatrixUtilsContra.matrixMultiply(temp, diag, mRow, dim, dim, res);
+        return res;
     }
 
 

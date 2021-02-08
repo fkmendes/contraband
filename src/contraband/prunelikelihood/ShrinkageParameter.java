@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ShrinkageParameter extends CalculationNode {
-    final public Input<RealParameter> deltaInput = new Input<>("delta", "Shrinkage intensity parameter.");
     final public Input<MorphologicalData> traitInput = new Input<>("trait","Morphological data set.", Input.Validate.REQUIRED);
     final public Input<RealParameter> weightInput = new Input<>("weight", "Weight of each character.");
 
@@ -33,8 +32,6 @@ public class ShrinkageParameter extends CalculationNode {
 
     @Override
     public void initAndValidate() {
-        delta = deltaInput.get().getValue();
-
         morphData = traitInput.get();
         traitValuesArr = morphData .getMorphologicalData();
         nSpecies = morphData .getSpeciesNr();
@@ -42,6 +39,8 @@ public class ShrinkageParameter extends CalculationNode {
 
         weight = new double[nTraits];
         weight = weightInput.get().getDoubleValues();
+
+        estimateShrinkageParameter();
     }
 
     public double getDelta() { return delta; }
@@ -59,7 +58,6 @@ public class ShrinkageParameter extends CalculationNode {
         double denominator = calculateDenominator(nSpecies, nTraits, singularValueArr, uMatArr, vMatArr, xsw);
 
         double numerator = calculateNumerator(nSpecies, nTraits, xs, sw, denominator);
-
 
         if (denominator == 0) {
             delta = 1.0;
@@ -80,7 +78,7 @@ public class ShrinkageParameter extends CalculationNode {
             for (int i = 0; i < n; i ++) {
                 double d = MatrixUtilsContra.getMatrixEntry(data, i, j, nTraits);
                 sum1 = sum1 + d * wVec[i];
-                sum2 = sum2 + d * wVec[i];
+                sum2 = sum2 + d * d * wVec[i];
             }
             m[j] = sum1;
             v[j] = h1 * (sum2 - sum1 * sum1);
@@ -197,91 +195,78 @@ public class ShrinkageParameter extends CalculationNode {
             singularValueArr[i] = singularValues.get(i);
         }
 
-        for (int j = 0; j < uMat.getRowDimension(); j++){
-            for(int k = 0; k < uMat.getColumnDimension(); k++){
-                MatrixUtilsContra.setMatrixEntry(uMatArr, j, k, uMat.getEntry(j, k), uMat.getRowDimension());
-                MatrixUtilsContra.setMatrixEntry(vMatArr, j, k, vMat.getEntry(j, k), vMat.getRowDimension());
+        int nRow = uMat.getRowDimension();
+        int nCol = uMat.getColumnDimension();
+        uMatArr = new double[nCol * nRow];
+        for (int j = 0; j < nRow; j++){
+            for(int k = 0; k < nCol; k++){
+                MatrixUtilsContra.setMatrixEntry(uMatArr, j, k, uMat.getEntry(j, k), nCol);
+            }
+        }
+
+        nRow = vMat.getRowDimension();
+        nCol = vMat.getColumnDimension();
+        vMatArr = new double[nCol * nRow];
+        for (int j = 0; j <  nRow; j++){
+            for(int k = 0; k < nCol; k++){
+                MatrixUtilsContra.setMatrixEntry(vMatArr, j, k, vMat.getEntry(j, k), nCol);
             }
         }
     }
 
     private double calculateDenominator(int n, int p, double[] singularValues, double[] uMatArr, double[] vMatArr, double[] xsw){
-        // sweep(xswsvd$u, 2, xswsvd$d^3, "*")
         int singularValueNr = singularValues.length;
-        //RealMatrix aMat = new Array2DRowRealMatrix(new double [n][singularValues.size()]);
         double[] aMat = new double[n * singularValueNr];
         for (int j = 0; j < singularValueNr; j ++) {
             for (int i = 0; i < n; i++) {
-                //aMat.setEntry(i, j, uMat.getEntry(i, j) * Math.pow(singularValues.get(j), 3));
                 double value = MatrixUtilsContra.getMatrixEntry(uMatArr, i, j, singularValueNr) * Math.pow(singularValues[j], 3);
                 MatrixUtilsContra.setMatrixEntry(aMat, i, j, value, singularValueNr);
             }
         }
 
-        // (sweep(xswsvd$u, 2, xswsvd$d^3, "*") %*% t(xswsvd$v))
-        //RealMatrix bMat = aMat.multiply(vMat);
-        double[] bMat = new double[n * singularValueNr];
-        MatrixUtilsContra.matrixMultiply(aMat, vMatArr, n, singularValueNr, bMat);
+        double[] bMat = new double[n * p];
+        MatrixUtilsContra.matrixMultiply(aMat, vMatArr, n, singularValueNr, p, bMat);
 
-        // xsw * (sweep(xswsvd$u, 2, xswsvd$d^3, "*") %*% t(xswsvd$v))
-        //RealMatrix cMat = new Array2DRowRealMatrix(new double [n][p]);
         double[] cMat = new double[n * p];
         for (int i = 0; i < n; i++) {
             for (int j =0; j < p; j++) {
-                //cMat.setEntry(i, j, xsw.getEntry(i,j) * bMat.getEntry(i, j));
-                double value = MatrixUtilsContra.getMatrixEntry(xsw, i, j, p) * MatrixUtilsContra.getMatrixEntry(bMat, i, j, singularValueNr);
+                double value = MatrixUtilsContra.getMatrixEntry(xsw, i, j, p) * MatrixUtilsContra.getMatrixEntry(bMat, i, j, p);
                 MatrixUtilsContra.setMatrixEntry(cMat, i, j, value, p);
             }
         }
 
-        //sum1 = sum(xsw * (sweep(xswsvd$u, 2, xswsvd$d^3, "*") %*% t(xswsvd$v)))
         double sum1 = 0.0;
-        //sum2 = sum(colSums(xsw^2)^2)
         double sum2 = 0.0;
         for (int j = 0; j < p; j ++) {
             double sum3 = 0.0;
             for (int i = 0; i < n; i ++) {
-                //sum1 += cMat.getEntry(i, j);
                 sum1 += MatrixUtilsContra.getMatrixEntry(cMat, i, j, p);
-                //sum3 += xsw.getEntry(i, j) * xsw.getEntry(i, j);
                 sum3 += MatrixUtilsContra.getMatrixEntry(xsw, i, j, p) * MatrixUtilsContra.getMatrixEntry(xsw, i, j, p);
             }
             sum2 += sum3 * sum3;
         }
-        double denominator = sum1 - sum2;
-        return denominator;
+        return sum1 - sum2;
     }
 
     private double calculateNumerator(int n, int p, double[] xs, double[] sw, double denominator){
-        // sweep(xs^2, MARGIN = 1, STATS = sw, FUN = "*")
-        //RealMatrix xs2w = new Array2DRowRealMatrix(new double [n][p]);
         double[] xs2w = new double[n * p];
         for (int j = 0; j < p; j ++) {
             for (int i = 0; i < n; i ++) {
-                //double xsSq =  xs.getEntry(i,j) * xs.getEntry(i,j);
                 double xsSq = MatrixUtilsContra.getMatrixEntry(xs, i, j, p) * MatrixUtilsContra.getMatrixEntry(xs, i, j, p);
-                //xs2w.setEntry(i,j, xsSq * sw.getEntry(i));
                 MatrixUtilsContra.setMatrixEntry(xs2w, i, j, xsSq * sw[i], p);
             }
         }
 
-        //xs2wPartial1 = xs2w[, (p - 1):1]
-        //RealMatrix xs2wPartial1 = new Array2DRowRealMatrix(new double [n][p - 1]);
         double[] xs2wPartial1 = new double[n * (p - 1)];
         for (int j = 0; j < (p -1); j ++) {
-            //xs2wPartial1.setColumn(j, xs2w.getColumn(p - 2 - j));
             for (int i = 0; i < n; i ++) {
                 double value = MatrixUtilsContra.getMatrixEntry(xs2w, i, p - 2 - j, p);
                 MatrixUtilsContra.setMatrixEntry(xs2wPartial1, i, j, value, p-1);
             }
         }
 
-        //xs2wPartial2 = xs2w[, p:2, drop = FALSE]
-        //t(apply(xs2w[, p:2, drop = FALSE],1, cumsum))
-        //RealMatrix xs2wPartial2 = new Array2DRowRealMatrix(new double [n][p - 1]);
         double[] xs2wPartial2 = new double[n * (p - 1)];
         for (int j = 0; j < (p - 1); j ++) {
-            //xs2wPartial2.setColumn(j, xs2w.getColumn(p - 1 - j));
             for (int i = 0; i < n; i ++) {
                 double value = MatrixUtilsContra.getMatrixEntry(xs2w, i, p - 1 - j, p);
                 MatrixUtilsContra.setMatrixEntry(xs2wPartial2, i, j, value, p-1);
@@ -291,29 +276,21 @@ public class ShrinkageParameter extends CalculationNode {
         for (int i = 0; i < n; i++) {
             double cumSum = 0.0;
             for (int j = 0; j < (p - 1); j ++) {
-                //cumSum += xs2wPartial2.getEntry(i, j);
                 cumSum += MatrixUtilsContra.getMatrixEntry(xs2wPartial2, i, j, p-1);
-                //xs2wPartial2.setEntry(i, j, cumSum);
                 MatrixUtilsContra.setMatrixEntry(xs2wPartial2, i, j, cumSum, p - 1);
             }
         }
 
-        //xs2wPartial2 = xs2wPartial2.transpose();
         double sum4 = 0.0;
         for (int i = 0; i < n; i ++) {
             for (int j = 0; j < (p - 1); j++){
-                //sum4 += xs2wPartial1.getEntry(i,j) * xs2wPartial2.getEntry(i,j);
                 sum4 += MatrixUtilsContra.getMatrixEntry(xs2wPartial1, i, j, p - 1) * MatrixUtilsContra.getMatrixEntry(xs2wPartial2, i, j, p - 1);
             }
         }
         double sER2 = 2 * sum4;
 
-        //double denominator = sE2R;
-        //double numerator = sER2 - sE2R;
-        double numerator = sER2 - denominator;
-        return numerator;
+        return sER2 - denominator;
     }
-
 
     @Override
     protected boolean requiresRecalculation() {

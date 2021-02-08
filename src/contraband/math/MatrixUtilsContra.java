@@ -433,6 +433,25 @@ public class MatrixUtilsContra {
 
         return resMat;
     }
+    /*
+     * This methods calculates product of inMat and matToMultiply.
+     * inMat has nRow and dim column number
+     * matToMultiply has dim row number and nCol
+     * resMat has nRow * nCol
+     */
+    public static void matrixMultiply (double[] inMat, double[] matToMultiply, int nRowInMat, int dim, int nColToMat, double[] resMat) {
+        for (int i = 0; i < nRowInMat; i ++) {
+            for (int j = 0; j < nColToMat; j ++) {
+                double sumTemp = 0.0;
+
+                for (int k = 0; k < dim; k++) {
+                    sumTemp += MatrixUtilsContra.getMatrixEntry(inMat, i, k, dim) * MatrixUtilsContra.getMatrixEntry(matToMultiply, k, j, nColToMat);
+                }
+
+                MatrixUtilsContra.setMatrixEntry(resMat, i, j, sumTemp, nColToMat);
+            }
+        }
+    }
 
     /*
      * This method multiplies matrix inRM by a double scalar.
