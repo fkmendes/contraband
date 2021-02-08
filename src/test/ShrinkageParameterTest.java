@@ -191,7 +191,6 @@ public class ShrinkageParameterTest {
         Assert.assertEquals(0.528076427063438, delta, EPSILON);
     }
 
-
     @Test
     public void testShrinkageUtilsFiveSpeciesTwelveTraits() {
         // initialize default weight vector
@@ -214,7 +213,6 @@ public class ShrinkageParameterTest {
 
         Assert.assertEquals(0.543770621867578, delta, EPSILON);
     }
-
 
     @Test
     public void testShrinkageParameterFiveSpeciesTwelveTraits(){

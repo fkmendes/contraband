@@ -168,51 +168,27 @@ public class ShrinkageParameter extends CalculationNode {
             //psmall.svd
             xswsvd = ShrinkageUtils.pSmallSVD(xsw);
             ShrinkageUtils.populateSingularValues(xswsvd, p, singularValues, validIndex);
-            ShrinkageUtils.populateSqrtSingularValues(singularValues);
-            vMat = ShrinkageUtils.getValidVMatrix(xswsvd.getV(), validIndex);
-            uMat = ShrinkageUtils.getUMatForPSmall(xsw, vMat, singularValues);
-            vMat = vMat.transpose();
+            singularValueArr = ShrinkageUtils.populateSqrtSingularValuesArr(singularValues);
+            double[] vTArr = ShrinkageUtils.getValidVMatrixArr(xswsvd.getV(), validIndex, p);
+            uMatArr = ShrinkageUtils.getUMatArrForPSmall(xswArr, vTArr, singularValueArr, n);
+            vMatArr = new double[p * singularValues.size()];
+            MatrixUtilsContra.matrixTranspose(vTArr, p, singularValues.size(), vMatArr);
         } else if (edgeRatio * n < p) {
             //nsmall.svd
             xswsvd = ShrinkageUtils.nSmallSVD(xsw);
             ShrinkageUtils.populateSingularValues(xswsvd, n, singularValues, validIndex);
-            ShrinkageUtils.populateSqrtSingularValues(singularValues);
-            uMat = ShrinkageUtils.getValidUMatrix(xswsvd.getU(), validIndex);
-            vMat = ShrinkageUtils.getVMatForNSmall(xsw, uMat, singularValues);
-            vMat = vMat.transpose();
+            singularValueArr = ShrinkageUtils.populateSqrtSingularValuesArr(singularValues);
+            uMatArr = ShrinkageUtils.getValidUMatrixArr(xswsvd.getU(), validIndex, nSpecies);
+            double[] vTArr = ShrinkageUtils.getVMatArrForNSmall(xswArr, uMatArr, singularValueArr, p, n);
+            vMatArr = new double[p * singularValueArr.length];
+            MatrixUtilsContra.matrixTranspose(vTArr, p, singularValueArr.length, vMatArr);
         } else{
             //positive.svd
             xswsvd = ShrinkageUtils.positiveSVD(xsw);
             ShrinkageUtils.populateSingularValues(xswsvd, Math.max(n, p), singularValues, validIndex);
-            uMat = ShrinkageUtils.getValidUMatrix(xswsvd.getU(), validIndex);
-            vMat = ShrinkageUtils.getValidVMatrix(xswsvd.getVT(), validIndex);
-        }
-
-        populateArrays(singularValues, uMat, vMat);
-    }
-
-    private void populateArrays(List<Double> singularValues, RealMatrix uMat, RealMatrix vMat){
-        singularValueArr = new double[singularValues.size()];
-        for(int i = 0; i < singularValues.size(); i++){
-            singularValueArr[i] = singularValues.get(i);
-        }
-
-        int nRow = uMat.getRowDimension();
-        int nCol = uMat.getColumnDimension();
-        uMatArr = new double[nCol * nRow];
-        for (int j = 0; j < nRow; j++){
-            for(int k = 0; k < nCol; k++){
-                MatrixUtilsContra.setMatrixEntry(uMatArr, j, k, uMat.getEntry(j, k), nCol);
-            }
-        }
-
-        nRow = vMat.getRowDimension();
-        nCol = vMat.getColumnDimension();
-        vMatArr = new double[nCol * nRow];
-        for (int j = 0; j <  nRow; j++){
-            for(int k = 0; k < nCol; k++){
-                MatrixUtilsContra.setMatrixEntry(vMatArr, j, k, vMat.getEntry(j, k), nCol);
-            }
+            singularValueArr = ShrinkageUtils.populateSingularValuesArr(singularValues);
+            uMatArr = ShrinkageUtils.getValidUMatrixArr(xswsvd.getU(), validIndex, n);
+            vMatArr = ShrinkageUtils.getValidVMatrixArr(xswsvd.getVT(), validIndex, p);
         }
     }
 

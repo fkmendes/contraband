@@ -281,6 +281,22 @@ public class ShrinkageUtils {
         }
     }
 
+    public static double[] populateSqrtSingularValuesArr(List<Double> singularValues){
+        double[] res = new double[singularValues.size()];
+        for(int i = 0; i < singularValues.size(); i++){
+            res[i] = FastMath.sqrt(singularValues.get(i));
+        }
+        return res;
+    }
+
+    public static double[] populateSingularValuesArr(List<Double> singularValues){
+        double[] res = new double[singularValues.size()];
+        for(int i = 0; i < singularValues.size(); i++){
+            res[i] = singularValues.get(i);
+        }
+        return res;
+    }
+
     // For pSmall v = s$v[, Positive, drop=FALSE]
     // For nSmall u = s$u[, Positive, drop=FALSE]
     public static RealMatrix getValidUMatrix(RealMatrix aMat, List<Integer> index){
@@ -336,11 +352,11 @@ public class ShrinkageUtils {
         return m.multiply(v).multiply(diag);
     }
 
-    public static double[] getUMatArrForPSmall(double[] m, double[] v, List<Double> d, int nSpecies){
-        int dim = d.size();
+    public static double[] getUMatArrForPSmall(double[] m, double[] v, double[] d, int nSpecies){
+        int dim = d.length;
         double[] diag = new double[dim * dim];
         for(int i = 0; i < dim; i++){
-            MatrixUtilsContra.setMatrixEntry(diag, i, i, 1/d.get(i), dim);
+            MatrixUtilsContra.setMatrixEntry(diag, i, i, 1/d[i], dim);
         }
 
         double[] temp = new double[nSpecies * dim];
@@ -361,11 +377,11 @@ public class ShrinkageUtils {
         return m.transpose().multiply(u).multiply(diag);
     }
 
-    public static double[] getVMatForNSmall(double[] m, double[] u, List<Double> d, int nTraits ,int nSpecies){
-        int dim = d.size();
+    public static double[] getVMatArrForNSmall(double[] m, double[] u, double[] d, int nTraits ,int nSpecies){
+        int dim = d.length;
         double[] diag = new double[dim * dim];
-        for(int i = 0; i < d.size(); i++){
-            MatrixUtilsContra.setMatrixEntry(diag, i, i, 1/d.get(i), dim);
+        for(int i = 0; i < dim; i++){
+            MatrixUtilsContra.setMatrixEntry(diag, i, i, 1/d[i], dim);
         }
 
         double[] mTranspose = new double[m.length];
