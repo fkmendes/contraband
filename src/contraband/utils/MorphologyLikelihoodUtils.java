@@ -11,6 +11,8 @@ import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.commons.math3.util.FastMath;
+import org.jblas.DoubleMatrix;
+import org.jblas.MatrixFunctions;
 import outercore.parameter.KeyRealParameter;
 
 public class MorphologyLikelihoodUtils {
@@ -340,4 +342,47 @@ public class MorphologyLikelihoodUtils {
             }
         }
     }
+
+    /*
+     * Methods for OU model
+     */
+
+    // The following two methods calculate matrix exponential of a matrix,
+    // by using a method in jblas that applies to DoubleMatrix.
+    public static double[][] exp(double[][] matrix) {
+        return MatrixFunctions.expm(new DoubleMatrix(matrix)).toArray2();
+    }
+
+    // calculate A, b, C, d, E, f for OU model
+    public static void populateAbCdEf(GeneralNodeMath nodeMath, int nTraits, int nodeIdx) {
+
+        double[] res = new double[nTraits * nTraits];
+        // AMat = -0.5 * V_1
+        // invVarianceRM.scalarMultiply(-0.5)
+        MatrixUtilsContra.vectorMapMultiply(nodeMath.getInvVarianceMatrix(), -0.5, res);
+
+        // eMat = Phi.transpose * V_1
+        //phiMat.transpose().multiply(invVarianceRM);
+        //MatrixUtilsContra.matrixTranspose(phiMat, nTraits, phiMatTranspose);
+        //MatrixUtilsContra.matrixMultiply(phiMatTranspose, nodeMath.getInvVarianceMatrix(), nTraits, nTraits, res);
+
+        // CMat = -0.5 * Phi.transpose * V_1 * Phi
+        // eMat.multiply(phiMat).scalarMultiply(-0.5);
+        // MatrixUtilsContra.matrixMultiply(eMat, phiMat, nTraits, nTraits, eMulPhiMat);
+        // MatrixUtilsContra.vectorMapMultiply(eMulPhiMat, -0.5, res);
+
+        // f = -0.5 * (t(omega) * V_1 * omega + nTraits * LOGTWOPI + log(V.determinant))
+        //-0.5 * (varianceRM.preMultiply(omegaVec).dotProduct(omegaVec) + nTraits * LOGTWOPI +  Math.log(varianceRMDet));
+        // -0.5 * (MatrixUtilsContra.tVecDotMatrixDotVec(omegaVec, nodeMath.getInvVarianceMatrix(), nTraits) + nTraits * LOGTWOPI +  nodeMath.getVarianceMatrixDet());
+
+        // bVec = V.inverse * omegaVec
+        // invVarainceRM.preMultiply(omegaVec);
+        // MatrixUtilsContra.matrixPreMultiply(omegaVec, nodeMath.getInvVarianceMatrix(), nTraits, nTraits, bVec);
+
+        // dVec = - eMat * omegaVec
+        // eMat.transpose().preMultiply(omegaVec).mapMultiply(-1);
+        //MatrixUtilsContra.matrixPreMultiply(omegaVec, eMatTrans, nTraits, nTraits, eMatOmega);
+        //MatrixUtilsContra.vectorMapMultiply(eMatOmega, -1, res);
+
+ }
 }
