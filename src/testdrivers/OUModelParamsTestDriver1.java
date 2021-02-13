@@ -9,7 +9,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import java.util.Arrays;
 
-public class OUModelParamsTestDriver {
+public class OUModelParamsTestDriver1 {
     public static void main(String[] args) {
 
         // (1) initialize the test
@@ -18,7 +18,6 @@ public class OUModelParamsTestDriver {
         double[] phiTranspose = new double[nTraits * nTraits];
         double[] eMulPhiMat = new double[nTraits * nTraits];
         double[] resVec = new double[nTraits];
-        double[] resVec1 = new double[nTraits];
         double[] eTranspose = new double[nTraits * nTraits];
 
         // (2) specify the input: parameters from NodeMath
