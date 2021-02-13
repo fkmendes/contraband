@@ -46,6 +46,16 @@ public class GeneralNodeMath extends CalculationNode {
     private double [] mVecArray;
     private double [] rArray;
 
+    //OU model parameters
+    private double [] phiMatArray;
+    private double [] phiMat;
+    private double [] omegaVecArray;
+    private double [] omegaVec;
+    private double [] bVec;
+    private double [] dVec;
+    private double [] bVecArray;
+    private double [] dVecArray;
+
     // temporary variables
     private double [] mVecInit;
     private double [] mVec;
@@ -254,6 +264,17 @@ public class GeneralNodeMath extends CalculationNode {
         aPlusLInverse = new double [traitDim];
     }
 
+    private void intOUModelParams(){
+        phiMat = new double[paramDim];
+        phiMatArray = new double[paramDim * nodeNr];
+        omegaVec = new double[nTraits];
+        omegaVecArray = new double[nTraits * nodeNr];
+        bVec = new double[nTraits];
+        dVec = new double[nTraits];
+        bVecArray = new double[nTraits * nodeNr];
+        dVecArray = new double[nTraits * nodeNr];
+    }
+
     //getters
     public double[] getAMatForNode(int nodeIdx) {
         MatrixUtilsContra.getMatrixRow(aArray, nodeIdx, paramDim, aMat);
@@ -331,6 +352,26 @@ public class GeneralNodeMath extends CalculationNode {
 
     public double getTraitRate() { return rateMatrix.getSigmaMatrix()[0]; }
 
+    public double[] getPhiMatForNode(int nodeIdx){
+        MatrixUtilsContra.getMatrixRow(phiMatArray, nodeIdx, paramDim, phiMat);
+        return phiMat;
+    }
+
+    public double[] getOmegaVecForNode(int nodeIdx){
+        MatrixUtilsContra.getMatrixRow(omegaVecArray, nodeIdx, nTraits, omegaVec);
+        return omegaVec;
+    }
+
+    public double[] getBVecForNode (int nodeIdx) {
+        MatrixUtilsContra.getMatrixRow(bVecArray, nodeIdx, nTraits, bVec);
+        return bVec;
+    }
+
+    public double[] getDVecForNode (int nodeIdx) {
+        MatrixUtilsContra.getMatrixRow(dVecArray, nodeIdx, nTraits, dVec);
+        return dVec;
+    }
+
     // setters
     public void setLikelihoodForSampledAncestors(double value) {
         likForSA = value;
@@ -399,6 +440,18 @@ public class GeneralNodeMath extends CalculationNode {
 
     public void setSingularMatrixFlag(boolean value) {
         singularMatrix  = value;
+    }
+
+    public void setPhiMatForNode (int nodeIdx, double[] value) {
+        System.arraycopy(value, 0, phiMatArray, nodeIdx * traitDim, value.length);
+    }
+
+    public void setBVecForNode (int nodeIdx, double[] value) {
+        MatrixUtilsContra.setMatrixRow(bVecArray, value, nodeIdx, nTraits);
+    }
+
+    public void setDVecForNode (int nodeIdx, double[] value) {
+        MatrixUtilsContra.setMatrixRow(dVecArray, value, nodeIdx, nTraits);
     }
 
     //

@@ -3,10 +3,8 @@ package contraband.utils;
 import contraband.math.GeneralNodeMath;
 import contraband.math.MatrixUtilsContra;
 import contraband.prunelikelihood.MorphologicalData;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.LUDecomposition;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
+import contraband.prunelikelihood.OUPruneUtils;
+import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
@@ -357,32 +355,72 @@ public class MorphologyLikelihoodUtils {
     public static void populateAbCdEf(GeneralNodeMath nodeMath, int nTraits, int nodeIdx) {
 
         double[] res = new double[nTraits * nTraits];
+        double[] phiTranspose = new double[nTraits * nTraits];
+        double[] eMulPhiMat = new double[nTraits * nTraits];
+        double[] resVec = new double[nTraits];
+        double[] resVec1 = new double[nTraits];
+        double[] eTranspose = new double[nTraits * nTraits];
+
         // AMat = -0.5 * V_1
         // invVarianceRM.scalarMultiply(-0.5)
         MatrixUtilsContra.vectorMapMultiply(nodeMath.getInvVarianceMatrix(), -0.5, res);
+        nodeMath.setAMatForNode(nodeIdx, res);
 
         // eMat = Phi.transpose * V_1
         //phiMat.transpose().multiply(invVarianceRM);
-        //MatrixUtilsContra.matrixTranspose(phiMat, nTraits, phiMatTranspose);
-        //MatrixUtilsContra.matrixMultiply(phiMatTranspose, nodeMath.getInvVarianceMatrix(), nTraits, nTraits, res);
+        MatrixUtilsContra.matrixTranspose(nodeMath.getPhiMatForNode(nodeIdx), nTraits, phiTranspose);
+        MatrixUtilsContra.matrixMultiply(phiTranspose, nodeMath.getInvVarianceMatrix(), nTraits, nTraits, res);
+        nodeMath.setEMatForNode(nodeIdx, res);
 
         // CMat = -0.5 * Phi.transpose * V_1 * Phi
         // eMat.multiply(phiMat).scalarMultiply(-0.5);
-        // MatrixUtilsContra.matrixMultiply(eMat, phiMat, nTraits, nTraits, eMulPhiMat);
-        // MatrixUtilsContra.vectorMapMultiply(eMulPhiMat, -0.5, res);
+        MatrixUtilsContra.matrixMultiply(nodeMath.getEMatForNode(nodeIdx), nodeMath.getPhiMatForNode(nodeIdx), nTraits, nTraits, eMulPhiMat);
+        MatrixUtilsContra.vectorMapMultiply(eMulPhiMat, -0.5, res);
+        nodeMath.setCMatForNode(nodeIdx, res);
 
         // f = -0.5 * (t(omega) * V_1 * omega + nTraits * LOGTWOPI + log(V.determinant))
         //-0.5 * (varianceRM.preMultiply(omegaVec).dotProduct(omegaVec) + nTraits * LOGTWOPI +  Math.log(varianceRMDet));
-        // -0.5 * (MatrixUtilsContra.tVecDotMatrixDotVec(omegaVec, nodeMath.getInvVarianceMatrix(), nTraits) + nTraits * LOGTWOPI +  nodeMath.getVarianceMatrixDet());
+        double f = -0.5 * (MatrixUtilsContra.tVecDotMatrixDotVec(nodeMath.getOmegaVecForNode(nodeIdx), nodeMath.getInvVarianceMatrix(), nTraits) + nTraits * LOGTWOPI +  nodeMath.getVarianceMatrixDet());
+        nodeMath.setfForNode(nodeIdx, f);
 
         // bVec = V.inverse * omegaVec
         // invVarainceRM.preMultiply(omegaVec);
-        // MatrixUtilsContra.matrixPreMultiply(omegaVec, nodeMath.getInvVarianceMatrix(), nTraits, nTraits, bVec);
+        MatrixUtilsContra.matrixPreMultiply(nodeMath.getOmegaVecForNode(nodeIdx), nodeMath.getInvVarianceMatrix(), nTraits, nTraits, resVec);
+        nodeMath.setBVecForNode(nodeIdx, resVec);
 
         // dVec = - eMat * omegaVec
         // eMat.transpose().preMultiply(omegaVec).mapMultiply(-1);
-        //MatrixUtilsContra.matrixPreMultiply(omegaVec, eMatTrans, nTraits, nTraits, eMatOmega);
-        //MatrixUtilsContra.vectorMapMultiply(eMatOmega, -1, res);
-
+        MatrixUtilsContra.matrixTranspose(nodeMath.getEMatForNode(nodeIdx), nTraits, eTranspose);
+        MatrixUtilsContra.matrixPreMultiply(nodeMath.getOmegaVecForNode(nodeIdx), eTranspose, nTraits, nTraits, resVec);
+        MatrixUtilsContra.vectorMapMultiply(resVec, -1, resVec1);
+        nodeMath.setDVecForNode(nodeIdx, resVec1);
  }
+
+    public static void populateLmrForOUTip(GeneralNodeMath nodeMath, double[] traitValuesArr, int nTraits, int nodeIdx) {
+
+        double[] res = new double[nTraits * nTraits];
+        double[] eTranspose = new double[nTraits * nTraits];
+        double[] resVec = new double[nTraits];
+
+        //L = 0.5 * (C + C.transpose)
+        //cMat.add(cMat.transpose()).scalarMultiply(0.5);
+        MatrixUtilsContra.matrixTransAddScalar(nodeMath.getCMatForNode(nodeIdx), 0.5, nTraits, res);
+        nodeMath.setLForNode(nodeIdx, res);
+
+        // vector of trait values at this tip
+        nodeMath.setTraitsVecForTip(traitValuesArr, nodeIdx);
+
+        //r = (X.transpose * A * X) + (X.transpose * b) + f
+       //aMat.preMultiply(traitsValues).dotProduct(traitsValues) + traitsValues.dotProduct(bVec) + f;
+       double r = MatrixUtilsContra.tVecDotMatrixDotVec(nodeMath.getTraitsVec(), nodeMath.getAMatForNode(nodeIdx), nTraits)
+               + MatrixUtilsContra.vectorDotMultiply(nodeMath.getTraitsVec(), nodeMath.getBVecForNode(nodeIdx))
+               + nodeMath.getfForNode(nodeIdx);
+       nodeMath.setRForNode(nodeIdx, r);
+
+       // m = d + (E * X)
+       //eMat.transpose().preMultiply(traitsValues).add(dVec);
+       MatrixUtilsContra.matrixTranspose(nodeMath.getEMatForNode(nodeIdx), nTraits, eTranspose);
+       MatrixUtilsContra.matrixPreMultiplyAddVector(nodeMath.getTraitsVec(), eTranspose, nodeMath.getDVecForNode(nodeIdx), nTraits, nTraits, resVec);
+       nodeMath.setMVecForNode(nodeIdx, resVec);
+    }
 }
