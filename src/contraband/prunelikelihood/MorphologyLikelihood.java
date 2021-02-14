@@ -115,7 +115,7 @@ public abstract class MorphologyLikelihood extends Distribution {
                 // add up to this node
                 MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLMatForNode(childIdx), thisNodeL);
                 thisNodeR += nodeMath.getRForNode(childIdx);
-                MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
+                MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getMVecForNode(childIdx), thisNodeMVec);
 
             } else {
                 // if child is an sampled ancestor
@@ -133,7 +133,7 @@ public abstract class MorphologyLikelihood extends Distribution {
 
                         // add up to this node
                         thisNodeR += nodeMath.getRForNode(childIdx);
-                        MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
+                        MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getMVecForNode(childIdx), thisNodeMVec);
                         MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLMatForNode(childIdx), thisNodeL);
 
                     } else {
@@ -153,7 +153,7 @@ public abstract class MorphologyLikelihood extends Distribution {
                         // add up to this node
                         MatrixUtilsContra.vectorAdd(thisNodeL, nodeMath.getLMatForNode(gcSANr), thisNodeL);
                         thisNodeR += nodeMath.getRForNode(gcSANr);
-                        MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
+                        MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getMVecForNode(gcSANr), thisNodeMVec);
 
                         // prune the subtree rooted at the child node
                         prune(child, nTraits, traitValuesArr, pcmc, nodeMath);
