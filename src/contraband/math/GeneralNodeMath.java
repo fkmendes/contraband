@@ -353,7 +353,7 @@ public class GeneralNodeMath extends CalculationNode {
     public double getTraitRate() { return rateMatrix.getSigmaMatrix()[0]; }
 
     public double[] getPhiMatForNode(int nodeIdx){
-        MatrixUtilsContra.getMatrixRow(phiMatArray, nodeIdx, paramDim, phiMat);
+        //MatrixUtilsContra.getMatrixRow(phiMatArray, nodeIdx, paramDim, phiMat);
         return phiMat;
     }
 
@@ -442,8 +442,15 @@ public class GeneralNodeMath extends CalculationNode {
         singularMatrix  = value;
     }
 
-    public void setPhiMatForNode (int nodeIdx, double[] value) {
-        System.arraycopy(value, 0, phiMatArray, nodeIdx * traitDim, value.length);
+    public void setPhiMatForNode (double[][] value) {
+        //System.arraycopy(value, 0, phiMatArray, nodeIdx * traitDim, value.length);
+        for(int k = 0; k < nTraits; k++){
+            System.arraycopy(value[k], 0, phiMat, k * nTraits, nTraits);
+        }
+    }
+
+    public void setOmegaVecForNode(double[] value){
+        System.arraycopy(value, 0, omegaVec, 0, nTraits);
     }
 
     public void setBVecForNode (int nodeIdx, double[] value) {

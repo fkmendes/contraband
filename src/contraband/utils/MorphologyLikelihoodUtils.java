@@ -1,8 +1,10 @@
 package contraband.utils;
 
+import beast.evolution.tree.Node;
 import contraband.math.GeneralNodeMath;
 import contraband.math.MatrixUtilsContra;
 import contraband.prunelikelihood.MorphologicalData;
+import contraband.prunelikelihood.OUNodeMath;
 import contraband.prunelikelihood.OUPruneUtils;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
@@ -463,5 +465,43 @@ public class MorphologyLikelihoodUtils {
         MatrixUtilsContra.matrixMultiply(eAPlusLInv, eMatTransScalar, nTraits, nTraits, cToSubtract);
         MatrixUtilsContra.matrixSubtract(nodeMath.getCMatForNode(nodeIdx), cToSubtract, nTraits, lMat);
         nodeMath.setLForNode(nodeIdx, lMat);
+    }
+
+    public static void populatePhiMatrixForNode (int nTraits, double branchLength, double[] alphaMat, GeneralNodeMath nodeMath) {
+        double[][] res = new double[nTraits][nTraits];
+        for (int i = 0; i < nTraits; i++) {
+            for (int j = 0; j < nTraits; j++) {
+                res[i][j] = MatrixUtilsContra.getMatrixEntry(alphaMat, i, j, nTraits) * -branchLength;
+            }
+        }
+
+        //double[][] matrixExp = exp(res);
+        //double[] phiMatrix = new double[nTraits * nTraits];
+        //for(int k = 0; k < nTraits; k++){
+            //System.arraycopy(matrixExp[k], 0, phiMatrix, k * nTraits, nTraits);
+        //}
+        nodeMath.setPhiMatForNode(exp(res));
+    }
+
+    /*
+     * I is an identity matrix.
+     *
+     * omega <- (I - e_Ht) %*% Theta
+     */
+    public static void populateOmegaVecForNode(int nTraits, double[] phiMat, double[] thetaVec, GeneralNodeMath nodeMath) {
+        //identity.subtract(phiMat).transpose().preMultiply(thetaVec);
+        double[] res = new double[nTraits];
+        double[] negativeEPhi = new double[nTraits * nTraits];
+        for (int i = 0; i < nTraits; i++){
+            for (int j = 0; j < nTraits; j++){
+                if(i == j){
+                    negativeEPhi[i * nTraits + j] = 1.0 - MatrixUtilsContra.getMatrixEntry(phiMat, i, j, nTraits);
+                } else {
+                    negativeEPhi[i * nTraits + j] = 1.0 - MatrixUtilsContra.getMatrixEntry(phiMat, j, i, nTraits);
+                }
+            }
+        }
+        MatrixUtilsContra.matrixPreMultiply(thetaVec, negativeEPhi, nTraits, nTraits, res);
+        nodeMath.setOmegaVecForNode(res);
     }
 }

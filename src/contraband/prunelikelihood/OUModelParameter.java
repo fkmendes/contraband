@@ -49,6 +49,9 @@ public class OUModelParameter extends CalculationNode {
 
     private double[] pMat;
     private double[] inverseP;
+    private double[] pMatTranspose;
+    private double[] inversePTranspose;
+    private double[] eigenValues;
 
     // for doing LUDecompostion
     private double[] lu;
@@ -132,6 +135,12 @@ public class OUModelParameter extends CalculationNode {
 
     public double[] getAlphaDecomposeInversePMat() { return inverseP; }
 
+    public double[] getPMatTranspose() { return pMatTranspose; }
+
+    public double[] getInversePTranspose() {return inversePTranspose; }
+
+    public double[] getEigenValues() { return eigenValues; }
+
     /*
      * Initiate and validate inputs for JOU model
      */
@@ -170,6 +179,7 @@ public class OUModelParameter extends CalculationNode {
         pivot = new int[nTraits];
         evenSingular = new boolean[2];
         identityMatrix = new double[nTraits * nTraits];
+        eigenValues = new double[nTraits];
 
         // create an identity matrix for LUDecomposition
         for (int i = 0; i < nTraits; i++) {
@@ -178,6 +188,8 @@ public class OUModelParameter extends CalculationNode {
 
         pMat = new double[nTraits * nTraits];
         inverseP = new double[nTraits * nTraits];
+        pMatTranspose = new double[nTraits * nTraits];
+        inversePTranspose = new double[nTraits * nTraits];
     }
 
     public void performAlphaEigenDecomposition() {
@@ -204,6 +216,9 @@ public class OUModelParameter extends CalculationNode {
             }
         }
 
+        // get eigen values
+        eigenValues = decompositionH.getRealEigenvalues();
+
         // calculate the inverse matrix of pMat
         LUDecompositionForArray.ArrayLUDecomposition(pMat, lu, pivot, evenSingular, nTraits);
         try {
@@ -212,6 +227,14 @@ public class OUModelParameter extends CalculationNode {
         catch (SingularMatrixException e) {
             singularMatrix = true;
         }
+
+        // get the transpose matrix
+        populateTransposeMatrix();
+    }
+
+    private void populateTransposeMatrix(){
+        MatrixUtilsContra.matrixTranspose(pMat, nTraits, pMatTranspose);
+        MatrixUtilsContra.matrixTranspose(inverseP, nTraits, inversePTranspose);
     }
 
     public void updateOUModelParams() {
