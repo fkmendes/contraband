@@ -185,7 +185,6 @@ public class GeneralNodeMath extends CalculationNode {
         initForSampledAncestors();
         initVarianceAndExpectation();
         initTraitRateMatrix();
-        intOUModelParams();
     }
 
     // initialise
@@ -266,7 +265,9 @@ public class GeneralNodeMath extends CalculationNode {
         aPlusLInverse = new double [traitDim];
     }
 
-    private void intOUModelParams(){
+    public void intOUModelParams(){
+        initMatrixParams();
+        paramDim = nTraits * nTraits;
         phiMat = new double[paramDim];
         phiMatArray = new double[paramDim * nodeNr];
         omegaVec = new double[nTraits];
@@ -275,6 +276,12 @@ public class GeneralNodeMath extends CalculationNode {
         dVec = new double[nTraits];
         bVecArray = new double[nTraits * nodeNr];
         dVecArray = new double[nTraits * nodeNr];
+        initAbCdEfArray();
+        initLmrArray();
+        initUDecomposition();
+        initForSampledAncestors();
+        initVarianceAndExpectation();
+        initTraitRateMatrix();
     }
 
     //getters

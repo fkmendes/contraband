@@ -14,6 +14,7 @@ public class OULikelihood extends MorphologyLikelihood {
     public void initAndValidate() {
         super.initAndValidate();
 
+        nodeMathInput.get().intOUModelParams();
         nodeMathInput.get().updateSigmaMatrix();
         modelParameter = modelParameterInput.get();
         modelParameter.updateOUModelParams();
