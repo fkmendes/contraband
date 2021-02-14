@@ -53,6 +53,8 @@ public class OULikelihood extends MorphologyLikelihood {
     protected void populateAbCdEfForTips(GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx) {
         MorphologyLikelihoodUtils.populatePhiMatrixForNode(traitInput.get().getTotalTraitNr(), branchLength, modelParameter.getAlphaMat(), nodeMath);
         MorphologyLikelihoodUtils.populateOmegaVecForNode(traitInput.get().getTotalTraitNr(), nodeMath.getPhiMatForNode(nodeIdx), modelParameter.getThetaVecForNode(nodeIdx), nodeMath);
+        nodeMath.populateOUVarianceMatrixForNode(branchLength, modelParameter, true);
+        nodeMath.operateOnVarianceMatrix();
         MorphologyLikelihoodUtils.populateAbCdEf(nodeMath, nTraits, nodeIdx);
     }
 
@@ -60,6 +62,8 @@ public class OULikelihood extends MorphologyLikelihood {
     protected void populateAbCdEfForInternalNodes (GeneralNodeMath nodeMath, double branchLength, int nTraits, int nodeIdx) {
         MorphologyLikelihoodUtils.populatePhiMatrixForNode(traitInput.get().getTotalTraitNr(), branchLength, modelParameter.getAlphaMat(), nodeMath);
         MorphologyLikelihoodUtils.populateOmegaVecForNode(traitInput.get().getTotalTraitNr(), nodeMath.getPhiMatForNode(nodeIdx), modelParameter.getThetaVecForNode(nodeIdx), nodeMath);
+        nodeMath.populateOUVarianceMatrixForNode(branchLength, modelParameter, false);
+        nodeMath.operateOnVarianceMatrix();
         MorphologyLikelihoodUtils.populateAbCdEf(nodeMath, nTraits, nodeIdx);
     }
 

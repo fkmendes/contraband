@@ -131,8 +131,8 @@ public class SigmaMatrix extends CalculationNode {
                 covarianceValues = new double[nTraits * (nTraits - 1) / 2];
                 if (covarianceInput.get().getDimension() != (nTraits * (nTraits - 1) / 2)) {
                     covarianceInput.get().setDimension((nTraits * (nTraits - 1) / 2));
-                    covarianceValues = covarianceInput.get().getDoubleValues();
                 }
+                covarianceValues = covarianceInput.get().getDoubleValues();
             }
             
             else if (rhoInput.get()!=null){

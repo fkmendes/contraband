@@ -6,6 +6,7 @@ import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
 import beast.evolution.tree.Tree;
 import contraband.prunelikelihood.MorphologicalData;
+import contraband.prunelikelihood.OUModelParameter;
 import contraband.prunelikelihood.SigmaMatrix;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;
@@ -184,6 +185,7 @@ public class GeneralNodeMath extends CalculationNode {
         initForSampledAncestors();
         initVarianceAndExpectation();
         initTraitRateMatrix();
+        intOUModelParams();
     }
 
     // initialise
@@ -358,7 +360,7 @@ public class GeneralNodeMath extends CalculationNode {
     }
 
     public double[] getOmegaVecForNode(int nodeIdx){
-        MatrixUtilsContra.getMatrixRow(omegaVecArray, nodeIdx, nTraits, omegaVec);
+        //MatrixUtilsContra.getMatrixRow(omegaVecArray, nodeIdx, nTraits, omegaVec);
         return omegaVec;
     }
 
@@ -571,6 +573,37 @@ public class GeneralNodeMath extends CalculationNode {
 
     public void populateVarianceMatrixForIntNodes(double branchLength){
         MatrixUtilsContra.vectorMapMultiply(rateMatrix.getSigmaMatrix(), branchLength, varianceMatrix);
+    }
+
+    public void populateOUVarianceMatrixForNode(double branchLength, OUModelParameter modelParameter, boolean isTip) {
+        // P_1SigmaP_t = inverseP * Sigma * t(inverseP)
+        double[]  P_1SigmaP_t = new double[traitDim];
+        MatrixUtilsContra.matricesProduct(modelParameter.getAlphaDecomposeInversePMat(), rateMatrix.getSigmaMatrix(),modelParameter.getInversePTranspose(), nTraits, P_1SigmaP_t);
+
+        // fLambda_ij(t) * P_1SigmaP_t
+        double[] fLambdaP_1SigmaP_t = new double[traitDim];
+        double[] eigenValues = modelParameter.getEigenValues();
+        for (int i = 0; i < nTraits; i++) {
+            for (int j = 0; j < nTraits; j++) {
+                double lambda = eigenValues[i] + eigenValues[j];
+                if (Math.abs(lambda) < 1e-8) {
+                    //fLambdaP_1SigmaP_t[i][j] = nodeHeight * P_1SigmaP_t.getEntry(i,j);
+                    MatrixUtilsContra.setMatrixEntry(fLambdaP_1SigmaP_t, j, i, branchLength * MatrixUtilsContra.getMatrixEntry(P_1SigmaP_t, i, j, nTraits), nTraits);
+                } else {
+                    double f = (1 - Math.exp(-lambda * branchLength)) / lambda;
+                    //fLambdaP_1SigmaP_t[i][j] = f * P_1SigmaP_t.getEntry(i,j);
+                    MatrixUtilsContra.setMatrixEntry(fLambdaP_1SigmaP_t, j, i, f * MatrixUtilsContra.getMatrixEntry(P_1SigmaP_t, i, j, nTraits), nTraits);
+                }
+            }
+        }
+
+        // variance matrix = P * (fLambda * P_1SigmaP_t) * t(P)
+        if(popMatrixInput.get() != null && isTip) {
+            MatrixUtilsContra.matricesProduct(modelParameter.getAlphaDecomposePMat(), fLambdaP_1SigmaP_t, modelParameter.getPMatTranspose(), nTraits, rateScaler);
+            MatrixUtilsContra.vectorAdd(rateScaler, popMatrix.getSigmaMatrix(), varianceMatrix);
+       } else {
+            MatrixUtilsContra.matricesProduct(modelParameter.getAlphaDecomposePMat(), fLambdaP_1SigmaP_t, modelParameter.getPMatTranspose(), nTraits, varianceMatrix);
+        }
     }
 
     public void operateOnVarianceMatrix() {

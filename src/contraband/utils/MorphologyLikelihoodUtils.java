@@ -471,7 +471,7 @@ public class MorphologyLikelihoodUtils {
         double[][] res = new double[nTraits][nTraits];
         for (int i = 0; i < nTraits; i++) {
             for (int j = 0; j < nTraits; j++) {
-                res[i][j] = MatrixUtilsContra.getMatrixEntry(alphaMat, i, j, nTraits) * -branchLength;
+                res[i][j] = MatrixUtilsContra.getMatrixEntry(alphaMat, i, j, nTraits) * (-branchLength);
             }
         }
 
@@ -497,7 +497,7 @@ public class MorphologyLikelihoodUtils {
                 if(i == j){
                     negativeEPhi[i * nTraits + j] = 1.0 - MatrixUtilsContra.getMatrixEntry(phiMat, i, j, nTraits);
                 } else {
-                    negativeEPhi[i * nTraits + j] = 1.0 - MatrixUtilsContra.getMatrixEntry(phiMat, j, i, nTraits);
+                    negativeEPhi[i * nTraits + j] = - MatrixUtilsContra.getMatrixEntry(phiMat, j, i, nTraits);
                 }
             }
         }
