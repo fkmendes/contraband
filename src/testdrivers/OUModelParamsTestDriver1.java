@@ -1,12 +1,11 @@
 package testdrivers;
 
-import com.sun.deploy.util.GeneralUtil;
+
 import contraband.math.MatrixUtilsContra;
 import contraband.prunelikelihood.OUPruneUtils;
 import contraband.utils.GeneralUtils;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.FastMath;
-
 import java.util.Arrays;
 
 public class OUModelParamsTestDriver1 {
@@ -14,7 +13,6 @@ public class OUModelParamsTestDriver1 {
 
         // (1) initialize the test
         int nTraits = 4;
-        double[] res = new double[nTraits * nTraits];
         double[] phiTranspose = new double[nTraits * nTraits];
         double[] eMulPhiMat = new double[nTraits * nTraits];
         double[] resVec = new double[nTraits];

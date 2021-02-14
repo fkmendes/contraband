@@ -447,10 +447,8 @@ public class MorphologyLikelihoodUtils {
         //dVec.subtract(eAPlusLInv.transpose().preMultiply(mVec).mapMultiply(0.5));
         // m_non-tip = - 0.5 *  E * (A + L).inverse * m_i
         double[] eAPlusLInv = new double[nTraits * nTraits];
-        double[] eAplusLInvTrans = new double[nTraits * nTraits];
-        MatrixUtilsContra.matrixMultiply(nodeMath.getEMatForNode(nodeIdx), nodeMath.getAPlusLInverse(), nTraits, nTraits, eAplusLInvTrans);
-        MatrixUtilsContra.matrixTranspose(eAplusLInvTrans, nTraits, eAPlusLInv);
-        MatrixUtilsContra.matrixTransPreMapMultiply(bPlusM, eAPlusLInv, -0.5, nTraits, nTraits, dToSubtract);
+        MatrixUtilsContra.matrixMultiply(nodeMath.getEMatForNode(nodeIdx), nodeMath.getAPlusLInverse(), nTraits, nTraits, eAPlusLInv);
+        MatrixUtilsContra.matrixTransPreMapMultiply(bPlusM, eAPlusLInv, 0.5, nTraits, nTraits, dToSubtract);
         MatrixUtilsContra.vectorSubtract(nodeMath.getDVecForNode(nodeIdx), dToSubtract, mVec);
         nodeMath.setMVecForNode(nodeIdx, mVec);
 
