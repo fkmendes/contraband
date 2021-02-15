@@ -60,6 +60,7 @@ public class SigmaMatrix extends CalculationNode {
     private double[] storedRhoValues;
     private double[] storedInverseRhoMatrix;
     private double[] storedRhoMatrix;
+    private double[] storedCovariance;
 
     private double[] lu;
     private int[] pivot;
@@ -129,6 +130,7 @@ public class SigmaMatrix extends CalculationNode {
             else if(coEstimate) {
                 // an upper diagonal matrix
                 covarianceValues = new double[nTraits * (nTraits - 1) / 2];
+                storedCovariance = new double[nTraits * (nTraits - 1) / 2];
                 if (covarianceInput.get().getDimension() != (nTraits * (nTraits - 1) / 2)) {
                     covarianceInput.get().setDimension((nTraits * (nTraits - 1) / 2));
                 }
@@ -309,8 +311,8 @@ public class SigmaMatrix extends CalculationNode {
                     populateRhoValuesFromInverseMatrix();
                 }
                 //TO DO: confirm the condition of updating matrix!!!
-                if(!sigmaValueType) {
-                //if(!oneRateOnly) {
+                //if(!sigmaValueType) {
+                if(!oneRateOnly) {
                     // update the sigma matrix using rho values and sigma values
                     populateSigmaMatrix();
                     }
@@ -367,6 +369,9 @@ public class SigmaMatrix extends CalculationNode {
         System.arraycopy(sigmaMatrix, 0, storedSigmaMatrix, 0, sigmaMatrix.length);
         System.arraycopy(rhoMatrix, 0, storedRhoMatrix, 0, storedRhoMatrix.length);
 
+        if(coEstimate){
+            System.arraycopy(covarianceValues, 0, storedCovariance, 0, covarianceValues.length);
+        }
     }
 
     @Override
@@ -398,6 +403,12 @@ public class SigmaMatrix extends CalculationNode {
             double[] tempInverseRhoMatrix = inverseRhoMatrix;
             inverseRhoMatrix = storedInverseRhoMatrix;
             storedInverseRhoMatrix = tempInverseRhoMatrix;
+        }
+
+        if(coEstimate) {
+            double[] tempCovariance = covarianceValues;
+            covarianceValues = storedCovariance;
+            storedCovariance = tempCovariance;
         }
     }
 
