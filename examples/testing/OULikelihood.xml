@@ -14,7 +14,7 @@
 <map name="Dirichlet" >beast.math.distributions.Dirichlet</map>
 
 
-<run id="mcmc" spec="MCMC" chainLength="1000">
+<run id="mcmc" spec="MCMC" chainLength="500000">
 	<state id="state" storeEvery="5000">
 		<tree id="TheTree" name="stateNode" spec='beast.util.TreeParser' 
 					newick="(((t5:1.817200834,((t8:1.198100152,t9:1.198100152):0.09647591001,t7:1.294576062):0.5226247715):2.81691287,t1:0.4510475033):0.8478545584,(((t10:1.050371982,t11:1.050371982):2.196178377,((t4:0.6664595291,((t12:0.7960935013,((t14:0.3280377964,t15:0.3280377964):0.224131159,t13:0.5521689553):0.243924546):0.6327198567,t6:0.9193027238):0.4303386926):0.7483262819,t3:1.389940135):0.6390720264):1.359214975,t2:1.16800625):0.8762029283);" 
@@ -53,6 +53,8 @@
         <stateNode idref="alpha"/>
         <stateNode idref="theta"/>
         <stateNode idref="rootValues"/>
+        <stateNode idref="birthRate"/>
+        <stateNode idref="deathRate"/>
 	</state>
 
 	<distribution id="posterior" spec="util.CompoundDistribution">
@@ -60,8 +62,16 @@
     <distribution id="prior" spec="util.CompoundDistribution">
         <!-- tree prior -->
         <!-- tree prior -->
-        <distribution id="BDTree" spec="beast.evolution.speciation.BirthDeathGernhard08Model" tree="@TheTree" relativeDeathRate="0.3333333" birthDiffRate="0.4"/>
-
+        <distribution id="BirthDeathPrior" spec="beast.evolution.speciation.BirthDeathGernhard08Model" tree="@TheTree">
+            <birthDiffRate id="birthRate" spec="parameter.RealParameter">1.250255</birthDiffRate>
+            <relativeDeathRate id="deathRate" spec="parameter.RealParameter">0.7498399</relativeDeathRate>
+        </distribution>
+        <distribution id="FBDbirthRatePrior" spec="beast.math.distributions.Prior" x="@birthRate">
+            <Uniform id="Uniform.0" name="distr" lower="1.0" upper="1.5"/>
+        </distribution>
+        <distribution id="FBDdeathRatePrior" spec="beast.math.distributions.Prior" x="@deathRate">
+            <Uniform id="Uniform.1" name="distr" lower="0.5" upper="1.0"/>
+        </distribution>
         <!-- OU prior -->
         <distribution id="sigmasqPrior" spec="beast.math.distributions.Prior" x="@sigmasq">
             <distr id="LogNormal.sigmasq" spec="beast.math.distributions.LogNormalDistributionModel" S="0.3" M="1.0"/>
@@ -74,7 +84,7 @@
         <distribution id="popVarPrior" spec="beast.math.distributions.Prior" x="@popVar">
             <distr id="LogNormal.popVar" spec="beast.math.distributions.LogNormalDistributionModel" S="0.1" M="0.2"/>
         </distribution>
-        
+
         <distribution id="popCovPrior" spec="beast.math.distributions.Prior" x="@popCov">
             <distr id="Normal.popCov" spec="beast.math.distributions.Normal" mean="0.0" sigma="0.2"/>
         </distribution>
@@ -113,13 +123,13 @@
                 <tree idref="TheTree"/>
             </branchRateModel>
 
-            <nodeMath id="pcmNodeMath" spec="contraband.math.GeneralNodeMath">
+            <nodeMath id="pcmNodeMath" spec="contraband.math.GeneralNodeMath" shareCorrelation="true">
                 <tree idref="TheTree"/>
                 <trait idref="morphTraitData"/>
                 <rateMatrix id="traitRateMatrix" spec="contraband.prunelikelihood.SigmaMatrix" upperMatrix="true">
                     <trait idref="morphTraitData"/>
                     <sigmasq id="sigmasq" spec="parameter.RealParameter">1.0</sigmasq>
-                    <covariance id="rho" spec="parameter.RealParameter">0.0</covariance>
+                    <correlation id="rho" spec="parameter.RealParameter">0.0</correlation>
                 </rateMatrix>
                 <popMatrix id="popVariance" spec="contraband.prunelikelihood.SigmaMatrix" upperMatrix="true">
                     <trait idref="morphTraitData"/>
@@ -151,20 +161,17 @@
     <operator id="rootValueScaler" spec="RealRandomWalkOperator" parameter="@rootValues" windowSize="0.75" weight="6.0"/>
 
     <!-- tree operators -->
-
     <operator id="UniformOperator" spec="Uniform" tree="@TheTree" weight="20.0"/>
     <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@TheTree" weight="1.0"/>
     <operator id="TreeScaler" spec="ScaleOperator" scaleFactor="0.95" tree="@TheTree" weight="3.0"/>
-    <!--
-        <operator id="BirthDeathSubtreeSlide" spec="SubtreeSlide" tree="@TheTree" weight="15.0"/>
-        <operator id="BirthDeathNarrow" spec="Exchange" tree="@TheTree" weight="15.0"/>
-        <operator id="BirthDeathWide" spec="Exchange" isNarrow="false" tree="@TheTree" weight="3.0"/>
-        <operator id="BirthDeathWilsonBalding" spec="WilsonBalding" tree="@TheTree"ght="3.0"/>
+    <operator id="BirthDeathSubtreeSlide" spec="SubtreeSlide" tree="@TheTree" weight="15.0"/>
+    <operator id="BirthDeathNarrow" spec="Exchange" tree="@TheTree" weight="15.0"/>
+    <operator id="BirthDeathWide" spec="Exchange" isNarrow="false" tree="@TheTree" weight="3.0"/>
+    <operator id="BirthDeathWilsonBalding" spec="WilsonBalding" tree="@TheTree" weight="3.0"/>
+    <operator id="BirthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>
+    <operator id="DeathRateScaler" spec="ScaleOperator" parameter="@deathRate" scaleFactor="0.75" weight="3.0"/>
 
-        <operator id="BirthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>
-        <operator id="DeathRateScaler" spec="ScaleOperator" parameter="@deathRate" scaleFactor="0.75" weight="3.0"/>
-    -->
-    <logger id="tracelog" fileName="OULikelihood.log" logEvery="1" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" fileName="OULikelihood.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="likelihood"/>
       <log idref="prior"/>
@@ -178,7 +185,7 @@
       <log idref="rootValues"/>
     </logger>
 
-    <logger id="screenlog" logEvery="1">
+    <logger id="screenlog" logEvery="5000">
         <log idref="posterior"/>
         <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
         <log idref="likelihood"/>
