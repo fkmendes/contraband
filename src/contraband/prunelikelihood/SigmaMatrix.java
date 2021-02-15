@@ -308,7 +308,9 @@ public class SigmaMatrix extends CalculationNode {
                 if(inverseMatrix) {
                     populateRhoValuesFromInverseMatrix();
                 }
+                //TO DO: confirm the condition of updating matrix!!!
                 if(!sigmaValueType) {
+                //if(!oneRateOnly) {
                     // update the sigma matrix using rho values and sigma values
                     populateSigmaMatrix();
                     }

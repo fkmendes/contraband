@@ -19,7 +19,6 @@ public class OULikelihood extends MorphologyLikelihood {
         modelParameter = modelParameterInput.get();
         modelParameter.updateOUModelParams();
         modelParameter.performAlphaEigenDecomposition();
-
     }
 
     @Override
@@ -32,7 +31,7 @@ public class OULikelihood extends MorphologyLikelihood {
 
         if(modelParameterInput.isDirty()) {
             modelParameter.updateOUModelParams();
-            modelParameter.performAlphaEigenDecomposition();
+            //modelParameter.performAlphaEigenDecomposition();
         }
 
         return updateTraitRateMatrix;
@@ -41,6 +40,8 @@ public class OULikelihood extends MorphologyLikelihood {
     @Override
     public double calculateLogP() {
         boolean update = updateParameters();
+
+        if(modelParameter.isSingularAlphaMatrix()) { return Double.NEGATIVE_INFINITY; }
 
         // update trait values (liabilities)
         traitInput.get().updateTraitValuesArr(update, nodeMathInput.get().getTraitRateMatrix());

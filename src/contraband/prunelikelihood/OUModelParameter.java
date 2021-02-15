@@ -61,7 +61,15 @@ public class OUModelParameter extends CalculationNode {
     private boolean singularMatrix;
 
     // for store and restore
-
+    private double[] storedThetaVecList;
+    private Integer[] storedOptAssignment;
+    private double[] storedAlphaMat;
+    private double[] storedPMat;
+    private double[] storedInverseP;
+    private double[] storedPMatTranspose;
+    private double[] storedInversePTranspose;
+    private double[] storedEigenValues;
+    private boolean storedSingular;
 
 
     @Override
@@ -110,8 +118,9 @@ public class OUModelParameter extends CalculationNode {
             initDOUModel();
         }
 
-        // Initiate for Decomposition
+        // Initiate arrays and matrices
         initLUDecomposition();
+        populateStoreAndRestore();
     }
 
     // getters
@@ -140,6 +149,8 @@ public class OUModelParameter extends CalculationNode {
     public double[] getInversePTranspose() {return inversePTranspose; }
 
     public double[] getEigenValues() { return eigenValues; }
+
+    public boolean isSingularAlphaMatrix() { return singularMatrix; }
 
     /*
      * Initiate and validate inputs for JOU model
@@ -192,6 +203,18 @@ public class OUModelParameter extends CalculationNode {
         inversePTranspose = new double[nTraits * nTraits];
     }
 
+    // initiate for store and restore
+    private void populateStoreAndRestore() {
+        storedThetaVecList = new double[nTraits * optNr];
+        storedOptAssignment = new Integer[nodeNr];
+        storedAlphaMat = new double[nTraits * nTraits];
+        storedPMat = new double[nTraits * nTraits];
+        storedInverseP = new double[nTraits * nTraits];
+        storedPMatTranspose = new double[nTraits * nTraits];
+        storedInversePTranspose = new double[nTraits * nTraits];
+        storedEigenValues = new double[nTraits];
+    }
+
     public void performAlphaEigenDecomposition() {
         if(dAlphaInput.get() != null){
             populateAlphaMatrix(alphaRM, dAlphaMat, nTraits);
@@ -240,6 +263,7 @@ public class OUModelParameter extends CalculationNode {
     public void updateOUModelParams() {
         if(alphaInput.isDirty()){
             alphaMat = alphaInput.get().getDoubleValues();
+            performAlphaEigenDecomposition();
         }
 
         if(optAssignInput.isDirty()){
@@ -271,13 +295,72 @@ public class OUModelParameter extends CalculationNode {
     @Override
     public void store() {
         super.store();
+        //storedAlphaMat = alphaMat;
+        System.arraycopy(alphaMat, 0, storedAlphaMat, 0, alphaMat.length);
 
+        //storedEigenValues = eigenValues;
+        System.arraycopy(eigenValues, 0, storedEigenValues , 0, eigenValues.length);
+
+        //storedPMat = pMat;
+        System.arraycopy(pMat, 0, storedPMat, 0, pMat.length);
+
+        //storedPMatTranspose = pMatTranspose;
+        System.arraycopy(pMatTranspose, 0, storedPMatTranspose, 0, pMatTranspose.length);
+
+        //storedInverseP = inverseP;
+        System.arraycopy(inverseP, 0, storedInverseP, 0, inverseP.length);
+
+        //storedInversePTranspose = inversePTranspose;
+        System.arraycopy(inversePTranspose, 0, storedInversePTranspose, 0, inversePTranspose.length);
+
+        //storedOptAssignment = optAssignment;
+        System.arraycopy(optAssignment, 0, storedOptAssignment, 0, optAssignment.length);
+
+        //storedThetaVecList = thetaVecList;
+        System.arraycopy(thetaVecList, 0, storedThetaVecList, 0, thetaVecList.length);
+
+        storedSingular = singularMatrix;
     }
 
     @Override
     public void restore() {
         super.restore();
 
+        double[] tempAlphaMat = alphaMat;
+        alphaMat = storedAlphaMat;
+        storedAlphaMat = tempAlphaMat;
+
+        double[] tempEigenValues = eigenValues;
+        eigenValues = storedEigenValues;
+        storedEigenValues = tempEigenValues;
+
+        double[] tempPMat = pMat;
+        pMat = storedPMat;
+        storedPMat = tempPMat;
+
+        double[] tempPMatTranspose = pMatTranspose;
+        pMatTranspose = storedPMatTranspose;
+        storedPMatTranspose = tempPMatTranspose;
+
+        double[] tempInverseP = inverseP;
+        inverseP = storedInverseP;
+        storedInverseP = tempInverseP;
+
+        double[] tempInversePTranspose = inversePTranspose;
+        inversePTranspose = storedInversePTranspose;
+        storedInversePTranspose = tempInversePTranspose;
+
+        Integer[] tempOptAssignment = optAssignment;
+        optAssignment = storedOptAssignment;
+        storedOptAssignment = tempOptAssignment;
+
+        double[] tempThetaVecList = thetaVecList;
+        thetaVecList = storedThetaVecList;
+        storedThetaVecList = tempThetaVecList;
+
+        boolean tempSingular = singularMatrix;
+        singularMatrix = storedSingular;
+        storedSingular = tempSingular;
     }
 
 
