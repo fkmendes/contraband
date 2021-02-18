@@ -70,6 +70,9 @@ public class OUModelParameter extends CalculationNode {
     private double[] storedInversePTranspose;
     private double[] storedEigenValues;
     private boolean storedSingular;
+    private double[] storedJumpVCVMat;
+    private Integer[] storedJumpIndicators;
+    private double[] storedJumpMeanVec;
 
     private String modelType;
 
@@ -220,6 +223,11 @@ public class OUModelParameter extends CalculationNode {
         storedPMatTranspose = new double[nTraits * nTraits];
         storedInversePTranspose = new double[nTraits * nTraits];
         storedEigenValues = new double[nTraits];
+        if(modelType.equals("JOU")){
+            storedJumpVCVMat = new double [jumpVCVMat.length];
+            storedJumpIndicators = new Integer[nodeNr];
+            storedJumpMeanVec = new double[nTraits];
+        }
     }
 
     public void performAlphaEigenDecomposition() {
@@ -326,6 +334,11 @@ public class OUModelParameter extends CalculationNode {
         //storedThetaVecList = thetaVecList;
         System.arraycopy(thetaVecList, 0, storedThetaVecList, 0, thetaVecList.length);
 
+        if(modelType.equals("JOU")){
+            System.arraycopy(jumpVCVMat, 0, storedJumpVCVMat, 0, jumpVCVMat.length);
+            System.arraycopy(jumpIndicators, 0, storedJumpIndicators, 0, jumpIndicators.length);
+            System.arraycopy(jumpMeanVec, 0, storedJumpMeanVec, 0, jumpMeanVec.length);
+        }
         storedSingular = singularMatrix;
     }
 
@@ -368,6 +381,20 @@ public class OUModelParameter extends CalculationNode {
         boolean tempSingular = singularMatrix;
         singularMatrix = storedSingular;
         storedSingular = tempSingular;
+
+        if(modelType.equals("JOU")){
+            Integer[] tempJumpIndicators = jumpIndicators;
+            jumpIndicators = storedJumpIndicators;
+            storedJumpIndicators = tempJumpIndicators;
+
+            double[] tempJumpVCVMat = jumpVCVMat;
+            jumpVCVMat = storedJumpVCVMat;
+            storedJumpVCVMat = tempJumpVCVMat;
+
+            double[] tempJumpMeanVec = jumpMeanVec;
+            jumpMeanVec = storedJumpMeanVec;
+            storedJumpMeanVec = tempJumpMeanVec;
+        }
     }
 
 
