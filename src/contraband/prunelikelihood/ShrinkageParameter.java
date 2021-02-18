@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ShrinkageParameter extends CalculationNode {
     final public Input<MorphologicalData> traitInput = new Input<>("trait","Morphological data set.", Input.Validate.REQUIRED);
-    final public Input<RealParameter> weightInput = new Input<>("weight", "Weight of each character.");
+    final public Input<RealParameter> weightInput = new Input<>("weight", "Weight of each species.");
 
     private double delta;
     private double storedDelta;
@@ -30,6 +30,9 @@ public class ShrinkageParameter extends CalculationNode {
     private double[] vMatArr;
     private double[] weight;
 
+    private boolean equalWeight;
+    private RealMatrix xsw;
+
     @Override
     public void initAndValidate() {
         morphData = traitInput.get();
@@ -37,10 +40,25 @@ public class ShrinkageParameter extends CalculationNode {
         nSpecies = morphData .getSpeciesNr();
         nTraits = morphData .getTotalTraitNr();
 
-        weight = new double[nTraits];
-        weight = weightInput.get().getDoubleValues();
+        weight = new double[nSpecies];
+        if(weightInput.get() == null){
+            // if weight is not specified, equal weight is used.
+            for (int i = 0; i < nSpecies; i++) {
+                weight[i] = 1.0 / nSpecies;
+            }
+            equalWeight = true;
+        } else {
+            weight = weightInput.get().getDoubleValues();
+            equalWeight = false;
+        }
+
+        initIntermediateValues();
 
         estimateShrinkageParameter();
+    }
+
+    private void initIntermediateValues() {
+        xsw = new Array2DRowRealMatrix(new double[nSpecies][nTraits]);
     }
 
     public double getDelta() { return delta; }
@@ -68,9 +86,16 @@ public class ShrinkageParameter extends CalculationNode {
     }
 
     private void wtMoments(double[] data, double[] wVec, double [] m, double [] v, int n, int p) {
-        // if (uniform weights)
-        double h1 = n /(n - 1.0);
-        // else { h1 = 1/(1 - sum(wVec * wVec))}
+        double h1;
+        if (equalWeight) {
+            h1 = n / (n - 1.0);
+        } else {
+            double sum3 = 0;
+            for (int i = 0; i < nSpecies; i++) {
+                sum3 += wVec[i] * wVec[i];
+            }
+            h1 = 1 / (1 - sum3);
+        }
 
         for (int j = 0; j < p; j ++) {
             double sum1 = 0;
@@ -124,17 +149,20 @@ public class ShrinkageParameter extends CalculationNode {
     }
 
     private double prepareMatrixForSVD(int n, int p, double[] wVec, double[] xs, double[] sw, double[] xsw){
-        // w2 = sum(w * w)
-        // sw = sqrt(w)
-        //RealVector sw = new ArrayRealVector(new double[n]);
-        //double[] sw = new double[n];
-        double w2 = 0.0;
-        for (int i = 0; i < n; i++) {
-            w2 = w2 + wVec[i] * wVec[i];
-            //sw.setEntry(i, Math.sqrt(wVec[i]));
-            sw[i] = Math.sqrt(wVec[i]);
+        double h1w2;
+        if(equalWeight){
+            h1w2 = 1.0 / (nSpecies - 1.0);
+            for (int i = 0; i < n; i++) {
+                sw[i] = Math.sqrt(wVec[i]);
+            }
+        } else {
+            double w2 = 0.0;
+            for (int i = 0; i < n; i++) {
+                w2 += wVec[i] * wVec[i];
+                sw[i] = Math.sqrt(wVec[i]);
+            }
+            h1w2 = w2 / (1 - w2);
         }
-        double h1w2 = w2 / (1 - w2);
 
         // xsw = sweep(xs, MARGIN = 1, STATS = sw, FUN = "*")
         //RealMatrix xsw = new Array2DRowRealMatrix(new double[n][p]);
@@ -153,7 +181,7 @@ public class ShrinkageParameter extends CalculationNode {
         // For other cases, we need to implement fast.svd or get the delta from corpcor library.
         SingularValueDecomposition xswsvd;
 
-        RealMatrix xsw = new Array2DRowRealMatrix(new double[n][p]);
+        //RealMatrix xsw = new Array2DRowRealMatrix(new double[n][p]);
         for(int i = 0; i < n; i++){
             for(int j = 0; j < p; j++){
                 xsw.setEntry(i, j, MatrixUtilsContra.getMatrixEntry(xswArr, i, j, p));
@@ -163,7 +191,6 @@ public class ShrinkageParameter extends CalculationNode {
         // start fast svd
         List<Double> singularValues = new ArrayList<>();
         List<Integer> validIndex = new ArrayList<>();
-        RealMatrix vMat; RealMatrix uMat;
         if (n > edgeRatio * p) {
             //psmall.svd
             xswsvd = ShrinkageUtils.pSmallSVD(xsw);

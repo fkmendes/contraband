@@ -96,12 +96,7 @@ public class ShrinkageParameterTest {
         contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
         morphData.initByName("traits", contTrait, "tree", tree);
 
-        Double[] weight = new Double [nSpecies];
-        for (int i = 0; i < nSpecies; i++) {
-            weight[i] = 1.0 / nSpecies;
-        }
-        RealParameter traitWeight = new RealParameter(weight);
-        shrinkageParameter.initByName("trait", morphData, "weight", traitWeight);
+        shrinkageParameter.initByName("trait", morphData);
 
         delta = shrinkageParameter.getDelta();
         Assert.assertEquals(0.435026173002864, delta, EPSILON);
@@ -126,12 +121,7 @@ public class ShrinkageParameterTest {
         contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
         morphData.initByName("traits", contTrait, "tree", tree);
 
-        Double[] weight = new Double [nSpecies];
-        for (int i = 0; i < nSpecies; i++) {
-            weight[i] = 1.0 / nSpecies;
-        }
-        RealParameter traitWeight = new RealParameter(weight);
-        shrinkageParameter.initByName("trait", morphData, "weight", traitWeight);
+        shrinkageParameter.initByName("trait", morphData);
 
         delta = shrinkageParameter.getDelta();
         Assert.assertEquals(0.676989791098336, delta, EPSILON);
@@ -180,12 +170,7 @@ public class ShrinkageParameterTest {
         contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
         morphData.initByName("traits", contTrait, "tree", tree);
 
-        Double[] weight = new Double [nSpecies];
-        for (int i = 0; i < nSpecies; i++) {
-            weight[i] = 1.0 / nSpecies;
-        }
-        RealParameter traitWeight = new RealParameter(weight);
-        shrinkageParameter.initByName("trait", morphData, "weight", traitWeight);
+        shrinkageParameter.initByName("trait", morphData);
 
         delta = shrinkageParameter.getDelta();
         Assert.assertEquals(0.528076427063438, delta, EPSILON);
@@ -230,12 +215,7 @@ public class ShrinkageParameterTest {
         contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
         morphData.initByName("traits", contTrait, "tree", tree);
 
-        Double[] weight = new Double [nSpecies];
-        for (int i = 0; i < nSpecies; i++) {
-            weight[i] = 1.0 / nSpecies;
-        }
-        RealParameter traitWeight = new RealParameter(weight);
-        shrinkageParameter.initByName("trait", morphData, "weight", traitWeight);
+        shrinkageParameter.initByName("trait", morphData);
 
         delta = shrinkageParameter.getDelta();
         Assert.assertEquals(0.543770621867578, delta, EPSILON);
@@ -287,15 +267,35 @@ public class ShrinkageParameterTest {
         contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
         morphData.initByName("traits", contTrait, "tree", tree);
 
-        Double[] weight = new Double [nSpecies];
-        for (int i = 0; i < nSpecies; i++) {
-            weight[i] = 1.0 / nSpecies;
-        }
+        shrinkageParameter.initByName("trait", morphData);
+
+        delta = shrinkageParameter.getDelta();
+        Assert.assertEquals(0.330907701854751, delta, EPSILON);
+    }
+
+    @Test
+    public void testShrinkageParameterWeightsOnTenSpeciesSixTraits(){
+        // tree
+        treeStr = "((((t1:5.001472856,(t9:0.8671472739,t10:0.8671472739):4.134325582):1.169748763,(t2:4.572865663,t3:4.572865663):1.598355956):1.028509947,(t6:4.061841536,(t7:1.217047531,t8:1.217047531):2.844794005):3.137890029):4.120313239,(t4:4.190072813,t5:4.190072813):7.129971992);";
+        spNames = "t1 t9 t10 t2 t3 t6 t7 t8 t4 t5";
+        tree = new TreeParser(treeStr, false, false, true, 0);
+        nSpecies = 10;
+
+        // trait values
+        nTraits = 6;
+        contTraitData =  Arrays.asList(
+                -6.77771511714266, 5.6412376528486, 16.7787303972049, -0.808995434701036, 8.84439473245568, -6.03304843423229, 0.0240147807850825, -3.60199374802833, 6.70746847906576, 2.77219554352954, 5.48043562292939, -1.63861222545275, 1.21029257061537, -2.41207663256475, 5.21860888870714, 4.77394782636081, 8.22273655620462, -2.37967810465363, 4.45362620311193, -1.09471538833579, 0.259051733358624, 3.97746835296685, -2.41635825319525, -0.412562158053475, -4.28311743997789, -8.96041442159479, 11.5338063671715, 4.43082991266315, -0.395911017960692, -4.00877551895379, 2.91158824852438, -1.20271538091808, 11.2447167807583, 3.37338070586235, 10.2052105388768, -6.37663006990716, 5.49823972598282, -0.968407499325085, 6.33107250956359, 2.69726849358064, 2.40651903200087, -4.31901386089944, -1.3847760541425, 8.43167800720544, 11.6639685126154, -1.76960791902215, 4.59559070589586, -5.99933056361048, 7.69273157577489, 4.67428183396886, 3.37204425624012, 1.3060274229292, 2.07136812499068, -1.40548918534553, 2.68306230316882, 15.8942564699219, -5.05827986921687, 2.9907735251968, 3.96583930851246, 6.92390734541384
+        );
+        contTrait.initByName("value", contTraitData, "keys", spNames, "minordimension", nTraits);
+        morphData.initByName("traits", contTrait, "tree", tree);
+
+        Double[] weight = new Double []{0.1, 0.1, 0.2, 0.05, 0.20, 0.05, 0.05, 0.15, 0.05, 0.05};
+
         RealParameter traitWeight = new RealParameter(weight);
         shrinkageParameter.initByName("trait", morphData, "weight", traitWeight);
 
         delta = shrinkageParameter.getDelta();
-        Assert.assertEquals(0.330907701854751, delta, EPSILON);
+        Assert.assertEquals(0.90016696742332, delta, EPSILON);
     }
 
 }
