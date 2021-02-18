@@ -19,7 +19,6 @@ public class GeneralNodeMath extends CalculationNode {
     final public Input<MorphologicalData> traitInput = new Input<>("trait","Morphological data set.");
     final public Input<SigmaMatrix> rateMatrixInput = new Input<>("rateMatrix", "Trait evolutionary variance-covariance matrix, i.e. trait rate matrix.", Input.Validate.REQUIRED);
     final public Input<SigmaMatrix> popMatrixInput = new Input<>("popMatrix", "Intraspecific variance-covariance matrix, i.e. population noise.");
-    final public Input<SigmaMatrix> jumpMatrixInput = new Input<>("jumpMatrix", "Jump variance-covariance matrix");
     final public Input<Tree> treeInput = new Input<>("tree", "Phylogenetic tree.");
     final public Input<Boolean> shareRhoInput = new Input<>("shareCorrelation", "TRUE, if correlations are shared between rateMatrix and popMatrix.", false);
     final public Input<RealParameter> rootValuesInput = new Input<>("rootValues", "Trait values at the root.");
