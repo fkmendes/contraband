@@ -678,4 +678,27 @@ public class MatrixUtilsContra {
         }
     }
 
+    /*
+     * This method calculates the multiplication of three matrices, i.e.
+     * resMat = mat1 %*% mat2 %*% t(mat1) + mat3
+     *
+     * NOTE: all matrices have to square with dimension "dim".
+     */
+    public static void matricesTransProductAdd(double[] mat1, double[] mat2, double[] mat3, int dim, double[] resMat){
+        for (int i = 0; i < dim; i++) {
+            for (int l = 0; l < dim; l++) {
+                double sum2 = 0.0;
+                for (int k = 0; k < dim; k++) {
+                    double sum1 = 0;
+                    for (int j = 0; j < dim; j++) {
+                        sum1 += MatrixUtilsContra.getMatrixEntry(mat1, i, j, dim) * MatrixUtilsContra.getMatrixEntry(mat2, j, k, dim);
+                    }
+                    sum2 += sum1 * MatrixUtilsContra.getMatrixEntry(mat1, l, k, dim);
+                }
+                MatrixUtilsContra.setMatrixEntry(resMat, i, l, sum2 + MatrixUtilsContra.getMatrixEntry(mat3, i,l,dim), dim);
+            }
+        }
+
+    }
+
 }

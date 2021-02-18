@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.branchratemodel:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
+
+<map name="Uniform" >beast.math.distributions.Uniform</map>
+<map name="Exponential" >beast.math.distributions.Exponential</map>
+<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+<map name="Normal" >beast.math.distributions.Normal</map>
+<map name="Beta" >beast.math.distributions.Beta</map>
+<map name="Gamma" >beast.math.distributions.Gamma</map>
+<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+<map name="prior" >beast.math.distributions.Prior</map>
+<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+<map name="Dirichlet" >beast.math.distributions.Dirichlet</map>
+
+<data id="discrete_traits" dataType="standard">
+<sequence id="seq_t23_2" taxon="t23_2" totalcount="3" value="010"/>
+                  <sequence id="seq_t11_1" taxon="t11_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t22_1" taxon="t22_1" totalcount="3" value="011"/>
+                  <sequence id="seq_t21_1" taxon="t21_1" totalcount="3" value="011"/>
+                  <sequence id="seq_t13_1" taxon="t13_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t18_1" taxon="t18_1" totalcount="3" value="011"/>
+                  <sequence id="seq_t12_2" taxon="t12_2" totalcount="3" value="011"/>
+                  <sequence id="seq_t8_1" taxon="t8_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t10_1" taxon="t10_1" totalcount="3" value="011"/>
+                  <sequence id="seq_t17_1" taxon="t17_1" totalcount="3" value="011"/>
+                  <sequence id="seq_t7_1" taxon="t7_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t5_1" taxon="t5_1" totalcount="3" value="001"/>
+                  <sequence id="seq_t9_1" taxon="t9_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t14_1" taxon="t14_1" totalcount="3" value="001"/>
+                  <sequence id="seq_t3_1" taxon="t3_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t4_1" taxon="t4_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t15_1" taxon="t15_1" totalcount="3" value="001"/>
+                  <sequence id="seq_t20_1" taxon="t20_1" totalcount="3" value="011"/>
+                  <sequence id="seq_t26_2" taxon="t26_2" totalcount="3" value="011"/>
+                  <sequence id="seq_t24_1" taxon="t24_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t27_1" taxon="t27_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t23_1" taxon="t23_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t12_1" taxon="t12_1" totalcount="3" value="011"/>
+                  <sequence id="seq_t26_1" taxon="t26_1" totalcount="3" value="011"/>
+                  <sequence id="seq_t33_1" taxon="t33_1" totalcount="3" value="011"/>
+                  <sequence id="seq_t36_1" taxon="t36_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t41_1" taxon="t41_1" totalcount="3" value="010"/>
+                  <sequence id="seq_t46_1" taxon="t46_1" totalcount="3" value="010"/>
+</data>
+
+<run id="mcmc" spec="MCMC" chainLength="25000000">
+	<state id="state" storeEvery="5000">
+		<tree id="TheTree" name="stateNode" spec='beast.util.ZeroBranchSATreeParser'
+					newick="(((((t13_1:1.427040548,t18_1:1.427040548):1.502914788,(t10_1:1.231557712,t17_1:1.231557712):1.698397624):1.216655663,(t23_2:0.1863765042,t23_1:0):3.960234495):2.772298644,(((t12_2:1.285377411,t12_1:0):0.05838469256,t8_1:1.343762104):0.2009971997,(t20_1:0.5125227899,(t26_2:0.2872113041,t26_1:0):0.2253114858):1.032236513):5.37415034):2.022583762,((t21_1:5.411798983,t33_1:0):2.463473314,((((((t7_1:1.002477244,(t24_1:0.2972793829,t27_1:0.2972793829):0.705197861):1.252145409,t46_1:0):0.2716832345,t11_1:2.526305887):0.5707906424,t22_1:3.097096529):1.672972587,((((t4_1:0.6299359647,t15_1:0.6299359647):0.07887481995,t3_1:0.7088107846):1.144751653,(t5_1:0.9004190446,(t9_1:0.893667989,t14_1:0.893667989):0.006751055648):0.9531433933):1.111560244,t41_1:0):1.804946434):0.4994778185,t36_1:0):2.605725363):1.066221107):0.5343692632;"
+					IsLabelledNewick="true">
+	            <taxonset id="TaxonSet" spec="TaxonSet">
+                <taxon id="t23_2" spec="Taxon"/>
+                  <taxon id="t11_1" spec="Taxon"/>
+                  <taxon id="t22_1" spec="Taxon"/>
+                  <taxon id="t21_1" spec="Taxon"/>
+                  <taxon id="t13_1" spec="Taxon"/>
+                  <taxon id="t18_1" spec="Taxon"/>
+                  <taxon id="t12_2" spec="Taxon"/>
+                  <taxon id="t8_1" spec="Taxon"/>
+                  <taxon id="t10_1" spec="Taxon"/>
+                  <taxon id="t17_1" spec="Taxon"/>
+                  <taxon id="t7_1" spec="Taxon"/>
+                  <taxon id="t5_1" spec="Taxon"/>
+                  <taxon id="t9_1" spec="Taxon"/>
+                  <taxon id="t14_1" spec="Taxon"/>
+                  <taxon id="t3_1" spec="Taxon"/>
+                  <taxon id="t4_1" spec="Taxon"/>
+                  <taxon id="t15_1" spec="Taxon"/>
+                  <taxon id="t20_1" spec="Taxon"/>
+                  <taxon id="t26_2" spec="Taxon"/>
+                  <taxon id="t24_1" spec="Taxon"/>
+                  <taxon id="t27_1" spec="Taxon"/>
+                  <taxon id="t23_1" spec="Taxon"/>
+                  <taxon id="t12_1" spec="Taxon"/>
+                  <taxon id="t26_1" spec="Taxon"/>
+                  <taxon id="t33_1" spec="Taxon"/>
+                  <taxon id="t36_1" spec="Taxon"/>
+                  <taxon id="t41_1" spec="Taxon"/>
+                  <taxon id="t46_1" spec="Taxon"/>
+	            </taxonset>
+            <trait id="FossilSet" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
+                t23_1=0.186376504174122,
+t12_1=1.28537741105708,
+t26_1=0.287211304090514,
+t33_1=5.41179898348581,
+t36_1=5.2695469346105,
+t41_1=2.96512268214789,
+t46_1=2.25462265255239
+                <taxa idref="TaxonSet"/>
+            </trait>
+        </tree>
+		<stateNode idref="rootValues"/>
+        <stateNode idref="inverseMatrix"/>
+        <parameter id="FBDdiversificationRate" name="stateNode">0.285136061473069</parameter>
+        <parameter id="FBDturnover" name="stateNode">0.188929630737345</parameter>
+        <parameter id="FBDsamplingProportion" name="stateNode">0.477132205109891</parameter>
+        <parameter id="FBDorigin" name="stateNode">9.47586266853619</parameter>
+        <stateNode idref="binaryLiabilities"/>
+	</state>
+
+	<distribution id="posterior" spec="util.CompoundDistribution">
+    <!-- START prior -->
+    <distribution id="prior" spec="util.CompoundDistribution">
+        <!-- tree prior -->
+        <distribution id="FBD" spec="beast.evolution.speciation.SABirthDeathModel"
+                      diversificationRate="@FBDdiversificationRate"
+                      turnover="@FBDturnover"
+                      samplingProportion="@FBDsamplingProportion"
+                      origin="@FBDorigin"
+                      tree="@TheTree">
+            <parameter id="FBDremovalProb" lower="0.0" name="removalProbability" upper="1.0">0.0</parameter>
+            <parameter id="FBDrho" lower="0.0" name="rho" upper="1.0">1.0</parameter>
+        </distribution>
+        <distribution id="DivRatePrior" spec="beast.math.distributions.Prior" x="@FBDdiversificationRate">
+            <distr id="LogNormal.divrate" spec="beast.math.distributions.LogNormalDistributionModel" S="0.1" M="-1.3"/>
+        </distribution>
+
+        <distribution id="TurnOverPrior" spec="beast.math.distributions.Prior" x="@FBDturnover">
+            <distr id="beta.turnover" spec="beast.math.distributions.Beta" alpha="10" beta="30"/>
+        </distribution>
+
+        <distribution id="SamplePropPrior" spec="beast.math.distributions.Prior" x="@FBDsamplingProportion">
+            <distr id="beta.sampleprop" spec="beast.math.distributions.Beta" alpha="20" beta="30"/>
+        </distribution>
+
+        <distribution id="OriginPrior" spec="beast.math.distributions.Prior" x="@FBDorigin">
+            <distr id="LogNormal.origin" spec="beast.math.distributions.LogNormalDistributionModel" S="0.1" M="2.3"/>
+        </distribution>
+
+        <!-- BM model prior -->
+        <distribution id="wishartPrior" spec="beast.math.distributions.WishartDistribution" df="6.0" arg="@inverseMatrix">
+            <scaleMatrix id="scaleMatrix" spec="parameter.RealParameter">
+            6 1.74420791678131 0.393594525754452 -3.25641066860408 -1.13246589247138 0.178297321312129 1.74420791678131 6 4.30627778358757 0.638826004229484 0.421550226397813 -1.1075679268688 0.393594525754452 4.30627778358757 6 1.95473941415548 -1.3254970824346 -3.68255945853889 -3.25641066860408 0.638826004229484 1.95473941415548 6 1.28835505899042 0.316137732937932 -1.13246589247138 0.421550226397813 -1.3254970824346 1.28835505899042 6 0.69566449150443 0.178297321312129 -1.1075679268688 -3.68255945853889 0.316137732937932 0.69566449150443 6
+            </scaleMatrix>
+        </distribution>
+
+        <distribution id="MeanPrior" spec="beast.math.distributions.Prior" x="@rootValues">
+	        <distr id="Normal.Mean" spec="beast.math.distributions.Normal" mean="0" sigma="2"/>
+        </distribution>
+    </distribution>
+    <!-- END prior -->
+
+    <!-- START likelihood -->
+    <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+     <!-- START Morphological likleihood-->
+        <distribution id="BinaryDiscreteLikelihood" spec="contraband.prunelikelihood.BinaryDiscreteTraits" tree="@TheTree">
+            <liability id="binaryLiabilities" spec="parameter.RealParameter">1.0</liability>
+            <data id="binaryData" spec="FilteredAlignment" data="@discrete_traits" filter="1,2,3"/>
+        </distribution>
+
+        <distribution id="LiabilityLikelihood" spec="contraband.prunelikelihood.LiabilityLikelihood">
+			<tree idref="TheTree"/>
+
+            <binaryDiscreteTraits idref="BinaryDiscreteLikelihood"/>
+
+            <traits id="oneTraitData" spec="outercore.parameter.KeyRealParameter" minordimension="3" keys="t23_2 t11_1 t22_1 t21_1 t13_1 t18_1 t12_2 t8_1 t10_1 t17_1 t7_1 t5_1 t9_1 t14_1 t3_1 t4_1 t15_1 t20_1 t26_2 t24_1 t27_1 t23_1 t12_1 t26_1 t33_1 t36_1 t41_1 t46_1">
+                2.85825616334958 1.23701619155346 1.98673116835781 1.17807321808647 0.350991941005351 3.08537551371278 2.98628804304419 -1.0212395133799 6.69592775963037 2.20828125645345 -5.33882879318335 15.6498082232232 1.77306998321515 0.049885413171715 4.96795040956617 2.66008989199218 0.55873718040892 4.77166467310276 1.51768997756364 -1.88595914935801 8.66572125998056 1.01923229979308 -0.483549960579678 5.64656542973372 2.55971511212096 -2.1245796128516 9.95389699532247 3.1945494144461 -2.58271666623277 10.6906098994847 2.43856341037081 1.53513004353652 2.5078497175334 3.9725916474445 -0.0753870131653914 5.77659255116027 4.45599479445195 1.69963364082637 2.05628836546083 4.10179316207069 0.0336111290132448 5.4618107347301 3.58809613295646 1.39886689096518 2.52462624728661 4.3171261048059 2.88469306018572 -0.966903817280083 4.24746534048198 0.841179265907081 3.53301861360034 1.72858426512669 -2.91654492163231 10.7869853775898 1.93550341354062 -3.06799688946489 11.7582191257051 2.54225072609312 2.81491994159202 -0.0984217646385104 2.15073586513018 2.20996163569999 0.798591637224146 3.06417075466825 1.56447092055961 1.39316587545396 1.40824738868531 -1.80745653547242 8.81439150804655 1.83341891596259 -2.97291716265006 11.4164416310977 2.76993081082038 -0.242305058253739 5.73704876769007 2.44900420305956 1.22131614449185 2.14484346405301 3.19777292181705 2.49592244857453 0.555835143147982 1.9915134379019 1.32309716287554 1.37579541365755
+            </traits>
+
+			<branchRateModel id="rateCatClock" spec="contraband.clock.RateCategoryClockModel" nCat="1">
+                <rates id="rateValues" spec="parameter.RealParameter">1.0</rates>
+                <rateCatAssign id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0</rateCatAssign>
+                <tree idref="TheTree"/>
+            </branchRateModel>
+
+            <nodeMath id="pcmNodeMath" spec="contraband.math.NodeMath" traits="@oneTraitData" oneRateOnly="true">
+                <binaryDiscreteTraits idref="BinaryDiscreteLikelihood"/>
+            	<sigmasq id="varValues" spec="parameter.RealParameter">1.0</sigmasq>
+                <inverseMatrix id="inverseMatrix" spec="parameter.RealParameter">1.0</inverseMatrix>
+                <rootValues id="rootValues" spec="parameter.RealParameter">2.29450396545669 0.794800118334596 2.93226979688089 -1.75393751351229 1.89212814137246 -1.03810996756835</rootValues>
+            </nodeMath>
+        </distribution>
+        <!-- END Morphological likleihood -->
+	</distribution> 
+	<!-- END Likelihood -->
+	</distribution> 
+	<!-- END Posterior -->
+
+    <operator id="FBDDiveRateScaler" spec="ScaleOperator" parameter="@FBDdiversificationRate" scaleFactor="0.75" weight="2.0"/>
+    <operator id="FBDTurnOverScaler" spec="ScaleOperator" parameter="@FBDturnover" scaleFactor="0.75" weight="2.0"/>
+    <operator id="FBDSamplingPropScaler" spec="ScaleOperator" parameter="@FBDsamplingProportion" scaleFactor="0.75" weight="2.0"/>
+    <operator id="FBDoriginScaler" spec="ScaleOperator" parameter="@FBDorigin" scaleFactor="0.75" weight="2.0"/>
+
+    <operator id="GibbsOperator" spec="contraband.prunelikelihood.InverseMatrixGibbsOperator" dimension="6" values="@inverseMatrix" distr="@wishartPrior" likelihood="@LiabilityLikelihood" nodeMath="@pcmNodeMath" weight="5.0"/>
+    <operator id="MeanRandomWalk" spec="RealRandomWalkOperator" parameter="@rootValues" windowSize="1.0" weight="6.0"/>
+
+    <operator id="FBDLeafToSA" spec="LeafToSampledAncestorJump" tree="@TheTree" weight="1.0"/>
+    <operator id="FBDSAWilsonBalding" spec="SAWilsonBalding" tree="@TheTree" weight="3.0"/>
+    <operator id="FBDSAWide" spec="SAExchange" isNarrow="false" tree="@TheTree" weight="3.0"/>
+    <operator id="FBDSANarrow" spec="SAExchange" tree="@TheTree" weight="10.0"/>
+    <operator id="FBDSAUniformOperator" spec="SAUniform" tree="@TheTree" weight="20.0"/>
+    <operator id="FBDSATreeRootScaler" spec="SAScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@TheTree" weight="1.0"/>
+    <operator id="FBDSATreeScaler" spec="SAScaleOperator" scaleFactor="0.95" tree="@TheTree" weight="3.0"/>
+
+    <operator id="BinaryLiabilityScaler" spec="ScaleOperator" parameter="@binaryLiabilities" scaleFactor="0.75" weight="20.0"/>
+    <operator id="BinaryLiabilityRandomWalk" spec="RealRandomWalkOperator" parameter="@binaryLiabilities" windowSize="0.5" weight="10.0"/>
+
+    <logger id="tracelog" fileName="LiabilityLikelihood_Gibbs_93.log" logEvery="5000" model="@posterior" sanitiseHeaders="true" sort="smart">
+      <log idref="posterior"/>
+      <log idref="likelihood"/>
+      <log idref="prior"/>
+      <log id="TreeStats" spec="beast.evolution.tree.TreeStatLogger" tree="@TheTree"/>
+      <log id="SACountFBD" spec="beast.evolution.tree.SampledAncestorLogger" tree="@TheTree"/>
+      <log idref="binaryLiabilities"/>
+      <log idref="varValues"/>
+      <log idref="inverseMatrix"/>
+      <log idref="rootValues"/>
+      <log idref="FBDdiversificationRate"/>
+      <log idref="FBDturnover"/>
+      <log idref="FBDsamplingProportion"/>
+      <log idref="FBDorigin"/>
+    </logger>
+
+    <logger id="screenlog" logEvery="500000">
+        <log idref="posterior"/>
+        <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+    </logger>
+
+    <logger id="treelog" fileName="LiabilityLikelihood_Gibbs_93.trees" logEvery="5000" mode="tree">
+        <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
+    </logger>
+  </run>
+</beast>

@@ -4,6 +4,7 @@ import beast.evolution.tree.Node;
 import contraband.math.GeneralNodeMath;
 import contraband.math.MatrixUtilsContra;
 import contraband.prunelikelihood.MorphologicalData;
+import contraband.prunelikelihood.OUModelParameter;
 import contraband.prunelikelihood.OUNodeMath;
 import contraband.prunelikelihood.OUPruneUtils;
 import org.apache.commons.math3.linear.*;
@@ -488,7 +489,7 @@ public class MorphologyLikelihoodUtils {
      *
      * omega <- (I - e_Ht) %*% Theta
      */
-    public static void populateOmegaVecForNode(int nTraits, double[] phiMat, double[] thetaVec, GeneralNodeMath nodeMath) {
+    public static void populateOmegaVecForNode(int nodeIdx, int nTraits, double[] phiMat, OUModelParameter modelParameter, GeneralNodeMath nodeMath) {
         //identity.subtract(phiMat).transpose().preMultiply(thetaVec);
         double[] res = new double[nTraits];
         double[] negativeEPhi = new double[nTraits * nTraits];
@@ -501,7 +502,39 @@ public class MorphologyLikelihoodUtils {
                 }
             }
         }
-        MatrixUtilsContra.matrixPreMultiply(thetaVec, negativeEPhi, nTraits, nTraits, res);
-        nodeMath.setOmegaVecForNode(res);
+        MatrixUtilsContra.matrixPreMultiply(modelParameter.getThetaVecForNode(nodeIdx), negativeEPhi, nTraits, nTraits, res);
+
+        if(modelParameter.getModelType().equals("JOU")) {
+            // calculate omega for OU model with jumps
+            populateJOUOmegaVec(nodeIdx, nTraits, res, phiMat, modelParameter, nodeMath);
+        } else {
+            nodeMath.setOmegaVecForNode(res);
+        }
     }
-}
+
+    /*
+     * OU model with jumps
+     * omega <- e_Ht%*%mj +  (I-e_Ht)%*%Theta
+     */
+    public static void populateJOUOmegaVec(int nodeIdx, int nTraits, double[] iMinusPhiTheta,double[] phiMat, OUModelParameter modelParameter, GeneralNodeMath nodeMath) {
+        double[] res = new double[nTraits];
+        double indicator = modelParameter.getJumpIndicatorForNode(nodeIdx);
+        if (indicator == 0) {
+            nodeMath.setOmegaVecForNode(iMinusPhiTheta);
+        } else {
+            double[] jumpMean = modelParameter.getJumpMeanVec();
+
+            //phiMat.transpose().preMultiply(mj).add(iMinusPhiTheta);
+            for (int i = 0; i < nTraits; i++) {
+                double sum = 0.0;
+                for (int j = 0; j < nTraits; j++) {
+                    sum = sum + jumpMean[j] * phiMat[i * nTraits + j];
+                }
+                res[i] = sum + iMinusPhiTheta[i];
+            }
+            nodeMath.setOmegaVecForNode(res);
+        }
+    }
+
+
+    }

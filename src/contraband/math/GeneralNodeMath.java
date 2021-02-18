@@ -19,6 +19,7 @@ public class GeneralNodeMath extends CalculationNode {
     final public Input<MorphologicalData> traitInput = new Input<>("trait","Morphological data set.");
     final public Input<SigmaMatrix> rateMatrixInput = new Input<>("rateMatrix", "Trait evolutionary variance-covariance matrix, i.e. trait rate matrix.", Input.Validate.REQUIRED);
     final public Input<SigmaMatrix> popMatrixInput = new Input<>("popMatrix", "Intraspecific variance-covariance matrix, i.e. population noise.");
+    final public Input<SigmaMatrix> jumpMatrixInput = new Input<>("jumpMatrix", "Jump variance-covariance matrix");
     final public Input<Tree> treeInput = new Input<>("tree", "Phylogenetic tree.");
     final public Input<Boolean> shareRhoInput = new Input<>("shareCorrelation", "TRUE, if correlations are shared between rateMatrix and popMatrix.", false);
     final public Input<RealParameter> rootValuesInput = new Input<>("rootValues", "Trait values at the root.");
@@ -582,7 +583,7 @@ public class GeneralNodeMath extends CalculationNode {
         MatrixUtilsContra.vectorMapMultiply(rateMatrix.getSigmaMatrix(), branchLength, varianceMatrix);
     }
 
-    public void populateOUVarianceMatrixForNode(double branchLength, OUModelParameter modelParameter, boolean isTip) {
+    public void populateOUVarianceMatrixForNode(int nodeIdx, double branchLength, OUModelParameter modelParameter, boolean isTip) {
         // P_1SigmaP_t = inverseP * Sigma * t(inverseP)
         double[]  P_1SigmaP_t = new double[traitDim];
         MatrixUtilsContra.matricesProduct(modelParameter.getAlphaDecomposeInversePMat(), rateMatrix.getSigmaMatrix(),modelParameter.getInversePTranspose(), nTraits, P_1SigmaP_t);
@@ -604,11 +605,28 @@ public class GeneralNodeMath extends CalculationNode {
             }
         }
 
-        // variance matrix = P * (fLambda * P_1SigmaP_t) * t(P)
-        if(popMatrixInput.get() != null && isTip) {
+        // JOU model:  res <- res + xi[edgeIndex]*(e_Ht %*% Sigmaj %*% t(e_Ht))
+        if(modelParameter.getModelType().equals("JOU")){
+            // P * (fLambda * P_1SigmaP_t) * t(P)
+            MatrixUtilsContra.matricesProduct(modelParameter.getAlphaDecomposePMat(), fLambdaP_1SigmaP_t, modelParameter.getPMatTranspose(), nTraits, rateScaler);
+            if(modelParameter.getJumpIndicatorForNode(nodeIdx) == 1) {
+                //RealMatrix phiRM = PhiMatList.get(nodeIdx);
+                //variance = phiRM.multiply(sigmaJRM).multiply(phiRM.transpose()).add(variance);
+               MatrixUtilsContra.matricesTransProductAdd(getPhiMatForNode(nodeIdx), modelParameter.getJumpVCVMat(), rateScaler, nTraits, varianceMatrix);
+            } else {
+                System.arraycopy(rateScaler, 0, varianceMatrix, 0, rateScaler.length);
+            }
+            //JOU with population variance
+            if(popMatrixInput.get() != null && isTip) {
+                MatrixUtilsContra.vectorAdd(varianceMatrix, popMatrix.getSigmaMatrix(), varianceMatrix);
+            }
+        }
+        // OU with population variance
+        else if (popMatrixInput.get() != null && isTip) {
             MatrixUtilsContra.matricesProduct(modelParameter.getAlphaDecomposePMat(), fLambdaP_1SigmaP_t, modelParameter.getPMatTranspose(), nTraits, rateScaler);
             MatrixUtilsContra.vectorAdd(rateScaler, popMatrix.getSigmaMatrix(), varianceMatrix);
        } else {
+            // OU without population variance
             MatrixUtilsContra.matricesProduct(modelParameter.getAlphaDecomposePMat(), fLambdaP_1SigmaP_t, modelParameter.getPMatTranspose(), nTraits, varianceMatrix);
         }
     }

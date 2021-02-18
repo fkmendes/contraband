@@ -71,6 +71,8 @@ public class OUModelParameter extends CalculationNode {
     private double[] storedEigenValues;
     private boolean storedSingular;
 
+    private String modelType;
+
 
     @Override
     public void initAndValidate() {
@@ -88,6 +90,7 @@ public class OUModelParameter extends CalculationNode {
         }
         alphaMat = alphaInput.get().getDoubleValues();
 
+        modelType = "OU";
 
         // there are optNr theta vectors in the tree
         // corresponding to categories assignment of each branch
@@ -110,6 +113,7 @@ public class OUModelParameter extends CalculationNode {
 
         // Initiate and validate inputs for JOU model
         if(jumpVCVMatInput.get() != null) {
+            modelType = "JOU";
             initJOUModel();
         }
 
@@ -152,10 +156,13 @@ public class OUModelParameter extends CalculationNode {
 
     public boolean isSingularAlphaMatrix() { return singularMatrix; }
 
+    public String getModelType() { return modelType; }
+
     /*
      * Initiate and validate inputs for JOU model
      */
     public void initJOUModel(){
+        jumpVCVMatInput.get().populateSigmaMatrix();
         jumpVCVMat = jumpVCVMatInput.get().getSigmaMatrix();
 
         jumpMeanVec = new double[nTraits];
