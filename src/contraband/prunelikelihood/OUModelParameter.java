@@ -73,6 +73,7 @@ public class OUModelParameter extends CalculationNode {
     private double[] storedJumpVCVMat;
     private Integer[] storedJumpIndicators;
     private double[] storedJumpMeanVec;
+    private double[] storedDAlphaMat;
 
     private String modelType;
 
@@ -122,6 +123,7 @@ public class OUModelParameter extends CalculationNode {
 
         // Initiate and validate inputs for DOU model
         if(dAlphaInput.get() != null){
+            modelType = "DOU";
             initDOUModel();
         }
 
@@ -228,6 +230,9 @@ public class OUModelParameter extends CalculationNode {
             storedJumpIndicators = new Integer[nodeNr];
             storedJumpMeanVec = new double[nTraits];
         }
+        if(modelType.equals("DOU")){
+            storedDAlphaMat = new double[nTraits * nTraits];
+        }
     }
 
     public void performAlphaEigenDecomposition() {
@@ -304,6 +309,7 @@ public class OUModelParameter extends CalculationNode {
 
         if(dAlphaInput.isDirty()){
             dAlphaMat = dAlphaInput.get().getDoubleValues();
+            performAlphaEigenDecomposition();
         }
     }
 
@@ -338,6 +344,9 @@ public class OUModelParameter extends CalculationNode {
             System.arraycopy(jumpVCVMat, 0, storedJumpVCVMat, 0, jumpVCVMat.length);
             System.arraycopy(jumpIndicators, 0, storedJumpIndicators, 0, jumpIndicators.length);
             System.arraycopy(jumpMeanVec, 0, storedJumpMeanVec, 0, jumpMeanVec.length);
+        }
+        if(modelType.equals("DOU")){
+            System.arraycopy(dAlphaMat, 0, storedDAlphaMat, 0, dAlphaMat.length);
         }
         storedSingular = singularMatrix;
     }
@@ -394,6 +403,11 @@ public class OUModelParameter extends CalculationNode {
             double[] tempJumpMeanVec = jumpMeanVec;
             jumpMeanVec = storedJumpMeanVec;
             storedJumpMeanVec = tempJumpMeanVec;
+        }
+        if(modelType.equals("DOU")){
+            double[] tempDAlphaMat = dAlphaMat;
+            dAlphaMat = storedDAlphaMat;
+            storedDAlphaMat = tempDAlphaMat;
         }
     }
 
