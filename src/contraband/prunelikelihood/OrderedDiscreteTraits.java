@@ -20,14 +20,14 @@ public class OrderedDiscreteTraits extends ThresholdModel {
         super.initAndValidate();
         nSpecies = getSpeciesNr();
         nTraits = getLiabilityNr();
-        if (liabilitiesInput.get().getDimension() != nSpecies * nTraits){
-            liabilitiesInput.get().setDimension(nSpecies * nTraits);
-            initiateLiabilities();
-        }
 
         nrOfStates = new int[nTraits];
         populateTraitStates(nrOfStates, nTraits);
 
+        if (liabilitiesInput.get().getDimension() != nSpecies * nTraits){
+            liabilitiesInput.get().setDimension(nSpecies * nTraits);
+            initiateLiabilities();
+        }
 
         int threshDim = getParameterDimension(nrOfStates);
         if(thresholdsInput.get().getDimension() != threshDim){
