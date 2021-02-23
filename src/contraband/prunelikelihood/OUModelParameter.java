@@ -33,7 +33,7 @@ public class OUModelParameter extends CalculationNode {
 
     private double[] alphaMat;
     private RealMatrix alphaRM;
-
+    private SigmaMatrix jumpMatrix;
     private double[] jumpVCVMat;
     private double[] jumpMeanVec;
     private double[] thetaVec;
@@ -137,7 +137,7 @@ public class OUModelParameter extends CalculationNode {
 
     public double[] getDAlphaMat() { return dAlphaMat; }
 
-    public double[] getJumpVCVMat() { return jumpVCVMat; }
+    public double[] getJumpVCVMat() { return jumpMatrix.getSigmaMatrix(); }
 
     public double[] getThetaVecForNode(int nodeIdx) {
         int index = optAssignment[nodeIdx];
@@ -167,8 +167,9 @@ public class OUModelParameter extends CalculationNode {
      * Initiate and validate inputs for JOU model
      */
     public void initJOUModel(){
+        jumpMatrix = jumpVCVMatInput.get();
         jumpVCVMatInput.get().populateSigmaMatrix();
-        jumpVCVMat = jumpVCVMatInput.get().getSigmaMatrix();
+        //jumpVCVMat = jumpVCVMatInput.get().getSigmaMatrix();
 
         jumpMeanVec = new double[nTraits];
         if(jumpMeanValuesInput.get().getDimension() != nTraits) {
@@ -226,7 +227,7 @@ public class OUModelParameter extends CalculationNode {
         storedInversePTranspose = new double[nTraits * nTraits];
         storedEigenValues = new double[nTraits];
         if(modelType.equals("JOU")){
-            storedJumpVCVMat = new double [jumpVCVMat.length];
+            //storedJumpVCVMat = new double [jumpVCVMat.length];
             storedJumpIndicators = new Integer[nodeNr];
             storedJumpMeanVec = new double[nTraits];
         }
@@ -294,18 +295,19 @@ public class OUModelParameter extends CalculationNode {
             thetaVecList = thetaInput.get().getDoubleValues();
         }
 
-        if(jumpVCVMatInput.isDirty()){
-            jumpVCVMatInput.get().updateParameters(false);
-            jumpVCVMat = jumpVCVMatInput.get().getSigmaMatrix();
-        }
-
         if(jumpIndicatorsInput.isDirty()){
             jumpIndicators = jumpIndicatorsInput.get().getValues();
         }
 
-        if(jumpMeanValuesInput.isDirty()) {
-            jumpMeanVec = jumpMeanValuesInput.get().getDoubleValues();
-        }
+            if(jumpVCVMatInput.isDirty()){
+            jumpMatrix.updateParameters(false);
+            //jumpVCVMat = jumpMatrix.getSigmaMatrix();
+           }
+
+            if(jumpMeanValuesInput.isDirty()) {
+                jumpMeanVec = jumpMeanValuesInput.get().getDoubleValues();
+           }
+
 
         if(dAlphaInput.isDirty()){
             dAlphaMat = dAlphaInput.get().getDoubleValues();
@@ -316,32 +318,24 @@ public class OUModelParameter extends CalculationNode {
     @Override
     public void store() {
         super.store();
-        //storedAlphaMat = alphaMat;
         System.arraycopy(alphaMat, 0, storedAlphaMat, 0, alphaMat.length);
 
-        //storedEigenValues = eigenValues;
         System.arraycopy(eigenValues, 0, storedEigenValues , 0, eigenValues.length);
 
-        //storedPMat = pMat;
         System.arraycopy(pMat, 0, storedPMat, 0, pMat.length);
 
-        //storedPMatTranspose = pMatTranspose;
         System.arraycopy(pMatTranspose, 0, storedPMatTranspose, 0, pMatTranspose.length);
 
-        //storedInverseP = inverseP;
         System.arraycopy(inverseP, 0, storedInverseP, 0, inverseP.length);
 
-        //storedInversePTranspose = inversePTranspose;
         System.arraycopy(inversePTranspose, 0, storedInversePTranspose, 0, inversePTranspose.length);
 
-        //storedOptAssignment = optAssignment;
         System.arraycopy(optAssignment, 0, storedOptAssignment, 0, optAssignment.length);
 
-        //storedThetaVecList = thetaVecList;
         System.arraycopy(thetaVecList, 0, storedThetaVecList, 0, thetaVecList.length);
 
         if(modelType.equals("JOU")){
-            System.arraycopy(jumpVCVMat, 0, storedJumpVCVMat, 0, jumpVCVMat.length);
+            //System.arraycopy(jumpVCVMat, 0, storedJumpVCVMat, 0, jumpVCVMat.length);
             System.arraycopy(jumpIndicators, 0, storedJumpIndicators, 0, jumpIndicators.length);
             System.arraycopy(jumpMeanVec, 0, storedJumpMeanVec, 0, jumpMeanVec.length);
         }
@@ -396,9 +390,9 @@ public class OUModelParameter extends CalculationNode {
             jumpIndicators = storedJumpIndicators;
             storedJumpIndicators = tempJumpIndicators;
 
-            double[] tempJumpVCVMat = jumpVCVMat;
-            jumpVCVMat = storedJumpVCVMat;
-            storedJumpVCVMat = tempJumpVCVMat;
+            //double[] tempJumpVCVMat = jumpVCVMat;
+            //jumpVCVMat = storedJumpVCVMat;
+            //storedJumpVCVMat = tempJumpVCVMat;
 
             double[] tempJumpMeanVec = jumpMeanVec;
             jumpMeanVec = storedJumpMeanVec;
