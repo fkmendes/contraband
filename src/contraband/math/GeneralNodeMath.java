@@ -483,7 +483,7 @@ public class GeneralNodeMath extends CalculationNode {
     // invert trait rate matrix and get determinant
     // NOTE: if we sample the inverse matrix, this method can be simplified.
     public void operateOnTraitRateMatrix() {
-        singularMatrix = false;
+        //singularMatrix = false;
 
         if(popVariance && !matrixParams){
             // taking intraspecific variance into account
@@ -538,7 +538,7 @@ public class GeneralNodeMath extends CalculationNode {
      * matrixParams operations
      */
     public void checkNearlySingularMatrix () {
-        singularMatrix = false;
+        //singularMatrix = false;
         // NOTE: if matrix parameterization
         // we need to check the variance matrix
         if(matrixParams) {

@@ -58,6 +58,8 @@ public abstract class MorphologyLikelihood extends Distribution {
 
         //if(nodeMath.getMatrixParamsFlag()) {
             // initialized to be false because variance matrix will be tested if nearly singular
+            // Should be careful: BM and OU are different
+            // BM model checks nearly singular once, OU model checks on every branch
             nodeMath.setSingularMatrixFlag(false);
         //}
 

@@ -237,6 +237,7 @@ public class OUModelParameter extends CalculationNode {
     }
 
     public void performAlphaEigenDecomposition() {
+        singularMatrix = false;
         if(dAlphaInput.get() != null){
             populateAlphaMatrix(alphaRM, dAlphaMat, nTraits);
         } else {

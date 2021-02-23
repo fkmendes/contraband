@@ -45,13 +45,18 @@ public class BMLikelihood extends MorphologyLikelihood {
 
         //This is only for non-matrix parameterization
         if(!nodeMathInput.get().getMatrixParamsFlag() && update) {
-            nodeMathInput.get().checkNearlySingularMatrix();
+            nodeMathInput.get().setSingularMatrixFlag(false);
 
+            nodeMathInput.get().checkNearlySingularMatrix();
             if(nodeMathInput.get().getSingularMatrixFlag()){
                 return Double.NEGATIVE_INFINITY;
             }
 
             nodeMathInput.get().operateOnTraitRateMatrix();
+            if(nodeMathInput.get().getSingularMatrixFlag()){
+                return Double.NEGATIVE_INFINITY;
+            }
+
             nodeMathInput.get().operateOnInvTraitRateMatrix();
         }
 
