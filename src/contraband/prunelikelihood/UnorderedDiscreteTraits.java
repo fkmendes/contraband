@@ -1,9 +1,15 @@
 package contraband.prunelikelihood;
 
 
+import beast.core.Input;
+import beast.core.parameter.IntegerParameter;
+
 import java.util.Arrays;
 
 public class UnorderedDiscreteTraits extends ThresholdModel {
+    // This is an optional input for specifying the states of traits
+    // it is used when a trait in the data set does not have all the states
+    final public Input<IntegerParameter> traitStatesInput = new Input<>("states", "Number of states corresponding to each trait.");
 
     private int nSpecies;
     private int nTraits;
@@ -18,7 +24,14 @@ public class UnorderedDiscreteTraits extends ThresholdModel {
         nTraits = getLiabilityNr();
 
         nrOfStates = new int[nTraits];
-        populateTraitStates(nrOfStates, nTraits);
+        if(traitStatesInput.get() == null) {
+            populateTraitStates(nrOfStates, nTraits);
+        } else {
+            Integer[] states = traitStatesInput.get().getValues();
+            for(int i = 0; i < nTraits; i++){
+                nrOfStates[i] = states[i] - 1;
+            }
+        }
         nrOfLiabilities = getParameterDimension(nrOfStates);
         liabilitiesInput.get().setDimension(nrOfLiabilities * nSpecies);
         liabilityIndex = getParameterIndex(nrOfStates, nTraits);
