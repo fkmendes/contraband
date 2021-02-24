@@ -269,7 +269,7 @@ public class OUModelParameter extends CalculationNode {
         try {
             LUDecompositionForArray.populateInverseMatrix(lu, pivot, identityMatrix, evenSingular[1], nTraits, inverseP);
         }
-        catch (SingularMatrixException e) {
+        catch (RuntimeException e) {
             singularMatrix = true;
         }
 
