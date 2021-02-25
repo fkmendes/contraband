@@ -1,6 +1,7 @@
 package contraband.prunelikelihood;
 
 import beast.core.Input;
+import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 
 import java.util.Arrays;
@@ -8,6 +9,7 @@ import java.util.Arrays;
 
 public class OrderedDiscreteTraits extends ThresholdModel {
     final public Input<RealParameter> thresholdsInput = new Input<>("threshold", "Thresholds for mapping ordered discrete traits.", Input.Validate.REQUIRED);
+    final public Input<IntegerParameter> traitStatesInput = new Input<>("states", "Number of states corresponding to each trait.");
 
     private int nSpecies;
     private int nTraits;
@@ -22,7 +24,14 @@ public class OrderedDiscreteTraits extends ThresholdModel {
         nTraits = getLiabilityNr();
 
         nrOfStates = new int[nTraits];
-        populateTraitStates(nrOfStates, nTraits);
+        if(traitStatesInput.get() == null) {
+            populateTraitStates(nrOfStates, nTraits);
+        } else {
+            Integer[] states = traitStatesInput.get().getValues();
+            for(int i = 0; i < nTraits; i++){
+                nrOfStates[i] = states[i] - 1;
+            }
+        }
 
         int threshDim = getParameterDimension(nrOfStates);
         if(thresholdsInput.get().getDimension() != threshDim){
