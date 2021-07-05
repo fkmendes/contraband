@@ -18,7 +18,7 @@ public class OUModelParameter extends CalculationNode {
     // OU model
     final public Input<RealParameter> alphaInput = new Input<>("alpha","An array of (nTraits * nTraits) elements, representing selection strength.", Input.Validate.REQUIRED);
     final public Input<RealParameter> thetaInput = new Input<>("theta","An array of nTraits elements, representing optimum trait values, elements in Theta vector.", Input.Validate.REQUIRED);
-    final public Input<Integer> optNrInput = new Input<>("optNr","Number of theta (vectors).");
+    final public Input<Integer> optNrInput = new Input<>("optNr","Number of theta (vectors).",0);
     final public Input<IntegerParameter> optAssignInput = new Input<>("optAssign", "the opt assignment for each node in the tree.");
     // JOU model
     final public Input<SigmaMatrix> jumpVCVMatInput = new Input<>("jumpVCVMat","Variance-covariance matrix of the normal jump distribution.");
@@ -98,7 +98,11 @@ public class OUModelParameter extends CalculationNode {
 
         // there are optNr theta vectors in the tree
         // corresponding to categories assignment of each branch
-        optNr = optNrInput.get();
+        if(optNr == 0) {
+            optNr = nodeNr; // multiple optima
+        } else {
+            optNr = optNrInput.get(); // opt = 1, meaning a global optimal value
+        }
         optAssignment = new Integer[nodeNr];
         if(optAssignInput.get().getDimension() != nodeNr) {
             optAssignInput.get().setDimension(nodeNr);
