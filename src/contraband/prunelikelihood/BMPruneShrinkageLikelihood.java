@@ -35,7 +35,7 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
         delta = deltaInput.get();
 
         // the real matrix that has the trait values for species
-        traitRM = new Array2DRowRealMatrix(new double[getNSpecies()][getNTraits()]);
+        traitRM = new Array2DRowRealMatrix(new double[getNumberOfSpeciesWithData()][getNTraits()]);
         PruneLikelihoodUtils.populateTraitValuesMatrix(traitsValuesInput.get(), treeInput.get(), getNTraits(), traitRM);
 
         if (includePopVarInput.get()) {

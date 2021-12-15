@@ -23,6 +23,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
     private Tree tree;
     private int nTraits;
     private int nSpecies;
+    private int nSpeciesWithData;
 
     private KeyRealParameter traitsValues;
 
@@ -48,7 +49,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         // and make a list of real vectors
         traitsValues = traitsValuesInput.get();
         nTraits = traitsValues.getMinorDimension1();
-        //nSpecies = traitsValues.getMinorDimension2();
+        nSpeciesWithData = traitsValues.getMinorDimension2();
         nSpecies = tree.getLeafNodeCount();
         traitValuesArr = new double[nSpecies * nTraits];
 
@@ -71,9 +72,15 @@ public abstract class PruneLikelihoodProcess extends Distribution {
             logP =  Double.NEGATIVE_INFINITY;
             return;
         }
-
         // prune the tree by starting from the root
         nodeMath.setLikelihoodForSampledAncestors(0.0);
+        for(int i = 0; i < tree.getLeafNodeCount(); i++){
+            if(nodeMath.isSpeciesToIgnore(tree.getNode(i).getNr())){
+                //nodeMath.setSpeciesToIgnore(tree.getNode(i).getParent().getNr());
+                nodeMath.setNodeHasMissingData(tree.getNode(i).getParent().getNr());
+                nodeMath.setSpeciesToIgnoreIndex(tree.getNode(i).getParent().getNr(), i);
+            }
+        }
         // if using shrinkage method, 'traitValuesArr' is 'transformedTraitValues'
         // otherwise, it is original trait values.
         pruneNode(tree.getRoot(), nTraits, traitValuesArr, branchRateModel, nodeMath, popSE);
@@ -110,10 +117,14 @@ public abstract class PruneLikelihoodProcess extends Distribution {
 
     public int getRootIndex () { return tree.getRoot().getNr(); }
 
+    public int getNumberOfSpeciesWithData() {return nSpeciesWithData; }
+
     // setters
     public void setPopSE (boolean value) { popSE = value; }
 
-    public void setTraitValuesArr (double[] values) { traitValuesArr = values; }
+    public void setTraitValuesArr (double[] values) {
+        traitValuesArr = values;
+    }
 
     public void pruneNode(Node node, int nTraits, double[] traitValuesArr,
                            BranchRateModel.Base pcmc, NodeMath nodeMath, boolean popSE) {
@@ -151,6 +162,25 @@ public abstract class PruneLikelihoodProcess extends Distribution {
                 // add up to this node
                 thisNodeL += nodeMath.getLForNode(childIdx);
                 thisNodeR += nodeMath.getRForNode(childIdx);
+                MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
+
+            } else if(nodeMath.hasMissingDataSpecies(childIdx)){
+                Node childHasData = child.getChild(0);
+                if(nodeMath.isSpeciesToIgnore(childHasData.getNr())){
+                    childHasData = child.getChild(1);
+                }
+                double compoundVariance = nodeMath.getVarianceForNode(childIdx) + childHasData.getLength() * pcmc.getRateForBranch(childHasData);
+                nodeMath.setVarianceForTip(childHasData.getNr(), compoundVariance);
+                nodeMath.setVarianceForTip(childIdx, compoundVariance);
+
+                PruneLikelihoodUtils.populateACEf(nodeMath, compoundVariance, nTraits, childHasData.getNr());
+
+                calculateLmrForTips(nodeMath, traitValuesArr, nTraits, childHasData.getNr());
+                nodeMath.setExpectationForTip(childIdx);
+
+                // add up to this node
+                thisNodeL += nodeMath.getLForNode(childHasData.getNr());
+                thisNodeR += nodeMath.getRForNode(childHasData.getNr());
                 MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
 
             } else {

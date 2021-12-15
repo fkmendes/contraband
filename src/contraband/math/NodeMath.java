@@ -102,7 +102,9 @@ public class NodeMath extends CalculationNode {
     private double[] transformedTraitValues;
     private double[] storedTransformedTraitValues;
 
-    private boolean[] speciesToIgnoreMissingData;
+    private boolean[] speciesToIgnoreMissingData;//tip nodes that do not have continuous data
+    private int[] speciesToIgnoreIndex;//tip node index of parent node
+    private boolean[] nodeAsTip;
 
     @Override
     public void initAndValidate() {
@@ -117,6 +119,8 @@ public class NodeMath extends CalculationNode {
             nSpecies = traitsValues.getMinorDimension2();
         }
         speciesToIgnoreMissingData = new boolean[2 * nSpecies - 1];
+        speciesToIgnoreIndex = new int[2 * nSpecies - 1];
+        nodeAsTip = new boolean[2 * nSpecies - 1];
 
         // TRUE, if sigmasq and rho are in variance-covariance parameterization.
         if (covarianceInput.get() == null) {
@@ -301,6 +305,14 @@ public class NodeMath extends CalculationNode {
         return speciesToIgnoreMissingData[nodeNr];
     }
 
+    public int getSpeciesToIgnoreIndex(int parent) {
+        return speciesToIgnoreIndex[parent];
+    }
+
+    public boolean hasMissingDataSpecies(int parent){
+        return nodeAsTip[parent];
+    }
+
     //setters
     public void setAForNode (int nodeIdx, double value) { aArray[nodeIdx] = value; }
 
@@ -357,6 +369,14 @@ public class NodeMath extends CalculationNode {
 
     public void setSpeciesToIgnore(int nodeNr) {
         speciesToIgnoreMissingData[nodeNr] = true;
+    }
+
+    public void setSpeciesToIgnoreIndex(int parent, int child) {
+        speciesToIgnoreIndex[parent] = child;
+    }
+
+    public void setNodeHasMissingData(int parent){
+        nodeAsTip[parent] = true;
     }
 
     private void initializeAbCdEfArray() {
@@ -626,8 +646,12 @@ public class NodeMath extends CalculationNode {
         RealMatrix dataTransformMat = upperMatLUD.getSolver().getInverse();
 
         RealMatrix transformedTraitsMat = traitMat.multiply(dataTransformMat);
-        for (int j = 0; j < traitMat.getRowDimension(); j++) {
-            System.arraycopy(transformedTraitsMat.getRow(j), 0, transformedTraitValues, j * nTraits, nTraits);
+        int index = 0;
+        for (int j = 0; j < nSpecies; j++) {
+            if(!speciesToIgnoreMissingData[j]) {
+                System.arraycopy(transformedTraitsMat.getRow(index), 0, transformedTraitValues, j * nTraits, nTraits);
+                index ++;
+            }
         }
     }
 
