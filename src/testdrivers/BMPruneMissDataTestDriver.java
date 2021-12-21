@@ -15,7 +15,9 @@ public class BMPruneMissDataTestDriver {
         Tree tree = new TreeParser(treeStr, false, false, true, 0);
 
         // some species has missing data denoted by true.
-        boolean[] speciesToIgnore = new boolean[]{false, false, true, false, true, true, false, false, true, false};
+        // for internal nodes, if all the descants are TRUE, the whole clade will be ignored during likelihood calculation
+        boolean[] speciesToIgnore = new boolean[]{false, true, true, false, true, true, false, false, true, true,
+                                                  false, false, false, false, false, false, false, false, false};
 
         // arrays to populate:
         // (1) if an internal node has missing data descendants
@@ -28,6 +30,16 @@ public class BMPruneMissDataTestDriver {
 
         // using a recursive algorithm to populate the arrays and calculate the variance
         prune(tree.getRoot(), speciesToIgnore, missingDataSpeciesIndex, hasMissingDataSpecies, nodeVariance);
+
+        System.out.println("speciesToIgnore " + "\n" +
+                           "internal node 10: " + speciesToIgnore[10] + "\n" +
+                           "internal node 11: " + speciesToIgnore[11] + "\n" +
+                           "internal node 12: " + speciesToIgnore[12] + "\n" +
+                           "internal node 13: " + speciesToIgnore[13] + "\n" +
+                           "internal node 14: " + speciesToIgnore[14] + "\n" +
+                           "internal node 15: " + speciesToIgnore[15] + "\n" +
+                           "internal node 16: " + speciesToIgnore[16] + "\n" +
+                           "internal node 17: " + speciesToIgnore[17] + "\n");
 
         // print out the results and compare to the expected
         // the tips are all FALSE
@@ -121,9 +133,6 @@ public class BMPruneMissDataTestDriver {
         // use the node number as index
         int nodeIndex = node.getNr();
 
-        // variance for this node
-        nodeVariance[nodeIndex] = node.getLength();
-
         // get the child nodes of this node
         List<Node> children = node.getChildren();
 
@@ -138,18 +147,17 @@ public class BMPruneMissDataTestDriver {
                 // the flag of this node will be set to TRUE
                 nodeToIgnore = speciesToIgnore[childIndex] | nodeToIgnore;
 
-                if (!speciesToIgnore[childIndex]) {
-                    // if this child node has trait values
-                    // the branch length will be calculated and assigned to this child node
+                if(!speciesToIgnore[childIndex]) {
                     nodeVariance[childIndex] = child.getLength();
                 }
             }
             // CASE2: child is an internal node
             else {
-                // first calculate the length of branch above this child
-                nodeVariance[childIndex] = child.getLength();
                 // second prune the subtree that is rooted at the child until tips are reached
                 prune(child, speciesToIgnore, missingDataSpeciesIndex, hasMissingDataSpecies, nodeVariance);
+
+                nodeToIgnore = speciesToIgnore[childIndex] | nodeToIgnore;
+
             }
             // if this node has missing data species
             // we will record the node index of the descant that has trait values
@@ -158,18 +166,21 @@ public class BMPruneMissDataTestDriver {
             }
         }
 
+        speciesToIgnore[nodeIndex] = speciesToIgnore[node.getChild(0).getNr()] && speciesToIgnore[node.getChild(1).getNr()];
+
         // set the flag
         hasMissingDataSpecies[nodeIndex]  = nodeToIgnore;
-
-        if (nodeToIgnore) {
-            // combine the variance
-            double compoundVariance = nodeVariance[nodeIndex] + nodeVariance[missingDataSpeciesIndex[nodeIndex]];
-            nodeVariance[nodeIndex] = compoundVariance;
-        } else {
-            // maximum likelihood estimate
-            double vc1 = nodeVariance[node.getChild(0).getNr()];
-            double vc2 = nodeVariance[node.getChild(1).getNr()];
-            nodeVariance[nodeIndex] = nodeVariance[nodeIndex] + ((vc1 * vc2) / (vc1 + vc2));
+        if(!speciesToIgnore[nodeIndex]) {
+            if (nodeToIgnore) {
+                // combine the variance
+                double compoundVariance = node.getLength() + nodeVariance[missingDataSpeciesIndex[nodeIndex]];
+                nodeVariance[nodeIndex] = compoundVariance;
+            } else {
+                // maximum likelihood estimate
+                double vc1 = nodeVariance[node.getChild(0).getNr()];
+                double vc2 = nodeVariance[node.getChild(1).getNr()];
+                nodeVariance[nodeIndex] = node.getLength() + ((vc1 * vc2) / (vc1 + vc2));
+            }
         }
     }
 
