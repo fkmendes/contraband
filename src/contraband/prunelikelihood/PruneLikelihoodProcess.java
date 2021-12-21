@@ -74,11 +74,21 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         }
         // prune the tree by starting from the root
         nodeMath.setLikelihoodForSampledAncestors(0.0);
+        // to obtain the node information about missing data
         for(int i = 0; i < tree.getLeafNodeCount(); i++){
-            if(nodeMath.isSpeciesToIgnore(tree.getNode(i).getNr())){
-                //nodeMath.setSpeciesToIgnore(tree.getNode(i).getParent().getNr());
-                nodeMath.setNodeHasMissingData(tree.getNode(i).getParent().getNr());
-                nodeMath.setSpeciesToIgnoreIndex(tree.getNode(i).getParent().getNr(), i);
+
+            if(nodeMath.isSpeciesToIgnore(i)){
+                Node iNode = tree.getNode(i);
+                Node iParent = iNode.getParent();
+                int iParentNr = iParent.getNr();
+                nodeMath.setNodeHasMissingData(iParentNr);
+                Node sib = iParent.getChild(0);
+                int sibNr = sib.getNr();
+                if(sibNr  == i){
+                    nodeMath.setSpeciesToIgnoreIndex(iParentNr, iParent.getChild(1).getNr());
+                } else {
+                    nodeMath.setSpeciesToIgnoreIndex(iParentNr, sibNr);
+                }
             }
         }
         // if using shrinkage method, 'traitValuesArr' is 'transformedTraitValues'
@@ -164,25 +174,6 @@ public abstract class PruneLikelihoodProcess extends Distribution {
                 thisNodeR += nodeMath.getRForNode(childIdx);
                 MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
 
-            } else if(nodeMath.hasMissingDataSpecies(childIdx)){
-                Node childHasData = child.getChild(0);
-                if(nodeMath.isSpeciesToIgnore(childHasData.getNr())){
-                    childHasData = child.getChild(1);
-                }
-                double compoundVariance = nodeMath.getVarianceForNode(childIdx) + childHasData.getLength() * pcmc.getRateForBranch(childHasData);
-                nodeMath.setVarianceForTip(childHasData.getNr(), compoundVariance);
-                nodeMath.setVarianceForTip(childIdx, compoundVariance);
-
-                PruneLikelihoodUtils.populateACEf(nodeMath, compoundVariance, nTraits, childHasData.getNr());
-
-                calculateLmrForTips(nodeMath, traitValuesArr, nTraits, childHasData.getNr());
-                nodeMath.setExpectationForTip(childIdx);
-
-                // add up to this node
-                thisNodeL += nodeMath.getLForNode(childHasData.getNr());
-                thisNodeR += nodeMath.getRForNode(childHasData.getNr());
-                MatrixUtilsContra.vectorAdd(thisNodeMVec, nodeMath.getTempVec(), thisNodeMVec);
-
             } else {
                 // if child is an sampled ancestor
                 // it will not be included
@@ -261,13 +252,18 @@ public abstract class PruneLikelihoodProcess extends Distribution {
                 }
             }
         }
+        if(nodeMath.hasMissingDataSpecies(thisNodeIdx)) {
+            int speciesHadDataIndex = nodeMath.getSpeciesToIgnoreIndex(thisNodeIdx);
+            double compoundVariance = nodeMath.getVarianceForNode(thisNodeIdx) + nodeMath.getVarianceForNode(speciesHadDataIndex);
+            nodeMath.setVarianceForTip(thisNodeIdx, compoundVariance);
+            nodeMath.setExpectationForIntNode(thisNodeIdx, nodeMath.getExpectationForNode(speciesHadDataIndex));
+        } else {
+            // estimate the node variance
+            nodeMath.setVarianceForParent(thisNodeIdx, node.getLength() * pcmc.getRateForBranch(node), node.getChild(0).getNr(), node.getChild(1).getNr());
 
-        // estimate the node variance
-        nodeMath.setVarianceForParent(thisNodeIdx, node.getLength() * pcmc.getRateForBranch(node), node.getChild(0).getNr(), node.getChild(1).getNr());
-
-        // estimate the node expectations
-        nodeMath.setExpectationForParent(thisNodeIdx, node.getChild(0).getNr(), node.getChild(1).getNr());
-
+            // estimate the node expectations
+            nodeMath.setExpectationForParent(thisNodeIdx, node.getChild(0).getNr(), node.getChild(1).getNr());
+        }
         // set lMat, mVec and r for this node
         nodeMath.setLForNode(thisNodeIdx, thisNodeL);
         nodeMath.setMVecForNode(thisNodeIdx, thisNodeMVec);

@@ -344,6 +344,10 @@ public class NodeMath extends CalculationNode {
         MatrixUtilsContra.setMatrixRow(nodeExpectation, traitsVec, nodeIdx, nTraits);
     }
 
+    public void setExpectationForIntNode (int nodeIdx, double[] exp) {
+        MatrixUtilsContra.setMatrixRow(nodeExpectation, exp, nodeIdx, nTraits);
+    }
+
     public void setVarianceForTip (int nodeIdx, double value) { nodeVariance[nodeIdx] = value; }
 
     public void setVarianceForParent (int parentIdx, double branchLength, int child1Idx, int child2Idx) {

@@ -30,7 +30,6 @@ public class PruneLikelihoodUtils {
     }
 
     public static void  populateTraitValuesArr(KeyRealParameter traitValues, Tree tree, NodeMath nodeMath, int nTraits, double[] traitValuesArr) {
-        int index = 0;
         for (int i = 0; i < tree.getLeafNodeCount(); i ++) {
             // get all traits values for this species
             Double[] traitForSpecies = traitValues.getRowValues(tree.getNode(i).getID());
@@ -39,9 +38,8 @@ public class PruneLikelihoodUtils {
             } else {
                 for (int j = 0; j < nTraits; j++) {
                     // populate the traits one by one in an array
-                    traitValuesArr[index * nTraits + j] = traitForSpecies[j];
+                    traitValuesArr[i * nTraits + j] = traitForSpecies[j];
                 }
-                index ++;
             }
         }
     }
