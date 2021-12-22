@@ -74,9 +74,10 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         }
         // prune the tree by starting from the root
         nodeMath.setLikelihoodForSampledAncestors(0.0);
-        // to obtain the node information about missing data
-        for(int i = 0; i < tree.getLeafNodeCount(); i++){
 
+        // to obtain the node information about missing data
+        nodeMath.initializeNodeStatArrays();
+        for(int i = 0; i < tree.getLeafNodeCount(); i++){
             if(nodeMath.isSpeciesToIgnore(i)){
                 Node iNode = tree.getNode(i);
                 Node iParent = iNode.getParent();
@@ -91,6 +92,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
                 }
             }
         }
+
         // if using shrinkage method, 'traitValuesArr' is 'transformedTraitValues'
         // otherwise, it is original trait values.
         pruneNode(tree.getRoot(), nTraits, traitValuesArr, branchRateModel, nodeMath, popSE);

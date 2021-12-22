@@ -90,6 +90,8 @@ public class NodeMath extends CalculationNode {
     private double[] storedSigmaValues;
     private double[] storedRhoValues;
     private double [] storedTraitRateMatrix;
+    //private double [] storedNodeVariance;
+    //private double [] storedNodeExpectation;
 
     // shrinkage
     private Boolean useShrinkage;
@@ -105,6 +107,8 @@ public class NodeMath extends CalculationNode {
     private boolean[] speciesToIgnoreMissingData;//tip nodes that do not have continuous data
     private int[] speciesToIgnoreIndex;//tip node index of parent node
     private boolean[] nodeAsTip;
+    //private int[] storedSpeciesToIgnoreIndex;
+    //private boolean[] storedNodeAsTip;
 
     @Override
     public void initAndValidate() {
@@ -121,6 +125,8 @@ public class NodeMath extends CalculationNode {
         speciesToIgnoreMissingData = new boolean[2 * nSpecies - 1];
         speciesToIgnoreIndex = new int[2 * nSpecies - 1];
         nodeAsTip = new boolean[2 * nSpecies - 1];
+        //storedNodeAsTip = new boolean[2 * nSpecies - 1];
+        //storedSpeciesToIgnoreIndex = new int[2 * nSpecies - 1];
 
         // TRUE, if sigmasq and rho are in variance-covariance parameterization.
         if (covarianceInput.get() == null) {
@@ -175,8 +181,10 @@ public class NodeMath extends CalculationNode {
         }
         // each node has its variance = branch rate * branch length
         nodeVariance = new double [nodeNr];
+        //storedNodeVariance = new double [nodeNr];
         // each node has its expectation = weight average of trait values from descendants
         nodeExpectation = new double [nTraits * nodeNr];
+        //storedNodeExpectation = new double [nTraits * nodeNr];
         // initialize expectation
         expect1 = new double [nTraits];
         expect2 = new double [nTraits];
@@ -227,6 +235,13 @@ public class NodeMath extends CalculationNode {
             Log.warning.println("NodeMath::Estimating root state by MLE.");
             sampleRoot = false;
         }
+    }
+
+    public void initializeNodeStatArrays(){
+        speciesToIgnoreIndex = new int[2 * nSpecies - 1];
+        nodeAsTip = new boolean[2 * nSpecies - 1];
+        nodeVariance = new double [nodeNr];
+        nodeExpectation = new double [nTraits * nodeNr];
     }
 
     //getters
@@ -674,14 +689,22 @@ public class NodeMath extends CalculationNode {
         } else {
             System.arraycopy(sigmaValues, 0, storedSigmaValues, 0, nTraits);
         }
-
-        System.arraycopy(rhoValues, 0, storedRhoValues, 0, (nTraits * (nTraits - 1) / 2));
+        if(!useShrinkage) {
+            System.arraycopy(rhoValues, 0, storedRhoValues, 0, (nTraits * (nTraits - 1) / 2));
+        }
         System.arraycopy(traitRateMatrix, 0, storedTraitRateMatrix, 0, matDim);
         System.arraycopy(invTraitRateMatrix, 0, storedInvTraitRateMatrix, 0, matDim);
         System.arraycopy(rootValuesVec, 0, storedRootValuesVec, 0, nTraits);
 
         // shrinkage only
         System.arraycopy(transformedTraitValues, 0, storedTransformedTraitValues, 0, nSpecies * nTraits);
+/*
+        System.arraycopy(nodeAsTip, 0, storedNodeAsTip, 0, 2 * nSpecies - 1);
+        System.arraycopy(speciesToIgnoreIndex, 0, storedSpeciesToIgnoreIndex, 0, 2 * nSpecies - 1);
+
+        System.arraycopy(nodeVariance, 0, storedNodeVariance, 0, nodeNr);
+        System.arraycopy(nodeExpectation, 0, storedNodeExpectation, 0, nodeNr * nTraits);
+*/
     }
 
     @Override
@@ -726,5 +749,23 @@ public class NodeMath extends CalculationNode {
         double[] tempTraitValuesArrayList = transformedTraitValues;
         transformedTraitValues = storedTransformedTraitValues;
         storedTransformedTraitValues = tempTraitValuesArrayList;
+
+/*
+        int[] tempSpeciesToIgnoreIndex = speciesToIgnoreIndex;
+        speciesToIgnoreIndex = storedSpeciesToIgnoreIndex;
+        storedSpeciesToIgnoreIndex = tempSpeciesToIgnoreIndex;
+
+        boolean[] tempNodeAsTip = nodeAsTip;
+        nodeAsTip = storedNodeAsTip;
+        storedNodeAsTip = tempNodeAsTip;
+
+        double[] tempNodeVariance = nodeVariance;
+        nodeVariance = storedNodeVariance;
+        storedNodeVariance = tempNodeVariance;
+
+        double[] tempNodeExpectation = nodeExpectation;
+        nodeExpectation = storedNodeExpectation;
+        storedNodeExpectation = tempNodeExpectation;
+*/
     }
 }
