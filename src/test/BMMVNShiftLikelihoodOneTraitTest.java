@@ -36,7 +36,8 @@ public class BMMVNShiftLikelihoodOneTraitTest {
     Double[] rootValueVectorInput;
     RealParameter rootValue;
     List<Double> oneTraitValues;
-    KeyRealParameter oneTraitData;
+    RealParameter oneTraitData;
+    // KeyRealParameter oneTraitData;
     BMMVNShiftLikelihoodOneTrait bmLk;
 
     /*

@@ -30,7 +30,8 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 
 	final public Input<RealParameter> rootValueInput = new Input<>("rootValue", "rootValue, or y_0, the root value and the expected value at the tips.", Validate.REQUIRED);
 	final public Input<TreeToVCVMat> rateManagerInput = new Input<>("rateManager", "color manager object that paints branches with their own rates.", Validate.REQUIRED);
-	final public Input<KeyRealParameter> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
+	final public Input<RealParameter> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
+	// final public Input<KeyRealParameter> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED);
 	// final public Input<OneValueContTraits> oneTraitInput = new Input<>("oneTraitData", "continuous data values for one trait.", Validate.REQUIRED); // original implementation (for the above line) with OneValueContTraits data wrapper
 
 	/*
@@ -189,7 +190,8 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		// }
 
 		String[] spNamesInPhyloTMatOrder = rateManager.getSpNamesInVCVMatOrder();
-		KeyRealParameter oneTraitValues = oneTraitInput.get();
+		RealParameter oneTraitValues = oneTraitInput.get();
+		// KeyRealParameter oneTraitValues = oneTraitInput.get();
 		int i = 0;
 		for (String spName: spNamesInPhyloTMatOrder) {
 			oneTraitDataVec.setEntry(i, oneTraitValues.getValue(spName));
