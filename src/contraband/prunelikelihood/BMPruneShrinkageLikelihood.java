@@ -8,7 +8,6 @@ import contraband.math.NodeMath;
 import contraband.utils.PruneLikelihoodUtils;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
-import outercore.parameter.KeyRealParameter;
 import java.util.List;
 import java.util.Random;
 
@@ -17,7 +16,8 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
     final public Input<Boolean> includePopVarInput = new Input<>("includePopVar", "if including population variance or not.", false);
     final public Input<RealParameter> popVarInput = new Input<>("popVar", "population variance.");
     final public Input<Double> deltaVarInput = new Input<>("deltaVar", "Shrinkage parameter for population variance, either sampled or given.");
-    final public Input<KeyRealParameter> populationTraitsInput = new Input<>("populationTraits","Trait values for calculating the population noise.");
+    final public Input<RealParameter> populationTraitsInput = new Input<>("populationTraits","Trait values for calculating the population noise.");
+    //final public Input<KeyRealParameter> populationTraitsInput = new Input<>("populationTraits","Trait values for calculating the population noise.");
 
     private RealMatrix traitRM;
     private double delta;
@@ -94,7 +94,7 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
         return getLogP();
     }
 
-    private RealMatrix populationTraitMatrix(KeyRealParameter traitsValues){
+    private RealMatrix populationTraitMatrix(RealParameter traitsValues){
         int nTraits = traitsValues.getMinorDimension1();
         int nSpecies = traitsValues.getMinorDimension2();
         RealMatrix traitRM = new Array2DRowRealMatrix(new double[nSpecies][nTraits]);

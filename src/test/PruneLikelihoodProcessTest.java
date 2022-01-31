@@ -13,7 +13,6 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Assert;
 import org.junit.Test;
-import outercore.parameter.KeyRealParameter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class PruneLikelihoodProcessTest {
     private Integer nTraits;
     private String spNames;
     private List<Double> data;
-    private final KeyRealParameter traitValues = new KeyRealParameter();
+    private final RealParameter traitValues = new RealParameter();
 
     /*
      * Tree with 3 species and each species has 2 traits

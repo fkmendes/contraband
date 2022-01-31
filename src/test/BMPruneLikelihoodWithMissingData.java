@@ -9,7 +9,6 @@ import contraband.prunelikelihood.BMPruneLikelihood;
 import contraband.prunelikelihood.BMPruneShrinkageLikelihood;
 import org.junit.Assert;
 import org.junit.Test;
-import outercore.parameter.KeyRealParameter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class BMPruneLikelihoodWithMissingData {
     private RealParameter sigmasq;
     private RealParameter rootValues;
     private final NodeMath nodeMath = new NodeMath();
-    private final KeyRealParameter traitValues = new KeyRealParameter();
+    private final RealParameter traitValues = new RealParameter();
     private final IntegerParameter colorAssignments = new IntegerParameter(new Integer[] {0});
     private final RealParameter colorValues = new RealParameter(new Double[] {1.0});
     private final RateCategoryClockModel lsc = new RateCategoryClockModel();

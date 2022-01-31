@@ -8,8 +8,6 @@ import contraband.math.MatrixUtilsContra;
 import contraband.math.NodeMath;
 import contraband.prunelikelihood.BMPruneLikelihood;
 import contraband.utils.PruneLikelihoodUtils;
-import outercore.parameter.KeyRealParameter;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,7 +22,7 @@ public class BMPruneUtilsTestDriver2 {
         );
         String spNames = "A B C";
 
-        KeyRealParameter traitsValues = new KeyRealParameter();
+        RealParameter traitsValues = new RealParameter();
         traitsValues.initByName("value", data, "keys", spNames, "minordimension", nTraits);
 
         String treeStr = "((A:23.0058179,B:23.0058179):14.350951,C:37.3567689);";

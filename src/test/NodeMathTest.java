@@ -9,7 +9,6 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Assert;
 import org.junit.Test;
-import outercore.parameter.KeyRealParameter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,7 +21,7 @@ public class NodeMathTest {
     private String spNames;
     private TreeParser tree;
     private String treeStr;
-    private final KeyRealParameter traitValues = new KeyRealParameter();
+    private final RealParameter traitValues = new RealParameter();
     private final NodeMath nodeMath = new NodeMath();
     private double[] traitValuesArr;
     private RealParameter sigmasq;

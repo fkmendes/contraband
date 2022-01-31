@@ -8,7 +8,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import contraband.math.NodeMath;
 import contraband.prunelikelihood.BMPruneLikelihood;
-import outercore.parameter.KeyRealParameter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +27,7 @@ public class BMPruneLikelihoodTest {
     private RealParameter correlation;
     private RealParameter sigmasq;
     private final NodeMath nodeMath = new NodeMath();
-    private final KeyRealParameter traitValues = new KeyRealParameter();
+    private final RealParameter traitValues = new RealParameter();
     private final IntegerParameter colorAssignments = new IntegerParameter(new Integer[] {0});
     private final RealParameter colorValues = new RealParameter(new Double[] {1.0});
     private final RateCategoryClockModel lsc = new RateCategoryClockModel();

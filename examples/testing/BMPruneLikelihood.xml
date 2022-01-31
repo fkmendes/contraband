@@ -71,7 +71,7 @@
         <distribution id="PCMLikelihood" spec="contraband.prunelikelihood.BMPruneLikelihood">
             <tree idref="TheTree"/>
 
-            <traits id="oneTraitData" spec="outercore.parameter.KeyRealParameter" minordimension="2" keys="t2 t3 t1">
+            <traits id="oneTraitData" spec="parameter.RealParameter" minordimension="2" keys="t2 t3 t1">
                     -0.432903665204275 2.92196906278985 -1.55412737943192 2.70418286048809 -1.88985983258794 1.95736899616511
             </traits>
 

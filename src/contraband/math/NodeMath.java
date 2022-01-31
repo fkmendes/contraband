@@ -10,10 +10,10 @@ import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.util.FastMath;
-import outercore.parameter.KeyRealParameter;
 
 public class NodeMath extends CalculationNode {
-    final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+    final public Input<RealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+    //final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Evolutionary rates of traits. Diagonal elements in rate matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> rhoInput = new Input<>("correlation", "Correlations of traits. Off-diagonal elements in rate matrix.");
     final public Input<Boolean> oneRateOnlyInput = new Input<>("oneRateOnly", "TRUE, if all traits share one evolutionary rate.", false);
@@ -113,7 +113,7 @@ public class NodeMath extends CalculationNode {
     @Override
     public void initAndValidate() {
         // collect trait information
-        KeyRealParameter traitsValues = traitsValuesInput.get();
+        RealParameter traitsValues = traitsValuesInput.get();
         nTraits = traitsValues.getMinorDimension1();
         if(treeInput.get() != null){
             // if some species does not have any data, we Must input tree

@@ -10,8 +10,6 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Assert;
 import org.junit.Test;
-import outercore.parameter.KeyRealParameter;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,7 +25,7 @@ public class PruneLikelihoodUtilsTest {
     private Integer nTraits;
     private String spNames;
     private List<Double> data;
-    private final KeyRealParameter traitValues = new KeyRealParameter();
+    private final RealParameter traitValues = new RealParameter();
     final static double EPSILON = 1e-7;
     /*
      * (1) Populates trait values in an array and a real matrix

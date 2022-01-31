@@ -3,29 +3,31 @@ package contraband.prunelikelihood;
 import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.State;
+import beast.core.parameter.RealParameter;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import java.util.List;
 import java.util.Random;
-
 import contraband.math.MatrixUtilsContra;
 import contraband.math.NodeMath;
 import contraband.utils.PruneLikelihoodUtils;
-import outercore.parameter.*;
+
 
 public abstract class PruneLikelihoodProcess extends Distribution {
     final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Input.Validate.REQUIRED);
     final public Input<BranchRateModel.Base> branchRateModelInput = new Input<>("branchRateModel", "the rate or optimum on each branch");
     final public Input<NodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.", Input.Validate.REQUIRED);
-    final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+    final public Input<RealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+    //final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+
 
     private Tree tree;
     private int nTraits;
     private int nSpecies;
     private int nSpeciesWithData;
 
-    private KeyRealParameter traitsValues;
+    private RealParameter traitsValues;
 
     private BranchRateModel.Base branchRateModel;
 

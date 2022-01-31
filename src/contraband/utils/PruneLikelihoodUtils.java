@@ -1,23 +1,21 @@
 package contraband.utils;
 
+import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
-
 import contraband.math.NodeMath;
 import contraband.math.MatrixUtilsContra;
-
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.commons.math3.util.FastMath;
 
-import outercore.parameter.KeyRealParameter;
 
 public class PruneLikelihoodUtils {
 
     private static double LOGTWOPI = FastMath.log(2 * Math.PI);
 
-    public static void populateTraitValuesArr(KeyRealParameter traitValues, Tree tree, int nTraits, double[] traitValuesArr) {
+    public static void populateTraitValuesArr(RealParameter traitValues, Tree tree, int nTraits, double[] traitValuesArr) {
         // according to node number of tips
         for (int i = 0; i < tree.getLeafNodeCount(); i ++) {
             // get all traits values for this species
@@ -29,7 +27,7 @@ public class PruneLikelihoodUtils {
         }
     }
 
-    public static void  populateTraitValuesArr(KeyRealParameter traitValues, Tree tree, NodeMath nodeMath, int nTraits, double[] traitValuesArr) {
+    public static void  populateTraitValuesArr(RealParameter traitValues, Tree tree, NodeMath nodeMath, int nTraits, double[] traitValuesArr) {
         for (int i = 0; i < tree.getLeafNodeCount(); i ++) {
             // get all traits values for this species
             Double[] traitForSpecies = traitValues.getRowValues(tree.getNode(i).getID());
@@ -47,7 +45,7 @@ public class PruneLikelihoodUtils {
     /*
      * Fills out traitRM in place
      */
-    public static void populateTraitValuesMatrix(KeyRealParameter traitValues, Tree tree, int nTraits, RealMatrix traitRM){
+    public static void populateTraitValuesMatrix(RealParameter traitValues, Tree tree, int nTraits, RealMatrix traitRM){
         int index = 0;
         for (int i = 0; i < tree.getLeafNodeCount(); i ++) {
             // get all traits values for this species
