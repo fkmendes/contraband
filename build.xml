@@ -3,6 +3,15 @@
     Build contraband.
   </description>
 
+  <!-- The original version of this build.xml built contraband from files
+  compiled from beast2, sampled-ancestors, SB2, etc.
+  These dependencies are now being provided as .jar files within contraband's
+  lib/ directory.
+  This makes things cleaner; the previous version of this build.xml was
+  bombing whenever one of the dependencies for some reason stopped building
+  themselves...
+  -->
+
   <!-- ########## PROPERTIES ########## -->
   <property name="binName" value="contraband"/>
   <property name="projName" value="contraband"/>
@@ -21,18 +30,18 @@
   <property name="buildLib" location="${buildContra}/build-lib"/>
 
   <!-- beast2-related paths -->
-  <property name="beast2path" location="../beast2"/>
-  <property name="libBeast2" location="${beast2path}/lib"/>
-  <property name="srcBeast2" location="${beast2path}/src"/>
-  <property name="beast2classpath" location="${beast2path}/build"/>
+  <!-- <property name="beast2path" location="../beast2"/> -->
+  <!-- <property name="libBeast2" location="${beast2path}/lib"/> -->
+  <!-- <property name="srcBeast2" location="${beast2path}/src"/> -->
+  <!-- <property name="beast2classpath" location="${beast2path}/build"/> -->
 
   <!-- other packages paths -->
-  <property name="SApath" location="../sampled-ancestors"/>
-  <property name="SAclasspath" location="${SApath}/build"/>
-  <property name="starbeast2path" location="../starbeast2"/>
-  <property name="starbeast2classpath" location="${starbeast2path}/build"/>
-  <property name="beast-outercorepath" location="../beast-outercore"/>
-  <property name="beast-outercoreclasspath" location="${beast-outercorepath}/build" />
+  <!--  <property name="SApath" location="../sampled-ancestors"/>-->
+  <!--  <property name="SAclasspath" location="${SApath}/build"/>-->
+  <!--  <property name="starbeast2path" location="../starbeast2"/>-->
+  <!--  <property name="starbeast2classpath" location="${starbeast2path}/build"/>-->
+  <!-- <property name="beast-outercorepath" location="../beast-outercore"/> -->
+  <!-- <property name="beast-outercoreclasspath" location="${beast-outercorepath}/build" /> -->
 
   <!-- BEAST 2 currently uses Java 1.8 -->
   <property name="sourceVersion" value="1.8"/>
@@ -43,10 +52,10 @@
   <!-- classpath -->
   <path id="classpath">
     <pathelement path="${buildContra}"/>
-    <fileset dir="${libBeast2}" includes="*.jar"/>
+    <!-- <fileset dir="${libBeast2}" includes="*.jar"/> -->
     <fileset dir="${libContra}" includes="*.jar"/>
-    <pathelement path="${beast2classpath}"/> <!-- We need BEAST 2 compiled files to compile contraband -->
-    <pathelement path="${beast-outercoreclasspath}"/> <!-- We need beast-outercore compiled files to compile contraband -->
+    <!-- <pathelement path="${beast2classpath}"/> --> <!-- We need BEAST 2 compiled files to compile contraband -->
+    <!-- <pathelement path="${beast-outercoreclasspath}"/ --> <!-- We need beast-outercore compiled files to compile contraband -->
   </path>
 
   <!-- Other -->
@@ -104,46 +113,47 @@
     <!-- Put everything in contraband.vSomeVersion.jar -->
     <jar jarfile="${distContra}/${binName}.v${projVersion}.jar">
       <manifest>
-	<attribute name="Built-By" value="${user.name}"/>
-	<attribute name="Main-Class" value="${BEASTmain}"/>
+	    <attribute name="Built-By" value="${user.name}"/>
+	    <attribute name="Main-Class" value="${BEASTmain}"/>
       </manifest>
 
       <!-- Add source and compiled files from contraband -->
       <fileset dir="${buildContra}">
-	<include name="**/*.class"/>
-	<include name="**/*.java"/>
+	    <include name="**/*.class"/>
+	    <include name="**/*.java"/>
       </fileset>
 
       <!-- Add compiled files from beast2 (so we can actually run things) -->
-      <fileset dir="${beast2classpath}">
-	<include name="beast/**/*.class"/>
-	<include name="org/**/*.class"/>
-      </fileset>
+      <!-- <fileset dir="${beast2classpath}"> -->
+      <!-- 	<include name="beast/**/*.class"/> -->
+      <!-- 	<include name="org/**/*.class"/> -->
+      <!-- </fileset> -->
 
-      <fileset dir="${libBeast2}">
-	<include name="*.jar"/>
-      </fileset>
+      <!-- <fileset dir="${libBeast2}"> -->
+      <!-- 	<include name="*.jar"/> -->
+      <!-- </fileset> -->
 
       <!-- Add compiled files from other packages -->
-      <fileset dir="${SAclasspath}">
-	<include name="beast/**/*.class"/>
-      </fileset>
+      <!-- <fileset dir="${SAclasspath}">-->
+      <!--   <include name="beast/**/*.class"/>-->
+      <!-- </fileset>-->
+      <!-- <fileset dir="${starbeast2classpath}">-->
+      <!--   <include name="starbeast2/**/*.class"/>-->
+      <!-- </fileset>-->
 
-      <fileset dir="${starbeast2classpath}">
-	<include name="starbeast2/**/*.class"/>
-      </fileset>
-
-      <fileset dir="${beast-outercoreclasspath}">
-	<include name="outercore/**/*.class"/>
-      </fileset>
+      <!-- <fileset dir="${beast-outercoreclasspath}"> -->
+      <!-- 	<include name="outercore/**/*.class"/> -->
+      <!-- </fileset> -->
 
       <!-- Bundles executables and a bunch of other files from these libs -->
       <!-- e.g., it creates /org/antlr/v4/runtime/a.class -->
+      <!-- 
       <zipgroupfileset dir="${libBeast2}" includes="beagle.jar"/>
       <zipgroupfileset dir="${libBeast2}" includes="colt.jar"/>
       <zipgroupfileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
       <zipgroupfileset dir="${libBeast2}" includes="jam.jar"/>
       <zipgroupfileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
+      -->
     </jar>
 
     <!-- Put everything in contraband.vSomeVersion.src.jar -->

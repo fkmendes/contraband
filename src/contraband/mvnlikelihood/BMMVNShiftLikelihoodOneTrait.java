@@ -12,7 +12,7 @@ import org.apache.commons.math3.linear.RealVector;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
-import outercore.parameter.KeyRealParameter;
+// import outercore.parameter.KeyRealParameter;
 
 /**
  * @author Fabio K. Mendes
