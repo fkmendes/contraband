@@ -53,7 +53,8 @@
   <path id="classpath">
     <pathelement path="${buildContra}"/>
     <!-- <fileset dir="${libBeast2}" includes="*.jar"/> -->
-    <fileset dir="${libContra}" includes="*.jar"/>
+    <fileset dir="${libContra}" includes="*.jar"/> <!-- Used for building (but does not affect contraband's .jar!) -->
+
     <!-- <pathelement path="${beast2classpath}"/> --> <!-- We need BEAST 2 compiled files to compile contraband -->
     <!-- <pathelement path="${beast-outercoreclasspath}"/ --> <!-- We need beast-outercore compiled files to compile contraband -->
   </path>
@@ -147,7 +148,11 @@
 
       <!-- Bundles executables and a bunch of other files from these libs -->
       <!-- e.g., it creates /org/antlr/v4/runtime/a.class -->
-      <!-- 
+      <!-- Note that this affects contraband's .jar; beast2's classes, for example,
+      are already being accessed within beast2's .jar during building, as
+      all .jar files inside contraband/lib/ are in the classpath -->
+      <zipgroupfileset dir="${libContra}" includes="beast-2.6.6.jar"/> <!-- Need it for BEAST's Main -->
+      <!--
       <zipgroupfileset dir="${libBeast2}" includes="beagle.jar"/>
       <zipgroupfileset dir="${libBeast2}" includes="colt.jar"/>
       <zipgroupfileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
@@ -161,7 +166,7 @@
 	 files match the executable .jar -->
     <jar jarfile="${distContra}/${binName}.v${projVersion}.src.jar">
       <fileset dir="${srcContra}">
-	<include name="**/*.java"/>
+	    <include name="**/*.java"/>
       </fileset>
     </jar>
 
