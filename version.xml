@@ -1,4 +1,4 @@
-<addon name="contraband" version="0.0.1">
+<addon name="contraband" version="1.0.0">
   <depends on="beast2" atleast="2.6.0" atmost="2.6.9"/>
   <depends on="SA" atleast="2.0.0"/>
   <depends on="MM" atleast="1.1.0"/>

@@ -7,7 +7,7 @@
 	</description>
 
 	<!-- set global properties for this build -->
-	<property name="versioncontraband" value="0.0.1" />
+	<property name="versioncontraband" value="1.0.0" />
 	<property name="srccontraband" location="src" />
 	<property name="doccontraband" location="doc" />
 	<property name="buildcontraband" location="build" />
@@ -30,17 +30,16 @@
 		<fileset dir="${libBeast2}" includes="junit-4.8.2.jar"/>
 		<fileset dir="${libBeast2}" includes="jam.jar"/>
 		<fileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
-	<pathelement path="${beast2classpath}"/>
+		<pathelement path="${beast2classpath}"/>
 		<fileset dir="${beast2path}/lib" includes="jam.jar"/>
 		<fileset dir="${beast2path}/lib" includes="beagle.jar"/>
 		<fileset dir="${beast2path}/lib" includes="fest.jar"/>
 		<fileset dir="${beast2path}/lib" includes="colt.jar"/>
 		<fileset dir="${libcontraband}" includes="commons-lang3-3.10.jar"/>
-		<fileset dir="${libcontraband}" includes="junit-4.8.2.jar"/>
 	<pathelement path="../BEASTLabs/build"/>
-	<pathelement path="../starbeast3/build"/>
 	<pathelement path="../starbeast2/build"/>
 	<pathelement path="../sampled-ancestors/build"/>
+	<pathelement path="../morph-models/build"/>
 	</path>
 
 
