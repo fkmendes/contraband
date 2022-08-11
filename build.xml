@@ -1,197 +1,368 @@
-<project default="build" basedir="." name="BUILD_contraband">
-  <description>
-    Build contraband.
-  </description>
+<!-- Build contraband. It is also used by Hudson contraband project. JUnit test is available for this build. -->
+<project basedir="." default="build_jar_all_contraband" name="BUILD_contraband">
+	<description>
+	    Build contraband.
+	    JUnit test is available for this build.
+	    $Id: build_contraband.xml $
+	</description>
 
-  <!-- The original version of this build.xml built contraband from files
-  compiled from beast2, sampled-ancestors, SB2, etc.
-  These dependencies are now being provided as .jar files within contraband's
-  lib/ directory.
-  This makes things cleaner; the previous version of this build.xml was
-  bombing whenever one of the dependencies for some reason stopped building
-  themselves...
-  -->
+	<!-- set global properties for this build -->
+	<property name="versioncontraband" value="0.0.1" />
+	<property name="srccontraband" location="src" />
+	<property name="doccontraband" location="doc" />
+	<property name="buildcontraband" location="build" />
+	<property name="libcontraband" location="lib" />
+	<property name="release_dir" value="release" />
+	<property name="distcontraband" location="${buildcontraband}/dist" />
+	<property name="beast2path" location="../beast2"/>
+	<property name="libBeast2" location="${beast2path}/lib" />
+	<property name="srcBeast2" location="${beast2path}/src" />
+	<property name="beast2classpath" location="${beast2path}/build" />
+	<property name="Add_on_dir" value="${release_dir}/add-on" />
 
-  <!-- ########## PROPERTIES ########## -->
-  <property name="binName" value="contraband"/>
-  <property name="projName" value="contraband"/>
-  <property name="projVersion" value="0.0.1"/>
+    <import file="${beast2path}/build.xml" />
 
-  <!-- contraband-related paths -->
-  <property name="srcContra" location="src"/>
-  <property name="buildContra" location="build"/>
-  <property name="libContra" location="lib"/>
-  <property name="release_dir" location="release"/>
-  <property name="distContra" location="${buildContra}/dist"/>
+	<property name="main_class_CladeAge" value="beast.app.ca.contrabandPanel" />
+	<property name="report" value="${buildcontraband}/junitreport"/>
 
-  <!-- unit test related paths -->
-  <property name="testReportsContra" location="${buildContra}/test-reports"/>
-  <property name="buildTestContra" location="${buildContra}/build-test"/>
-  <property name="buildLib" location="${buildContra}/build-lib"/>
+	<path id="classpath">
+        <pathelement path="${buildcontraband}"/>
+		<fileset dir="${libBeast2}" includes="junit-4.8.2.jar"/>
+		<fileset dir="${libBeast2}" includes="jam.jar"/>
+		<fileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
+	<pathelement path="${beast2classpath}"/>
+		<fileset dir="${beast2path}/lib" includes="jam.jar"/>
+		<fileset dir="${beast2path}/lib" includes="beagle.jar"/>
+		<fileset dir="${beast2path}/lib" includes="fest.jar"/>
+		<fileset dir="${beast2path}/lib" includes="colt.jar"/>
+		<fileset dir="${libcontraband}" includes="commons-lang3-3.10.jar"/>
+		<fileset dir="${libcontraband}" includes="junit-4.8.2.jar"/>
+	<pathelement path="../BEASTLabs/build"/>
+	<pathelement path="../starbeast3/build"/>
+	<pathelement path="../starbeast2/build"/>
+	<pathelement path="../sampled-ancestors/build"/>
+	</path>
 
-  <!-- beast2-related paths -->
-  <!-- <property name="beast2path" location="../beast2"/> -->
-  <!-- <property name="libBeast2" location="${beast2path}/lib"/> -->
-  <!-- <property name="srcBeast2" location="${beast2path}/src"/> -->
-  <!-- <property name="beast2classpath" location="${beast2path}/build"/> -->
 
-  <!-- other packages paths -->
-  <!--  <property name="SApath" location="../sampled-ancestors"/>-->
-  <!--  <property name="SAclasspath" location="${SApath}/build"/>-->
-  <!--  <property name="starbeast2path" location="../starbeast2"/>-->
-  <!--  <property name="starbeast2classpath" location="${starbeast2path}/build"/>-->
-  <!-- <property name="beast-outercorepath" location="../beast-outercore"/> -->
-  <!-- <property name="beast-outercoreclasspath" location="${beast-outercorepath}/build" /> -->
 
-  <!-- BEAST 2 currently uses Java 1.8 -->
-  <property name="sourceVersion" value="1.8"/>
-  <property name="targetVersion" value="1.8"/>
 
-  <!-- <import file="${SApath}/build.xml" /> -->
+	<!-- start -->
+	<target name="initcontraband">
+		<echo message="${ant.project.name}: ${ant.file}" />
+	</target>
 
-  <!-- classpath -->
-  <path id="classpath">
-    <pathelement path="${buildContra}"/>
-    <!-- <fileset dir="${libBeast2}" includes="*.jar"/> -->
-    <fileset dir="${libContra}" includes="*.jar"/> <!-- Used for building (but does not affect contraband's .jar!) -->
+	<target name="cleancontraband">
+    	<delete dir="${buildcontraband}" />
+	</target>
 
-    <!-- <pathelement path="${beast2classpath}"/> --> <!-- We need BEAST 2 compiled files to compile contraband -->
-    <!-- <pathelement path="${beast-outercoreclasspath}"/ --> <!-- We need beast-outercore compiled files to compile contraband -->
-  </path>
+	<!-- clean previous build, and then compile Java source code, and Juint test -->
+	<target name="build_all_contraband" depends="cleancontraband,compile-allcontraband,junitcontraband"
+        description="Clean and Build all run-time stuff">
+	</target>
 
-  <!-- Other -->
-  <property name="BEASTmain" value="beast.app.BeastMCMC"/>
-  <property name="report" value="${buildContra}/junitreport"/>
+	<!-- clean previous build, compile Java source code, and Junit test, and make the beast.jar and beauti.jar -->
+	<target name="build_jar_all_contraband" depends="cleancontraband,compile-allcontraband,junitcontraband,dist_all_contraband"
+        description="Clean and Build all run-time stuff">
+	</target>
 
-  <!-- ########## BUILDING  ########## -->
-  <target name="init">
-    <mkdir dir="${buildContra}"/>
-    <mkdir dir="${distContra}"/>
-    <mkdir dir="${libContra}"/>
-    <mkdir dir="${testReportsContra}"/>
-    <mkdir dir="${buildTestContra}"/>
-    <mkdir dir="${buildLib}"/>
-    <echo message="${ant.project.name}: ${ant.file}"/>
-  </target>
 
-  <target name="clean">
-    <delete dir="${buildContra}"/>
-    <delete dir="${distContra}"/>
-    <delete dir="${testReportsContra}"/>
-    <delete dir="${buildTestContra}"/>
-    <delete dir="${buildLib}"/>
-  </target>
+	<!-- No JUnit Test, clean previous build, compile Java source code, and make the contraband.jar and beauti.jar -->
+	<target name="build_jar_all_contraband_NoJUnitTest" depends="cleancontraband,compile-allcontraband,dist_all_contraband"
+        description="Clean and Build all run-time stuff">
+	</target>
 
-  <!-- Entry point: clean -> init -> compile -> unit tests -> release -->
-  <target name="build" depends="clean,compile,test,release"
-	  description="Clean, build and release all we need to run this package.">
-  </target>
+	<!-- compile Java source code -->
+	<target name="compile-allcontraband" depends="initcontraband,compile-all">
 
-  <!-- Compile -->
-  <target name="compile" depends="init">
-    <!-- Capture the path as a delimited property using the refid attribute -->
-    <property name="myclasspath" refid="classpath"/>
 
-    <!-- Emit the property to the ant console -->
-    <echo message="Classpath = ${myclasspath}"/>
+	    <!-- Capture the path as a delimited property using the refid attribute -->
+	    <property name="myclasspath" refid="classpath"/>
+	    <!-- Emit the property to the ant console -->
+	    <echo message="Classpath = ${myclasspath}"/>
 
-    <javac srcdir="${srcContra}" destdir="${buildContra}" classpath="${myclasspath}"
-           target="${targetVersion}" source="${sourceVersion}"
-	   includeantruntime="false"
-	   debug="true"
-	   fork="true"
-	   memoryinitialsize="256m"
-	   memorymaximumsize="1024m">
-      <include name="**/**" />
-    </javac>
+		<mkdir dir="${buildcontraband}" />
 
-    <echo message="Successfully compiled."/>
-  </target>
+		<!-- Compile the java code from ${srccontraband} into ${buildcontraband} /bin -->
+		<javac srcdir="${srccontraband}" destdir="${buildcontraband}" classpathref="classpath"
+		       fork="true"
+		       memoryinitialsize="256m"
+		       memorymaximumsize="256m"
+			   source="1.8"
+		       target="1.8">
+			<include name="**/**" />
+			<!-- compile JUnit test classes -->
+			<include name="test/beast/**" />
+		</javac>
+		<copy todir="${buildcontraband}">
+			<fileset dir="${srccontraband}" includes="**/*.png" />
+		</copy>
+		<echo message="Successfully compiled." />
+	</target>
 
-  <!-- Jar release -->
-  <target name="release" depends="compile">
+	<!-- make the beast.jar and beauti.jar -->
+	<target name="dist_all_contraband" depends="compile-allcontraband" description="create contraband jar">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${distcontraband}" />
 
-    <!-- Put everything in contraband.vSomeVersion.jar -->
-    <jar jarfile="${distContra}/${binName}.v${projVersion}.jar">
-      <manifest>
-	    <attribute name="Built-By" value="${user.name}"/>
-	    <attribute name="Main-Class" value="${BEASTmain}"/>
-      </manifest>
+		<!-- Put everything in ${buildcontraband} into the beast.jar file -->
+		<jar jarfile="${distcontraband}/contraband.jar">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="${main_class_CladeAge}" />
+			</manifest>
+			<fileset dir="${buildcontraband}">
+				<include name="**/*.class" />
+				<include name="**/*.png" />
+			</fileset>
+			<fileset dir="${beast2classpath}">
+				<include name="**/*.class" />
+				<include name="**/*.properties" />
+				<include name="**/*.png" />
+			</fileset>
+			<zipgroupfileset dir="${libBeast2}" includes="jam.jar" />
+			<zipgroupfileset dir="${libBeast2}" includes="beagle.jar" />
+			<zipgroupfileset dir="${libBeast2}" includes="colt.jar" />
+			<zipgroupfileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar" />
+			<zipgroupfileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar" />
+		</jar>
+		<jar jarfile="${distcontraband}/contraband.src.jar">
+			<fileset dir="${srccontraband}">
+				<include name="**/*.java" />
+				<include name="**/*.png" />
+				<include name="**/*.xsl" />
+			</fileset>
+        </jar>
+		<jar jarfile="${distcontraband}/contraband.addon.jar">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+			</manifest>
+			<fileset dir="${buildcontraband}">
+				<include name="**/*.png" />
+				<include name="**/*.class" />
+				<include name="**/*.class" />
+				<include name="**/*.properties" />
+			</fileset>
+		</jar>
+	</target>
 
-      <!-- Add source and compiled files from contraband -->
-      <fileset dir="${buildContra}">
-	    <include name="**/*.class"/>
-	    <include name="**/*.java"/>
-      </fileset>
+	<!-- run beast.jar -->
+	<target name="run_contraband">
+		<java jar="${distcontraband}/contraband.jar" fork="true" />
+	</target>
 
-      <!-- Add compiled files from beast2 (so we can actually run things) -->
-      <!-- <fileset dir="${beast2classpath}"> -->
-      <!-- 	<include name="beast/**/*.class"/> -->
-      <!-- 	<include name="org/**/*.class"/> -->
-      <!-- </fileset> -->
 
-      <!-- <fileset dir="${libBeast2}"> -->
-      <!-- 	<include name="*.jar"/> -->
-      <!-- </fileset> -->
+	<!-- JUnit test -->
+	<target name="junitcontraband">
+		<mkdir dir="${report}" />
+		<junit printsummary="yes"> <!--showoutput='yes'-->
+			<classpath>
+				<path refid="classpath" />
+				<path location="${buildcontraband}" />
+			</classpath>
 
-      <!-- Add compiled files from other packages -->
-      <!-- <fileset dir="${SAclasspath}">-->
-      <!--   <include name="beast/**/*.class"/>-->
-      <!-- </fileset>-->
-      <!-- <fileset dir="${starbeast2classpath}">-->
-      <!--   <include name="starbeast2/**/*.class"/>-->
-      <!-- </fileset>-->
+			<formatter type="xml" />
 
-      <!-- <fileset dir="${beast-outercoreclasspath}"> -->
-      <!-- 	<include name="outercore/**/*.class"/> -->
-      <!-- </fileset> -->
+			<batchtest fork="yes" todir="${report}">
+				<fileset dir="${srccontraband}">
+                    <include name="test/**/*Test.java"/>
+				</fileset>
+				<fileset dir="${srcBeast2}">
+                    <include name="test/beast/integration/**/*Test.java"/>
+                    <exclude name="test/beast/integration/**/ResumeTest.java"/>
+				</fileset>
+			</batchtest>
+		</junit>
+		<echo message="JUnit test finished." />
+	</target>
 
-      <!-- Bundles executables and a bunch of other files from these libs -->
-      <!-- e.g., it creates /org/antlr/v4/runtime/a.class -->
-      <!-- Note that this affects contraband's .jar; beast2's classes, for example,
-      are already being accessed within beast2's .jar during building, as
-      all .jar files inside contraband/lib/ are in the classpath -->
-      <zipgroupfileset dir="${libContra}" includes="beast-2.6.6.jar"/> <!-- Need it for BEAST's Main -->
-      <!--
-      <zipgroupfileset dir="${libBeast2}" includes="beagle.jar"/>
-      <zipgroupfileset dir="${libBeast2}" includes="colt.jar"/>
-      <zipgroupfileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
-      <zipgroupfileset dir="${libBeast2}" includes="jam.jar"/>
-      <zipgroupfileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
-      -->
-    </jar>
+    <target name="junitreport">
+		<junitreport todir="${report}">
+			<fileset dir="${report}" includes="*.xml"/>
+			<report format="frames" todir="${report}"/>
+		</junitreport>
+		<echo message="JUnit test report finished." />
+	</target>
 
-    <!-- Put everything in contraband.vSomeVersion.src.jar -->
-    <!-- This is a source jar distribution that guarantees the source
-	 files match the executable .jar -->
-    <jar jarfile="${distContra}/${binName}.v${projVersion}.src.jar">
-      <fileset dir="${srcContra}">
-	    <include name="**/*.java"/>
-      </fileset>
-    </jar>
 
-  </target>
+	<target name="addon"
+	        depends="build_jar_all_contraband_NoJUnitTest"
+	        description="release BEAST 2 add-on version of contraband">
 
-  <!-- Unit testing -->
-  <target name="test" depends="compile">
+		<delete dir="${Add_on_dir}" />
+		<!-- Create the release directory -->
+		<mkdir dir="${Add_on_dir}" />
+		<mkdir dir="${Add_on_dir}/lib" />
+		<mkdir dir="${Add_on_dir}/doc" />
+		<mkdir dir="${Add_on_dir}/examples" />
+		<mkdir dir="${Add_on_dir}/templates" />
 
-    <junit printsummary="yes" failureproperty="testFailed" showoutput="true">
-      <classpath>
-	<pathelement path="${myclasspath}"/>
-	<pathelement path="${buildContra}"/>
-	<pathelement path="${buildTestContra}"/>
-	<fileset dir="${buildLib}" includes="*.jar"/>
-      </classpath>
+		<copy todir="${Add_on_dir}">
+			<fileset file="version.xml"/>
+		</copy>
+		<copy todir="${Add_on_dir}/examples">
+			<fileset dir="examples" />
+		</copy>
+		<!--
+		<copy todir="${Add_on_dir}/doc">
+			<fileset dir="doc" includes="contraband.pdf"/>
+		</copy>
+		-->
+		<copy todir="${Add_on_dir}/lib">
+			<fileset dir="${distcontraband}" includes="contraband.addon.jar" />
+		</copy>
+		<copy todir="${Add_on_dir}">
+			<fileset dir="${distcontraband}" includes="contraband.src.jar" />
+		</copy>
 
-      <batchtest fork="yes" todir="${testReportsContra}">
-	<fileset dir="${srcContra}">
-	  <include name="**/*Test.java"/>
-	</fileset>
-	<formatter type="plain"/>
-      </batchtest>
-    </junit>
 
-    <fail if="testFailed" status="1" message="Unit test failed."/>
-  </target>
-  
+		<copy todir="${Add_on_dir}/templates">
+			<fileset file="templates/*.xml" />
+		</copy>
+
+
+		<jar jarfile="${distcontraband}/contraband.addon.v${versioncontraband}.zip">
+			<fileset dir="${Add_on_dir}">
+				<include name="**/*" />
+			</fileset>
+        </jar>
+		<echo message="Add-on version v${versioncontraband} release is finished." />
+	</target>
+
+
+
+
+
+	<!-- Release -->
+	<property name="version" value="1.0.0" />
+	<property name="version_number" value="${versioncontraband}" />
+	<property name="release_dircontraband" value="release" />
+	<property name="copyright" value="CladeAge development team 2013" />
+
+	<property name="CladeAge_name" value="CladeAge" />
+
+	<property name="common_dircontraband" value="${release_dircontraband}/common" />
+	<property name="Mac_dircontraband" value="${release_dircontraband}/Mac" />
+	<property name="Linux_dircontraband" value="${release_dircontraband}/Linux" />
+	<property name="Windows_dircontraband" value="${release_dircontraband}/Windows" />
+
+	<property name="Mac_package_dircontraband" value="${Mac_dircontraband}/${CladeAge_name}" />
+	<property name="Linux_package_dircontraband" value="${Linux_dircontraband}/${CladeAge_name}" />
+	<property name="Windows_package_dircontraband" value="${Windows_dircontraband}/${CladeAge_name}" />
+
+	<!-- Need to either install Launch4j under {CladeAge workspace}/${release}
+                 or install it in the default directory and change the location of launch4j.dir -->
+	<target name="windows"
+	        depends="build_jar_all_contraband_NoJUnitTest"
+	        description="release Windows version of CladeAge">
+
+		<delete dir="${Windows_package_dircontraband}" />
+		<!-- Create the release directory -->
+		<mkdir dir="${Windows_package_dircontraband}" />
+
+		<property name="launch4j.dir" location="../../launch4j" />
+		<taskdef name="launch4j"
+		         classname="net.sf.launch4j.ant.Launch4jTask"
+		         classpath="${launch4j.dir}/launch4j.jar :${launch4j.dir}/lib/xstream.jar" />
+
+		<copy file="${distcontraband}/contraband.src.jar" todir="${Windows_package_dircontraband}/lib" />
+		<copy file="${common_dircontraband}/VERSION HISTORY.txt" todir="${Windows_package_dircontraband}" />
+		<copy file="${common_dircontraband}/README.txt" todir="${Windows_package_dircontraband}" />
+		<copy file="${common_dircontraband}/LICENSE.txt" todir="${Windows_package_dircontraband}" />
+
+		<!-- CladeAge v?.?.?.exe -->
+		<launch4j configFile="${Windows_dircontraband}/CladeAge_launch4j.xml"
+		          jar="${distcontraband}/contraband.jar"
+		          outfile="${Windows_package_dircontraband}/${CladeAge_name}.exe"
+		          fileVersion="${version_number}.0"
+		          txtFileVersion="${versioncontraband}"
+		          productVersion="${version_number}.0"
+		          txtProductVersion="${versioncontraband}" />
+
+		<copy todir="${Windows_package_dircontraband}/templates/">
+			<fileset dir="templates/" />
+		</copy>
+
+		<zip destfile="${Windows_dircontraband}/${CladeAge_name} v${versioncontraband}.zip">
+			<zipfileset dir="${Windows_package_dircontraband}" prefix="${CladeAge_name}" />
+		</zip>
+
+		<echo message="Windows version release is finished." />
+	</target>
+
+	<target name="linux"
+	        depends="build_jar_all_contraband_NoJUnitTest"
+	        description="release Linux/Unix version of CladeAge">
+		<delete dir="${Linux_package_dircontraband}" />
+		<!-- Create the release directory -->
+		<mkdir dir="${Linux_package_dircontraband}" />
+
+		<copy todir="${Linux_package_dircontraband}/bin">
+			<fileset dir="${Linux_dircontraband}/bin" />
+		</copy>
+		<chmod dir="${Linux_package_dircontraband}/bin" perm="755" includes="**/**" />
+
+		<copy file="${distcontraband}/contraband.jar" todir="${Linux_package_dircontraband}/lib" />
+		<copy file="${distcontraband}/contraband.src.jar" todir="${Linux_package_dircontraband}/lib" />
+		<copy file="${common_dircontraband}/icons/contraband.png" todir="${Linux_package_dircontraband}/images" />
+
+		<copy file="${common_dircontraband}/VERSION HISTORY.txt" todir="${Linux_package_dircontraband}" />
+		<copy file="${common_dircontraband}/README.txt" todir="${Linux_package_dircontraband}" />
+		<copy file="${common_dircontraband}/LICENSE.txt" todir="${Linux_package_dircontraband}" />
+
+		<echo message="Have to tar manaully, because [ANT Bug 550] the tar task change the mode of the executables files." />
+		<echo message="Linux/Unix version release is finished." />
+	</target>
+
+	<property name="jarbundler_dir" value="/Applications/eclipse/plugins/org.apache.ant_1.8.3.v201301120609/lib" />
+	<target name="mac"
+	        depends="build_jar_all_contraband_NoJUnitTest"
+	        description="release Mac version of CladeAge">
+		<delete dir="${Mac_package_dircontraband}" />
+		<delete file="${Mac_dircontraband}/pack.temp.dmg"/>
+		<delete file="${Mac_dircontraband}/CladeAge v${versioncontraband}.dmg"/>
+		<!-- Create the release directory -->
+		<mkdir dir="${Mac_package_dircontraband}" />
+
+		<copy todir="${Mac_package_dircontraband}/bin">
+			<fileset dir="${Linux_dircontraband}/bin" />
+		</copy>
+		<chmod dir="${Mac_package_dircontraband}/bin" perm="755" includes="**/**" />
+
+		<copy file="${distcontraband}/contraband.jar" todir="${Mac_package_dircontraband}/lib" />
+		<copy file="${distcontraband}/contraband.src.jar" todir="${Mac_package_dircontraband}/lib" />
+
+		<copy file="${common_dircontraband}/VERSION HISTORY.txt" todir="${Mac_package_dircontraband}" />
+		<copy file="${common_dircontraband}/README.txt" todir="${Mac_package_dircontraband}" />
+		<copy file="${common_dircontraband}/LICENSE.txt" todir="${Mac_package_dircontraband}" />
+
+		<taskdef name="jarbundler"
+		         classname="net.sourceforge.jarbundler.JarBundler"
+		         classpath="${jarbundler_dir}/jarbundler-2.2.0.jar" />
+
+		<!-- create a jar bundle for the mac -->
+		<jarbundler dir="${Mac_package_dircontraband}"
+		            name="${CladeAge_name}"
+		            mainclass="${main_class_CladeAge}"
+		            icon="${common_dircontraband}/icons/contraband.icns"
+		            jvmversion="1.8+"
+		            vmoptions="-Xmx1024M"
+		            arguments="-window -working -options"
+		            version="${versioncontraband}"
+		            infostring="${CladeAge_name}, ${copyright}"
+		            bundleid="${main_class_CladeAge}">
+			<jarfileset dir="${Mac_package_dircontraband}/lib">
+				<include name="**/contraband.jar" />
+			</jarfileset>
+			<javaproperty name="apple.laf.useScreenMenuBar" value="true" />
+			<javaproperty name="java.library.path" value="$JAVAROOT:/usr/local/lib" />
+		</jarbundler>
+
+		<echo message="Building disk image." />
+		<exec executable='release/Mac/createdmg.sh'/>
+		<echo message="Mac version release is finished." />
+	</target>
+
+
+
+
 </project>
