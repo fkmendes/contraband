@@ -2,14 +2,15 @@ package contraband.mvnlikelihood;
 import java.util.List;
 import java.util.Random;
 
-import beast.core.Citation;
-import beast.core.Description;
+import beast.base.core.Citation;
+import beast.base.core.Description;
 import org.apache.commons.math3.linear.*;
 
-import beast.core.Input;
-import beast.core.State;
-import beast.core.parameter.RealParameter;
-import beast.core.Input.Validate;
+import beast.base.core.Input;
+import beast.base.inference.State;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.util.InputUtil;
+import beast.base.core.Input.Validate;
 // import outercore.parameter.KeyRealParameter;
 
 /**
@@ -164,10 +165,10 @@ public class BMMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		boolean updateTipValues = false;
 		boolean updateAncNodeVCVMat = false; // always false for the moment, only tree logger uses this as true
 		
-		if (treeInput.isDirty() || (doCoalCorrectionInput.get() && coalCorrectionInput.isDirty())) {  updatePhyloTMat = true; updateVCVMat = true; }
-		if (sigmasqInput.isDirty()) { updateVCVMat = true; }
-		if (rootValueInput.isDirty()) { updateMean = true; }
-		if (oneTraitInput.isDirty()) { updateTipValues = true; }
+		if (InputUtil.isDirty(treeInput) || (doCoalCorrectionInput.get() && InputUtil.isDirty(coalCorrectionInput))) {  updatePhyloTMat = true; updateVCVMat = true; }
+		if (InputUtil.isDirty(sigmasqInput)) { updateVCVMat = true; }
+		if (InputUtil.isDirty(rootValueInput)) { updateMean = true; }
+		if (InputUtil.isDirty(oneTraitInput)) { updateTipValues = true; }
 		
 		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean, updateAncNodeVCVMat, updateTipValues);
 		populateParentInstanceVars(updateVCVMat, updateMean, updateAncNodeVCVMat);

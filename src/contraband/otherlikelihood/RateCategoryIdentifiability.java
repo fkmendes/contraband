@@ -2,10 +2,10 @@ package contraband.otherlikelihood;
 
 import java.util.List;
 import java.util.Random;
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.State;
-import beast.core.parameter.RealParameter;
+import beast.base.inference.Distribution;
+import beast.base.core.Input;
+import beast.base.inference.State;
+import beast.base.inference.parameter.RealParameter;
 
 /*
  * This is a "hack" likelihood that helps us reject colors (e.g., rates, adaptive optima) that are not in increasing order

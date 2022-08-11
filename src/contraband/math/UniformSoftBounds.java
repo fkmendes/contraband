@@ -3,9 +3,10 @@ package contraband.math;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.ContinuousDistribution;
 import org.apache.commons.math.distribution.Distribution;
-import beast.math.distributions.ParametricDistribution;
-import beast.core.Description;
-import beast.core.Input;
+
+import beast.base.inference.distribution.ParametricDistribution;
+import beast.base.core.Description;
+import beast.base.core.Input;
 import org.apache.commons.math3.util.FastMath;
 
 

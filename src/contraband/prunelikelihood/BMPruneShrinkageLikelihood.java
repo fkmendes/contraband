@@ -1,8 +1,8 @@
 package contraband.prunelikelihood;
 
-import beast.core.Input;
-import beast.core.State;
-import beast.core.parameter.RealParameter;
+import beast.base.core.Input;
+import beast.base.inference.State;
+import beast.base.inference.parameter.RealParameter;
 import contraband.math.MatrixUtilsContra;
 import contraband.math.NodeMath;
 import contraband.utils.PruneLikelihoodUtils;

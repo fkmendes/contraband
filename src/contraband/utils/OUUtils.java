@@ -1,7 +1,7 @@
 package contraband.utils;
 
-import beast.evolution.branchratemodel.BranchRateModel;
-import beast.evolution.tree.Node;
+import beast.base.evolution.branchratemodel.BranchRateModel;
+import beast.base.evolution.tree.Node;
 import contraband.math.MatrixUtilsContra;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;

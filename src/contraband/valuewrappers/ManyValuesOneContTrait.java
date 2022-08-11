@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import beast.core.BEASTObject;
-import beast.core.Input;
-import beast.core.Input.Validate;
+import beast.base.core.BEASTObject;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
 
 public class ManyValuesOneContTrait extends BEASTObject {
 

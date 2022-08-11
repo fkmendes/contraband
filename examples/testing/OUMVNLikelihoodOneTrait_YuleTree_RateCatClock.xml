@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<beast namespace="beast.core:beast.evolution.alignment:beast.core.util:beast.evolution.operators:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
+<beast namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.util:beast.base.math:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
 
   <run id="mcmc" spec="MCMC" chainLength="5000000">
     <state id="state" storeEvery="5000">
@@ -12,37 +12,37 @@
     </state>
 
     <!-- START posterior -->
-    <distribution id="posterior" spec="util.CompoundDistribution">
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
 
       <!-- START prior -->
-      <distribution id="prior" spec="util.CompoundDistribution">
-	    <prior id="YuleBirthRatePrior" spec="beast.math.distributions.Prior" name="distribution" x="@birthRate">
-          <Uniform id="UniformBirth" spec="beast.math.distributions.Uniform" name="distr" upper="Infinity"/>
+      <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
+	    <prior id="YuleBirthRatePrior" spec="beast.base.inference.distribution.Prior" name="distribution" x="@birthRate">
+          <Uniform id="UniformBirth" spec="beast.base.inference.distribution.Uniform" name="distr" upper="Infinity"/>
         </prior>
 	
-        <distribution id="SigmaSqPrior" spec="beast.math.distributions.Prior" x="@OUSigmaSq">
-	      <distr id="Exp.OUSigmaSq" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.2"/>
+        <distribution id="SigmaSqPrior" spec="beast.base.inference.distribution.Prior" x="@OUSigmaSq">
+	      <distr id="Exp.OUSigmaSq" spec="beast.base.inference.distribution.Exponential" offset="0.0" mean="0.2"/>
         </distribution>
 
-        <distribution id="RootValuePrior" spec="beast.math.distributions.Prior" x="@OURootValue">
-	      <distr id="Normal.OURootValue" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+        <distribution id="RootValuePrior" spec="beast.base.inference.distribution.Prior" x="@OURootValue">
+	      <distr id="Normal.OURootValue" spec="beast.base.inference.distribution.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
 
-        <distribution id="AlphaPrior" spec="beast.math.distributions.Prior" x="@OUAlpha">
-	      <distr id="LogNormal.OUAlpha" spec="beast.math.distributions.LogNormalDistributionModel" S="1.0" M="1.0"/>
+        <distribution id="AlphaPrior" spec="beast.base.inference.distribution.Prior" x="@OUAlpha">
+	      <distr id="LogNormal.OUAlpha" spec="beast.base.inference.distribution.LogNormalDistributionModel" S="1.0" M="1.0"/>
 	    </distribution>
 	
-	    <distribution id="ThetaValuePrior" spec="beast.math.distributions.Prior" x="@OUTheta">
-	      <distr id="Normal.OUTheta" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+	    <distribution id="ThetaValuePrior" spec="beast.base.inference.distribution.Prior" x="@OUTheta">
+	      <distr id="Normal.OUTheta" spec="beast.base.inference.distribution.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
       </distribution>
       <!-- END prior -->
 
       <!-- START likelihood -->
-      <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+      <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution" useThreads="false">
 	<distribution id="OUMVN" spec="contraband.mvnlikelihood.OUMVNLikelihoodOneTrait" eqDist="false" useRootMetaData="true">
 
-	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,sp2:1.0):1.0,sp3:2.0);" offset="0" singlechild="false" binarizeMultifurcations="true">
+	  <tree id="TheTree" spec="beast.base.evolution.tree.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="((sp1:1.0,sp2:1.0):1.0,sp3:2.0);" offset="0" singlechild="false" binarizeMultifurcations="true">
 	    <taxonset id="TaxonSet" spec="TaxonSet">
 	      <taxon id="sp1" spec="Taxon"/>
 	      <taxon id="sp2" spec="Taxon"/>
@@ -115,7 +115,7 @@
     </logger>
 
     <logger id="treelog.t:firsthalf" fileName="OUMVN_samplingtree.trees" logEvery="5000" mode="tree">
-      <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
+      <log id="TreeWithMetaDataLogger" spec="beast.base.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
     </logger>
   </run>
 </beast>

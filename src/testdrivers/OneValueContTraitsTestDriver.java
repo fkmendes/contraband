@@ -2,7 +2,7 @@ package testdrivers;
 
 import java.util.Arrays;
 
-import beast.core.parameter.RealParameter;
+import beast.base.inference.parameter.RealParameter;
 import contraband.valuewrappers.OneValueContTraits;
 
 /**

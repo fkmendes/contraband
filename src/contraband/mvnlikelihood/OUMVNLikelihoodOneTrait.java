@@ -3,8 +3,8 @@ package contraband.mvnlikelihood;
 import java.util.List;
 import java.util.Random;
 
-import beast.core.Citation;
-import beast.core.Description;
+import beast.base.core.Citation;
+import beast.base.core.Description;
 import contraband.utils.OUUtils;
 import contraband.clock.TreeToVCVMat;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -14,10 +14,11 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-import beast.core.Input;
-import beast.core.State;
-import beast.core.parameter.RealParameter;
-import beast.core.Input.Validate;
+import beast.base.core.Input;
+import beast.base.inference.State;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.util.InputUtil;
+import beast.base.core.Input.Validate;
 // import outercore.parameter.KeyRealParameter;
 
 /**
@@ -234,11 +235,11 @@ public class OUMVNLikelihoodOneTrait extends MVNProcessOneTrait {
 		boolean updateMean = false;
 		boolean updateData = false; // for Jive!
 		
-		if (alphaInput.isDirty()) { updateVCVMat = true; updateMean = true; }
-		if (treeInput.isDirty()) {  updatePhyloTMat = true; updateVCVMat = true; }
-		if (sigmasqInput.isDirty() || alphaInput.isDirty()) { updateVCVMat = true; }
-		if (rootValueInput.isDirty() || alphaInput.isDirty() || optimumManagerInput.isDirty()) { updateMean = true; }
-		if (oneTraitInput.isDirty()) { updateData = true; }
+		if (InputUtil.isDirty(alphaInput)) { updateVCVMat = true; updateMean = true; }
+		if (InputUtil.isDirty(treeInput)) {  updatePhyloTMat = true; updateVCVMat = true; }
+		if (InputUtil.isDirty(sigmasqInput) || InputUtil.isDirty(alphaInput)) { updateVCVMat = true; }
+		if (InputUtil.isDirty(rootValueInput) || InputUtil.isDirty(alphaInput) || InputUtil.isDirty(optimumManagerInput)) { updateMean = true; }
+		if (InputUtil.isDirty(oneTraitInput)) { updateData = true; }
 		
 		populateInstanceVars(updatePhyloTMat, updateVCVMat, updateMean, updateData);
 		populateParentInstanceVars(updateVCVMat, updateMean, updateData);

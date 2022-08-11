@@ -1,10 +1,11 @@
 package contraband.math;
 
-import beast.core.CalculationNode;
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
-import beast.evolution.tree.Tree;
+import beast.base.inference.CalculationNode;
+import beast.base.core.Input;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.util.InputUtil;
+import beast.base.core.Log;
+import beast.base.evolution.tree.Tree;
 import contraband.utils.NodeMathUtils;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -437,8 +438,9 @@ public class NodeMath extends CalculationNode {
     }
 
 
+    
     public void populateRootValuesVec(int rootIdx) {
-        if(sampleRoot && rootValuesInput.isDirty()) {
+        if(sampleRoot && InputUtil.isDirty(rootValuesInput)) {
             rootValuesVec = rootValuesInput.get().getDoubleValues();
         }
         if(!sampleRoot) {
@@ -603,18 +605,18 @@ public class NodeMath extends CalculationNode {
         boolean updateSigma = false;
 
         // update trait correlations
-        if(rhoInput.isDirty()) {
+        if(InputUtil.isDirty(rhoInput)) {
             rhoValues = rhoInput.get().getDoubleValues();
             updateRho = true;
         }
         // update trait correlations
-        if(covarianceInput.isDirty()) {
+        if(InputUtil.isDirty(covarianceInput)) {
             rhoValues = covarianceInput.get().getDoubleValues();
             updateRho = true;
         }
 
         // update trait evolutionary rates
-        if(sigmasqInput.isDirty()) {
+        if(InputUtil.isDirty(sigmasqInput)) {
             if (oneRateOnly) {
                 sigmaValue = sigmasqInput.get().getValue();
             } else {

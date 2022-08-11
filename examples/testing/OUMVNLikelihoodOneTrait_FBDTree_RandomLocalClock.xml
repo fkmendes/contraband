@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution.speciation" required="BEAST v2.5.0" version="2.5">
+<beast namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.base.util:beast.base.math:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.base.evolution.speciation" required="BEAST v2.5.0" version="2.5">
 
   <data id="seqs" name="alignment">
     <sequence id="1" taxon="t26_1" totalcount="4" value="ccagcctgctcattctttttatcggggacgggagcctctaatgtgctgtttgtatgaccccatagaacattgcttgaactcggaccatgcgttttgtcccaggatctccttaacggacaagagactcgtcgagagaagacacgcttaacttctaacccagtactctgactgtgaagcctagagaagccgcgtcgttgtgccttctgggcgcgcaccgcacgggatgagtgtgtgcgctattgcacacccagaagcccaaaagatgctttacacggagcaaggacgagggtgattcgcctggttttgaattgatgaggacgcataggaatattaggctgcgcaaagctcctgcagttgtgagttcgccctaataacaaaccgcctacttgtttaggatatgttactcgaagcattggcaggattacacgcctcgtacaaacgcacgatctagccatctgaagttggttgcatcacccaagacgagggaccagacctattatattagcgtgcatggcctctaatctcacggaggtaccgccgagccctattaggctcgtagcatgaaagaagctagaaacgacgggagataggcagcgcatagacgatccctaacttcgtgttagtgtccagatctggtaggtttgccttactgatggtatggcgtcgtactgatcaatgatctcgatcaccaatcaacgaatgccccaagccttgcgactgacgaaacctgaatgtgtgtgtctacccccgagccatagtctctcacgcgcggacttacgagcgatgtctttccgatgcgggctaagctgattcaaagctgcggatgctactcggtagatgttatggaatgagtgtcgaacccgcttcctgacatcaaaatacaggcgaaactagctggcgaagacgacctagtctccgaactcgaacgtatgtgaatctttgctcagattcagcatgcgcttcaatccggcttaccccacccgggtgtggctgacggttaagagagggccctaccgatttaggactataatggctttagttaatacaattgcggataatagttagaagcattggccaattgagcgcagacgacaaactagtttaaggggcggccgtagtcttgcaatgcttgaagcttgaaataagccatgtcaatggccgggttcttacccgttcggttgttcagggtcaagcgatacaattaaccgctagtaagcaacacgaaggcagggttcaggcgacgcgcactccgcgtgccagagtcaattgttagctgtataactgcacctgaaaccacatacttgaccgtttcctcagactctgacaagccggatctaaaccagtctctagtcccctgggtgggatctaaccggtcttcacaactgccagactgcacaccccaattctcaccggctataactttgtagacctatcaccttggtttacacgacattttcgttactaattgtccttgcactaccatgcgctcatacttttgaaagcgggtacacatctctgatctttgaggctgtaaccactatcacgagacgagacatcgaccctgaccgtgccgggccggcctgataatcctgttgaatttcgcgcgcagcaacgctagcgcgtttatgatgcaacgctcggtccccgcactacccagacttctaatattaagtcgcaaacttcgtaaaccaactcggcgttcgaagatcgtaggagctgatttttagtcctcgtcgataatttgtactccttcatcactgatggcgcggcatagaacggagctgctcaataccgattaccgcttttaaacttcatacaggctcggaagcaccgtggattcgtaactggtgaccccgttagcattcaaaacgaattagtattacctcgggcccgagtggaagtagctacggggtgtcggcgcatgacttgtccactgccgagatctgtgaggagatgtcggtactctcttcggatgccaaaatagccctttaaggccatcc"/>
@@ -83,51 +83,51 @@
     </state>
 
     <!-- START posterior -->
-    <distribution id="posterior" spec="util.CompoundDistribution">
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
 
       <!-- START prior -->
-      <distribution id="prior" spec="util.CompoundDistribution">
+      <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
         <distribution id="FBD" spec="beast.evolution.speciation.SABirthDeathModel" conditionOnRhoSampling="true" birthRate="@FBDbirthRate" deathRate="@FBDdeathRate" samplingRate="@FBDsamplingRate" origin="@FBDorigin" tree="@TheTree">
           <parameter id="FBDremovalProb" lower="0.0" name="removalProbability" upper="1.0">0.0</parameter>                                                                                     
           <parameter id="FBDrho" estimate="false" lower="0.0" name="rho" upper="1.0">1.0</parameter>                                                                                 
         </distribution>                                                                                                                                                                        
 
-        <distribution id="FBDbirthRatePrior" spec="beast.math.distributions.Prior" x="@FBDbirthRate">
-          <distr id="FBDbirthRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.0125"/>
+        <distribution id="FBDbirthRatePrior" spec="beast.base.inference.distribution.Prior" x="@FBDbirthRate">
+          <distr id="FBDbirthRateExponential" spec="beast.base.inference.distribution.Exponential" offset="0.0" mean="0.0125"/>
         </distribution>                                                                                                                                                                               
 
-	<distribution id="FBDdeathRatePrior" spec="beast.math.distributions.Prior" x="@FBDdeathRate">
-          <distr id="FBDdeathRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.01"/>
+	<distribution id="FBDdeathRatePrior" spec="beast.base.inference.distribution.Prior" x="@FBDdeathRate">
+          <distr id="FBDdeathRateExponential" spec="beast.base.inference.distribution.Exponential" offset="0.0" mean="0.01"/>
         </distribution>                                                                                                                                                                               
 
-	<distribution id="FBDsamplingRatePrior" spec="beast.math.distributions.Prior" x="@FBDsamplingRate">
-          <distr id="FBDsamplingRateExponential" spec="beast.math.distributions.Exponential" offset="0.0" mean="0.006666667"/>
+	<distribution id="FBDsamplingRatePrior" spec="beast.base.inference.distribution.Prior" x="@FBDsamplingRate">
+          <distr id="FBDsamplingRateExponential" spec="beast.base.inference.distribution.Exponential" offset="0.0" mean="0.006666667"/>
         </distribution>
 
-        <distribution id="FBDoriginPrior" spec="beast.math.distributions.Prior" x="@FBDorigin">
-          <distr id="FBDoriginUniform" spec="beast.math.distributions.Uniform" upper="Infinity"/>
+        <distribution id="FBDoriginPrior" spec="beast.base.inference.distribution.Prior" x="@FBDorigin">
+          <distr id="FBDoriginUniform" spec="beast.base.inference.distribution.Uniform" upper="Infinity"/>
         </distribution>
         
-	<distribution id="SigmaSqPrior" spec="beast.math.distributions.Prior" x="@OUSigmaSq">
-	  <distr id="LogNormal.OUSigmaSq" spec="beast.math.distributions.LogNormalDistributionModel" S="0.7171" M="-5.9691"/>
+	<distribution id="SigmaSqPrior" spec="beast.base.inference.distribution.Prior" x="@OUSigmaSq">
+	  <distr id="LogNormal.OUSigmaSq" spec="beast.base.inference.distribution.LogNormalDistributionModel" S="0.7171" M="-5.9691"/>
 	</distribution>
 	
-	<distribution id="RootValuePrior" spec="beast.math.distributions.Prior" x="@OURootValue">
-	  <distr id="Normal.OURootValue" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+	<distribution id="RootValuePrior" spec="beast.base.inference.distribution.Prior" x="@OURootValue">
+	  <distr id="Normal.OURootValue" spec="beast.base.inference.distribution.Normal" mean="0.0" sigma="2.0"/>
         </distribution>
 
-	<distribution id="AlphaPrior" spec="beast.math.distributions.Prior" x="@OUAlpha">
-	  <distr id="LogNormal.OUAlpha" spec="beast.math.distributions.LogNormalDistributionModel" S="0.8005" M="0.0932"/>
+	<distribution id="AlphaPrior" spec="beast.base.inference.distribution.Prior" x="@OUAlpha">
+	  <distr id="LogNormal.OUAlpha" spec="beast.base.inference.distribution.LogNormalDistributionModel" S="0.8005" M="0.0932"/>
 	</distribution>
 	
-	<distribution id="ThetaValuePrior" spec="beast.math.distributions.Prior" x="@OUTheta">
-	  <distr id="Normal.OUTheta" spec="beast.math.distributions.Normal" mean="1.0" sigma="2.0"/>
+	<distribution id="ThetaValuePrior" spec="beast.base.inference.distribution.Prior" x="@OUTheta">
+	  <distr id="Normal.OUTheta" spec="beast.base.inference.distribution.Normal" mean="1.0" sigma="2.0"/>
         </distribution>
       </distribution>
       <!-- END prior -->
 
       <!-- START likelihood -->
-      <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+      <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution" useThreads="false">
         <distribution id="GeneTree" spec="ThreadedTreeLikelihood" data="@seqs" tree="@TheTree">
           <siteModel id="JC69" spec="SiteModel">
             <parameter id="mutationRate" estimate="false" name="mutationRate">1.0</parameter>
@@ -135,14 +135,14 @@
             <substModel id="JukesCantor69" spec="JukesCantor"/>
           </siteModel>
 	  
-          <branchRateModel id="StrictClock" spec="beast.evolution.branchratemodel.StrictClockModel">
+          <branchRateModel id="StrictClock" spec="beast.base.evolution.branchratemodel.StrictClockModel">
             <parameter id="clockRate" estimate="false" name="clock.rate">0.00030172519909387</parameter>
           </branchRateModel>
         </distribution>
 
 	<distribution id="OUMVN" spec="contraband.mvnlikelihood.OUMVNLikelihoodOneTrait" eqDist="false" useRootMetaData="true">
-	  <tree id="TheTree" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="(((t38_1:110.6768615,(((t62_1:8.402457314,t23_1:8.402457314):43.68072526,t8_1:52.08318257):87.96180886,t58_1:140.0449914):134.2950777):151.641139,((((t28_1:30.45323577,(t37_1:170.0061457,t24_1:170.0061457):58.17770631):2.657249767,(t51_1:85.97746235,(t5_1:40.0874166,(t55_1:27.98729482,t19_1:27.98729482):12.10012177):116.9076956):73.84598954):117.6330956,(((t36_1:81.27797166,t22_1:81.27797166):149.6798968,(t9_1:109.3286759,((t45_1:48.48515506,t26_1:48.48515506):2.31711465,(t57_1:20.12937599,t39_1:20.12937599):30.67289373):90.98749173):89.16810703):106.7707809,(((((((t46_1:66.02540211,((t40_1:114.6485329,(t35_1:107.9418986,(t60_1:71.62144683,t29_1:71.62144683):36.32045177):6.706634278):90.00204556,t42_1:204.6505784):21.56049203):4.794403373,t7_1:231.0054738):6.758831668,t31_1:13.6271733):22.58140402,(((t13_1:55.40412166,t49_1:55.40412166):100.9075401,t12_1:39.71799205):50.66190528,((t3_1:28.90463171,((t61_1:4.32036613,t4_1:4.32036613):0.4543938556,t15_1:4.774759985):24.12987172):38.05104781,t54_1:66.95567952):140.0178875):53.37214253):6.260677542,t18_1:266.6063871):27.84173838,((((t63_1:120.9442833,(t11_1:62.41908272,(t21_1:37.61712304,t10_1:37.61712304):24.80195968):58.52520061):47.52852178,t16_1:168.4728051):81.15873417,(((t6_1:82.43666592,t34_1:10.57378172):26.56342015,(t1_1:0.2687987761,t33_1:0.2687987761):108.7312873):134.1329669,(((t14_1:43.37610458,t52_1:0.282675241):17.35930207,t32_1:60.73540666):122.9201703,t17_1:183.6555769):59.47747607):6.498486285):15.51173441,t41_1:46.34180798):29.30485177):25.63484409,t43_1:90.60222169):17.64567987):10.74554793):35.88438934,t50_1:80.16687875):41.62262139):237.195993,(((((((t25_1:37.28566659,(t48_1:13.47785539,t44_1:13.47785539):23.8078112):44.6030171,(t53_1:42.90227988,t64_1:42.90227988):38.98640381):8.508345968,t27_1:90.39702966):122.7645476,t56_1:32.69139215):22.85493336,t30_1:14.66490491):140.8275931,(t2_1:14.5881305,t20_1:14.5881305):362.2559732):107.4228518,(t59_1:115.1702261,t47_1:115.1702261):369.0967293):178.9102456):65.97080166;" offset="0" singlechild="false">
-	    <trait id="FossilSet" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
+	  <tree id="TheTree" spec="beast.base.evolution.tree.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" newick="(((t38_1:110.6768615,(((t62_1:8.402457314,t23_1:8.402457314):43.68072526,t8_1:52.08318257):87.96180886,t58_1:140.0449914):134.2950777):151.641139,((((t28_1:30.45323577,(t37_1:170.0061457,t24_1:170.0061457):58.17770631):2.657249767,(t51_1:85.97746235,(t5_1:40.0874166,(t55_1:27.98729482,t19_1:27.98729482):12.10012177):116.9076956):73.84598954):117.6330956,(((t36_1:81.27797166,t22_1:81.27797166):149.6798968,(t9_1:109.3286759,((t45_1:48.48515506,t26_1:48.48515506):2.31711465,(t57_1:20.12937599,t39_1:20.12937599):30.67289373):90.98749173):89.16810703):106.7707809,(((((((t46_1:66.02540211,((t40_1:114.6485329,(t35_1:107.9418986,(t60_1:71.62144683,t29_1:71.62144683):36.32045177):6.706634278):90.00204556,t42_1:204.6505784):21.56049203):4.794403373,t7_1:231.0054738):6.758831668,t31_1:13.6271733):22.58140402,(((t13_1:55.40412166,t49_1:55.40412166):100.9075401,t12_1:39.71799205):50.66190528,((t3_1:28.90463171,((t61_1:4.32036613,t4_1:4.32036613):0.4543938556,t15_1:4.774759985):24.12987172):38.05104781,t54_1:66.95567952):140.0178875):53.37214253):6.260677542,t18_1:266.6063871):27.84173838,((((t63_1:120.9442833,(t11_1:62.41908272,(t21_1:37.61712304,t10_1:37.61712304):24.80195968):58.52520061):47.52852178,t16_1:168.4728051):81.15873417,(((t6_1:82.43666592,t34_1:10.57378172):26.56342015,(t1_1:0.2687987761,t33_1:0.2687987761):108.7312873):134.1329669,(((t14_1:43.37610458,t52_1:0.282675241):17.35930207,t32_1:60.73540666):122.9201703,t17_1:183.6555769):59.47747607):6.498486285):15.51173441,t41_1:46.34180798):29.30485177):25.63484409,t43_1:90.60222169):17.64567987):10.74554793):35.88438934,t50_1:80.16687875):41.62262139):237.195993,(((((((t25_1:37.28566659,(t48_1:13.47785539,t44_1:13.47785539):23.8078112):44.6030171,(t53_1:42.90227988,t64_1:42.90227988):38.98640381):8.508345968,t27_1:90.39702966):122.7645476,t56_1:32.69139215):22.85493336,t30_1:14.66490491):140.8275931,(t2_1:14.5881305,t20_1:14.5881305):362.2559732):107.4228518,(t59_1:115.1702261,t47_1:115.1702261):369.0967293):178.9102456):65.97080166;" offset="0" singlechild="false">
+	    <trait id="FossilSet" spec="beast.base.evolution.tree.TraitSet" traitname="date-backward">
               t9_1=32.4610855765405,
               t52_1=43.0934293424854,
               t51_1=71.0176498745044,

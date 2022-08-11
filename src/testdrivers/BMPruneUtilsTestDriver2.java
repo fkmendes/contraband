@@ -1,8 +1,8 @@
 package testdrivers;
 
-import beast.core.parameter.IntegerParameter;
-import beast.core.parameter.RealParameter;
-import beast.util.TreeParser;
+import beast.base.inference.parameter.IntegerParameter;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.tree.TreeParser;
 import contraband.clock.RateCategoryClockModel;
 import contraband.math.MatrixUtilsContra;
 import contraband.math.NodeMath;

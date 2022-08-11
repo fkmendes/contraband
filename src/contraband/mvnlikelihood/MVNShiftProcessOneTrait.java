@@ -3,7 +3,6 @@ package contraband.mvnlikelihood;
 import java.util.List;
 import java.util.Random;
 
-import beast.core.*;
 import contraband.utils.MVNUtils;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
@@ -11,9 +10,15 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-import beast.core.Input.Validate;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.Distribution;
+import beast.base.inference.State;
+import beast.base.inference.util.InputUtil;
 
 /**
  * @author Fabio K. Mendes
@@ -178,7 +183,7 @@ public class MVNShiftProcessOneTrait extends Distribution {
 	public boolean requiresRecalculation() {
 		dirty = false;
 		
-		if (treeInput.isDirty()) {
+		if (InputUtil.isDirty(treeInput)) {
 			dirty = true;
 		}
 		

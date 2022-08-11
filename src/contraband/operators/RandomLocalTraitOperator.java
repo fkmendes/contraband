@@ -24,13 +24,13 @@
 
 package contraband.operators;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.Operator;
-import beast.core.parameter.BooleanParameter;
-import beast.core.parameter.RealParameter;
-import beast.util.Randomizer;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.Operator;
+import beast.base.inference.parameter.BooleanParameter;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.util.Randomizer;
 import contraband.clock.RandomLocalColorModel;
 
 import java.text.DecimalFormat;

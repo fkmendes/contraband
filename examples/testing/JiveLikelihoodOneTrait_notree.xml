@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<beast namespace="beast.core:beast.core.util:beast.evolution.operators:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
+<beast namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.util:beast.base.math:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
 
   <run id="mcmc" spec="MCMC" chainLength="1000000">
     <state id="state" storeEvery="10000">
@@ -7,22 +7,22 @@
       <stateNode idref="JiveMeans"/>
     </state>
 
-    <distribution id="posterior" spec="util.CompoundDistribution">
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
 
       <!-- START prior -->
-      <distribution id="prior" spec="util.CompoundDistribution">
-        <distribution id="JiveMeansPrior" spec="beast.math.distributions.Prior" x="@JiveMeans">
-	  <distr id="Unif.JiveMeans" spec="beast.math.distributions.Uniform" lower="-1E4" upper="1E4"/>
+      <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
+        <distribution id="JiveMeansPrior" spec="beast.base.inference.distribution.Prior" x="@JiveMeans">
+	  <distr id="Unif.JiveMeans" spec="beast.base.inference.distribution.Uniform" lower="-1E4" upper="1E4"/>
 	</distribution>
 
-	<distribution id="JiveLogVarsPrior" spec="beast.math.distributions.Prior" x="@JiveLogVars">
-	  <distr id="Unif.JiveLogVars" spec="beast.math.distributions.Uniform" lower="-10.0" upper="10.0"/>
+	<distribution id="JiveLogVarsPrior" spec="beast.base.inference.distribution.Prior" x="@JiveLogVars">
+	  <distr id="Unif.JiveLogVars" spec="beast.base.inference.distribution.Uniform" lower="-10.0" upper="10.0"/>
 	</distribution>
       </distribution>
       <!-- END prior -->
 
       <!-- START likelihood -->
-      <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+      <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution" useThreads="false">
 
 	<!-- START Jive -->
 	<distribution id="JiveLikelihood" spec="contraband.otherlikelihood.JiveLikelihoodOneTrait">

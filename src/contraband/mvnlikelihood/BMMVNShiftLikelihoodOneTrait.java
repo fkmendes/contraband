@@ -1,7 +1,7 @@
 package contraband.mvnlikelihood;
 
-import beast.core.Citation;
-import beast.core.Description;
+import beast.base.core.Citation;
+import beast.base.core.Description;
 import contraband.clock.TreeToVCVMat;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
@@ -9,10 +9,11 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.parameter.RealParameter;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.parameter.RealParameter;
 // import outercore.parameter.KeyRealParameter;
+import beast.base.inference.util.InputUtil;
 
 /**
  * @author Fabio K. Mendes
@@ -205,9 +206,9 @@ public class BMMVNShiftLikelihoodOneTrait extends MVNShiftProcessOneTrait {
 		boolean updateExpAtTip = false;
 		boolean updateTipValues = false;
 
-		if (treeInput.isDirty() || rateManagerInput.isDirty()) {  updateVCVMat = true; }
-		if (rootValueInput.isDirty()) { updateExpAtTip = true; }
-		if (oneTraitInput.isDirty()) { updateTipValues = true; }
+		if (InputUtil.isDirty(treeInput) || InputUtil.isDirty(rateManagerInput)) {  updateVCVMat = true; }
+		if (InputUtil.isDirty(rootValueInput)) { updateExpAtTip = true; }
+		if (InputUtil.isDirty(oneTraitInput)) { updateTipValues = true; }
 		
 		populateInstanceVars(updateVCVMat, updateExpAtTip, updateTipValues);
 		populateParentInstanceVars(updateVCVMat, updateExpAtTip);

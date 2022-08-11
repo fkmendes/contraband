@@ -3,13 +3,14 @@ package contraband.otherlikelihood;
 import java.util.List;
 import java.util.Random;
 
-import beast.core.Description;
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.State;
-import beast.core.Input.Validate;
-import beast.core.parameter.IntegerParameter;
-import beast.core.parameter.RealParameter;
+import beast.base.core.Description;
+import beast.base.inference.Distribution;
+import beast.base.core.Input;
+import beast.base.inference.State;
+import beast.base.core.Input.Validate;
+import beast.base.inference.parameter.IntegerParameter;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.util.InputUtil;
 import contraband.utils.MVNUtils;
 // import outercore.parameter.KeyRealParameter;
 
@@ -59,7 +60,7 @@ public class WNLikelihoodOneTrait extends Distribution {
 
 		// in case we ever sample tip values because of missing data, say
 		boolean updateTipValues = false;
-		if (oneTraitInput.isDirty()) { updateTipValues = true; }
+		if (InputUtil.isDirty(oneTraitInput)) { updateTipValues = true; }
 		populateSampleData(updateTipValues);
 
 		// TODO: later should add support for clocks and checking if operated on (if is dirty)

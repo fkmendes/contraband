@@ -1,12 +1,12 @@
 package contraband.prunelikelihood;
 
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.State;
-import beast.core.parameter.RealParameter;
-import beast.evolution.branchratemodel.BranchRateModel;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
+import beast.base.inference.Distribution;
+import beast.base.core.Input;
+import beast.base.inference.State;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.branchratemodel.BranchRateModel;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 import java.util.List;
 import java.util.Random;
 import contraband.math.MatrixUtilsContra;

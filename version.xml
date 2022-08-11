@@ -1,6 +1,34 @@
-<addon name="contraband" version="1.0.0">
-  <depends on="beast2" atleast="2.6.0" atmost="2.6.9"/>
-  <depends on="SA" atleast="2.0.0"/>
-  <depends on="MM" atleast="1.1.0"/>
-  <depends on="starbeast2" atleast="0.15.5"/>
+<addon name="contraband" version="1.0.1">
+	<depends on='BEAST.base' atleast='2.7.0'/>
+	<depends on='BEAST.app' atleast='2.7.0'/>
+
+
+    <service type="beast.base.core.BEASTInterface">
+        <provider classname="contraband.clock.ColorManager"/>
+        <provider classname="contraband.clock.RandomLocalColorModel"/>
+        <provider classname="contraband.clock.RateCategoryClockModel"/>
+        <provider classname="contraband.clock.TreeToVCVMat"/>
+        <provider classname="contraband.coalescent.CoalCorrection"/>
+        <provider classname="contraband.loggers.RateAndShiftLogger"/>
+        <provider classname="contraband.math.NodeMath"/>
+        <provider classname="contraband.math.Square"/>
+        <provider classname="contraband.math.UniformSoftBounds"/>
+        <provider classname="contraband.mvnlikelihood.BMMVNLikelihoodOneTrait"/>
+        <provider classname="contraband.mvnlikelihood.BMMVNShiftLikelihoodOneTrait"/>
+        <provider classname="contraband.mvnlikelihood.MVNShiftProcessOneTrait"/>
+        <provider classname="contraband.mvnlikelihood.OUMVNLikelihoodOneTrait"/>
+        <provider classname="contraband.operators.BitMoveOperator"/>
+        <provider classname="contraband.operators.RandomLocalTraitOperator"/>
+        <provider classname="contraband.otherlikelihood.JiveLikelihoodOneTrait"/>
+        <provider classname="contraband.otherlikelihood.RateCategoryIdentifiability"/>
+        <provider classname="contraband.otherlikelihood.WNLikelihoodOneTrait"/>
+        <provider classname="contraband.prunelikelihood.BMPruneLikelihood"/>
+        <provider classname="contraband.prunelikelihood.BMPruneShrinkageLikelihood"/>
+        <provider classname="contraband.valuewrappers.ManyValuesOneContTrait"/>
+        <provider classname="contraband.valuewrappers.OneValueContTraits"/>
+    </service>
+
+
+
+	
 </addon>

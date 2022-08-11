@@ -1,14 +1,15 @@
 package contraband.clock;
 
-import beast.core.Citation;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.parameter.BooleanParameter;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
-import beast.evolution.branchratemodel.BranchRateModel;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.core.Function;
+import beast.base.core.Input;
+import beast.base.inference.parameter.BooleanParameter;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.core.Log;
+import beast.base.evolution.branchratemodel.BranchRateModel;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 
 /**
  * @author Alexei Drummond
@@ -46,7 +47,7 @@ public class RandomLocalColorModel extends BranchRateModel.Base {
                     false, Input.Validate.OPTIONAL);
 
     Tree tree;
-    RealParameter meanColor;
+    Function meanColor;
     boolean scaling = true;
 
     @Override
@@ -147,7 +148,7 @@ public class RandomLocalColorModel extends BranchRateModel.Base {
 
             scaleFactor = timeTotal / branchTotal;
 
-            scaleFactor *= meanColor.getValue();
+            scaleFactor *= meanColor.getArrayValue();
         } else {
             scaleFactor = 1.0;
         }

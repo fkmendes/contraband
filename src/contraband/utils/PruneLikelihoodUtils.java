@@ -1,7 +1,7 @@
 package contraband.utils;
 
-import beast.core.parameter.RealParameter;
-import beast.evolution.tree.Tree;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.tree.Tree;
 import contraband.math.NodeMath;
 import contraband.math.MatrixUtilsContra;
 import org.apache.commons.math3.linear.MatrixUtils;

@@ -24,16 +24,16 @@
 
 package contraband.operators;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.Logger;
-import beast.core.Operator;
-import beast.core.parameter.BooleanParameter;
-import beast.core.util.Log;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.util.Randomizer;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.Logger;
+import beast.base.inference.Operator;
+import beast.base.inference.parameter.BooleanParameter;
+import beast.base.core.Log;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.util.Randomizer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -69,7 +69,7 @@ public class BitMoveOperator extends Operator {
     @Override
     public double proposal() {
 
-        final BooleanParameter p = parameterInput.get(this);
+        final BooleanParameter p = parameterInput.get();
 
         final int dim = p.getDimension();
 

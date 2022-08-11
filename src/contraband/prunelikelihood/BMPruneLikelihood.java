@@ -1,7 +1,8 @@
 package contraband.prunelikelihood;
 
-import beast.core.Description;
-import beast.core.Input;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.inference.util.InputUtil;
 import contraband.math.MatrixUtilsContra;
 import contraband.math.NodeMath;
 import contraband.utils.PruneLikelihoodUtils;
@@ -40,7 +41,7 @@ public class BMPruneLikelihood extends PruneLikelihoodProcess {
     @Override
     public double calculateLogP() {
         boolean updateTraitRateMatrix = false;
-        if(nodeMathInput.isDirty()) {
+        if(InputUtil.isDirty(nodeMathInput)) {
             // update parameters if some parameters are dirty
             updateTraitRateMatrix = getNodeMath().updateParameters();
         }

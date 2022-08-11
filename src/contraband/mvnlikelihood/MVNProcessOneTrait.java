@@ -3,8 +3,8 @@ package contraband.mvnlikelihood;
 import java.util.ArrayList;
 import java.util.List;
 
-import beast.core.Citation;
-import beast.core.Description;
+import beast.base.core.Citation;
+import beast.base.core.Description;
 import contraband.coalescent.CoalCorrection;
 import contraband.utils.MVNUtils;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -13,11 +13,12 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
+import beast.base.inference.Distribution;
+import beast.base.inference.util.InputUtil;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 
 /**
  * @author Fabio K. Mendes
@@ -221,7 +222,7 @@ public abstract class MVNProcessOneTrait extends Distribution {
 	public boolean requiresRecalculation() {
 		dirty = false;
 		
-		if (treeInput.isDirty() || rootEdgeLengthInput.isDirty() || (doCoalCorrectionInput.get() && coalCorrectionInput.isDirty())) {
+		if (InputUtil.isDirty(treeInput) || InputUtil.isDirty(rootEdgeLengthInput) || (doCoalCorrectionInput.get() && InputUtil.isDirty(coalCorrectionInput))) {
 			dirty = true;
 		}
 		

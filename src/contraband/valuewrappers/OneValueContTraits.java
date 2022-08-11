@@ -2,10 +2,11 @@ package contraband.valuewrappers;
 
 import java.util.HashMap;
 import java.util.Map;
-import beast.core.CalculationNode;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.parameter.RealParameter;
+import beast.base.inference.CalculationNode;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.util.InputUtil;
 
 public class OneValueContTraits extends CalculationNode {
 
@@ -123,7 +124,7 @@ public class OneValueContTraits extends CalculationNode {
 	 * One trait, all species (order provided by spNamesInput) 
 	 */
 	public Double[] getTraitValues(int traitIdx, String[] strings) {
-		if (traitInput.isDirty()) {
+		if (InputUtil.isDirty(traitInput)) {
 			populateSpValuesMap();
 		}
 		Double[] traitValues = new Double[nSpp]; // used by getter (same trait, different species)

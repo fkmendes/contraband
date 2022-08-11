@@ -1,8 +1,8 @@
 package testdrivers;
 
-import beast.core.parameter.RealParameter;
-import beast.evolution.tree.Tree;
-import beast.util.TreeParser;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeParser;
 import contraband.mvnlikelihood.BMMVNLikelihoodOneTrait;
 import contraband.coalescent.CoalCorrection;
 

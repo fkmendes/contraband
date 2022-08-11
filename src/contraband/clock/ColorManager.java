@@ -3,12 +3,12 @@ package contraband.clock;
 import java.util.ArrayList;
 import java.util.List;
 
-import beast.core.CalculationNode;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.evolution.branchratemodel.BranchRateModel;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
+import beast.base.inference.CalculationNode;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.evolution.branchratemodel.BranchRateModel;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 
 /*
  * DEPRECATED
