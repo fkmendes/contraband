@@ -1,12 +1,15 @@
 # contraband
 
-The 'contraband' (**cont**inuous **tra**its **b**rowni**an** mo**d**els) BEAST 2 package provides a suite of models for the study of continuous trait evolution in a Bayesian framework.
+The 'contraband' (**cont**inuous **tra**its **b**rowni**an** mo**d**els) BEAST 2 package provides a suite of models for the study of continuous trait evolution in a Bayesian framework. 
 
 ## Citation
 
 [[ref]](https://besjournals.onlinelibrary.wiley.com/doi/epdf/10.1111/2041-210X.13458) Théo Gaboriau, Fábio K. Mendes, Simon Joly, Daniele Silvestro and Nicolas Salamin (2020). A multi-platform package for the analysis of intra- and interspecific trait evolution. *Methods Ecol. Evol.*, 1-9.
 
 ## Building
+
+contraband can be installed through BEAUti or the BEAST 2 package manager.
+
 
 In order to build an executable .jar file for the *contraband* package:
 
