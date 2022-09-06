@@ -79,21 +79,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
 
         // to obtain the node information about missing data
         nodeMath.initializeNodeStatArrays();
-        for(int i = 0; i < tree.getLeafNodeCount(); i++){
-            if(nodeMath.isSpeciesToIgnore(i)){
-                Node iNode = tree.getNode(i);
-                Node iParent = iNode.getParent();
-                int iParentNr = iParent.getNr();
-                nodeMath.setNodeHasMissingData(iParentNr);
-                Node sib = iParent.getChild(0);
-                int sibNr = sib.getNr();
-                if(sibNr  == i){
-                    nodeMath.setSpeciesToIgnoreIndex(iParentNr, iParent.getChild(1).getNr());
-                } else {
-                    nodeMath.setSpeciesToIgnoreIndex(iParentNr, sibNr);
-                }
-            }
-        }
+        prune(tree.getRoot());
 
         // if using shrinkage method, 'traitValuesArr' is 'transformedTraitValues'
         // otherwise, it is original trait values.
@@ -280,6 +266,50 @@ public abstract class PruneLikelihoodProcess extends Distribution {
 
     protected double calculateLikelihood(NodeMath nodeMath, double l0, double[] m0, double r0, int rootIdx) {return 1.0;}
 
+    /*
+     * This function populates the arrays for species having missing data
+     */
+    private void prune(Node node){
+        List<Node> children = node.getChildren();
+        for (Node child : children) {
+            if(!child.isLeaf()){
+                prune(child);
+                Node c1 = child.getChild(0);
+                Node c2 = child.getChild(1);
+                // (1) an internal node having both tips to ignore
+                // -> this internal node will be ignored
+                // -> its parent will be set as a node having missing data
+                // -> indicating that its parent will get its sibling during likelihood calculation
+                if(nodeMath.isSpeciesToIgnore(c1.getNr()) && nodeMath.isSpeciesToIgnore(c2.getNr())){
+                    nodeMath.setSpeciesToIgnore(child.getNr());
+                    nodeMath.setNodeHasMissingData(node.getNr());
+
+                    Node sib = node.getChild(0);
+                    int sibNr = sib.getNr();
+                    if(sibNr  == child.getNr()){
+                        nodeMath.setSpeciesToIgnoreIndex(node.getNr(), node.getChild(1).getNr());
+                    } else {
+                        nodeMath.setSpeciesToIgnoreIndex(node.getNr(), sibNr);
+                    }
+                }
+                // (2) one of the child of the internal node is a species to ignore
+                // -> set this internal node as a node having missing data
+                // -> this internal node will get the child having data during likelihood calculation
+                if(nodeMath.isSpeciesToIgnore(c1.getNr()) && !nodeMath.isSpeciesToIgnore(c2.getNr())){
+                    nodeMath.setNodeHasMissingData(child.getNr());
+                    nodeMath.setSpeciesToIgnoreIndex(child.getNr(), c2.getNr());
+                }
+
+                if(!nodeMath.isSpeciesToIgnore(c1.getNr()) && nodeMath.isSpeciesToIgnore(c2.getNr())){
+                    nodeMath.setNodeHasMissingData(child.getNr());
+                    nodeMath.setSpeciesToIgnoreIndex(child.getNr(), c1.getNr());
+                }
+
+
+            }
+        }
+
+    }
     @Override
     public List<String> getArguments() {
         // TODO Auto-generated method stub

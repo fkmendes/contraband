@@ -32,7 +32,7 @@ public class PruneLikelihoodUtils {
             // get all traits values for this species
             Double[] traitForSpecies = traitValues.getRowValues(tree.getNode(i).getID());
             if(traitForSpecies == null) {
-                nodeMath.setSpeciesToIgnore(i);
+                nodeMath.setSpeciesToIgnoreIni(i);
             } else {
                 for (int j = 0; j < nTraits; j++) {
                     // populate the traits one by one in an array

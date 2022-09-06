@@ -103,7 +103,7 @@ public class NodeMath extends CalculationNode {
     private double detInvRhoMatrix;
     private double[] transformedTraitValues;
     private double[] storedTransformedTraitValues;
-
+    private boolean[] speciesToIgnoreIni;
     private boolean[] speciesToIgnoreMissingData;//tip nodes that do not have continuous data
     private int[] speciesToIgnoreIndex;//tip node index of parent node
     private boolean[] nodeAsTip;
@@ -123,6 +123,7 @@ public class NodeMath extends CalculationNode {
             nSpecies = traitsValues.getMinorDimension2();
         }
         speciesToIgnoreMissingData = new boolean[2 * nSpecies - 1];
+        speciesToIgnoreIni = new boolean[2 * nSpecies - 1];
         speciesToIgnoreIndex = new int[2 * nSpecies - 1];
         nodeAsTip = new boolean[2 * nSpecies - 1];
         //storedNodeAsTip = new boolean[2 * nSpecies - 1];
@@ -238,6 +239,7 @@ public class NodeMath extends CalculationNode {
     }
 
     public void initializeNodeStatArrays(){
+        System.arraycopy(speciesToIgnoreIni, 0, speciesToIgnoreMissingData, 0, 2 * nSpecies - 1) ;
         speciesToIgnoreIndex = new int[2 * nSpecies - 1];
         nodeAsTip = new boolean[2 * nSpecies - 1];
         nodeVariance = new double [nodeNr];
@@ -388,6 +390,10 @@ public class NodeMath extends CalculationNode {
 
     public void setSpeciesToIgnore(int nodeNr) {
         speciesToIgnoreMissingData[nodeNr] = true;
+    }
+
+    public void setSpeciesToIgnoreIni(int nodeNr) {
+        speciesToIgnoreIni[nodeNr] = true;
     }
 
     public void setSpeciesToIgnoreIndex(int parent, int child) {
@@ -667,7 +673,7 @@ public class NodeMath extends CalculationNode {
         RealMatrix transformedTraitsMat = traitMat.multiply(dataTransformMat);
         int index = 0;
         for (int j = 0; j < nSpecies; j++) {
-            if(!speciesToIgnoreMissingData[j]) {
+            if(!speciesToIgnoreIni[j]) {
                 System.arraycopy(transformedTraitsMat.getRow(index), 0, transformedTraitValues, j * nTraits, nTraits);
                 index ++;
             }
