@@ -99,6 +99,7 @@ public class NodeMath extends CalculationNode {
     private RealMatrix unbiasedRhoRM;
     private RealMatrix identityRM;
     private RealMatrix traitRateRM;
+    private RealMatrix storedTraitRateRM;
     private RealMatrix shrinkageRhoRM;
     private double detRhoMatrix;
     private double detInvRhoMatrix;
@@ -150,6 +151,7 @@ public class NodeMath extends CalculationNode {
         // initialize real matrix
         identityRM = MatrixUtils.createRealIdentityMatrix(nTraits);
         traitRateRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
+        storedTraitRateRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         shrinkageRhoRM = new Array2DRowRealMatrix(new double[nTraits][nTraits]);
         transformedTraitValues = new double[nSpecies * nTraits];
         storedTransformedTraitValues = new double[nSpecies * nTraits];
@@ -654,9 +656,8 @@ public class NodeMath extends CalculationNode {
 
     // This method populates determinant based on Rho matrix
     public void populateInverseTraitRateMatrix () {
-        double sigmasq = sigmasqInput.get().getValue();
-        detTraitRateMat = Math.log(detRhoMatrix) + nTraits * FastMath.log(sigmasq);
-        detInvTraitRateMat = Math.log(detInvRhoMatrix) + nTraits * FastMath.log(1 / sigmasq);
+        detTraitRateMat = Math.log(detRhoMatrix) + nTraits * FastMath.log(sigmaValue);
+        detInvTraitRateMat = Math.log(detInvRhoMatrix) + nTraits * FastMath.log(1 / sigmaValue);
     }
 
     // This method transforms original data set so that traits are independent of each other
@@ -703,7 +704,10 @@ public class NodeMath extends CalculationNode {
         System.arraycopy(rootValuesVec, 0, storedRootValuesVec, 0, nTraits);
 
         // shrinkage only
-        System.arraycopy(transformedTraitValues, 0, storedTransformedTraitValues, 0, nSpecies * nTraits);
+        if(useShrinkage) {
+            System.arraycopy(transformedTraitValues, 0, storedTransformedTraitValues, 0, nSpecies * nTraits);
+            storedTraitRateRM = traitRateRM.copy();
+        }
 /*
         System.arraycopy(nodeAsTip, 0, storedNodeAsTip, 0, 2 * nSpecies - 1);
         System.arraycopy(speciesToIgnoreIndex, 0, storedSpeciesToIgnoreIndex, 0, 2 * nSpecies - 1);
@@ -752,9 +756,15 @@ public class NodeMath extends CalculationNode {
         storedRhoValues = tempRhoValues;
 
         // shrinkage only
-        double[] tempTraitValuesArrayList = transformedTraitValues;
-        transformedTraitValues = storedTransformedTraitValues;
-        storedTransformedTraitValues = tempTraitValuesArrayList;
+        if(useShrinkage) {
+            double[] tempTraitValuesArrayList = transformedTraitValues;
+            transformedTraitValues = storedTransformedTraitValues;
+            storedTransformedTraitValues = tempTraitValuesArrayList;
+
+            RealMatrix tempTraitRateRM = traitRateRM;
+            traitRateRM = storedTraitRateRM;
+            storedTraitRateRM = tempTraitRateRM;
+        }
 
 /*
         int[] tempSpeciesToIgnoreIndex = speciesToIgnoreIndex;

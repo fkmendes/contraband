@@ -34,6 +34,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
     private NodeMath nodeMath;
 
     private double[] traitValuesArr;
+    private double[] storedTraitValuesArr;
 
     private boolean popSE;
 
@@ -54,6 +55,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         nSpeciesWithData = traitsValues.getMinorDimension2();
         nSpecies = tree.getLeafNodeCount();
         traitValuesArr = new double[nSpecies * nTraits];
+        storedTraitValuesArr = new double[nSpecies * nTraits];
 
         // check input
         if (nodeMathInput.get() == null) {
@@ -137,7 +139,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
     public void setPopSE (boolean value) { popSE = value; }
 
     public void setTraitValuesArr (double[] values) {
-        traitValuesArr = values;
+        System.arraycopy(values, 0, traitValuesArr, 0, nSpecies * nTraits);
     }
 
     public void pruneNode(Node node, int nTraits, double[] traitValuesArr,
@@ -273,6 +275,22 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         nodeMath.setLForNode(thisNodeIdx, thisNodeL);
         nodeMath.setMVecForNode(thisNodeIdx, thisNodeMVec);
         nodeMath.setRForNode(thisNodeIdx, thisNodeR);
+    }
+
+    @Override
+    public void store() {
+
+        System.arraycopy(traitValuesArr, 0, storedTraitValuesArr, 0, nSpecies * nTraits);
+        super.store();
+    }
+
+    @Override
+    public void restore() {
+        double[] tempTraitArr = traitValuesArr;
+        traitValuesArr = storedTraitValuesArr;
+        storedTraitValuesArr = tempTraitArr;
+
+        super.restore();
     }
 
     protected void calculateLmrForTips(NodeMath nodeMath, double[] traitValuesArr, int nTraits, int nodeIdx) {}
