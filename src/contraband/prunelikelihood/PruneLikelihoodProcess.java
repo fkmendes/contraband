@@ -94,7 +94,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
                 }
             }
         }
-
+        nodeMath.setSingularMatrix(false);
         // if using shrinkage method, 'traitValuesArr' is 'transformedTraitValues'
         // otherwise, it is original trait values.
         pruneNode(tree.getRoot(), nTraits, traitValuesArr, branchRateModel, nodeMath, popSE);
@@ -161,6 +161,7 @@ public abstract class PruneLikelihoodProcess extends Distribution {
             }
 
             double branchLength = child.getLength() * pcmc.getRateForBranch(child);
+            if(branchLength < 1.0E-6) {nodeMath.setSingularMatrix(true);}
             nodeMath.setVarianceForTip(childIdx, branchLength);
 
             // (1) child is a normal tip

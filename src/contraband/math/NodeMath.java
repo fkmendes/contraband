@@ -493,6 +493,10 @@ public class NodeMath extends CalculationNode {
         detTraitRateMat = FastMath.log(det);
     }
 
+    public void setSingularMatrix(boolean value){
+        singularMatrix = value;
+    }
+
     /*
      * This method implements LUDecomposition
      * and calculates determinant of inverse trait rate matrix.

@@ -94,6 +94,8 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
         return getLogP();
     }
 
+
+
     private RealMatrix populationTraitMatrix(RealParameter traitsValues){
         int nTraits = traitsValues.getMinorDimension1();
         int nSpecies = traitsValues.getMinorDimension2();
