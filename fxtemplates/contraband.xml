@@ -79,7 +79,7 @@
 			contraband.prunelikelihood.BMPruneLikelihood.branchratemodel,
 			contraband.prunelikelihood.BMPruneLikelihood.nodeMath,
 			contraband.prunelikelihood.BMPruneLikelihood.includeRoot,
-			contraband.prunelikelihood.BMPruneLikelihood.nodeMath.traits,
+
 			contraband.prunelikelihood.BMPruneLikelihood.nodeMath.sigmasq,
             contraband.prunelikelihood.BMPruneLikelihood.nodeMath.correlation,
 			contraband.prunelikelihood.BMPruneLikelihood.nodeMath.rootValues"
@@ -139,7 +139,8 @@ contraband/Operators/=Standard/Operators/,
 contraband/Priors/=Standard/Priors/,
 contraband/MCMC/=Standard/MCMC/,
 contraband/Partitions/=Standard/Partitions/,
-contraband/math/nodeMath,
+contraband/math/nodeMath/,
+contraband/math/nodeMath/traits/,
 contraband/prunelikelihood/BMPruneLikelihood,
 contraband/Initialization/=Standard/Initialization/,
 contraband/Starting_tree/=Standard/Starting_tree/,
@@ -208,12 +209,18 @@ ClusterTree/clusterType//'>
 		<panel spec="beastfx.app.inputeditor.BeautiPanelConfig" panelname="MCMC" tiptext="MCMC parameters"
 			   path="" hasPartitions="none" icon="9.pngx" forceExpansion="TRUE"/>
 		<mergepoint id="aux-bm-panels"/>
-		
 
+		<panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname="Initialization" tiptext="Initial state"
+			   path='state/stateNode'
+			   hasPartitions="none" icon='6.png.x' forceExpansion='TRUE_START_COLLAPSED'
+			   isVisible='false'
+		/>
+		<mergepoint id='aux-bm-initilisation-panels'/>
 
 		<alignmentProvider id="Add Continuous Data" spec="contraband.app.beauti.BeautiContrabandAlignmentProvider" template="@contTrait"/>
 
 		<subtemplate id='contTrait' class='beast.base.evolution.alignment.FilteredAlignment' mainid='$(n)'
+					 hmc="contraband/math/NodeMath/traits/"
 		>
 			<![CDATA[
 			<tree id="Tree.t:$(n)" name="stateNode">
@@ -226,21 +233,17 @@ ClusterTree/clusterType//'>
 				<shape               spec='parameter.RealParameter' id='gammaShape.s:$(n)' value='1.0' lower='0.1' estimate='false'/>
 			</plugin>
 
-			<plugin id="pcmNodeMath.c:$(n)" spec="contraband.math.NodeMath" traits="@oneTraitData">
+			<plugin id="pcmNodeMath.c:$(n)" spec="contraband.math.NodeMath" traits="@oneTraitData.t:$(n)" tree="@Tree.t:$(n)">
             	<sigmasq id="varValues.t:$(n)" spec="parameter.RealParameter">1.0</sigmasq>
             	<correlation id="covValues.t:$(n)" spec="parameter.RealParameter" lower='-1.0' upper='1.0'>0.1</correlation>
                 <rootValues id="rootValues.t:$(n)" spec="parameter.RealParameter">0.0</rootValues>
             </plugin>
 
-            <plugin spec='beast.base.evolution.tree.coalescent.RandomTree' id='RandomTree.t:$(n)' estimate='false' initial='@Tree.t:$(n)'>
-                <taxa idref='$(n)'/>
-                <populationModel id='ConstantPopulation0.t:$(n)' spec='ConstantPopulation'>
-            		<popSize id='randomPopSize.t:$(n)' spec='parameter.RealParameter' value='1'/>
-	            </populationModel>
-            </plugin>
-
             <plugin spec='YuleModel' id="YuleModel.t:$(n)" tree='@Tree.t:$(n)'>
                 <parameter name='birthDiffRate' id="birthRate.t:$(n)" lower="0.0" value='1.0' estimate='true'/>
+            </plugin>
+
+            <plugin id="oneTraitData.t:$(n)" spec="parameter.RealParameter" minordimension="1" keys="1" value='1'>
             </plugin>
 
 			<distribution spec='contraband.prunelikelihood.BMPruneLikelihood' id="contTreeLikelihood.$(n)">
@@ -248,9 +251,7 @@ ClusterTree/clusterType//'>
             <siteModel idref="SiteModel.s:$(n)"/>
             <tree idref="Tree.t:$(n)"/>
             <nodeMath idref="pcmNodeMath.c:$(n)"/>
-    		<traits id="oneTraitData" spec="parameter.RealParameter" minordimension="1" keys="Aelurodon_ferox_13.135 Canis_dirus_0.0285 Epicyon_haydeni_11.95 Hesperocyon_gregarius_35.55 Paraenhydrocyon_josephi_25.615 Tomarctus_hippophaga_14.785 Enhydrocyon_pahinsintewakpa_28.55 Cuon_alpinus_0.0	Speothos_venaticus_0.0 Canis_lupus_0.0 Cerdocyon_thous_0.0 Otocyon_megalotis_0.0 Vulpes_vulpes_0.0 Ursus_americanus_0.0 Ailurus_fulgens_0.0 Nandinia_binotata_0.0 Paradoxurus_hermaphroditus_0.0 Hyaenictitherium_wongii_6.65 Smilodon_fatalis_0.0285">
-                    -0.432903665204275 2.92196906278985 -1.55412737943192 2.70418286048809 -1.88985983258794 1.95736899616511 -0.432903665204275 2.92196906278985 -1.55412737943192 2.70418286048809 -1.88985983258794 1.95736899616511 -0.432903665204275 2.92196906278985 -1.55412737943192 2.70418286048809 -1.88985983258794 2.70418286048809 -1.88985983258794
-            </traits>
+    		<traits idref="oneTraitData.t:$(n)"/>
             <branchRateModel spec='StrictClockModel' id='StrictClock.c:$(n)'>
                <clock.rate id='clockRate.c:$(n)' spec='parameter.RealParameter' lower="0.0" value='1.0' estimate='false'/>
             </branchRateModel>
@@ -269,6 +270,7 @@ ClusterTree/clusterType//'>
             <operator id='YuleModelWide.t:$(n)' spec='Exchange' isNarrow='false' weight="3" tree="@Tree.t:$(n)"/>
             <operator id='YuleModelWilsonBalding.t:$(n)' spec='WilsonBalding' weight="3" tree="@Tree.t:$(n)"/>
 
+    		<operator id='YuleBirthRateScaler.t:$(n)' spec='kernel.BactrianScaleOperator' scaleFactor="0.75" weight="3" parameter="@birthRate.t:$(n)"/>
 			<operator id="varValuesScaler.t:$(n)" spec='kernel.BactrianScaleOperator' scaleFactor="0.5" weight="10.0" parameter="@varValues.t:$(n)"/>
         	<operator id="covValuesScaler.t:$(n)" spec='kernel.BactrianScaleOperator' scaleFactor="0.5" weight="10.0" parameter="@covValues.t:$(n)"/>
         	<operator id="rootValuesScaler.t:$(n)" spec='kernel.BactrianScaleOperator' scaleFactor="0.5" weight="10.0" parameter="@rootValues.t:$(n)"/>
@@ -280,9 +282,27 @@ ClusterTree/clusterType//'>
 			</operator>
 
    			<prior id='YuleBirthRatePrior.t:$(n)' x='@birthRate.t:$(n)'><distr spec="beast.base.inference.distribution.Uniform" lower='0' upper='Infinity'/></prior>
-			<prior id="varValuesPrior.t:$(n)" x="@varValues.t:$(n)"><distr spec="beast.base.inference.distribution.LogNormalDistributionModel" S="0.5" M="0.2"/></prior>
-			<prior id="covValuesPrior.t:$(n)" x="@covValues.t:$(n)"><distr spec="beast.base.inference.distribution.Beta" alpha='2.0' beta='2.0'/></prior>
-			<prior id="rootValuesPrior.t:$(n)" x="@rootValues.t:$(n)"><distr spec="beast.base.inference.distribution.Normal" mean="0.0" sigma="0.5"/></prior>
+
+			<prior id="varValuesPrior.t:$(n)" name="distribution" x="@varValues.t:$(n)">
+    			<LogNormal meanInRealSpace="false" name="distr">
+        			<M spec="parameter.RealParameter" estimate="false">0.2</M>
+        			<S spec="parameter.RealParameter" estimate="false">0.5</S>
+	    		</LogNormal>
+    		</prior>
+
+			<prior id="covValuesPrior.t:$(n)" name="distribution" x="@covValues.t:$(n)">
+        		<distr spec="beast.base.inference.distribution.Beta">
+            		<parameter name='alpha' value="2.0" estimate='false'/>
+            		<parameter name='beta' value="2.0" estimate='false'/>
+        		</distr>
+    		</prior>
+
+			<prior id="rootValuesPrior.t:$(n)" name="distribution" x="@rootValues.t:$(n)">
+        		<distr spec="beast.base.inference.distribution.Normal">
+            		<parameter name='mean' value="0.0" estimate='false'/>
+            		<parameter name='sigma' value="0.5" estimate='false'/>
+        		</distr>
+    		</prior>
 
 			<logger id='treelog.t:$(n)' spec='beast.base.inference.Logger' logEvery="10000" fileName="$(tree).trees" mode='tree'>
 				<log id='TreeWithMetaDataLogger.t:$(n)' spec='beast.base.evolution.TreeWithMetaDataLogger' tree='@Tree.t:$(n)'>
@@ -290,24 +310,24 @@ ClusterTree/clusterType//'>
 			</logger>
 		]]>
 			<connect srcID="contTreeLikelihood.$(n)" targetID="likelihood" inputName="distribution" if="isInitializing"/>
-			<connect srcID='YuleModel.t:$(n)'               targetID='prior' inputName='distribution' if="isInitializing"/>
+			<connect srcID='YuleModel.t:$(n)'        targetID='prior' inputName='distribution' if="isInitializing"/>
 
-			<connect srcID='treelog.t:$(n)'                 targetID='mcmc' inputName='logger' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'/>
-			<connect srcID='RandomTree.t:$(n)'                targetID='mcmc' inputName='init'   if='isInitializing'/>
+			<connect srcID='treelog.t:$(n)'          targetID='mcmc' inputName='logger' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'/>
+			<connect srcID='RandomTree.t:$(n)'       targetID='mcmc' inputName='init'   if='isInitializing'/>
 			<connect method="beastfx.app.beauti.StateNodeInitialiserListInputEditor.customConnector"/>
 
-			<connect srcID='ClockPrior.c:$(n)'                targetID='prior' inputName='distribution' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
-			<connect srcID='YuleBirthRatePrior.t:$(n)'        targetID='prior' inputName='distribution' if='inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and birthRate.t:$(n)/estimate=true'>Prior on Yule birth rate for partition s:$(n)</connect>
-			<connect srcID='varValuesPrior.t:$(n)'        targetID='prior' inputName='distribution' if='inposterior(contTreeLikelihood.$(n)) and inposterior(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'>Prior on Yule birth rate for partition s:$(n)</connect>
-			<connect srcID='covValuesPrior.t:$(n)'        targetID='prior' inputName='distribution' if='inposterior(contTreeLikelihood.$(n)) and inposterior(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'>Prior on Yule birth rate for partition s:$(n)</connect>
-			<connect srcID='rootValuesPrior.t:$(n)'        targetID='prior' inputName='distribution' if='inposterior(contTreeLikelihood.$(n)) and inposterior(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'>Prior on Yule birth rate for partition s:$(n)</connect>
+			<connect srcID='ClockPrior.c:$(n)'            targetID='prior' inputName='distribution' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
+			<connect srcID='YuleBirthRatePrior.t:$(n)'    targetID='prior' inputName='distribution' if='inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and birthRate.t:$(n)/estimate=true'>Prior on Yule birth rate for partition s:$(n)</connect>
+			<connect srcID='varValuesPrior.t:$(n)'        targetID='prior' inputName='distribution' if='inposterior(contTreeLikelihood.$(n)) and inposterior(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'>Prior on trait evolutionary rate for partition s:$(n)</connect>
+			<connect srcID='covValuesPrior.t:$(n)'        targetID='prior' inputName='distribution' if='inposterior(contTreeLikelihood.$(n)) and inposterior(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'>Prior on trait correlations for partition s:$(n)</connect>
+			<connect srcID='rootValuesPrior.t:$(n)'       targetID='prior' inputName='distribution' if='inposterior(contTreeLikelihood.$(n)) and inposterior(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'>Prior on trait root values for partition s:$(n)</connect>
 
-			<connect srcID='Tree.t:$(n)'                      targetID='state' inputName='stateNode' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'/>
-			<connect srcID='clockRate.c:$(n)'                 targetID='state' inputName='stateNode' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
-			<connect srcID='birthRate.t:$(n)'                 targetID='state' inputName='stateNode' if='inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and birthRate.t:$(n)/estimate=true'/>
-			<connect srcID='varValues.t:$(n)'                 targetID='state' inputName='stateNode' if='inlikelihood(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'/>
-			<connect srcID='covValues.t:$(n)'                 targetID='state' inputName='stateNode' if='inlikelihood(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'/>
-			<connect srcID='rootValues.t:$(n)'                 targetID='state' inputName='stateNode' if='inlikelihood(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'/>
+			<connect srcID='Tree.t:$(n)'                  targetID='state' inputName='stateNode' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'/>
+			<connect srcID='clockRate.c:$(n)'             targetID='state' inputName='stateNode' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
+			<connect srcID='birthRate.t:$(n)'             targetID='state' inputName='stateNode' if='inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and birthRate.t:$(n)/estimate=true'/>
+			<connect srcID='varValues.t:$(n)'             targetID='state' inputName='stateNode' if='inlikelihood(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'/>
+			<connect srcID='covValues.t:$(n)'             targetID='state' inputName='stateNode' if='inlikelihood(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'/>
+			<connect srcID='rootValues.t:$(n)'            targetID='state' inputName='stateNode' if='inlikelihood(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'/>
 
 			<connect srcID='StrictClockRateScaler.c:$(n)'     targetID='mcmc' inputName='operator' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'>Scale clock rate of partition c:$(n)</connect>
 			<connect srcID='YuleBirthRateScaler.t:$(n)'       targetID='mcmc' inputName='operator' if='inposterior(birthRate.t:$(n)) and birthRate.t:$(n)/estimate=true'>Scales birth rate of Yule prior for partition t:$(n)</connect>
@@ -315,8 +335,8 @@ ClusterTree/clusterType//'>
 					 if='inlikelihood(clockRate.c:$(n)) and inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and clockRate.c:$(n)/estimate=true'>
 				Scale up substitution rate c:$(n) and scale down tree t:($n)
 			</connect>
-			<connect srcID='varValuesScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inlikelihood(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'>Scales trait evolutionary rates</connect>
-			<connect srcID='covValuesScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inlikelihood(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'>Scales trait correlations</connect>
+			<connect srcID='varValuesScaler.t:$(n)'  targetID='mcmc' inputName='operator' if='inlikelihood(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'>Scales trait evolutionary rates</connect>
+			<connect srcID='covValuesScaler.t:$(n)'  targetID='mcmc' inputName='operator' if='inlikelihood(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'>Scales trait correlations</connect>
 			<connect srcID='rootValuesScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inlikelihood(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'>Scales trait values at root of tree $(n)</connect>
 
 			<connect srcID='allTipDatesRandomWalker.t:$(n)'   targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and allTipDatesRandomWalker.t:$(n)/weight!=0.0'>Estimates tip dates for tree t:$(n)</connect>
@@ -335,9 +355,9 @@ ClusterTree/clusterType//'>
 			<connect srcID='clockRate.c:$(n)'                 targetID='tracelog' inputName='log' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
 			<connect srcID='YuleModel.t:$(n)'                 targetID='tracelog' inputName='log' if='inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'/>
 			<connect srcID='birthRate.t:$(n)'                 targetID='tracelog' inputName='log' if='inposterior(YuleModel.t:$(n)) and birthRate.t:$(n)/estimate=true'/>
-			<connect srcID='varValuesScaler.t:$(n)' 		  targetID='tracelog' inputName='log' if='inlikelihood(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'/>
-			<connect srcID='covValuesScaler.t:$(n)' 		  targetID='tracelog' inputName='log' if='inlikelihood(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'/>
-			<connect srcID='rootValuesScaler.t:$(n)' 	      targetID='tracelog' inputName='log' if='inlikelihood(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'/>
+			<connect srcID='varValues.t:$(n)' 		  		  targetID='tracelog' inputName='log' if='inlikelihood(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'/>
+			<connect srcID='covValues.t:$(n)' 		  		  targetID='tracelog' inputName='log' if='inlikelihood(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'/>
+			<connect srcID='rootValues.t:$(n)' 	              targetID='tracelog' inputName='log' if='inlikelihood(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'/>
 
 		</subtemplate>
 
@@ -354,6 +374,17 @@ ClusterTree/clusterType//'>
 		<mergepoint id='clockModelTemplates'/>
 		<mergepoint id='treePriorTemplates'/>
 		<mergepoint id='parametricDistributions'/>
+
+		<subtemplate id='RandomTree' class='beast.base.evolution.tree.coalescent.RandomTree' mainid='RandomTree.t:$(n)'>
+			<![CDATA[
+            <tree spec='beast.base.evolution.tree.coalescent.RandomTree' id='RandomTree.t:$(n)' estimate='false' initial="@Tree.t:$(n)">
+                <taxa idref='data'/>
+                <populationModel id='ConstantPopulation0.t:$(n)' spec='ConstantPopulation'>
+            		<popSize id='randomPopSize.t:$(n)' spec='parameter.RealParameter' value='1'/>
+	            </populationModel>
+            </tree>
+			]]>
+		</subtemplate>
 
 		<subtemplate id='MCMC' class='beast.base.inference.MCMC' mainid='mcmc'
 					 suppressInputs='
