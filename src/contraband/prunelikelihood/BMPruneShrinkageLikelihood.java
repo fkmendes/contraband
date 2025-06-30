@@ -1,6 +1,7 @@
 package contraband.prunelikelihood;
 
 import beast.base.core.Input;
+import beast.base.evolution.tree.Tree;
 import beast.base.inference.State;
 import beast.base.inference.parameter.RealParameter;
 import contraband.math.MatrixUtilsContra;
@@ -36,7 +37,9 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
 
         // the real matrix that has the trait values for species
         traitRM = new Array2DRowRealMatrix(new double[getNumberOfSpeciesWithData()][getNTraits()]);
-        PruneLikelihoodUtils.populateTraitValuesMatrix(traitsValuesInput.get(), treeInput.get(), getNTraits(), traitRM);
+        //PruneLikelihoodUtils.populateTraitValuesMatrix(traitsValuesInput.get(), (Tree) treeInput.get(), getNTraits(), traitRM);
+        PruneLikelihoodUtils.populateTraitValuesMatrix(dataInput.get(), getNTraits(), (Tree) treeInput.get(), traitRM);
+
 
         if (includePopVarInput.get()) {
             /*

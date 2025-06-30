@@ -2,6 +2,9 @@
 	<depends on='BEAST.base' atleast='2.7.0'/>
 	<depends on='BEAST.app' atleast='2.7.0'/>
 
+    <service type="beastfx.app.inputeditor.InputEditor">
+        <provider classname="contraband.app.beauti.BMModelInputEditor"/>
+    </service>
 
     <service type="beast.base.core.BEASTInterface">
         <provider classname="contraband.clock.ColorManager"/>
@@ -26,6 +29,9 @@
         <provider classname="contraband.prunelikelihood.BMPruneShrinkageLikelihood"/>
         <provider classname="contraband.valuewrappers.ManyValuesOneContTrait"/>
         <provider classname="contraband.valuewrappers.OneValueContTraits"/>
+        <provider classname="contraband.app.beauti.BeautiContrabandAlignmentProvider"/>
+        <provider classname="contraband.app.beauti.ContinuousData"/>
+        <provider classname="contraband.app.beauti.ContDataParser"/>
     </service>
 
 

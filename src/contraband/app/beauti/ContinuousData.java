@@ -79,35 +79,20 @@ public class ContinuousData extends DataType.Base {
         data = data.replaceAll("\\s", "");
 
         ArrayList<Integer> amb = new ArrayList<>();
-        boolean readingAmb=false;
+        String ambStr = "";
         for (byte c : data.getBytes()) {
-            if (!readingAmb) {
-                switch (c) {
-                    case GAP_CHAR:
-                    case MISSING_CHAR:
-                        String missing = Character.toString(MISSING_CHAR);
-                        sequence.add(codeMapping.indexOf(missing));
-                        break;
-                    case '{':
-                        readingAmb = true;
-                        amb.clear();
-                        break;
-                    default:
-                        sequence.add(Integer.parseInt((char) c + ""));
-                }
-            } else {
-                if (c != '}') {
-                    amb.add(Integer.parseInt((char) c + "") );
-                } else {
-                    readingAmb = false;
-                    String ambStr = "";
-                    for (Integer a : amb) {
-                        ambStr += Integer.toString(a);
-                    }
-                    int x = codeMapping.indexOf(ambStr);
-                    sequence.add(codeMapping.indexOf(ambStr));
-                }
+            if(c == '{') {
+                ambStr = "";
+                amb.clear();
 
+            } else if (c == '}') {
+                amb.clear();
+                int a = codeMapping.indexOf(ambStr);
+                sequence.add(codeMapping.indexOf(ambStr));
+                ambStr = "";
+            } else {
+                ambStr += (char) c;
+                //sequence.add(Integer.parseInt((char) c + ""));
             }
 
         }

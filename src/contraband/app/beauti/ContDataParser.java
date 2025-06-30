@@ -67,7 +67,7 @@ public class ContDataParser {
     public Alignment parseDataBlock(final BufferedReader fin) throws IOException {
         taxa = new ArrayList<>();
         final Alignment alignment = new Alignment();
-        alignment.dataTypeInput.setValue("continuous", alignment);
+        alignment.dataTypeInput.setValue("user defined", alignment);
         ContinuousData type = new ContinuousData();
         type.setInputValue("nrOfStates", charNr);
         type.initAndValidate();

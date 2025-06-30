@@ -51,29 +51,29 @@ public class BMModelInputEditor extends BEASTObjectInputEditor {
 	}
 
 
-	public InputEditor createTraitsEditor() {
-		NodeMath nodeMath = ((NodeMath) m_input.get());
+	//public InputEditor createTraitsEditor() {
+		//NodeMath nodeMath = ((NodeMath) m_input.get());
 
-        final Input<?> input = nodeMath.traitsValuesInput;
-		traitsEditor = new ParameterInputEditor(doc);
+        //final Input<?> input = nodeMath.traitsValuesInput;
+		//traitsEditor = new ParameterInputEditor(doc);
 
-		traitsEditor.init(input, nodeMath, -1, ExpandOption.TRUE, true);
-		traitsEntry = traitsEditor.getEntry();
-		traitsEntry.setOnKeyReleased(e -> processEntry2());
+		//traitsEditor.init(input, nodeMath, -1, ExpandOption.TRUE, true);
+		//traitsEntry = traitsEditor.getEntry();
+		//traitsEntry.setOnKeyReleased(e -> processEntry2());
 
-		traitsEditor.validateInput();
-		return traitsEditor;
-	}
+		//traitsEditor.validateInput();
+		//return traitsEditor;
+	//}
 
-	void processEntry2() {
-		String[] traitValues = new String[]{traitsEntry.getText()};
-		try {
-			Double categoryCount = Double.parseDouble(traitValues[0]);
-			NodeMath s = (NodeMath) m_input.get();
-			s.getInput("traits").setValue(categoryCount, s);
-			repaint();
-		} catch (java.lang.NumberFormatException e) {
+	//void processEntry2() {
+		//String[] traitValues = new String[]{traitsEntry.getText()};
+		//try {
+			//Double categoryCount = Double.parseDouble(traitValues[0]);
+			//NodeMath s = (NodeMath) m_input.get();
+			//s.getInput("traits").setValue(categoryCount, s);
+			//repaint();
+		//} catch (java.lang.NumberFormatException e) {
 			// ignore.
-		}
-	}
+		//}
+	//}
 }

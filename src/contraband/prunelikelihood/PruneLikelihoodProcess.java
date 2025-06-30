@@ -1,5 +1,7 @@
 package contraband.prunelikelihood;
 
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
 import beast.base.inference.Distribution;
 import beast.base.core.Input;
 import beast.base.inference.State;
@@ -14,11 +16,11 @@ import contraband.math.NodeMath;
 import contraband.utils.PruneLikelihoodUtils;
 
 
-public abstract class PruneLikelihoodProcess extends Distribution {
-    final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Input.Validate.REQUIRED);
-    final public Input<BranchRateModel.Base> branchRateModelInput = new Input<>("branchRateModel", "the rate or optimum on each branch");
+public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
+    //final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.", Input.Validate.REQUIRED);
+    //final public Input<BranchRateModel.Base> branchRateModelInput = new Input<>("branchRateModel", "the rate or optimum on each branch");
     final public Input<NodeMath> nodeMathInput = new Input<>("nodeMath","Node information that will be used in PCM likelihood calculation.", Input.Validate.REQUIRED);
-    final public Input<RealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+    //final public Input<RealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     //final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
 
 
@@ -41,19 +43,22 @@ public abstract class PruneLikelihoodProcess extends Distribution {
     @Override
     public void initAndValidate() {
         super.initAndValidate();
+        processContinuousAlignment();
 
         // get the tree
-        tree = treeInput.get();
+        tree = (Tree) treeInput.get();
+        nSpecies = tree.getLeafNodeCount();
+
 
         // get clock model
         branchRateModel = branchRateModelInput.get();
 
         // get the trait values for tips
         // and make a list of real vectors
-        traitsValues = traitsValuesInput.get();
-        nTraits = traitsValues.getMinorDimension1();
-        nSpeciesWithData = traitsValues.getMinorDimension2();
-        nSpecies = tree.getLeafNodeCount();
+        //traitsValues = traitsValuesInput.get();
+        //nTraits = traitsValues.getMinorDimension1();
+        //nSpeciesWithData = traitsValues.getMinorDimension2();
+
         traitValuesArr = new double[nSpecies * nTraits];
         storedTraitValuesArr = new double[nSpecies * nTraits];
 
@@ -67,6 +72,44 @@ public abstract class PruneLikelihoodProcess extends Distribution {
         // each species has nTraits in the array
         //PruneLikelihoodUtils.populateTraitValuesArr(traitsValues, tree, nTraits, traitValuesArr);
         PruneLikelihoodUtils.populateTraitValuesArr(traitsValues, tree, nodeMath, nTraits, traitValuesArr);
+    }
+
+    protected void processContinuousAlignment() {
+        Alignment aln = dataInput.get();
+        List<String> taxaNames = aln.getTaxaNames();
+        nTraits = aln.getMaxStateCount();
+        nSpeciesWithData = aln.getTaxonCount();
+        final Double[] traits = new Double[nTraits * nSpeciesWithData];
+
+        final StringBuilder traitValues = new StringBuilder();
+        final StringBuilder taxonSet = new StringBuilder();
+
+        int k = 0;
+        for(String taxon : taxaNames){
+            if(k == 0) {
+                taxonSet.append(taxon);
+            } else {
+                taxonSet.append(" ").append(taxon);
+            }
+
+            String taxonStr = aln.getSequenceAsString(taxon);
+            String[] strSplit = taxonStr.split(",");
+
+            for(int i = 0; i < strSplit.length; i++){
+                traits[k] = Double.parseDouble(strSplit[i]);
+
+                if(k == 0) {
+                    traitValues.append(strSplit[i]);
+                } else {
+                    traitValues.append(" ").append(strSplit[i]);
+                }
+
+                k = k + 1;
+            }
+        }
+        traitsValues = new RealParameter(traits);
+        traitsValues.initByName("keys", taxonSet.toString(), "minordimension", nTraits, "value", traitValues.toString());
+
     }
 
     protected void populateLogP() {

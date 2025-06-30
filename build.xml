@@ -36,10 +36,8 @@
 		<fileset dir="${beast2path}/lib" includes="fest.jar"/>
 		<fileset dir="${beast2path}/lib" includes="colt.jar"/>
 		<fileset dir="${libcontraband}" includes="commons-lang3-3.10.jar"/>
-	<pathelement path="../BEASTLabs/build"/>
-	<pathelement path="../starbeast2/build"/>
-	<pathelement path="../sampled-ancestors/build"/>
-	<pathelement path="../morph-models/build"/>
+	<pathelement path="../BeastFX/build"/>
+	<fileset dir="../BeastFX/locallib" includes="*.jar"/>
 	</path>
 
 
@@ -60,7 +58,7 @@
 	</target>
 
 	<!-- clean previous build, compile Java source code, and Junit test, and make the beast.jar and beauti.jar -->
-	<target name="build_jar_all_contraband" depends="cleancontraband,compile-allcontraband,junitcontraband,dist_all_contraband"
+	<target name="build_jar_all_contraband" depends="cleancontraband,compile-allcontraband,junitcontraband,dist_all_contraband,addon"
         description="Clean and Build all run-time stuff">
 	</target>
 
@@ -174,13 +172,6 @@
 		<echo message="JUnit test finished." />
 	</target>
 
-    <target name="junitreport">
-		<junitreport todir="${report}">
-			<fileset dir="${report}" includes="*.xml"/>
-			<report format="frames" todir="${report}"/>
-		</junitreport>
-		<echo message="JUnit test report finished." />
-	</target>
 
 
 	<target name="addon"
@@ -226,141 +217,6 @@
         </jar>
 		<echo message="Add-on version v${versioncontraband} release is finished." />
 	</target>
-
-
-
-
-
-	<!-- Release -->
-	<property name="version" value="1.0.0" />
-	<property name="version_number" value="${versioncontraband}" />
-	<property name="release_dircontraband" value="release" />
-	<property name="copyright" value="CladeAge development team 2013" />
-
-	<property name="CladeAge_name" value="CladeAge" />
-
-	<property name="common_dircontraband" value="${release_dircontraband}/common" />
-	<property name="Mac_dircontraband" value="${release_dircontraband}/Mac" />
-	<property name="Linux_dircontraband" value="${release_dircontraband}/Linux" />
-	<property name="Windows_dircontraband" value="${release_dircontraband}/Windows" />
-
-	<property name="Mac_package_dircontraband" value="${Mac_dircontraband}/${CladeAge_name}" />
-	<property name="Linux_package_dircontraband" value="${Linux_dircontraband}/${CladeAge_name}" />
-	<property name="Windows_package_dircontraband" value="${Windows_dircontraband}/${CladeAge_name}" />
-
-	<!-- Need to either install Launch4j under {CladeAge workspace}/${release}
-                 or install it in the default directory and change the location of launch4j.dir -->
-	<target name="windows"
-	        depends="build_jar_all_contraband_NoJUnitTest"
-	        description="release Windows version of CladeAge">
-
-		<delete dir="${Windows_package_dircontraband}" />
-		<!-- Create the release directory -->
-		<mkdir dir="${Windows_package_dircontraband}" />
-
-		<property name="launch4j.dir" location="../../launch4j" />
-		<taskdef name="launch4j"
-		         classname="net.sf.launch4j.ant.Launch4jTask"
-		         classpath="${launch4j.dir}/launch4j.jar :${launch4j.dir}/lib/xstream.jar" />
-
-		<copy file="${distcontraband}/contraband.src.jar" todir="${Windows_package_dircontraband}/lib" />
-		<copy file="${common_dircontraband}/VERSION HISTORY.txt" todir="${Windows_package_dircontraband}" />
-		<copy file="${common_dircontraband}/README.txt" todir="${Windows_package_dircontraband}" />
-		<copy file="${common_dircontraband}/LICENSE.txt" todir="${Windows_package_dircontraband}" />
-
-		<!-- CladeAge v?.?.?.exe -->
-		<launch4j configFile="${Windows_dircontraband}/CladeAge_launch4j.xml"
-		          jar="${distcontraband}/contraband.jar"
-		          outfile="${Windows_package_dircontraband}/${CladeAge_name}.exe"
-		          fileVersion="${version_number}.0"
-		          txtFileVersion="${versioncontraband}"
-		          productVersion="${version_number}.0"
-		          txtProductVersion="${versioncontraband}" />
-
-		<copy todir="${Windows_package_dircontraband}/fxtemplates/">
-			<fileset dir="fxtemplates/" />
-		</copy>
-
-		<zip destfile="${Windows_dircontraband}/${CladeAge_name} v${versioncontraband}.zip">
-			<zipfileset dir="${Windows_package_dircontraband}" prefix="${CladeAge_name}" />
-		</zip>
-
-		<echo message="Windows version release is finished." />
-	</target>
-
-	<target name="linux"
-	        depends="build_jar_all_contraband_NoJUnitTest"
-	        description="release Linux/Unix version of CladeAge">
-		<delete dir="${Linux_package_dircontraband}" />
-		<!-- Create the release directory -->
-		<mkdir dir="${Linux_package_dircontraband}" />
-
-		<copy todir="${Linux_package_dircontraband}/bin">
-			<fileset dir="${Linux_dircontraband}/bin" />
-		</copy>
-		<chmod dir="${Linux_package_dircontraband}/bin" perm="755" includes="**/**" />
-
-		<copy file="${distcontraband}/contraband.jar" todir="${Linux_package_dircontraband}/lib" />
-		<copy file="${distcontraband}/contraband.src.jar" todir="${Linux_package_dircontraband}/lib" />
-		<copy file="${common_dircontraband}/icons/contraband.png" todir="${Linux_package_dircontraband}/images" />
-
-		<copy file="${common_dircontraband}/VERSION HISTORY.txt" todir="${Linux_package_dircontraband}" />
-		<copy file="${common_dircontraband}/README.txt" todir="${Linux_package_dircontraband}" />
-		<copy file="${common_dircontraband}/LICENSE.txt" todir="${Linux_package_dircontraband}" />
-
-		<echo message="Have to tar manaully, because [ANT Bug 550] the tar task change the mode of the executables files." />
-		<echo message="Linux/Unix version release is finished." />
-	</target>
-
-	<property name="jarbundler_dir" value="/Applications/eclipse/plugins/org.apache.ant_1.8.3.v201301120609/lib" />
-	<target name="mac"
-	        depends="build_jar_all_contraband_NoJUnitTest"
-	        description="release Mac version of CladeAge">
-		<delete dir="${Mac_package_dircontraband}" />
-		<delete file="${Mac_dircontraband}/pack.temp.dmg"/>
-		<delete file="${Mac_dircontraband}/CladeAge v${versioncontraband}.dmg"/>
-		<!-- Create the release directory -->
-		<mkdir dir="${Mac_package_dircontraband}" />
-
-		<copy todir="${Mac_package_dircontraband}/bin">
-			<fileset dir="${Linux_dircontraband}/bin" />
-		</copy>
-		<chmod dir="${Mac_package_dircontraband}/bin" perm="755" includes="**/**" />
-
-		<copy file="${distcontraband}/contraband.jar" todir="${Mac_package_dircontraband}/lib" />
-		<copy file="${distcontraband}/contraband.src.jar" todir="${Mac_package_dircontraband}/lib" />
-
-		<copy file="${common_dircontraband}/VERSION HISTORY.txt" todir="${Mac_package_dircontraband}" />
-		<copy file="${common_dircontraband}/README.txt" todir="${Mac_package_dircontraband}" />
-		<copy file="${common_dircontraband}/LICENSE.txt" todir="${Mac_package_dircontraband}" />
-
-		<taskdef name="jarbundler"
-		         classname="net.sourceforge.jarbundler.JarBundler"
-		         classpath="${jarbundler_dir}/jarbundler-2.2.0.jar" />
-
-		<!-- create a jar bundle for the mac -->
-		<jarbundler dir="${Mac_package_dircontraband}"
-		            name="${CladeAge_name}"
-		            mainclass="${main_class_CladeAge}"
-		            icon="${common_dircontraband}/icons/contraband.icns"
-		            jvmversion="1.8+"
-		            vmoptions="-Xmx1024M"
-		            arguments="-window -working -options"
-		            version="${versioncontraband}"
-		            infostring="${CladeAge_name}, ${copyright}"
-		            bundleid="${main_class_CladeAge}">
-			<jarfileset dir="${Mac_package_dircontraband}/lib">
-				<include name="**/contraband.jar" />
-			</jarfileset>
-			<javaproperty name="apple.laf.useScreenMenuBar" value="true" />
-			<javaproperty name="java.library.path" value="$JAVAROOT:/usr/local/lib" />
-		</jarbundler>
-
-		<echo message="Building disk image." />
-		<exec executable='release/Mac/createdmg.sh'/>
-		<echo message="Mac version release is finished." />
-	</target>
-
 
 
 

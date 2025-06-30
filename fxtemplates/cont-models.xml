@@ -13,6 +13,10 @@
         <alignmentProvider id="Add Continuous Data" spec="contraband.app.beauti.BeautiContrabandAlignmentProvider" template="@contTrait"/>
 
         <subtemplate id='contTrait' class='beast.base.evolution.alignment.Alignment' mainid='$(n)'
+                     suppressInputs = 'contraband.math.NodeMath.traits,
+                                       contraband.math.NodeMath.shrinkage,
+                                       contraband.math.NodeMath.covariance,
+                                       contraband.math.NodeMath.tree'
         >
             <![CDATA[
 			<tree id="Tree.t:$(n)" name="stateNode">
@@ -25,7 +29,7 @@
 				<shape               spec='parameter.RealParameter' id='gammaShape.s:$(n)' value='1.0' lower='0.1' estimate='false'/>
 			</plugin>
 
-			<plugin id="pcmNodeMath.c:$(n)" spec="contraband.math.NodeMath" traits="@oneTraitData.t:$(n)" tree="@Tree.t:$(n)">
+			<plugin id="pcmNodeMath.c:$(n)" spec="contraband.math.NodeMath" traits="@$(n)" tree="@Tree.t:$(n)">
             	<sigmasq id="varValues.t:$(n)" spec="parameter.RealParameter">1.0</sigmasq>
             	<correlation id="covValues.t:$(n)" spec="parameter.RealParameter" lower='-1.0' upper='1.0'>0.1</correlation>
                 <rootValues id="rootValues.t:$(n)" spec="parameter.RealParameter">0.0</rootValues>
@@ -35,13 +39,10 @@
                 <parameter name='birthDiffRate' id="birthRate.t:$(n)" lower="0.0" value='1.0' estimate='true'/>
             </plugin>
 
-            <plugin id="oneTraitData.t:$(n)" spec="parameter.RealParameter" minordimension="1" keys="1" value='1'>
-            </plugin>
 
-			<distribution spec='contraband.prunelikelihood.BMPruneLikelihood' id="contTreeLikelihood.$(n)">
+			<distribution spec='contraband.prunelikelihood.BMPruneLikelihood' id="contTreeLikelihood.$(n)" data="@$(n)">
             <tree idref="Tree.t:$(n)"/>
             <nodeMath idref="pcmNodeMath.c:$(n)"/>
-    		<traits idref="oneTraitData.t:$(n)"/>
             <branchRateModel spec='StrictClockModel' id='StrictClock.c:$(n)'>
                <clock.rate id='clockRate.c:$(n)' spec='parameter.RealParameter' lower="0.0" value='1.0' estimate='false'/>
             </branchRateModel>

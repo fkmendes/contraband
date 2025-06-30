@@ -1,5 +1,6 @@
 package contraband.utils;
 
+import beast.base.evolution.alignment.Alignment;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.evolution.tree.Tree;
 import contraband.math.NodeMath;
@@ -57,6 +58,27 @@ public class PruneLikelihoodUtils {
                 index ++;
             }
         }
+    }
+
+    public static void populateTraitValuesMatrix(Alignment data,int nTraits, Tree tree,  RealMatrix traitRM){
+        int index = 0;
+        for (int j = 0; j < tree.getLeafNodeCount(); j ++) {
+            // get all traits values for this species
+            String taxonStr = data.getSequenceAsString(tree.getNode(j).getID());
+            String[] strSplit = taxonStr.split(",");
+            Double[] traitForSpecies = new Double[strSplit.length];
+            for(int i = 0; i < strSplit.length; i++) {
+                traitForSpecies[i] = Double.parseDouble(strSplit[i]);
+            }
+
+            for (int k = 0; k < nTraits; k++) {
+                traitRM.setEntry(index, k, traitForSpecies[k]);
+            }
+            index ++;
+
+
+        }
+
     }
 
     /*

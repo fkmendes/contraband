@@ -1,5 +1,6 @@
 package contraband.math;
 
+import beast.base.evolution.alignment.Alignment;
 import beast.base.inference.CalculationNode;
 import beast.base.core.Input;
 import beast.base.inference.parameter.RealParameter;
@@ -13,7 +14,7 @@ import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.util.FastMath;
 
 public class NodeMath extends CalculationNode {
-    final public Input<RealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+    final public Input<Alignment> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     //final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Evolutionary rates of traits. Diagonal elements in rate matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> rhoInput = new Input<>("correlation", "Correlations of traits. Off-diagonal elements in rate matrix.");
@@ -115,14 +116,14 @@ public class NodeMath extends CalculationNode {
     @Override
     public void initAndValidate() {
         // collect trait information
-        RealParameter traitsValues = traitsValuesInput.get();
-        nTraits = traitsValues.getMinorDimension1();
+        Alignment traitsValues = traitsValuesInput.get();
+        nTraits = traitsValues.getMaxStateCount();
         if(treeInput.get() != null){
             // if some species does not have any data, we Must input tree
             // We must also specify the root values because there is no MLE
             nSpecies = treeInput.get().getLeafNodeCount();
         } else {
-            nSpecies = traitsValues.getMinorDimension2();
+            nSpecies = traitsValues.getTaxonCount();
         }
         speciesToIgnoreMissingData = new boolean[2 * nSpecies - 1];
         speciesToIgnoreIndex = new int[2 * nSpecies - 1];
