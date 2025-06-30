@@ -67,16 +67,17 @@ public class ContDataParser {
     public Alignment parseDataBlock(final BufferedReader fin) throws IOException {
         taxa = new ArrayList<>();
         final Alignment alignment = new Alignment();
+        alignment.dataTypeInput.setValue("continuous", alignment);
+        ContinuousData type = new ContinuousData();
+        type.setInputValue("nrOfStates", charNr);
+        type.initAndValidate();
+        alignment.setInputValue("userDataType", type);
+        String ambiguitiesStr = "";
 
         for (int i = 0; i < taxaNr; i++) {
             String line = fin.readLine();
-            alignment.dataTypeInput.setValue("standard", alignment);
-            StandardData type = new StandardData();
-            type.setInputValue("nrOfStates", charNr);
-            type.initAndValidate();
-            alignment.setInputValue("userDataType", type);
-            String ambiguitiesStr = "";
-            alignment.userDataTypeInput.get().initByName("ambiguities", ambiguitiesStr);
+
+
 
             String[] strValues = line.split("\t");
             String taxon = strValues[0];
@@ -96,15 +97,18 @@ public class ContDataParser {
                 } else {
                     traitValues.append(" {").append(strValues[j]).append("}");
                 }
-
+                ambiguitiesStr += strValues[j]+ " ";
                 idx = idx + 1;
             }
+
             String data = traitValues.toString();
             final Sequence sequence = new Sequence();
             sequence.init(charNr, taxon, data);
             sequence.setID(generateSequenceID(taxon));
             alignment.sequenceInput.setValue(sequence, alignment);
         }
+
+        alignment.userDataTypeInput.get().initByName("ambiguities", ambiguitiesStr);
         alignment.initAndValidate();
         return alignment;
     }

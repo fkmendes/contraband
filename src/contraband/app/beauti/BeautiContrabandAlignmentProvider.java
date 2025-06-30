@@ -65,6 +65,21 @@ public class BeautiContrabandAlignmentProvider extends BeautiAlignmentProvider {
 
 		}
 
+		List<BEASTInterface> processedAlignments = new ArrayList<>();
+		for (BEASTInterface o : selectedPlugins) {
+			try {
+			if (o instanceof Alignment) {
+
+				processAlignment((Alignment) o, processedAlignments, doc);
+			}
+			} catch (Exception e) {
+				Alert.showMessageDialog(null, "Something went wrong converting the alignment: " + e.getMessage());
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+
 
 		return selectedPlugins;
 
@@ -72,59 +87,35 @@ public class BeautiContrabandAlignmentProvider extends BeautiAlignmentProvider {
 
 
 
-	public void processAlignment(Alignment alignment, List<BEASTInterface> filteredAlignments, boolean ascertained, BeautiDoc doc) throws Exception {
-
-		int nrOfStates = 3;
-		String tree = alignment.getID();
-		String clock = alignment.getID();
-		String ID = alignment.getID() + nrOfStates;
+	public void processAlignment(Alignment alignment, List<BEASTInterface> processedAlignments, BeautiDoc doc) throws Exception {
+		Map<Integer, List<Integer>> stateSpaceMap = new HashMap<Integer, List<Integer>>();
 
 
-			// create data type
-			DataType.Base dataType = null;
-			if (alignment.getDataType() instanceof StandardData) {
-				// determine state space size by interrogating StandardData
-				// data-type
-				StandardData base = (StandardData) alignment.getDataType();
-				dataType = new StandardData();
-				((StandardData) dataType).initByName("nrOfStates", nrOfStates,
-						"ambiguities", base.listOfAmbiguitiesInput.get());
-			}
+		ContinuousData dataType = (ContinuousData) alignment.getDataType();
 
-			String name = alignment.getID() + nrOfStates;
-			dataType.setID("contDataType." + name);
-			doc.addPlugin(dataType);
+		String name = alignment.getID() ;
+		String tree = alignment.getID() ;
+		String clock = alignment.getID() ;
 
-		FilteredAlignment data = new FilteredAlignment();
-		data.initByName("data", alignment, "filter", "1", "userDataType", dataType);
-		data.setID(ID);
-		doc.addPlugin(data);
+		doc.addPlugin(dataType);
+		doc.addPlugin(alignment);
+		// link trees and clock models
+		PartitionContext context = new PartitionContext(name, name, clock, tree);
 
+		try {
+			doc.addAlignmentWithSubnet(context, template.get());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-			// link trees and clock models
-			PartitionContext context = new PartitionContext(name, name, clock, tree);
-
-			// create treelikelihood for each state space
-			try {
-				doc.addAlignmentWithSubnet(context, template.get());
-//				GeneralSubstitutionModel smodel = (GeneralSubstitutionModel) doc.pluginmap.get("morphSubstModel.s:" + name);
-//				((RealParameter) smodel.ratesInput.get()).setDimension(nrOfStates * (nrOfStates - 1)/2);
-//				smodel.frequenciesInput.get().frequenciesInput.get().setDimension(nrOfStates);
-//				SiteModelInterface.Base sitemodel = (SiteModelInterface.Base) doc.pluginmap.get("morphSiteModel.s:" + name);
-//				sitemodel.substModelInput.setValue(smodel, sitemodel);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			filteredAlignments.add(alignment);
-
+		processedAlignments.add(alignment);
 
 	}
 
 
 	@Override
 	public int matches(Alignment alignment) {
-		if (alignment.userDataTypeInput.get() != null && alignment.userDataTypeInput.get() instanceof StandardData) {
+		if (alignment.userDataTypeInput.get() != null && alignment.userDataTypeInput.get() instanceof ContinuousData) {
 			return 20;
 		}
 		return 0;
