@@ -71,9 +71,9 @@
 			<operator id="varValuesScaler.t:$(n)" spec='kernel.BactrianScaleOperator' scaleFactor="0.5" weight="10.0" parameter="@varValues.t:$(n)"/>
         	<operator id="covValuesScaler.t:$(n)" spec='kernel.BactrianScaleOperator' scaleFactor="0.5" weight="10.0" parameter="@covValues.t:$(n)"/>
         	<operator id="rootValuesScaler.t:$(n)" spec='kernel.BactrianScaleOperator' scaleFactor="0.5" weight="10.0" parameter="@rootValues.t:$(n)"/>
-        	<operator id="varValuesRandomWalker.t:$(n)" spec='kernel.BactrianRandomWalkOperator' windowSize="0.5" weight="10.0" parameter="@varValues.t:$(n)"/>
-        	<operator id="covValuesRandomWalker.t:$(n)" spec='kernel.BactrianRandomWalkOperator' windowSize="0.1" weight="10.0" parameter="@covValues.t:$(n)"/>
-        	<operator id="rootValuesRandomWalker.t:$(n)" spec='kernel.BactrianRandomWalkOperator' windowSize="0.5" weight="10.0" parameter="@rootValues.t:$(n)"/>
+        	<operator id="varValuesRandomWalker.t:$(n)" spec='beast.base.inference.operator.RealRandomWalkOperator' windowSize="0.5" weight="10.0" parameter="@varValues.t:$(n)"/>
+        	<operator id="covValuesRandomWalker.t:$(n)" spec='beast.base.inference.operator.RealRandomWalkOperator' windowSize="0.1" weight="10.0" parameter="@covValues.t:$(n)"/>
+        	<operator id="rootValuesRandomWalker.t:$(n)" spec='beast.base.inference.operator.RealRandomWalkOperator' windowSize="0.5" weight="10.0" parameter="@rootValues.t:$(n)"/>
 
         	<operator id='StrictClockRateScalerX.c:$(n)' spec='kernel.BactrianScaleOperator' scaleFactor="0.75" weight="3" parameter='@clockRate.c:$(n)'/>
 			<operator id='strictClockUpDownOperatorX.c:$(n)' spec='kernel.BactrianUpDownOperator' scaleFactor="0.75" weight="3">
