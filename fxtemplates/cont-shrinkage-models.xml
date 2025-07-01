@@ -74,6 +74,7 @@
 
     		<operator id='YuleBirthRateScaler.t:$(n)' spec='kernel.BactrianScaleOperator' scaleFactor="0.75" weight="3" parameter="@birthRate.t:$(n)"/>
 			<operator id="varValuesScaler.t:$(n)" spec='kernel.BactrianScaleOperator' scaleFactor="0.5" weight="10.0" parameter="@varValues.t:$(n)"/>
+            <operator id="varValuesRandomWalker.t:$(n)" spec='kernel.BactrianRandomWalkOperator' windowSize="0.5" weight="10.0" parameter="@varValues.t:$(n)"/>
 
         	<operator id='StrictClockRateScalerX.c:$(n)' spec='kernel.BactrianScaleOperator' scaleFactor="0.75" weight="3" parameter='@clockRate.c:$(n)'/>
 			<operator id='strictClockUpDownOperatorX.c:$(n)' spec='kernel.BactrianUpDownOperator' scaleFactor="0.75" weight="3">
@@ -118,6 +119,7 @@
                 Scale up substitution rate c:$(n) and scale down tree t:($n)
             </connect>
             <connect srcID='varValuesScaler.t:$(n)'  targetID='mcmc' inputName='operator' if='inlikelihood(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'>Scales trait evolutionary rates</connect>
+            <connect srcID='varValuesRandomWalker.t:$(n)'  targetID='mcmc' inputName='operator' if='inlikelihood(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'>Randomly samples trait evolutionary rates</connect>
 
             <connect srcID='allTipDatesRandomWalker.t:$(n)'   targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and allTipDatesRandomWalker.t:$(n)/weight!=0.0'>Estimates tip dates for tree t:$(n)</connect>
             <connect srcID="YuleModelTreeRootScaler.t:$(n)"   targetID="mcmc" inputName="operator" if="inposterior(YuleModel.t:$(n)) and Tree.t:$(n)/estimate=true" >Scales root node for tree t:$(n)</connect>

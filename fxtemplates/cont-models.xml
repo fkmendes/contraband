@@ -71,6 +71,9 @@
 			<operator id="varValuesScaler.t:$(n)" spec='kernel.BactrianScaleOperator' scaleFactor="0.5" weight="10.0" parameter="@varValues.t:$(n)"/>
         	<operator id="covValuesScaler.t:$(n)" spec='kernel.BactrianScaleOperator' scaleFactor="0.5" weight="10.0" parameter="@covValues.t:$(n)"/>
         	<operator id="rootValuesScaler.t:$(n)" spec='kernel.BactrianScaleOperator' scaleFactor="0.5" weight="10.0" parameter="@rootValues.t:$(n)"/>
+        	<operator id="varValuesRandomWalker.t:$(n)" spec='kernel.BactrianRandomWalkOperator' windowSize="0.5" weight="10.0" parameter="@varValues.t:$(n)"/>
+        	<operator id="covValuesRandomWalker.t:$(n)" spec='kernel.BactrianRandomWalkOperator' windowSize="0.1" weight="10.0" parameter="@covValues.t:$(n)"/>
+        	<operator id="rootValuesRandomWalker.t:$(n)" spec='kernel.BactrianRandomWalkOperator' windowSize="0.5" weight="10.0" parameter="@rootValues.t:$(n)"/>
 
         	<operator id='StrictClockRateScalerX.c:$(n)' spec='kernel.BactrianScaleOperator' scaleFactor="0.75" weight="3" parameter='@clockRate.c:$(n)'/>
 			<operator id='strictClockUpDownOperatorX.c:$(n)' spec='kernel.BactrianUpDownOperator' scaleFactor="0.75" weight="3">
@@ -135,6 +138,10 @@
             <connect srcID='varValuesScaler.t:$(n)'  targetID='mcmc' inputName='operator' if='inlikelihood(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'>Scales trait evolutionary rates</connect>
             <connect srcID='covValuesScaler.t:$(n)'  targetID='mcmc' inputName='operator' if='inlikelihood(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'>Scales trait correlations</connect>
             <connect srcID='rootValuesScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inlikelihood(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'>Scales trait values at root of tree $(n)</connect>
+
+            <connect srcID='varValuesRandomWalker.t:$(n)'  targetID='mcmc' inputName='operator' if='inlikelihood(varValues.t:$(n)) and varValues.t:$(n)/estimate=true'>Randomly samples trait evolutionary rates</connect>
+            <connect srcID='covValuesRandomWalker.t:$(n)'  targetID='mcmc' inputName='operator' if='inlikelihood(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'>Randomly samples trait correlations</connect>
+            <connect srcID='rootValuesRandomWalker.t:$(n)' targetID='mcmc' inputName='operator' if='inlikelihood(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'>Randomly samples trait values at root of tree $(n)</connect>
 
             <connect srcID='allTipDatesRandomWalker.t:$(n)'   targetID='mcmc' inputName='operator' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and allTipDatesRandomWalker.t:$(n)/weight!=0.0'>Estimates tip dates for tree t:$(n)</connect>
             <connect srcID="YuleModelTreeRootScaler.t:$(n)"   targetID="mcmc" inputName="operator" if="inposterior(YuleModel.t:$(n)) and Tree.t:$(n)/estimate=true" >Scales root node for tree t:$(n)</connect>
