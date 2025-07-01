@@ -10,6 +10,7 @@
                type="contraband.math.NodeMath"
                hasPartitions="Tree" icon="3.pngx" forceExpansion="TRUE"/>
 
+
         <alignmentProvider id="Add Continuous Data" spec="contraband.app.beauti.BeautiContrabandAlignmentProvider" template="@contTrait"/>
 
         <subtemplate id='contTrait' class='beast.base.evolution.alignment.Alignment' mainid='$(n)'
@@ -156,9 +157,6 @@
             <connect srcID='rootValues.t:$(n)' 	              targetID='tracelog' inputName='log' if='inlikelihood(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'/>
 
         </subtemplate>
-
-
     </mergewith>
-
 
 </beast>

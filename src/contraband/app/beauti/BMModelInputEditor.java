@@ -8,19 +8,20 @@ import contraband.math.NodeMath;
 import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
+
 
 
 public class BMModelInputEditor extends BEASTObjectInputEditor {
 
 
-
-	ParameterInputEditor traitsEditor;
-	TextField traitsEntry;
-
+	ParameterInputEditor sigmasqEditor;
+	TextField sigmasqEntry;
+	protected SmallLabel sigmasqLabel;
 
 	// vars for dealing with mean-rate delta exchange operator
-	CheckBox fixMeanRatesCheckBox;
+	CheckBox ratesCheckBox;
 
 	public BMModelInputEditor() {
 		super();
@@ -41,39 +42,21 @@ public class BMModelInputEditor extends BEASTObjectInputEditor {
 		m_input = input;
 		m_beastObject = beastObject;
 
-		pane = FXUtils.newVBox();
-		pane.setPadding(new Insets(0, 5, 5, 0));
-		HBox itemBox = FXUtils.newHBox();
-		itemBox.setPadding(new Insets(0, 5, 5, 5));
-
 		super.init(input, beastObject, itemNr, isExpandOption, addButtons);
-
 	}
 
 
-	//public InputEditor createTraitsEditor() {
-		//NodeMath nodeMath = ((NodeMath) m_input.get());
+	public InputEditor createSigmasqEditor() {
+		NodeMath nodeMath = ((NodeMath) m_input.get());
 
-        //final Input<?> input = nodeMath.traitsValuesInput;
-		//traitsEditor = new ParameterInputEditor(doc);
+		final Input<?> input = nodeMath.sigmasqInput;
+		sigmasqEditor = new ParameterInputEditor(doc);
+		sigmasqEditor.init(input, nodeMath, -1, ExpandOption.FALSE, true);
+		sigmasqEntry = sigmasqEditor.getEntry();
 
-		//traitsEditor.init(input, nodeMath, -1, ExpandOption.TRUE, true);
-		//traitsEntry = traitsEditor.getEntry();
-		//traitsEntry.setOnKeyReleased(e -> processEntry2());
+		sigmasqEditor.validateInput();
+		return sigmasqEditor;
+	}
 
-		//traitsEditor.validateInput();
-		//return traitsEditor;
-	//}
 
-	//void processEntry2() {
-		//String[] traitValues = new String[]{traitsEntry.getText()};
-		//try {
-			//Double categoryCount = Double.parseDouble(traitValues[0]);
-			//NodeMath s = (NodeMath) m_input.get();
-			//s.getInput("traits").setValue(categoryCount, s);
-			//repaint();
-		//} catch (java.lang.NumberFormatException e) {
-			// ignore.
-		//}
-	//}
 }
