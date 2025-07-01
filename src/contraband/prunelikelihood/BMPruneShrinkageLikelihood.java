@@ -49,7 +49,14 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
             if (populationTraitsInput.get()!=null) {
                 lambda = deltaVarInput.get();
                 // Estimate population variance from a sample
-                RealMatrix popTraitsRM = populationTraitMatrix(populationTraitsInput.get());
+                //RealMatrix popTraitsRM = populationTraitMatrix(populationTraitsInput.get());
+                RealParameter traitParam = populationTraitsInput.get();
+                StringBuilder traitSpecies = new StringBuilder("Species_0");
+                for(int i = 1; i < traitParam.getMinorDimension2(); i++) {
+                    traitSpecies.append(" Species_").append(i);
+                }
+                traitParam.initByName("keys", traitSpecies.toString());
+                RealMatrix popTraitsRM = populationTraitMatrix(traitParam);
                 traitRM = PruneLikelihoodUtils.populateTraitValueMatrixEstimatedPopulationVariance(popTraitsRM, traitRM, getNTraits(), lambda);
                 getNodeMath().estimateCorrelations(popTraitsRM);
             } else{

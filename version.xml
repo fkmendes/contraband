@@ -4,6 +4,7 @@
 
     <service type="beastfx.app.inputeditor.InputEditor">
         <provider classname="contraband.app.beauti.BMModelInputEditor"/>
+        <provider classname="contraband.app.beauti.ShrinkageInputEditor"/>
     </service>
 
     <service type="beast.base.core.BEASTInterface">
