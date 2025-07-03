@@ -3,25 +3,14 @@ package contraband.app.beauti;
 import beast.base.core.BEASTInterface;
 import beast.base.core.Input;
 import beastfx.app.inputeditor.*;
-import beastfx.app.util.FXUtils;
-import contraband.math.NodeMath;
-import javafx.geometry.Insets;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
-
+import contraband.prunelikelihood.BMPruneLikelihood;
 
 
 public class BMModelInputEditor extends BEASTObjectInputEditor {
 
 
-	ParameterInputEditor sigmasqEditor;
-	TextField sigmasqEntry;
-	protected SmallLabel sigmasqLabel;
+	BEASTObjectInputEditor nodeMathEditor;
 
-	// vars for dealing with mean-rate delta exchange operator
-	CheckBox ratesCheckBox;
 
 	public BMModelInputEditor() {
 		super();
@@ -32,7 +21,7 @@ public class BMModelInputEditor extends BEASTObjectInputEditor {
 
 	@Override
 	public Class<?> type() {
-		return NodeMath.class;
+		return BMPruneLikelihood.class;
 	}
 
 	@Override
@@ -46,16 +35,15 @@ public class BMModelInputEditor extends BEASTObjectInputEditor {
 	}
 
 
-	public InputEditor createSigmasqEditor() {
-		NodeMath nodeMath = ((NodeMath) m_input.get());
+	public InputEditor createNodeMathEditor() {
+		BMPruneLikelihood lik = (BMPruneLikelihood) m_input.get();
+		final Input<?> input = lik.nodeMathInput;
 
-		final Input<?> input = nodeMath.sigmasqInput;
-		sigmasqEditor = new ParameterInputEditor(doc);
-		sigmasqEditor.init(input, nodeMath, -1, ExpandOption.FALSE, true);
-		sigmasqEntry = sigmasqEditor.getEntry();
+		nodeMathEditor = new BEASTObjectInputEditor(doc);
+		nodeMathEditor.init(input, lik, -1, ExpandOption.TRUE, true);
 
-		sigmasqEditor.validateInput();
-		return sigmasqEditor;
+		nodeMathEditor.validateInput();
+		return nodeMathEditor;
 	}
 
 

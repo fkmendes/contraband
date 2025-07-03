@@ -6,18 +6,22 @@
 
         <panel spec="beastfx.app.inputeditor.BeautiPanelConfig" panelname="Continuous Model"
                tiptext="Brownian motion model specifications"
-               path="nodeMath"
-               type="contraband.math.NodeMath"
+               path=""
+               type="contraband.prunelikelihood.BMPruneLikelihood"
                hasPartitions="Tree" icon="3.pngx" forceExpansion="TRUE"/>
 
 
         <alignmentProvider id="Add Continuous Data" spec="contraband.app.beauti.BeautiContrabandAlignmentProvider" template="@contTrait"/>
 
         <subtemplate id='contTrait' class='beast.base.evolution.alignment.Alignment' mainid='$(n)'
-                     suppressInputs = 'contraband.math.NodeMath.traits,
-                                       contraband.math.NodeMath.shrinkage,
-                                       contraband.math.NodeMath.covariance,
-                                       contraband.math.NodeMath.tree'
+                     suppressInputs = 'contraband.prunelikelihood.BMPruneLikelihood.siteModel,
+                     contraband.prunelikelihood.BMPruneLikelihood.tree,
+                     contraband.prunelikelihood.BMPruneLikelihood.data,
+                     contraband.prunelikelihood.BMPruneLikelihood.branchRateModel,
+                     contraband.math.NodeMath.traits,
+                     contraband.math.NodeMath.shrinkage,
+                     contraband.math.NodeMath.covariance,
+                     contraband.math.NodeMath.tree'
         >
             <![CDATA[
 			<tree id="Tree.t:$(n)" name="stateNode">

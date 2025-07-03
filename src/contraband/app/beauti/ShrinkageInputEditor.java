@@ -2,16 +2,12 @@ package contraband.app.beauti;
 
 import beast.base.core.BEASTInterface;
 import beast.base.core.Input;
-import beast.base.evolution.sitemodel.SiteModel;
-import beast.base.inference.parameter.RealParameter;
 import beastfx.app.inputeditor.*;
 import beastfx.app.util.FXUtils;
 import contraband.math.NodeMath;
 import contraband.prunelikelihood.BMPruneShrinkageLikelihood;
 import javafx.geometry.Insets;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 
 
