@@ -38,7 +38,7 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
         // the real matrix that has the trait values for species
         traitRM = new Array2DRowRealMatrix(new double[getNumberOfSpeciesWithData()][getNTraits()]);
         //PruneLikelihoodUtils.populateTraitValuesMatrix(traitsValuesInput.get(), (Tree) treeInput.get(), getNTraits(), traitRM);
-        PruneLikelihoodUtils.populateTraitValuesMatrix(dataInput.get(), getNTraits(), (Tree) treeInput.get(), traitRM);
+        PruneLikelihoodUtils.populateTraitValuesMatrix(getTraitsValues(), (Tree) treeInput.get(), getNTraits(), traitRM);
 
 
         if (includePopVarInput.get()) {
@@ -100,17 +100,31 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
 
 
     private RealMatrix populationTraitMatrix(RealParameter traitsValues){
-        int nTraits = traitsValues.getMinorDimension1();
+        int nTraits = getNTraits();
         int nSpecies = traitsValues.getMinorDimension2();
-        RealMatrix traitRM = new Array2DRowRealMatrix(new double[nSpecies][nTraits]);
-        String[] keys = traitsValues.getKeys();
-        for (int i = 0; i < nSpecies; i ++) {
-            // get all traits values for this species
-            Double[] traitForSpecies = traitsValues.getRowValues(keys[i]);
-            for (int j= 0; j < nTraits; j ++) {
-                traitRM.setEntry(i, j, traitForSpecies[j]);
+        RealMatrix traitRM;
+
+        if(nSpecies == 1) {
+            nSpecies = getNumberOfSpeciesWithData();
+            traitRM = new Array2DRowRealMatrix(new double[nSpecies][nTraits]);
+            for (int i = 0; i < nSpecies; i++) {
+                for (int j = 0; j < nTraits; j++) {
+                    traitRM.setEntry(i, j, 1.0);
+                }
+            }
+
+        } else {
+            traitRM = new Array2DRowRealMatrix(new double[nSpecies][nTraits]);
+            String[] keys = traitsValues.getKeys();
+            for (int i = 0; i < nSpecies; i++) {
+                // get all traits values for this species
+                Double[] traitForSpecies = traitsValues.getRowValues(keys[i]);
+                for (int j = 0; j < nTraits; j++) {
+                    traitRM.setEntry(i, j, traitForSpecies[j]);
+                }
             }
         }
+
         return traitRM;
     }
 

@@ -194,6 +194,8 @@ public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
 
     public int getNumberOfSpeciesWithData() {return nSpeciesWithData; }
 
+    protected RealParameter getTraitsValues() { return traitsValues; }
+
     // setters
     public void setPopSE (boolean value) { popSE = value; }
 
