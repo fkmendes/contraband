@@ -11,7 +11,7 @@
                hasPartitions="Partition" icon="3.pngx" forceExpansion="TRUE"/>
 
 
-        <alignmentProvider id="Add Shrinkage Data" spec="contraband.app.beauti.BeautiContrabandAlignmentProvider" template="@shrinkageTrait"/>
+        <alignmentProvider id="Add continuous Data" spec="contraband.app.beauti.BeautiContrabandAlignmentProvider" template="@shrinkageTrait"/>
 
         <subtemplate id='shrinkageTrait' class='beast.base.evolution.alignment.Alignment' mainid='$(n)'
                      suppressInputs = 'contraband.prunelikelihood.BMPruneShrinkageLikelihood.popVar,
@@ -39,6 +39,8 @@
             <plugin spec='YuleModel' id="YuleModel.t:$(n)" tree='@Tree.t:$(n)'>
                 <parameter name='birthDiffRate' id="birthRate.t:$(n)" lower="0.0" value='1.0' estimate='true'/>
             </plugin>
+
+            <plugin id="oneTraitData" spec="parameter.RealParameter" estimate="false" value='1.0'/>
 
 			<distribution spec='contraband.prunelikelihood.BMPruneShrinkageLikelihood' id="contTreeLikelihood.$(n)" data="@$(n)" delta="0.1" includePopVar="true" deltaVar="0.0">
 			<populationTraits idref="oneTraitData"/>
