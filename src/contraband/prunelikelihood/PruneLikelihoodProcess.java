@@ -9,6 +9,8 @@ import beast.base.inference.parameter.RealParameter;
 import beast.base.evolution.branchratemodel.BranchRateModel;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import contraband.math.MatrixUtilsContra;
@@ -77,39 +79,53 @@ public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
     protected void processContinuousAlignment() {
         Alignment aln = dataInput.get();
         List<String> taxaNames = aln.getTaxaNames();
+        List<String> taxaNamesForString = new ArrayList<>();
         nTraits = aln.getMaxStateCount();
         nSpeciesWithData = aln.getTaxonCount();
         final Double[] traits = new Double[nTraits * nSpeciesWithData];
 
         final StringBuilder traitValues = new StringBuilder();
-        final StringBuilder taxonSet = new StringBuilder();
-
         int k = 0;
         for(String taxon : taxaNames){
-            if(k == 0) {
-                taxonSet.append(taxon);
-            } else {
-                taxonSet.append(" ").append(taxon);
-            }
+            taxaNamesForString.add(taxon);
 
             String taxonStr = aln.getSequenceAsString(taxon);
             String[] strSplit = taxonStr.split(",");
 
-            for(int i = 0; i < strSplit.length; i++){
-                traits[k] = Double.parseDouble(strSplit[i]);
+            for(int i = 0; i < strSplit.length; i++) {
 
-                if(k == 0) {
-                    traitValues.append(strSplit[i]);
+                if (strSplit[i].equals("?") || strSplit[i].equals("-")) {
+                    nSpeciesWithData = nSpeciesWithData - 1;
+                    taxaNamesForString.remove(taxon);
+                    break;
                 } else {
-                    traitValues.append(" ").append(strSplit[i]);
+                    traits[k] = Double.parseDouble(strSplit[i]);
+
+                    if (k == 0) {
+                        traitValues.append(strSplit[i]);
+                    } else {
+                        traitValues.append(" ").append(strSplit[i]);
+                    }
+
+                    k = k + 1;
                 }
 
-                k = k + 1;
             }
         }
-        traitsValues = new RealParameter(traits);
-        traitsValues.initByName("keys", taxonSet.toString(), "minordimension", nTraits, "value", traitValues.toString());
 
+        final StringBuilder taxonSet = new StringBuilder();
+        k = 0;
+        for(String taxon : taxaNamesForString) {
+            if (k == 0) {
+                taxonSet.append(taxon);
+            } else {
+                taxonSet.append(" ").append(taxon);
+            }
+            k = k + 1;
+        }
+
+        traitsValues = new RealParameter(traits);
+        traitsValues.initByName("keys", taxonSet.toString(), "dimension", nSpeciesWithData * nTraits, "minordimension", nTraits, "value", traitValues.toString());
     }
 
     protected void populateLogP() {

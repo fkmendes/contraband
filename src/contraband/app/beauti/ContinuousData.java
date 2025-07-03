@@ -87,7 +87,6 @@ public class ContinuousData extends DataType.Base {
 
             } else if (c == '}') {
                 amb.clear();
-                int a = codeMapping.indexOf(ambStr);
                 sequence.add(codeMapping.indexOf(ambStr));
                 ambStr = "";
             } else {
