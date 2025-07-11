@@ -4,14 +4,14 @@
 
     <mergewith point='aux-partitions-panels'>
 
-        <panel spec="beastfx.app.inputeditor.BeautiPanelConfig" panelname="Shrinkage Model"
+        <panel spec="beastfx.app.inputeditor.BeautiPanelConfig" panelname="Instraspecific"
                tiptext="Brownian motion model specifications"
                path=""
                type="contraband.prunelikelihood.BMPruneShrinkageLikelihood"
                hasPartitions="Partition" icon="3.pngx" forceExpansion="TRUE"/>
 
 
-        <alignmentProvider id="Add continuous Data" spec="contraband.app.beauti.BeautiContrabandAlignmentProvider" template="@shrinkageTrait"/>
+        <alignmentProvider id="Add continuous data" spec="contraband.app.beauti.BeautiContrabandAlignmentProvider" template="@shrinkageTrait"/>
 
         <subtemplate id='shrinkageTrait' class='beast.base.evolution.alignment.Alignment' mainid='$(n)'
                      suppressInputs = 'contraband.prunelikelihood.BMPruneShrinkageLikelihood.popVar,

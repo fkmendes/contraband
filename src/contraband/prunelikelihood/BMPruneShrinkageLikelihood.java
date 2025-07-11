@@ -115,6 +115,15 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
 
         } else {
             traitRM = new Array2DRowRealMatrix(new double[nSpecies][nTraits]);
+            StringBuilder indNames = new StringBuilder();
+            for(int i = 0; i < nSpecies; i++) {
+                if(i == 0) {
+                    indNames.append("Sp_").append(i);
+                } else {
+                    indNames.append(" ").append("Sp_").append(i);
+                }
+            }
+            traitsValues.initByName("keys", indNames.toString());
             String[] keys = traitsValues.getKeys();
             for (int i = 0; i < nSpecies; i++) {
                 // get all traits values for this species
