@@ -1,4 +1,4 @@
-<addon name="contraband" version="1.0.1">
+<package name="contraband" version="1.0.1">
 	<depends on='BEAST.base' atleast='2.7.0'/>
 	<depends on='BEAST.app' atleast='2.7.0'/>
 
@@ -38,4 +38,4 @@
 
 
 	
-</addon>
+</package>

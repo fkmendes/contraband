@@ -7,7 +7,6 @@
 	</description>
 
 	<!-- set global properties for this build -->
-	<property name="versioncontraband" value="1.0.1" />
 	<property name="srccontraband" location="src" />
 	<property name="doccontraband" location="doc" />
 	<property name="buildcontraband" location="build" />
@@ -46,6 +45,11 @@
 	<!-- start -->
 	<target name="initcontraband">
 		<echo message="${ant.project.name}: ${ant.file}" />
+
+        <!-- Read package name and version from xml file -->
+        <xmlproperty file="version.xml" prefix="fromVersionFile" />
+        <property name="projName" value="${fromVersionFile.package(name)}" />
+        <property name="projVersion" value="${fromVersionFile.package(version)}" />
 	</target>
 
 	<target name="cleancontraband">
@@ -58,7 +62,7 @@
 	</target>
 
 	<!-- clean previous build, compile Java source code, and Junit test, and make the beast.jar and beauti.jar -->
-	<target name="build_jar_all_contraband" depends="cleancontraband,compile-allcontraband,junitcontraband,dist_all_contraband,addon"
+	<target name="build_jar_all_contraband" depends="cleancontraband,compile-allcontraband,junitcontraband,dist_all_contraband,package"
         description="Clean and Build all run-time stuff">
 	</target>
 
@@ -129,7 +133,7 @@
 				<include name="**/*.xsl" />
 			</fileset>
         </jar>
-		<jar jarfile="${distcontraband}/contraband.addon.jar">
+		<jar jarfile="${distcontraband}/contraband.package.jar">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
 			</manifest>
@@ -174,9 +178,11 @@
 
 
 
-	<target name="addon"
+	<target name="package"
 	        depends="build_jar_all_contraband_NoJUnitTest"
 	        description="release BEAST 2 add-on version of contraband">
+
+        <property name="fullName" value="${projName}.package.v${projVersion}"/>
 
 		<delete dir="${Add_on_dir}" />
 		<!-- Create the release directory -->
@@ -198,7 +204,7 @@
 		</copy>
 		-->
 		<copy todir="${Add_on_dir}/lib">
-			<fileset dir="${distcontraband}" includes="contraband.addon.jar" />
+			<fileset dir="${distcontraband}" includes="contraband.package.jar" />
 		</copy>
 		<copy todir="${Add_on_dir}">
 			<fileset dir="${distcontraband}" includes="contraband.src.jar" />
@@ -210,13 +216,38 @@
 		</copy>
 
 
-		<jar jarfile="${distcontraband}/contraband.addon.v${versioncontraband}.zip">
+		<jar jarfile="${distcontraband}/${fullName}.zip">
 			<fileset dir="${Add_on_dir}">
 				<include name="**/*" />
 			</fileset>
         </jar>
-		<echo message="Add-on version v${versioncontraband} release is finished." />
+		<echo message="Add-on version v${projVersion} release is finished." />
 	</target>
+
+
+
+
+	 	<condition property="isWindows"><os family="windows" /></condition>
+        <condition property="isLinux"><and><os family="unix"/><not><os family="mac"/></not></and></condition>
+        <condition property="isMac"><os family="mac" /></condition>
+
+        <target name="installLinux" depends="initcontraband,package" if="isLinux">
+                <mkdir dir="${user.home}/.beast/2.7/${projName}"/>
+                        <unzip src="${distcontraband}/${fullName}.zip" dest="${user.home}/.beast/2.7/${projName}"/>
+        </target>
+
+        <target name="installMac" depends="initcontraband,package" if="isMac">
+                <mkdir dir="${user.home}/.beast/2.7/${projName}"/>
+                        <unzip src="${distcontraband}/${fullName}.zip" dest="${user.home}/Library/Application Support/BEAST/2.7/${projName}"/>
+        </target>
+
+        <target name="installWindows" depends="initcontraband,package" if="isWindows">
+                <mkdir dir="${user.home}/BEAST/2.7/${projName}"/>
+                        <unzip src="${distcontraband}/${fullName}.zip" dest="${user.home}/BEAST/2.7/${projName}"/>
+        </target>
+
+        <target name="install" depends="installWindows,installMac,installLinux">
+        </target>
 
 
 
