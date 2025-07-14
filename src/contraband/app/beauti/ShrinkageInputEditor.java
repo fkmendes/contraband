@@ -33,7 +33,7 @@ public class ShrinkageInputEditor extends BEASTObjectInputEditor {
 	@Override
 	public Class<?> type() {
 
-		return BMPruneShrinkageLikelihood.class;
+		return NodeMath.class;
 	}
 
 	@Override

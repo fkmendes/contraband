@@ -4,24 +4,10 @@
 
     <mergewith point='aux-partitions-panels'>
 
-        <panel spec="beastfx.app.inputeditor.BeautiPanelConfig" panelname="Continuous Model"
-               tiptext="Brownian motion model specifications"
-               path=""
-               type="contraband.prunelikelihood.BMPruneLikelihood"
-               hasPartitions="Tree" icon="3.pngx" forceExpansion="TRUE"/>
-
 
         <alignmentProvider id="Add Continuous Data" spec="contraband.app.beauti.BeautiContrabandAlignmentProvider" template="@contTrait"/>
 
         <subtemplate id='contTrait' class='beast.base.evolution.alignment.Alignment' mainid='$(n)'
-                     suppressInputs = 'contraband.prunelikelihood.BMPruneLikelihood.siteModel,
-                     contraband.prunelikelihood.BMPruneLikelihood.tree,
-                     contraband.prunelikelihood.BMPruneLikelihood.data,
-                     contraband.prunelikelihood.BMPruneLikelihood.branchRateModel,
-                     contraband.math.NodeMath.traits,
-                     contraband.math.NodeMath.shrinkage,
-                     contraband.math.NodeMath.covariance,
-                     contraband.math.NodeMath.tree'
         >
             <![CDATA[
 			<tree id="Tree.t:$(n)" name="stateNode">
@@ -34,24 +20,26 @@
 				<shape               spec='parameter.RealParameter' id='gammaShape.s:$(n)' value='1.0' lower='0.1' estimate='false'/>
 			</plugin>
 
-			<plugin id="pcmNodeMath.c:$(n)" spec="contraband.math.NodeMath" traits="@$(n)" tree="@Tree.t:$(n)">
+			<plugin id="pcmNodeMath.s:$(n)" spec="contraband.math.NodeMath" traits="@$(n)" tree="@Tree.t:$(n)">
             	<sigmasq id="varValues.t:$(n)" spec="parameter.RealParameter">1.0</sigmasq>
             	<correlation id="covValues.t:$(n)" spec="parameter.RealParameter" lower='-1.0' upper='1.0'>0.1</correlation>
                 <rootValues id="rootValues.t:$(n)" spec="parameter.RealParameter">0.0</rootValues>
             </plugin>
+
+
 
             <plugin spec='YuleModel' id="YuleModel.t:$(n)" tree='@Tree.t:$(n)'>
                 <parameter name='birthDiffRate' id="birthRate.t:$(n)" lower="0.0" value='1.0' estimate='true'/>
             </plugin>
 
 
-			<distribution spec='contraband.prunelikelihood.BMPruneLikelihood' id="contTreeLikelihood.$(n)" data="@$(n)">
+			<plugin spec='contraband.prunelikelihood.BMPruneLikelihood' id="contTreeLikelihood.$(n)" data="@$(n)">
             <tree idref="Tree.t:$(n)"/>
-            <nodeMath idref="pcmNodeMath.c:$(n)"/>
+            <nodeMath idref="pcmNodeMath.s:$(n)"/>
             <branchRateModel spec='StrictClockModel' id='StrictClock.c:$(n)'>
                <clock.rate id='clockRate.c:$(n)' spec='parameter.RealParameter' lower="0.0" value='1.0' estimate='false'/>
             </branchRateModel>
-            </distribution>
+            </plugin>
             <tree spec='beast.base.evolution.tree.coalescent.RandomTree' id='RandomTree.t:$(n)' estimate='false' initial="@Tree.t:$(n)">
                 <taxa idref='data'/>
                 <populationModel id='ConstantPopulation0.t:$(n)' spec='ConstantPopulation'>
@@ -167,6 +155,56 @@
             <connect srcID='covValues.t:$(n)' 		  		  targetID='tracelog' inputName='log' if='inlikelihood(covValues.t:$(n)) and covValues.t:$(n)/estimate=true'/>
             <connect srcID='rootValues.t:$(n)' 	              targetID='tracelog' inputName='log' if='inlikelihood(rootValues.t:$(n)) and rootValues.t:$(n)/estimate=true'/>
 
+        </subtemplate>
+    </mergewith>
+
+    <mergewith point='substModelTemplates'>
+
+        <!-- BM model -->
+        <subtemplate id='Brownian motion' class='contraband.math.NodeMath' mainid='pcmNodeMath.s:$(n)'
+                     suppressInputs=" contraband.math.NodeMath.traits,
+                     contraband.math.NodeMath.tree,
+                     contraband.math.NodeMath.populationTraits,
+                     contraband.math.NodeMath.covariance,
+                     contraband.math.NodeMath.shrinkage,
+                     contraband.math.NodeMath.delta"
+        >
+            <![CDATA[
+    <plugin spec='contraband.math.NodeMath' id='pcmNodeMath.s:$(n)'/>
+]]>
+        </subtemplate>
+    </mergewith>
+
+
+    <mergewith point='substModelTemplates'>
+
+        <!-- BM model with instraspecific data -->
+        <subtemplate id='Instraspecific' class='contraband.math.NodeMath' mainid='pcmNodeMathS.s:$(n)'
+                     suppressInputs=" contraband.math.NodeMath.traits,
+                     contraband.math.NodeMath.tree,
+                     contraband.math.NodeMath.correlation,
+                     contraband.math.NodeMath.covariance,
+                     contraband.math.NodeMath.upperMatrix,
+                     contraband.math.NodeMath.rootValues"
+        >
+            <![CDATA[
+
+     <plugin  id="pcmNodeMathS.s:$(n)" spec="contraband.math.NodeMath" traits="@$(n)" tree="@Tree.t:$(n)" shrinkage="true" oneRateOnly="true">
+           <sigmasq id="varValues.t:$(n)" spec="parameter.RealParameter" estimate="false">1.0</sigmasq>
+           <populationTraits idref="oneTraitData"/>
+     </plugin >
+      <plugin id="oneTraitData" spec="parameter.RealParameter" estimate="false" value='1.0'/>
+
+       <plugin spec='contraband.prunelikelihood.BMPruneShrinkageLikelihood' id="contTreeLikelihood.$(n)" data="@$(n)" delta="0.1" includePopVar="true" deltaVar="0.0">
+			<populationTraits idref="oneTraitData"/>
+            <tree idref="Tree.t:$(n)"/>
+            <nodeMath idref="pcmNodeMathS.s:$(n)"/>
+            <branchRateModel spec='StrictClockModel' id='StrictClock.c:$(n)'>
+               <clock.rate id='clockRate.c:$(n)' spec='parameter.RealParameter' lower="0.0" value='1.0' estimate='false'/>
+            </branchRateModel>
+       </plugin>
+
+]]>
         </subtemplate>
     </mergewith>
 

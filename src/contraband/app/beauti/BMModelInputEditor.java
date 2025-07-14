@@ -3,14 +3,18 @@ package contraband.app.beauti;
 import beast.base.core.BEASTInterface;
 import beast.base.core.Input;
 import beastfx.app.inputeditor.*;
+import contraband.math.NodeMath;
 import contraband.prunelikelihood.BMPruneLikelihood;
+import contraband.prunelikelihood.BMPruneShrinkageLikelihood;
+import javafx.scene.control.TextField;
 
 
 public class BMModelInputEditor extends BEASTObjectInputEditor {
 
 
 	BEASTObjectInputEditor nodeMathEditor;
-
+	ParameterInputEditor popTraitsEditor;
+	TextField popTraitsEntry;
 
 	public BMModelInputEditor() {
 		super();
@@ -21,7 +25,7 @@ public class BMModelInputEditor extends BEASTObjectInputEditor {
 
 	@Override
 	public Class<?> type() {
-		return BMPruneLikelihood.class;
+		return NodeMath.class;
 	}
 
 	@Override
@@ -35,15 +39,18 @@ public class BMModelInputEditor extends BEASTObjectInputEditor {
 	}
 
 
-	public InputEditor createNodeMathEditor() {
-		BMPruneLikelihood lik = (BMPruneLikelihood) m_input.get();
-		final Input<?> input = lik.nodeMathInput;
+	public InputEditor createPopulationTraitsEditor() {
 
-		nodeMathEditor = new BEASTObjectInputEditor(doc);
-		nodeMathEditor.init(input, lik, -1, ExpandOption.TRUE, true);
+		NodeMath nodeMath = (NodeMath) m_input.get();
 
-		nodeMathEditor.validateInput();
-		return nodeMathEditor;
+		final Input<?> input = nodeMath.populationTraitsInput;
+
+		popTraitsEditor = new ParameterInputEditor(doc);
+		popTraitsEditor.init(input, nodeMath, -1, ExpandOption.TRUE, true);
+		popTraitsEntry = popTraitsEditor.getEntry();
+
+		popTraitsEditor.validateInput();
+		return popTraitsEditor;
 	}
 
 

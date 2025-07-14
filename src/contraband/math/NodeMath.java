@@ -1,6 +1,8 @@
 package contraband.math;
 
 import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.sitemodel.SiteModelInterface;
 import beast.base.inference.CalculationNode;
 import beast.base.core.Input;
 import beast.base.inference.parameter.RealParameter;
@@ -13,7 +15,7 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.util.FastMath;
 
-public class NodeMath extends CalculationNode {
+public class NodeMath extends CalculationNode implements SiteModelInterface {
     final public Input<Alignment> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     //final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Evolutionary rates of traits. Diagonal elements in rate matrix.", Input.Validate.REQUIRED);
@@ -24,6 +26,11 @@ public class NodeMath extends CalculationNode {
     final public Input<Boolean> useShrinkageInput = new Input<>("shrinkage", "TRUE, if shrinkage method is used to estimate the trait correlations.", false);
     final public Input<RealParameter> covarianceInput = new Input<>("covariance", "cov_ij = sigma_i * sigma_j * rho_ij.");
     final public Input<Tree> treeInput = new Input<>("tree", "Tree object containing tree.");
+    final public Input<RealParameter> populationTraitsInput = new Input<>("populationTraits","Trait values for calculating the population noise.");
+    final public Input<Double> deltaInput = new Input<>("delta", "Shrinkage parameter for correlations, either sampled or given.");
+
+
+
 
     private Integer nTraits;
     private Integer nSpecies;
@@ -784,5 +791,10 @@ public class NodeMath extends CalculationNode {
         nodeExpectation = storedNodeExpectation;
         storedNodeExpectation = tempNodeExpectation;
 */
+    }
+
+    @Override
+    public void setDataType(DataType dataType) {
+
     }
 }

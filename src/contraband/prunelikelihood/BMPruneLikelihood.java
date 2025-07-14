@@ -41,7 +41,7 @@ public class BMPruneLikelihood extends PruneLikelihoodProcess {
     @Override
     public double calculateLogP() {
         boolean updateTraitRateMatrix = false;
-        if(InputUtil.isDirty(nodeMathInput)) {
+        if(InputUtil.isDirty(siteModelInput)) {
             // update parameters if some parameters are dirty
             updateTraitRateMatrix = getNodeMath().updateParameters();
         }

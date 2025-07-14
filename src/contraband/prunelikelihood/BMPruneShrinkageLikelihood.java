@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Random;
 
 public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
-    final public Input<Double> deltaInput = new Input<>("delta", "Shrinkage parameter for correlations, either sampled or given.");
+    //final public Input<Double> deltaInput = new Input<>("delta", "Shrinkage parameter for correlations, either sampled or given.");
     final public Input<Boolean> includePopVarInput = new Input<>("includePopVar", "if including population variance or not.", false);
     final public Input<RealParameter> popVarInput = new Input<>("popVar", "population variance.");
     final public Input<Double> deltaVarInput = new Input<>("deltaVar", "Shrinkage parameter for population variance, either sampled or given.");
@@ -30,10 +30,10 @@ public class BMPruneShrinkageLikelihood extends PruneLikelihoodProcess {
         super.initAndValidate();
 
         // get delta: shrinkage parameter
-        if (deltaInput.get() == null) {
+        if (getNodeMath().deltaInput.get() == null) {
             throw new RuntimeException("BMPruneShrinkageLikelihood::NodeMath is required for pmc likelihood.");
         }
-        delta = deltaInput.get();
+        delta = getNodeMath().deltaInput.get();
 
         // the real matrix that has the trait values for species
         traitRM = new Array2DRowRealMatrix(new double[getNumberOfSpeciesWithData()][getNTraits()]);
