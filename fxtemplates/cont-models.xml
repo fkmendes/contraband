@@ -68,7 +68,7 @@
         	<operator id="rootValuesRandomWalker.t:$(n)" spec='beast.base.inference.operator.RealRandomWalkOperator' windowSize="0.5" weight="10.0" parameter="@rootValues.t:$(n)"/>
 
         	<operator id='StrictClockRateScalerX.c:$(n)' spec='kernel.BactrianScaleOperator' scaleFactor="0.75" weight="3" parameter='@clockRate.c:$(n)'/>
-			<operator id='strictClockUpDownOperatorX.c:$(n)' spec='kernel.BactrianUpDownOperator' scaleFactor="0.75" weight="3">
+			<operator id='strictClockUpDownOperator.c:$(n)' spec='kernel.BactrianUpDownOperator' scaleFactor="0.75" weight="3">
 				<up idref="clockRate.c:$(n)"/>
 				<down idref="Tree.t:$(n)"/>
 			</operator>
@@ -189,7 +189,7 @@
         >
             <![CDATA[
 
-     <plugin  id="pcmNodeMathS.s:$(n)" spec="contraband.math.NodeMath" traits="@$(n)" tree="@Tree.t:$(n)" shrinkage="true" oneRateOnly="true">
+     <plugin  id="pcmNodeMathS.s:$(n)" spec="contraband.math.NodeMath" traits="@$(n)" tree="@Tree.t:$(n)" shrinkage="true" oneRateOnly="true" delta="0.1">
            <sigmasq id="varValues.t:$(n)" spec="parameter.RealParameter" estimate="false">1.0</sigmasq>
            <populationTraits idref="oneTraitData"/>
      </plugin >

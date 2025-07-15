@@ -49,7 +49,11 @@ public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
 
         // get the tree
         tree = (Tree) treeInput.get();
-        nSpecies = tree.getLeafNodeCount();
+        if(tree.getNodeCount() == -1) {
+            nSpecies = 3; //only for
+        } else {
+            nSpecies = tree.getLeafNodeCount();
+        }
 
 
         // get clock model
