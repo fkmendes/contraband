@@ -15,9 +15,12 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.util.FastMath;
 
+import java.sql.SQLOutput;
+import java.util.Arrays;
+
 public class NodeMath extends CalculationNode implements SiteModelInterface {
     final public Input<Alignment> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
-    //final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
+//    final public Input<KeyRealParameter> traitsValuesInput = new Input<>("traits","Trait values at tips.", Input.Validate.REQUIRED);
     final public Input<RealParameter> sigmasqInput = new Input<>("sigmasq", "Evolutionary rates of traits. Diagonal elements in rate matrix.", Input.Validate.REQUIRED);
     final public Input<RealParameter> rhoInput = new Input<>("correlation", "Correlations of traits. Off-diagonal elements in rate matrix.");
     final public Input<Boolean> oneRateOnlyInput = new Input<>("oneRateOnly", "TRUE, if all traits share one evolutionary rate.", false);
@@ -99,8 +102,8 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
     private double[] storedSigmaValues;
     private double[] storedRhoValues;
     private double [] storedTraitRateMatrix;
-    //private double [] storedNodeVariance;
-    //private double [] storedNodeExpectation;
+    private double [] storedNodeVariance;
+    private double [] storedNodeExpectation; //TODO: shall use this for MCMC?
 
     // shrinkage
     private Boolean useShrinkage;
@@ -195,7 +198,8 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
         //storedNodeVariance = new double [nodeNr];
         // each node has its expectation = weight average of trait values from descendants
         nodeExpectation = new double [nTraits * nodeNr];
-        //storedNodeExpectation = new double [nTraits * nodeNr];
+        storedNodeExpectation = new double [nTraits * nodeNr];
+
         // initialize expectation
         expect1 = new double [nTraits];
         expect2 = new double [nTraits];
@@ -254,6 +258,7 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
         nodeVariance = new double [nodeNr];
         nodeExpectation = new double [nTraits * nodeNr];
     }
+
 
     //getters
     public boolean isSingularMatrix () { return singularMatrix; }
@@ -319,9 +324,21 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
 
     /*
      * expectation of a tip --> observed trait values
-     * expectation of an internal node (MLE) --> (m1 * v2 + m2 * v2) / (v1 + v2)
+     * expectation of an internal node (MLE) --> (m1 * v2 + m2 * v1) / (v1 + v2) - average (ML estimate)
      */
+
     public double[] getExpectationForNode (int nodeIdx) {
+        double[] exp = new double[nTraits]; // also the MLK - implement a getter to get the exp
+        MatrixUtilsContra.getMatrixRow(nodeExpectation, nodeIdx, nTraits, exp); //only get for the internal nodes
+        return exp;
+    }
+
+    //Get internalnodes MLE only
+    public double[] getInternalNodeExpectation(int nodeIdx) {
+        if (nodeIdx < nSpecies) {
+            throw new IllegalArgumentException("Node " + nodeIdx + " is not an internal node.");
+        }
+
         double[] exp = new double[nTraits];
         MatrixUtilsContra.getMatrixRow(nodeExpectation, nodeIdx, nTraits, exp);
         return exp;
@@ -380,8 +397,12 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
         double vc1 = nodeVariance[child1Idx];
         double vc2 = nodeVariance[child2Idx];
         nodeVariance[parentIdx] = branchLength + ((vc1 * vc2)/(vc1 + vc2));
+//        System.out.println("Parent " + parentIdx + ":");
+//        System.out.println("  vc1 = " + vc1 + " vc2 = " + vc2);
+//        System.out.println("  nodeVariance = " + nodeVariance[parentIdx]);
     }
 
+    //seetter to keep pruning
     public void setExpectationForParent (int parentIdx, int child1Idx, int child2Idx) {
         double vc1 = nodeVariance[child1Idx];
         double vc2 = nodeVariance[child2Idx];
@@ -391,6 +412,10 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
         MatrixUtilsContra.vectorMapMultiply(expect2, vc1/(vc1+vc2), expect2);
         MatrixUtilsContra.vectorAdd(expect1, expect2, expectp);
         MatrixUtilsContra.setMatrixRow(nodeExpectation, expectp, parentIdx, nTraits);
+//        System.out.println("Parent " + parentIdx + ":");
+//        System.out.println("  vc1 = " + vc1 + " vc2 = " + vc2);
+//        System.out.println("  nodeExpectation = " + nodeExpectation[parentIdx]);
+
     }
 
     public void setNTraits (int value) { nTraits = value; }
@@ -723,6 +748,8 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
         System.arraycopy(nodeVariance, 0, storedNodeVariance, 0, nodeNr);
         System.arraycopy(nodeExpectation, 0, storedNodeExpectation, 0, nodeNr * nTraits);
 */
+        System.arraycopy(nodeExpectation, 0, storedNodeExpectation, 0, nodeNr * nTraits);
+//        System.out.println("After store: " + Arrays.toString(nodeExpectation));
     }
 
     @Override
@@ -791,6 +818,10 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
         nodeExpectation = storedNodeExpectation;
         storedNodeExpectation = tempNodeExpectation;
 */
+        double[] tempNodeExpectation = nodeExpectation;
+        nodeExpectation = storedNodeExpectation;
+        storedNodeExpectation = tempNodeExpectation;
+//        System.out.println("After restore: " + Arrays.toString(nodeExpectation));
     }
 
     @Override

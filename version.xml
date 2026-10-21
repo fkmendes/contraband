@@ -33,6 +33,10 @@
         <provider classname="contraband.app.beauti.BeautiContrabandAlignmentProvider"/>
         <provider classname="contraband.app.beauti.ContinuousData"/>
         <provider classname="contraband.app.beauti.ContDataParser"/>
+        <provider classname="contraband.clock.TraitLinearClockModel"/>
+        <provider classname="contraband.loggers.InternalNodesBodyMassLogger"/>
+        <provider classname="contraband.loggers.TreeStringLogger"/>
+
     </service>
 
 

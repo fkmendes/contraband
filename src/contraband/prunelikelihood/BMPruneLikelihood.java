@@ -122,6 +122,17 @@ public class BMPruneLikelihood extends PruneLikelihoodProcess {
     }
 
 
+    /**
+     * BEAST2's CompoundDistribution skips calculateLogP() for non-dirty distributions and calls
+     * getCurrentLogP() instead (returning cached logP). BMPruneLikelihood is never dirty when all
+     * its parameters (sigmasq, rho, tree) are fixed — but it MUST still run every step to
+     * populate NodeMath's nodeExpectation for TraitLinearClockModel. Override to always recompute.
+     */
+    @Override
+    public double getCurrentLogP() {
+        return calculateLogP();
+    }
+
     @Override
     protected void calculateLmrForTips(NodeMath nodeMath, double[] traitValuesArr, int nTraits, int nodeIdx) {
         PruneLikelihoodUtils.populateLmrForTip(nodeMath, traitValuesArr, nTraits, nodeIdx);

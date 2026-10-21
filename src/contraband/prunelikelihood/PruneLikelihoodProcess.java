@@ -183,6 +183,7 @@ public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
 
         // calculate likelihood in log space
         logP = calculateLikelihood(nodeMath, l0, m0, r0, rootIdx);
+//        System.out.println(logP);
     }
 
     // getters
@@ -228,7 +229,9 @@ public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
             }
 
             double branchLength = child.getLength() * pcmc.getRateForBranch(child);
-            if(branchLength < 1.0E-6) {nodeMath.setSingularMatrix(true);}
+//            if(branchLength < 1.0E-6) {nodeMath.setSingularMatrix(true);}
+//            TODO: only flag singularMatrix for real branches that are numerically zero, not for SA tips whose zero branch length is by design (not a numerical problem)
+            if(branchLength < 1.0E-6 && !child.isDirectAncestor()) {nodeMath.setSingularMatrix(true);}
             nodeMath.setVarianceForTip(childIdx, branchLength);
 
             // (1) child is a normal tip
@@ -332,7 +335,8 @@ public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
         } else {
             // estimate the node variance
             nodeMath.setVarianceForParent(thisNodeIdx, node.getLength() * pcmc.getRateForBranch(node), node.getChild(0).getNr(), node.getChild(1).getNr());
-
+//            System.out.println("Printing branchlength: " + node.getChild(0).getNr());
+//            System.out.println("Rate: " + pcmc.getRateForBranch(node));
             // estimate the node expectations
             nodeMath.setExpectationForParent(thisNodeIdx, node.getChild(0).getNr(), node.getChild(1).getNr());
         }
