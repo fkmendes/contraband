@@ -214,8 +214,8 @@
     <map name="OneOnX">beast.base.inference.distribution.OneOnX</map>
     
 	<!-- MC3 with 4 chians -->
-    <run id="mcmc" spec="coupledMCMC.CoupledMCMC" chainLength="50000000" chains="4" deltaTemperature="0.1" resampleEvery="1000" optimise="true" target="0.234" logHeatedChains="false">
-    
+<!--    <run id="mcmc" spec="coupledMCMC.CoupledMCMC" chainLength="50000000" chains="4" deltaTemperature="0.1" resampleEvery="1000" optimise="true" target="0.234" logHeatedChains="false">-->
+    <run id="mcmc" spec="MCMC" chainLength="50000000">
         <state id="state" spec="State" storeEvery="100000">
             <!-- use time tree for inference -->
             <tree id="Tree"
@@ -249,7 +249,7 @@
             <!--    Prior section     -->
             <distribution id="prior" spec="CompoundDistribution">
                 <!-- FBD tree -->
-                <distribution id="FBD" spec="beast.evolution.speciation.SABirthDeathModel" conditionOnRhoSampling="true" conditionOnRoot="true" tree="@Tree">
+                <distribution id="FBD" spec="sa.evolution.speciation.SABirthDeathModel" conditionOnRhoSampling="true" conditionOnRoot="true" tree="@Tree">
                     <parameter id="FBDbirthRate" estimate="false" name="birthRate">0.1</parameter>
                     <parameter id="FBDdeathRate" estimate="false" name="deathRate">0.05</parameter>
                     <parameter id="FBDsamplingRate" estimate="false" name="samplingRate">0.01</parameter>
@@ -287,7 +287,7 @@
             </distribution>
 
             <!--    Likelihood section     -->
-            <distribution id="likelihood" spec="CompoundDistribution" useThreads="true">
+            <distribution id="likelihood" spec="CompoundDistribution" useThreads="false"> <!-- trait likelihood must finish (and run the tipward pass) before TraitLinearClock is read -->
                 <distribution id="contTreeLikelihood" spec="contraband.prunelikelihood.BMPruneLikelihood" data="@traitAlignment" tree="@Tree">
                     <nodeMath id="NodeMath" spec="contraband.math.NodeMath" oneRateOnly="true" traits="@traitAlignment" tree="@Tree" rootValues="@rootValue">
                         <parameter spec="parameter.RealParameter" estimate="false" name="sigmasq">1.0</parameter>

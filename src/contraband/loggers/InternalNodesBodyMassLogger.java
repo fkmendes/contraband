@@ -11,7 +11,7 @@ import contraband.math.NodeMath;
 
 import java.io.PrintStream;
 
-@Description("Logs body mass (ML trait expectation from NodeMath) and branch rate " +
+@Description("Logs body mass (trait mean given all the data, from NodeMath) and branch rate " +
         "for every node into a tab-separated log file. " +
         "Use TreeStringLogger in the same <logger> block to also record the tree.")
 public class InternalNodesBodyMassLogger extends BEASTObject implements Loggable {
@@ -92,14 +92,8 @@ public class InternalNodesBodyMassLogger extends BEASTObject implements Loggable
         for (int i = 0; i < nodeCount; i++) {
             Node node = tree.getNode(i);
 
-            double bodyMass;
-            if (node.isLeaf()) {
-                double[] observations = nodeMath.getExpectationForNode(node.getNr());
-                bodyMass = observations[traitIndex];
-            } else {
-                double[] expectation = nodeMath.getInternalNodeExpectation(node.getNr());
-                bodyMass = expectation[traitIndex];
-            }
+            // mean given all the data (tipward pass); for tips with data, the observed value
+            double bodyMass = nodeMath.getConditionalMean(node.getNr(), traitIndex);
             double rate = clockModel.getRateForBranch(node);
 
             out.print(bodyMass + "\t");

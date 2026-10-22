@@ -105,6 +105,20 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
     private double [] storedNodeVariance;
     private double [] storedNodeExpectation; //TODO: shall use this for MCMC?
 
+    // tipward (pre-order) pass
+    // branchVariance[i]: rate-scaled length of the branch above node i (t_i)
+    // varianceAtNode[i]: variance of nodeExpectation[i] at node i given the data below i (w_i);
+    //                    nodeVariance[i] = w_i + t_i for nodes with data below them
+    // preOrderMean / preOrderPrecision: distribution of node i given all data NOT below i (n_i, q_i)
+    // conditionalMean: mean of node i given all data (M_i)
+    private boolean requirePreOrder = false;
+    private double [] branchVariance;
+    private double [] varianceAtNode;
+    private double [] preOrderMean;
+    private double [] preOrderPrecision;
+    private double [] conditionalMean;
+    private double [] storedConditionalMean;
+
     // shrinkage
     private Boolean useShrinkage;
     private RealMatrix unbiasedRhoRM;
@@ -200,6 +214,14 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
         nodeExpectation = new double [nTraits * nodeNr];
         storedNodeExpectation = new double [nTraits * nodeNr];
 
+        // tipward (pre-order) pass
+        branchVariance = new double [nodeNr];
+        varianceAtNode = new double [nodeNr];
+        preOrderMean = new double [nTraits * nodeNr];
+        preOrderPrecision = new double [nodeNr];
+        conditionalMean = new double [nTraits * nodeNr];
+        storedConditionalMean = new double [nTraits * nodeNr];
+
         // initialize expectation
         expect1 = new double [nTraits];
         expect2 = new double [nTraits];
@@ -252,11 +274,18 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
         }
     }
 
+    /*
+     * Resets the per-node statistics before each pruning pass.
+     * Arrays are zero-filled in place (rather than re-allocated), so that the
+     * references swapped in store()/restore() remain the ones being written to.
+     */
     public void initializeNodeStatArrays(){
-        speciesToIgnoreIndex = new int[2 * nSpecies - 1];
-        nodeAsTip = new boolean[2 * nSpecies - 1];
-        nodeVariance = new double [nodeNr];
-        nodeExpectation = new double [nTraits * nodeNr];
+        Arrays.fill(speciesToIgnoreIndex, 0);
+        Arrays.fill(nodeAsTip, false);
+        Arrays.fill(nodeVariance, 0.0);
+        Arrays.fill(nodeExpectation, 0.0);
+        Arrays.fill(branchVariance, 0.0);
+        Arrays.fill(varianceAtNode, 0.0);
     }
 
 
@@ -396,7 +425,8 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
     public void setVarianceForParent (int parentIdx, double branchLength, int child1Idx, int child2Idx) {
         double vc1 = nodeVariance[child1Idx];
         double vc2 = nodeVariance[child2Idx];
-        nodeVariance[parentIdx] = branchLength + ((vc1 * vc2)/(vc1 + vc2));
+        varianceAtNode[parentIdx] = (vc1 * vc2)/(vc1 + vc2);
+        nodeVariance[parentIdx] = branchLength + varianceAtNode[parentIdx];
 //        System.out.println("Parent " + parentIdx + ":");
 //        System.out.println("  vc1 = " + vc1 + " vc2 = " + vc2);
 //        System.out.println("  nodeVariance = " + nodeVariance[parentIdx]);
@@ -416,6 +446,128 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
 //        System.out.println("  vc1 = " + vc1 + " vc2 = " + vc2);
 //        System.out.println("  nodeExpectation = " + nodeExpectation[parentIdx]);
 
+    }
+
+    /*
+     * Tipward (pre-order) pass
+     *
+     * After the rootward pass, each node i holds the mean m_i (nodeExpectation) and the
+     * variance w_i (varianceAtNode) of its trait value given the data below it, and the
+     * rate-scaled length t_i of the branch above it (branchVariance). The traits share the
+     * same tree-structured variance (the trait rate matrix factors out), so all of these
+     * are scalars per node and the trait rate matrix does not enter the means.
+     *
+     * The tipward pass computes, for each node i, the distribution of its trait value given
+     * all the data NOT below it, with mean n_i and precision q_i (as in BEAST's
+     * ContinuousDiffusionIntegrator.Basic.updatePreOrderPartial, and Eq. A.20-A.21 in
+     * Bastide et al. 2021), and then combines it with (m_i, 1/w_i) to obtain the mean of
+     * node i given all the data, M_i (Eq. A.25 in Bastide et al. 2021).
+     *
+     * Infinite precisions (exact values: fixed root, sampled ancestors, observed tips) and
+     * zero precisions (no information: flat root prior, tips without data) are allowed.
+     */
+    public void setRequirePreOrder (boolean value) { requirePreOrder = value; }
+
+    public boolean requiresPreOrder () { return requirePreOrder; }
+
+    public boolean isRootFixed () { return sampleRoot; }
+
+    public void setBranchVariance (int nodeIdx, double value) { branchVariance[nodeIdx] = value; }
+
+    public double getBranchVariance (int nodeIdx) { return branchVariance[nodeIdx]; }
+
+    public void setVarianceAtNode (int nodeIdx, double value) { varianceAtNode[nodeIdx] = value; }
+
+    public double getVarianceAtNode (int nodeIdx) { return varianceAtNode[nodeIdx]; }
+
+    public double getPreOrderPrecision (int nodeIdx) { return preOrderPrecision[nodeIdx]; }
+
+    public double[] getPreOrderMeanForNode (int nodeIdx) {
+        double[] mean = new double[nTraits];
+        MatrixUtilsContra.getMatrixRow(preOrderMean, nodeIdx, nTraits, mean);
+        return mean;
+    }
+
+    /* mean of the trait value at a node given all the data (tips, sampled ancestors, root) */
+    public double getConditionalMean (int nodeIdx, int traitIdx) {
+        return conditionalMean[nodeIdx * nTraits + traitIdx];
+    }
+
+    public double[] getConditionalMeanForNode (int nodeIdx) {
+        double[] mean = new double[nTraits];
+        MatrixUtilsContra.getMatrixRow(conditionalMean, nodeIdx, nTraits, mean);
+        return mean;
+    }
+
+    /*
+     * Initializes the pre-order partial at the root:
+     * root values given (and sampled) -> the root is known exactly (q = infinity, n = root values);
+     * otherwise -> flat prior on the root (q = 0, n is irrelevant and set to the rootward mean).
+     */
+    public void calculatePreOrderRoot (int rootIdx, double belowPrecision) {
+        int ro = rootIdx * nTraits;
+        if (sampleRoot) {
+            System.arraycopy(rootValuesVec, 0, preOrderMean, ro, nTraits);
+            preOrderPrecision[rootIdx] = Double.POSITIVE_INFINITY;
+        } else {
+            System.arraycopy(nodeExpectation, ro, preOrderMean, ro, nTraits);
+            preOrderPrecision[rootIdx] = 0.0;
+        }
+        updateConditionalMean(rootIdx, belowPrecision);
+    }
+
+    /*
+     * Pre-order partial of node i (child of k, sibling j):
+     *   q*_i = q_k + p_j,   n*_i = (q_k n_k + p_j m_j) / q*_i    (information at k not below i)
+     *   q_i  = 1 / (1/q*_i + t_i),   n_i = n*_i                   (moved down the branch above i)
+     * where p_j = 1/(w_j + t_j) is the precision of the sibling's rootward partial at k
+     * (0 if the sibling carries no data). This mirrors updatePreOrderPartial in BEAST.
+     */
+    public void updatePreOrderPartial (int parentIdx, int nodeIdx, int siblingIdx, double siblingPrecision) {
+        double pk = preOrderPrecision[parentIdx];
+        double weightParent = weightOfFirst(pk, siblingPrecision);
+        int ko = parentIdx * nTraits;
+        int io = nodeIdx * nTraits;
+        int jo = siblingIdx * nTraits;
+        for (int g = 0; g < nTraits; g++) {
+            preOrderMean[io + g] = (weightParent == 1.0) ? preOrderMean[ko + g] :
+                    weightParent * preOrderMean[ko + g] + (1.0 - weightParent) * nodeExpectation[jo + g];
+        }
+        // 1/0 = infinity and 1/infinity = 0 give the right limits here
+        double pip = pk + siblingPrecision;
+        preOrderPrecision[nodeIdx] = 1.0 / (1.0 / pip + branchVariance[nodeIdx]);
+    }
+
+    /*
+     * M_i = (q_i n_i + m_i / w_i) / (q_i + 1 / w_i), with belowPrecision = 1/w_i
+     * (infinity for exactly known values, 0 for tips without data).
+     * When both are infinite, the data at the node takes precedence.
+     */
+    public void updateConditionalMean (int nodeIdx, double belowPrecision) {
+        double weightAbove = Double.isInfinite(belowPrecision) ? 0.0 :
+                weightOfFirst(preOrderPrecision[nodeIdx], belowPrecision);
+        int io = nodeIdx * nTraits;
+        for (int g = 0; g < nTraits; g++) {
+            if (weightAbove == 1.0) {
+                conditionalMean[io + g] = preOrderMean[io + g];
+            } else if (weightAbove == 0.0) {
+                conditionalMean[io + g] = nodeExpectation[io + g];
+            } else {
+                conditionalMean[io + g] = weightAbove * preOrderMean[io + g] + (1.0 - weightAbove) * nodeExpectation[io + g];
+            }
+        }
+    }
+
+    /*
+     * weight of the first of two Gaussian sources of information (precisions pa and pb)
+     * in their precision-weighted mean; the first source wins ties between infinite
+     * precisions (as in BEAST), and gets all the weight when both precisions are 0.
+     */
+    private static double weightOfFirst (double pa, double pb) {
+        if (Double.isInfinite(pa)) return 1.0;
+        if (Double.isInfinite(pb)) return 0.0;
+        double sum = pa + pb;
+        return sum == 0.0 ? 1.0 : pa / sum;
     }
 
     public void setNTraits (int value) { nTraits = value; }
@@ -749,6 +901,7 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
         System.arraycopy(nodeExpectation, 0, storedNodeExpectation, 0, nodeNr * nTraits);
 */
         System.arraycopy(nodeExpectation, 0, storedNodeExpectation, 0, nodeNr * nTraits);
+        System.arraycopy(conditionalMean, 0, storedConditionalMean, 0, nodeNr * nTraits);
 //        System.out.println("After store: " + Arrays.toString(nodeExpectation));
     }
 
@@ -821,6 +974,10 @@ public class NodeMath extends CalculationNode implements SiteModelInterface {
         double[] tempNodeExpectation = nodeExpectation;
         nodeExpectation = storedNodeExpectation;
         storedNodeExpectation = tempNodeExpectation;
+
+        double[] tempConditionalMean = conditionalMean;
+        conditionalMean = storedConditionalMean;
+        storedConditionalMean = tempConditionalMean;
 //        System.out.println("After restore: " + Arrays.toString(nodeExpectation));
     }
 

@@ -74,8 +74,11 @@ import java.util.Arrays;
  *
  * Prerequisites
  *
- *   Internal-node log-body-mass expectations in NodeMath must be computed by a
- *   pruning-likelihood pass before getRateForBranch(Node) is called.
+ *   Node log-body-mass means in NodeMath must be computed by a pruning likelihood
+ *   (rootward + tipward passes; the tipward pass is switched on by this class) before
+ *   getRateForBranch(Node) is called. The pruning likelihood must therefore be evaluated
+ *   before the likelihood that uses this clock: list it first, in a CompoundDistribution
+ *   with useThreads="false".
  */
 @Description("Trait-driven log-linear clock model: log(r) = β·log(M) + log(α_i) + log(μ), " +
         "where log(M) is the branch mid-point log-body-mass, α_i is the per-branch raw rate " +
@@ -227,6 +230,17 @@ public class TraitLinearClockModel extends UCRelaxedClockModel {
         nodeMath   = nodeMathInput.get();
         traitIndex = traitIndexInput.get();
 
+        // node trait values must be on the original (log body-mass) scale; with the
+        // shrinkage likelihood they are computed on transformed (decorrelated) data
+        if (nodeMath.useShrinkage())
+            throw new IllegalArgumentException(
+                    "TraitLinearClockModel: NodeMath with shrinkage=true is not supported " +
+                            "(node trait values would be on the transformed scale).");
+
+        // ask the pruning likelihood to also run the tipward pass, so that every node
+        // has its trait mean given all the data (not only the data below it)
+        nodeMath.setRequirePreOrder(true);
+
         // ═══ CENTERING CHANGE — revert by removing this block ═══════════════════════
         // Reads directly from the trait Alignment — safe at init, no pruning pass needed.
         // Comma-split matches processContinuousAlignment() in PruneLikelihoodProcess.
@@ -337,13 +351,16 @@ public class TraitLinearClockModel extends UCRelaxedClockModel {
         return rates[category];
     }
 
-    /** Returns log-body-mass at branch midpoint: (log(M_child) + log(M_parent)) / 2. */
+    /**
+     * Returns log-body-mass at branch midpoint: (log(M_child) + log(M_parent)) / 2,
+     * where the node values are the means given all the data (tipward pass in NodeMath).
+     * Under BM with no data along branches, this average is exactly the mean of the
+     * trait at the branch midpoint given all the data.
+     * Tips with data return their observed value; tips without data return their parent's mean.
+     */
     private double getBranchLogTrait(Node node) {
-        int nodeNr   = node.getNr();
-        int parentNr = node.getParent().getNr();
-        double[] childExpectation  = nodeMath.getExpectationForNode(nodeNr);
-        double[] parentExpectation = nodeMath.getInternalNodeExpectation(parentNr);
-        return (childExpectation[traitIndex] + parentExpectation[traitIndex]) / 2.0;
+        return (nodeMath.getConditionalMean(node.getNr(), traitIndex)
+                + nodeMath.getConditionalMean(node.getParent().getNr(), traitIndex)) / 2.0;
     }
 
     /** Resets the lazy category log-rate cache (NaN = not yet computed). */
@@ -361,6 +378,11 @@ public class TraitLinearClockModel extends UCRelaxedClockModel {
         if (rateDistInput.get().isDirtyCalculation()) {
             recompute = true;
             return true;
+        }
+
+        // node trait values changed (e.g., tree, root value or trait-model parameters)
+        if (nodeMathInput.get().isDirtyCalculation()) {
+            recompute = true;
         }
 
         if (slopeInput.get().somethingIsDirty()) {

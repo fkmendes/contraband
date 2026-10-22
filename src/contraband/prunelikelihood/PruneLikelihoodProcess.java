@@ -181,6 +181,12 @@ public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
         // get the root values
         nodeMath.populateRootValuesVec(rootIdx);
 
+        // tipward pass: trait means at every node given all the data
+        // (only when requested, e.g., by a clock model that uses node trait values)
+        if (nodeMath.requiresPreOrder()) {
+            preOrderTraversal(tree.getRoot(), nodeMath);
+        }
+
         // calculate likelihood in log space
         logP = calculateLikelihood(nodeMath, l0, m0, r0, rootIdx);
 //        System.out.println(logP);
@@ -233,12 +239,16 @@ public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
 //            TODO: only flag singularMatrix for real branches that are numerically zero, not for SA tips whose zero branch length is by design (not a numerical problem)
             if(branchLength < 1.0E-6 && !child.isDirectAncestor()) {nodeMath.setSingularMatrix(true);}
             nodeMath.setVarianceForTip(childIdx, branchLength);
+            // for the tipward pass: rate-scaled length of the branch above the child
+            nodeMath.setBranchVariance(childIdx, branchLength);
 
             // (1) child is a normal tip
             if (child.isLeaf() && branchLength != 0.0) {
                 if (popSE) {
                     nodeMath.setVarianceForTip(childIdx,nodeMath.getVarianceForNode(childIdx) + 1);
                 }
+                // for the tipward pass: the tip value is exact, unless population variance is added
+                nodeMath.setVarianceAtNode(childIdx, popSE ? 1.0 : 0.0);
 
                 PruneLikelihoodUtils.populateACEf(nodeMath, nodeMath.getVarianceForNode(childIdx), nTraits, childIdx);
 
@@ -324,11 +334,16 @@ public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
                                             logPSA);
                         }
                     }
+                } else {
+                    // for the tipward pass: a sampled ancestor's trait value is exact
+                    nodeMath.setVarianceAtNode(childIdx, 0.0);
                 }
             }
         }
         if(nodeMath.hasMissingDataSpecies(thisNodeIdx)) {
             int speciesHadDataIndex = nodeMath.getSpeciesToIgnoreIndex(thisNodeIdx);
+            // for the tipward pass: all the data below this node comes through the child with data
+            nodeMath.setVarianceAtNode(thisNodeIdx, nodeMath.getVarianceForNode(speciesHadDataIndex));
             double compoundVariance = nodeMath.getVarianceForNode(thisNodeIdx) + nodeMath.getVarianceForNode(speciesHadDataIndex);
             nodeMath.setVarianceForTip(thisNodeIdx, compoundVariance);
             nodeMath.setExpectationForIntNode(thisNodeIdx, nodeMath.getExpectationForNode(speciesHadDataIndex));
@@ -344,6 +359,56 @@ public abstract class PruneLikelihoodProcess extends GenericTreeLikelihood {
         nodeMath.setLForNode(thisNodeIdx, thisNodeL);
         nodeMath.setMVecForNode(thisNodeIdx, thisNodeMVec);
         nodeMath.setRForNode(thisNodeIdx, thisNodeR);
+    }
+
+    /*
+     * Tipward (pre-order) pass, from the root to the tips.
+     * Must be called after the rootward pass (pruneNode) and populateRootValuesVec.
+     *
+     * For each node, combines the information from the data not below it (parent's
+     * pre-order partial plus the sibling's rootward partial, moved down the branch) with
+     * the information from the data below it (its rootward partial), giving the mean of
+     * its trait value given all the data (NodeMath.getConditionalMean).
+     */
+    protected void preOrderTraversal(Node root, NodeMath nodeMath) {
+        nodeMath.calculatePreOrderRoot(root.getNr(), belowPrecision(root, nodeMath));
+        preOrderNode(root, nodeMath);
+    }
+
+    private void preOrderNode(Node node, NodeMath nodeMath) {
+        if (node.isLeaf()) {
+            return;
+        }
+        // binary trees only (as in the rootward pass)
+        Node child0 = node.getChild(0);
+        Node child1 = node.getChild(1);
+        preOrderChild(node, child0, child1, nodeMath);
+        preOrderChild(node, child1, child0, nodeMath);
+        preOrderNode(child0, nodeMath);
+        preOrderNode(child1, nodeMath);
+    }
+
+    private void preOrderChild(Node parent, Node child, Node sibling, NodeMath nodeMath) {
+        int childIdx = child.getNr();
+        nodeMath.updatePreOrderPartial(parent.getNr(), childIdx, sibling.getNr(), inflatedPrecision(sibling, nodeMath));
+        nodeMath.updateConditionalMean(childIdx, belowPrecision(child, nodeMath));
+    }
+
+    /* precision of a node's rootward partial at the node itself (1/w); 0 for tips without data */
+    private double belowPrecision(Node node, NodeMath nodeMath) {
+        if (node.isLeaf() && nodeMath.isSpeciesToIgnore(node.getNr())) {
+            return 0.0;
+        }
+        return 1.0 / nodeMath.getVarianceAtNode(node.getNr());
+    }
+
+    /* precision of a node's rootward partial at its parent (1/(w + t)); 0 for tips without data */
+    private double inflatedPrecision(Node node, NodeMath nodeMath) {
+        if (node.isLeaf() && nodeMath.isSpeciesToIgnore(node.getNr())) {
+            return 0.0;
+        }
+        int nodeIdx = node.getNr();
+        return 1.0 / (nodeMath.getVarianceAtNode(nodeIdx) + nodeMath.getBranchVariance(nodeIdx));
     }
 
     @Override

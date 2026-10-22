@@ -8,8 +8,24 @@ import org.junit.Assert;
 import org.junit.Test;
 import contraband.math.NodeMath;
 import contraband.prunelikelihood.BMPruneLikelihood;
+import contraband.app.beauti.ContDataParser;
+import contraband.clock.TraitLinearClockModel;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.branchratemodel.StrictClockModel;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.distribution.LogNormalDistributionModel;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /*
  * This class contains unit tests for BMPruneLikelihood.class
@@ -436,5 +452,259 @@ public class BMPruneLikelihoodTest {
 
         Assert.assertEquals(-205.515395500167, lnLk, EPSILON);
     }
-}
 
+    /*
+     * ---------------------------------------------------------------------------
+     * Tipward (pre-order) pass: trait means at every node given all the data.
+     *
+     * Reference values are computed independently from the dense node covariance
+     * matrix (shared root-to-MRCA path lengths): for each trait,
+     *   E[Z_i | Y] = r + C_iY C_YY^-1 (y - r 1),
+     * with r the fixed root value, or the GLS root estimate under a flat root prior.
+     * The trait rate matrix cancels out of these means, so each trait is done separately.
+     * ---------------------------------------------------------------------------
+     */
+
+    // non-ultrametric tree with 6 tips
+    private static final String TIPWARD_TREE =
+            "(((A:1.0,B:0.5):0.7,C:2.1):0.4,((D:0.3,E:1.2):1.1,F:0.9):0.6);";
+
+    private static Alignment continuousAlignment(String id, String[] taxa, String[][] values) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ntax=").append(taxa.length).append("\tnchar=").append(values[0].length).append("\n");
+        for (int i = 0; i < taxa.length; i++) {
+            sb.append(taxa[i]);
+            for (String v : values[i]) {
+                sb.append("\t").append(v);
+            }
+            sb.append("\n");
+        }
+        ContDataParser parser = new ContDataParser();
+        parser.parseFile(id, new StringReader(sb.toString()));
+        return parser.m_alignment;
+    }
+
+    private static double depth(Node node) {
+        double d = 0.0;
+        while (!node.isRoot()) {
+            d += node.getLength();
+            node = node.getParent();
+        }
+        return d;
+    }
+
+    private static double sharedTime(Node a, Node b) {
+        Set<Integer> ancestorsOfA = new HashSet<>();
+        for (Node x = a; x != null; x = x.getParent()) {
+            ancestorsOfA.add(x.getNr());
+        }
+        Node x = b;
+        while (!ancestorsOfA.contains(x.getNr())) {
+            x = x.getParent();
+        }
+        return depth(x);
+    }
+
+    /*
+     * expected[nodeNr][trait] = E[Z_node | observed tips] under BM;
+     * rootValues == null means a flat prior on the root (GLS root estimate).
+     */
+    private static double[][] expectedConditionalMeans(Tree tree, String[] taxa, String[][] values,
+                                                       double[] rootValues) {
+        Node[] nodes = tree.getNodesAsArray();
+        int nTraits = values[0].length;
+        List<Node> observed = new ArrayList<>();
+        List<double[]> observedValues = new ArrayList<>();
+        for (Node node : nodes) {
+            if (!node.isLeaf()) continue;
+            int i = Arrays.asList(taxa).indexOf(node.getID());
+            if (values[i][0].equals("?")) continue;
+            observed.add(node);
+            double[] v = new double[nTraits];
+            for (int g = 0; g < nTraits; g++) v[g] = Double.parseDouble(values[i][g]);
+            observedValues.add(v);
+        }
+        int nObs = observed.size();
+        RealMatrix cYY = new Array2DRowRealMatrix(nObs, nObs);
+        for (int a = 0; a < nObs; a++)
+            for (int b = 0; b < nObs; b++)
+                cYY.setEntry(a, b, sharedTime(observed.get(a), observed.get(b)));
+        RealMatrix cYYInv = new LUDecomposition(cYY).getSolver().getInverse();
+        RealVector ones = new ArrayRealVector(nObs, 1.0);
+
+        double[][] expected = new double[nodes.length][nTraits];
+        for (int g = 0; g < nTraits; g++) {
+            RealVector y = new ArrayRealVector(nObs);
+            for (int a = 0; a < nObs; a++) y.setEntry(a, observedValues.get(a)[g]);
+            double r = rootValues != null ? rootValues[g] :
+                    cYYInv.operate(y).dotProduct(ones) / cYYInv.operate(ones).dotProduct(ones);
+            RealVector resid = cYYInv.operate(y.mapSubtract(r));
+            for (Node node : nodes) {
+                RealVector cNodeY = new ArrayRealVector(nObs);
+                for (int a = 0; a < nObs; a++) cNodeY.setEntry(a, sharedTime(node, observed.get(a)));
+                expected[node.getNr()][g] = r + cNodeY.dotProduct(resid);
+            }
+        }
+        return expected;
+    }
+
+    private static BMPruneLikelihood tipwardLikelihood(TreeParser tree, Alignment aln, NodeMath nodeMath) {
+        StrictClockModel clock = new StrictClockModel();
+        // a rate != 1 checks that branch lengths are rate-scaled consistently in both passes
+        clock.initByName("clock.rate", new RealParameter(new Double[]{0.5}));
+        BMPruneLikelihood lik = new BMPruneLikelihood();
+        lik.initByName("nodeMath", nodeMath, "siteModel", nodeMath, "tree", tree, "data", aln, "branchRateModel", clock);
+        return lik;
+    }
+
+    /* flat root prior, 2 correlated traits, all tips observed */
+    @Test
+    public void testTipwardPassFlatRoot() throws Exception {
+        String[] taxa = {"A", "B", "C", "D", "E", "F"};
+        String[][] values = {
+                {"0.3", "-1.2"}, {"0.9", "-0.4"}, {"2.1", "0.8"},
+                {"-0.7", "1.5"}, {"-1.4", "2.2"}, {"0.1", "0.6"}};
+        TreeParser tree = new TreeParser(TIPWARD_TREE, false, false, true, 0);
+        Alignment aln = continuousAlignment("tipwardFlat", taxa, values);
+
+        NodeMath nm = new NodeMath();
+        nm.initByName("traits", aln, "tree", tree,
+                "sigmasq", new RealParameter(new Double[]{0.8, 1.7}),
+                "correlation", new RealParameter(new Double[]{0.3}));
+        nm.setRequirePreOrder(true);
+        BMPruneLikelihood lik = tipwardLikelihood(tree, aln, nm);
+        lik.calculateLogP();
+
+        double[][] expected = expectedConditionalMeans(tree, taxa, values, null);
+        for (Node node : tree.getNodesAsArray()) {
+            Assert.assertArrayEquals("node " + node.getNr(),
+                    expected[node.getNr()], nm.getConditionalMeanForNode(node.getNr()), EPSILON);
+        }
+
+        // the tipward pass matters: some internal node differs from its rootward (below-only) mean
+        double maxDiff = 0.0;
+        for (Node node : tree.getInternalNodes()) {
+            for (int g = 0; g < 2; g++) {
+                maxDiff = Math.max(maxDiff, Math.abs(
+                        nm.getConditionalMean(node.getNr(), g) - nm.getExpectationForNode(node.getNr())[g]));
+            }
+        }
+        Assert.assertTrue(maxDiff > 1e-2);
+
+        // root: under a flat prior, the mean given all the data is the rootward (ML) estimate
+        int rootNr = tree.getRoot().getNr();
+        Assert.assertArrayEquals(nm.getExpectationForNode(rootNr), nm.getConditionalMeanForNode(rootNr), EPSILON);
+
+        // independent check with the smoother form: M_i = m_i + w_i / (w_i + t_i) * (M_parent - m_i)
+        for (Node node : tree.getNodesAsArray()) {
+            if (node.isRoot()) continue;
+            int i = node.getNr();
+            double w = nm.getVarianceAtNode(i);
+            double t = nm.getBranchVariance(i);
+            double[] m = nm.getExpectationForNode(i);
+            double[] mParent = nm.getConditionalMeanForNode(node.getParent().getNr());
+            for (int g = 0; g < 2; g++) {
+                double smoother = m[g] + w / (w + t) * (mParent[g] - m[g]);
+                Assert.assertEquals("smoother, node " + i, smoother, nm.getConditionalMean(i, g), EPSILON);
+            }
+        }
+    }
+
+    /* fixed (sampled) root value, one tip without data */
+    @Test
+    public void testTipwardPassFixedRootMissingTip() throws Exception {
+        String[] taxa = {"A", "B", "C", "D", "E", "F"};
+        String[][] values = {
+                {"0.3"}, {"0.9"}, {"2.1"}, {"?"}, {"-1.4"}, {"0.1"}};
+        TreeParser tree = new TreeParser(TIPWARD_TREE, false, false, true, 0);
+        Alignment aln = continuousAlignment("tipwardFixed", taxa, values);
+        double rootValue = 0.25;
+
+        NodeMath nm = new NodeMath();
+        nm.initByName("traits", aln, "tree", tree,
+                "sigmasq", new RealParameter(new Double[]{1.3}),
+                "correlation", new RealParameter(new Double[]{0.0}),
+                "rootValues", new RealParameter(new Double[]{rootValue}));
+        nm.setRequirePreOrder(true);
+        BMPruneLikelihood lik = tipwardLikelihood(tree, aln, nm);
+        lik.calculateLogP();
+
+        double[][] expected = expectedConditionalMeans(tree, taxa, values, new double[]{rootValue});
+        for (Node node : tree.getNodesAsArray()) {
+            Assert.assertEquals("node " + node.getNr(),
+                    expected[node.getNr()][0], nm.getConditionalMean(node.getNr(), 0), EPSILON);
+        }
+
+        // the root is known exactly
+        Assert.assertEquals(rootValue, nm.getConditionalMean(tree.getRoot().getNr(), 0), EPSILON);
+
+        // a tip without data takes the mean of its parent
+        for (Node node : tree.getExternalNodes()) {
+            if (node.getID().equals("D")) {
+                Assert.assertEquals(nm.getConditionalMean(node.getParent().getNr(), 0),
+                        nm.getConditionalMean(node.getNr(), 0), EPSILON);
+            }
+        }
+    }
+
+    /* the trait-linked clock uses the branch midpoint of the means given all the data */
+    @Test
+    public void testTraitLinearClockUsesTipwardMeans() throws Exception {
+        String[] taxa = {"A", "B", "C", "D", "E", "F"};
+        String[][] values = {
+                {"0.3"}, {"0.9"}, {"2.1"}, {"-0.7"}, {"-1.4"}, {"0.1"}};
+        TreeParser tree = new TreeParser(TIPWARD_TREE, false, false, true, 0);
+        Alignment aln = continuousAlignment("tipwardClock", taxa, values);
+
+        NodeMath nm = new NodeMath();
+        nm.initByName("traits", aln, "tree", tree,
+                "sigmasq", new RealParameter(new Double[]{1.3}),
+                "correlation", new RealParameter(new Double[]{0.0}));
+        BMPruneLikelihood lik = tipwardLikelihood(tree, aln, nm);
+
+        double slope = 0.7, meanRate = 2.0, rawRate = 1.5;
+        TraitLinearClockModel clock = new TraitLinearClockModel();
+        LogNormalDistributionModel distr = new LogNormalDistributionModel();
+        distr.initByName("M", "1.0", "S", "0.1", "meanInRealSpace", true);
+        clock.initByName("tree", tree, "nodeMath", nm,
+                "slope", new RealParameter(new Double[]{slope}),
+                "meanRate", new RealParameter(new Double[]{meanRate}),
+                "rawRate", new RealParameter(new Double[]{rawRate}),
+                "distr", distr);
+        // the clock switches the tipward pass on
+        Assert.assertTrue(nm.requiresPreOrder());
+
+        lik.calculateLogP();
+
+        double meanTip = (0.3 + 0.9 + 2.1 - 0.7 - 1.4 + 0.1) / 6.0;
+        double[][] expected = expectedConditionalMeans(tree, taxa, values, null);
+        for (Node node : tree.getNodesAsArray()) {
+            if (node.isRoot()) continue;
+            double mid = (expected[node.getNr()][0] + expected[node.getParent().getNr()][0]) / 2.0;
+            double expectedRate = Math.exp(slope * (mid - meanTip)) * rawRate * meanRate;
+            Assert.assertEquals("rate, node " + node.getNr(), expectedRate, clock.getRateForBranch(node), EPSILON);
+        }
+    }
+
+    /* without a request for it, the tipward pass does not run and the likelihood is unchanged */
+    @Test
+    public void testTipwardPassDoesNotChangeLikelihood() throws Exception {
+        String[] taxa = {"A", "B", "C", "D", "E", "F"};
+        String[][] values = {
+                {"0.3", "-1.2"}, {"0.9", "-0.4"}, {"2.1", "0.8"},
+                {"-0.7", "1.5"}, {"-1.4", "2.2"}, {"0.1", "0.6"}};
+        TreeParser tree = new TreeParser(TIPWARD_TREE, false, false, true, 0);
+        Alignment aln = continuousAlignment("tipwardLik", taxa, values);
+
+        double[] logPs = new double[2];
+        for (int pass = 0; pass < 2; pass++) {
+            NodeMath nm = new NodeMath();
+            nm.initByName("traits", aln, "tree", tree,
+                    "sigmasq", new RealParameter(new Double[]{0.8, 1.7}),
+                    "correlation", new RealParameter(new Double[]{0.3}));
+            nm.setRequirePreOrder(pass == 1);
+            logPs[pass] = tipwardLikelihood(tree, aln, nm).calculateLogP();
+        }
+        Assert.assertEquals(logPs[0], logPs[1], 0.0);
+    }
+}
